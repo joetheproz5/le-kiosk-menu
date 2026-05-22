@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Kiosk - Digital Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #2d2a26;
+            background-color: #fcf8ee;
+            background-image: 
+                linear-gradient(#f7f1e1 1.5px, transparent 1.5px),
+                linear-gradient(90deg, #f7f1e1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .brand-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="pb-32">
+
+    <header class="text-center pt-8 pb-6 px-4 max-w-md mx-auto">
+        <div class="w-28 h-28 mx-auto bg-white border-4 border-amber-900 rounded-full shadow-md mb-4 overflow-hidden relative">
+            <img src="menupictures/logo.png" alt="Le Kiosk Logo" class="w-full h-full object-cover object-center">
+        </div>
+        <h1 class="brand-heading text-4xl font-extrabold text-amber-900 tracking-wide uppercase drop-shadow-sm">
+            Le Kiosk
+        </h1>
+        <p class="text-xs font-semibold uppercase tracking-wider text-amber-700 mt-1">Waffle & Ice Cream Menu</p>
+        <p class="text-sm text-amber-800/80 italic font-medium mt-2">"Serving Cravings, Sharing Smiles"</p>
+        
+        <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-semibold">
+            <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
+            <!-- ✅ FIX: Wadi Chahrour now links to Google Maps with exact coordinates -->
+            <a href="https://www.google.com/maps?q=33.82106591222043,35.56495495194529" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">
+                📍 Wadi Chahrour
+            </a>
+        </div>
+    </header>
+
+    <!-- ✅ FIX: Nav now includes ALL categories: Burgers, Sweet Add-Ons, Savory Add-Ons -->
+    <nav class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto">
+        <a href="#appetizers" class="px-4 py-2 rounded-xl bg-amber-500 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition">Appetizers</a>
+        <a href="#sandwiches" class="px-4 py-2 rounded-xl bg-white/80 text-amber-900 border border-amber-200/50 font-bold text-xs uppercase tracking-wider transition hover:bg-amber-100">Sandwiches</a>
+        <a href="#Burgers" class="px-4 py-2 rounded-xl bg-white/80 text-amber-900 border border-amber-200/50 font-bold text-xs uppercase tracking-wider transition hover:bg-amber-100">Burgers</a>
+        <a href="#desserts" class="px-4 py-2 rounded-xl bg-white/80 text-amber-900 border border-amber-200/50 font-bold text-xs uppercase tracking-wider transition hover:bg-amber-100">Desserts</a>
+        <a href="#sweet" class="px-4 py-2 rounded-xl bg-white/80 text-amber-900 border border-amber-200/50 font-bold text-xs uppercase tracking-wider transition hover:bg-amber-100">Sweet Add-Ons</a>
+        <a href="#savory" class="px-4 py-2 rounded-xl bg-white/80 text-amber-900 border border-amber-200/50 font-bold text-xs uppercase tracking-wider transition hover:bg-amber-100">Savory Add-Ons</a>
+        <a href="#beverages" class="px-4 py-2 rounded-xl bg-white/80 text-amber-900 border border-amber-200/50 font-bold text-xs uppercase tracking-wider transition hover:bg-amber-100">Beverages</a>
+    </nav>
+
+    <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
+        <div class="bg-amber-950 text-amber-50 rounded-2xl p-4 shadow-xl border border-amber-900 flex items-center justify-between">
+            <div>
+                <span class="block text-[10px] uppercase tracking-wider text-amber-300 font-bold">Need Delivery?</span>
+                <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
+            </div>
+            <!-- ✅ FIX: tel: link correctly opens the phone dialer with the number pre-filled -->
+            <a href="tel:+96176840244" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-4 rounded-xl flex items-center gap-1.5 transition shadow-md">
+                <span>📞</span> Call Now
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const menuData = {
+            appetizers: {
+                title: "Appetizers",
+                items: [
+                    {
+                        name: "Fries Box",
+                        price: "$5",
+                        desc: "Crispy golden fries served with ketchup, mayo and bbq",
+                        image: "menupictures/friesbox.jpg",
+                        tags: []
+                    },
+                    {
+                        name: "Loaded Fries",
+                        price: "$7",
+                        desc: "A decadent mix of crispy chicken, fries, melted cheddar and BBQ sauce",
+                        image: "menupictures/loadedfries.jpg",
+                        tags: ["Popular"]
+                    },
+                    {
+                        name: "Chicken Wings (8pcs)",
+                        price: "$6",
+                        desc: "Juicy wings tossed in your choice of Buffalo or BBQ sauce",
+                        image: "menupictures/wings.jpg",
+                        tags: []
+                    }
+                ]
+            },
+            sandwiches: {
+                title: "Sandwiches",
+                banner: {
+                    text: "🚀 BOOST YOUR MEAL: Add fries + soft drink for only $3!",
+                    style: "bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold"
+                },
+                items: [
+                    {
+                        name: "Crispy Sandwich",
+                        price: "$6",
+                        desc: "Golden crispy chicken, fries, pickles, fresh lettuce & mayo",
+                        image: "menupictures/crispysandwish.jpg",
+                        tags: []
+                    },
+                    {
+                        name: "Hotdog Sandwich",
+                        price: "$6",
+                        desc: "Hotdog sausage topped with chips, ketchup, mayo, BBQ & mustard",
+                        image: "menupictures/hotdog.jpg",
+                        tags: []
+                    },
+                    {
+                        name: "Fries Sandwich",
+                        price: "$4",
+                        desc: "Golden fries with creamy coleslaw, pickles, ketchup & mayonnaise",
+                        image: "menupictures/friessandwish.jpg",
+                        tags: []
+                    },
+                    {
+                        name: "Taouk Sandwich",
+                        price: "$6",
+                        desc: "House-marinated grilled chicken, fries, coleslaw, pickles, and rich garlic sauce.",
+                        image: "menupictures/taouk.jpg",
+                        tags: []
+                    },
+                    {
+                        name: "Fajita Sandwich",
+                        price: "$6",
+                        desc: "Marinated chicken breast cooked with peppers, topped with cheese, lettuce, corn.",
+                        image: "menupictures/fajita.jpg",
+                        tags: []
+                    }
+                ]
+            },
+            Burgers: {
+                title: "Burgers",
+                items: [
+                    {
+                        name: "Lebanese Burger",
+                        price: "$6",
+                        desc: "Grilled beef patty, coleslaw, fries, tomato, pickles and our special sauce.",
+                        image: "menupictures/lebaneseburger.jpg",
+                        tags: ["Sweet"]
+                    },
+                    {
+                        name: "Crispy Burger",
+                        price: "$6",
+                        desc: "Crispy chicken breast, lettuce, pickles, and our house-made special sauce",
+                        image: "menupictures/crispyburger.jpg",
+                        tags: ["Traditional"]
+                    },
+                    {
+                        name: "Special Le Kiosk Burger",
+                        price: "$8",
+                        desc: "Crispy chicken, ham, cheddar, lettuce, pickles, special sauce, and garlic sauce.",
+                        image: "menupictures/lekioskburger.jpg",
+                        tags: ["Traditional"]
+                    }
+                ]
+            },
+            desserts: {
+                title: "Desserts",
+                items: [
+                    {
+                        name: "Mini Pancakes (15pcs)",
+                        price: "$7",
+                        desc: "Fluffy mini pancakes served fresh with your choice of chocolate",
+                        image: "menupictures/minipancake.jpg",
+                        tags: ["Sweet"]
+                    },
+                    {
+                        name: "Ice Cream Cup",
+                        price: "$2",
+                        desc: "Authentic, creamy Lebanese style premium ice cream",
+                        image: "menupictures/icecream.jpg",
+                        tags: ["Traditional"]
+                    }
+                ]
+            },
+            beverages: {
+                title: "Beverages",
+                items: [
+                    {
+                        name: "Soft Drinks",
+                        price: "$1",
+                        desc: "Selection of your favorite carbonated sodas",
+                        image: "menupictures/soda.jpg",
+                        tags: ["Cold Drinks"]
+                    },
+                    {
+                        name: "Mineral Water",
+                        price: "$0.60",
+                        desc: "Pure bottled refreshing water",
+                        image: "menupictures/water.jpg",
+                        tags: ["Essential"]
+                    },
+                    {
+                        name: "Beer",
+                        price: "$1.5",
+                        desc: "Crisp, refreshing, and the classic Lebanese pilsner.",
+                        image: "menupictures/beer.jpg",
+                        tags: ["Essential"]
+                    }
+                ]
+            },
+            sweet: {
+                title: "Sweet ADD-ONS",
+                banner: {
+                    text: "Choose from Hershey's, Lotus, Pink Chocolate,<br> Kinder, or Oreo Just for $2 <br> --------------------------------------<br> Add sliced fresh Strawberry or Banana <br> to your dessert Just for $1",
+                    style: "bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold"
+                },
+                items: []
+            },
+            savory: {
+                title: "Savory ADD-ONS",
+                banner: {
+                    text: "Warm melted cheddar cup or added directly <br>inside your sandwich Just for $1<br>--------------------------------------<br> Extra splash of tangy, spicy signature <br>Buffalo dipping sauce Just for $0.60",
+                    style: "bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold"
+                },
+                items: []
+            },
+            
+        };
+
+        function initMenu() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '';
+
+            for (const key in menuData) {
+                const category = menuData[key];
+                
+                let sectionHtml = `<section id="${key}" class="scroll-mt-24">`;
+                
+                sectionHtml += `
+                    <h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 flex items-center justify-between text-amber-950 uppercase tracking-wide">
+                        ${category.title}
+                    </h2>
+                `;
+
+                if (category.banner) {
+                    sectionHtml += `
+                        <div class="${category.banner.style} text-xs p-3 rounded-xl mb-4 text-center shadow-sm border border-amber-400/20">
+                            ${category.banner.text}
+                        </div>
+                    `;
+                }
+
+                if (category.items.length > 0) {
+                    sectionHtml += `<div class="grid gap-3.5">`;
+                    
+                    category.items.forEach(item => {
+                        let tagsMarkup = item.tags.map(t => `
+                            <span class="bg-amber-600 text-white text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md shadow-sm">
+                                ${t}
+                            </span>
+                        `).join('');
+                        
+                        sectionHtml += `
+                            <div class="bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex h-28 hover:shadow-md transition duration-200">
+                                <div class="w-28 h-full flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden">
+                                    <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
+                                </div>
+                                <div class="p-3 flex flex-col justify-between flex-grow bg-white min-w-0">
+                                    <div>
+                                        <div class="flex justify-between items-start gap-2">
+                                            <h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3>
+                                            <span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span>
+                                        </div>
+                                        <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
+                                    </div>
+                                    <div class="flex gap-1 items-center">
+                                        ${tagsMarkup}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    sectionHtml += `</div>`;
+                }
+
+                sectionHtml += `</section>`;
+                container.innerHTML += sectionHtml;
+            }
+        }
+
+        initMenu();
+    </script>
+</body>
+</html>
