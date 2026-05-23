@@ -30,7 +30,7 @@
         .order-mode .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
 
         /* CART PANEL — max-height capped so it never blocks the menu */
-        #cart-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 28rem; z-index: 60; transition: transform 0.35s cubic-bezier(.4,0,.2,1); padding: 0 16px 90px; }
+        #cart-panel { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(calc(100% + 88px)); width: 100%; max-width: 28rem; z-index: 60; transition: transform 0.35s cubic-bezier(.4,0,.2,1); padding: 0 16px 0; }
         #cart-panel.open { transform: translateX(-50%) translateY(0); }
         .cart-inner { background: #1c0f00; border-radius: 20px; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.25); border: 1px solid #3d1f00; max-height: 35vh; display: flex; flex-direction: column; }
         #cart-items { overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: thin; scrollbar-color: #3d1f00 transparent; }
@@ -227,7 +227,7 @@
     </div>
 
     <!-- ── BOTTOM BAR ── -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 z-[70] max-w-md mx-auto">
+    <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
         <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
             <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
             <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
