@@ -227,7 +227,7 @@
     </div>
 
     <!-- ── BOTTOM BAR ── -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
+    <div class="fixed bottom-0 left-0 right-0 p-4 z-[70] max-w-md mx-auto">
         <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
             <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
             <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
@@ -291,17 +291,25 @@
                 alert('⏰ Orders are only available between 6 PM and 12 AM.\n\nCome back later!');
                 return;
             }
-            orderMode = !orderMode;
-            document.body.classList.toggle('order-mode', orderMode);
-            const btn = document.getElementById('order-mode-btn');
-            btn.classList.toggle('active', orderMode);
-            btn.innerHTML = orderMode ? '✕ Cancel' : '🛒 Order';
-            if (!orderMode) {
+            if (orderMode) {
+                // Turning off — always cancel regardless of cart contents
+                orderMode = false;
+                document.body.classList.remove('order-mode');
+                const btn = document.getElementById('order-mode-btn');
+                btn.classList.remove('active');
+                btn.innerHTML = '🛒 Order';
                 cart = {};
                 document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
                 document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
                 updateCartBadge();
                 closeCart();
+            } else {
+                // Turning on
+                orderMode = true;
+                document.body.classList.add('order-mode');
+                const btn = document.getElementById('order-mode-btn');
+                btn.classList.add('active');
+                btn.innerHTML = '✕ Cancel';
             }
         }
 
