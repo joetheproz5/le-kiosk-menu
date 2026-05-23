@@ -1,710 +1,847 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Kiosk — Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Kiosk — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --a50:#fffbeb;--a100:#fef3c7;--a200:#fde68a;--a300:#fcd34d;
+  --a400:#fbbf24;--a500:#f59e0b;--a700:#b45309;--a800:#92400e;
+  --a900:#78350f;--a950:#451a03;
+  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;
+  --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g800:#1f2937;--g900:#111827;
+  --red:#ef4444;--red-d:#dc2626;--green:#22c55e;--green-d:#16a34a;
+  --white:#fff;--font:'Poppins',sans-serif;--brand:'Fredoka',sans-serif;
+}
+body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient(#f7f1e1 1.5px,transparent 1.5px),linear-gradient(90deg,#f7f1e1 1.5px,transparent 1.5px);background-size:24px 24px;min-height:100vh;color:var(--a950)}
 
-        :root {
-            --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-200: #fde68a;
-            --amber-400: #fbbf24; --amber-500: #f59e0b; --amber-700: #b45309;
-            --amber-800: #92400e; --amber-900: #78350f; --amber-950: #451a03;
-            --green-500: #22c55e; --green-600: #16a34a;
-            --red-400: #f87171; --red-500: #ef4444; --red-600: #dc2626;
-            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
-            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
-            --gray-600: #4b5563; --gray-800: #1f2937; --gray-900: #111827;
-            --white: #ffffff;
-            --font: 'Poppins', sans-serif;
-            --brand: 'Fredoka', sans-serif;
-        }
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{background:var(--white);border:1px solid var(--a200);border-radius:20px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(120,53,15,.08);text-align:center}
+.login-logo{font-family:var(--brand);font-size:32px;font-weight:700;color:var(--a900);letter-spacing:.05em}
+.login-sub{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--a700);margin-top:2px;margin-bottom:32px}
+.lbl{display:block;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--a800);margin-bottom:6px}
+.inp{width:100%;padding:12px 14px;border:1.5px solid var(--a200);border-radius:12px;font-family:var(--font);font-size:14px;background:var(--a50);color:var(--a950);outline:none;transition:border-color .2s;margin-bottom:16px}
+.inp:focus{border-color:var(--a500)}
+.login-btn{width:100%;background:var(--a900);color:var(--a100);border:none;border-radius:12px;padding:13px;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--a800)}
+.login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red-d);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;display:none}
+.login-error.show{display:block}
 
-        body {
-            font-family: var(--font);
-            background: #fcf8ee;
-            background-image: linear-gradient(#f7f1e1 1.5px, transparent 1.5px), linear-gradient(90deg, #f7f1e1 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-            min-height: 100vh;
-            color: var(--amber-950);
-        }
+/* SHELL */
+#admin-screen{display:none}
+.admin-header{background:var(--a900);color:var(--a100);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(120,53,15,.15)}
+.header-brand{font-family:var(--brand);font-size:22px;font-weight:700;letter-spacing:.05em}
+.header-brand span{font-family:var(--font);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;opacity:.65;margin-left:8px}
+.header-actions{display:flex;gap:10px;align-items:center}
 
-        /* ── LOGIN SCREEN ── */
-        #login-screen {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-        .login-card {
-            background: var(--white);
-            border: 1px solid var(--amber-200);
-            border-radius: 20px;
-            padding: 40px 36px;
-            width: 100%;
-            max-width: 380px;
-            box-shadow: 0 4px 24px rgba(120,53,15,0.08);
-            text-align: center;
-        }
-        .login-logo {
-            font-family: var(--brand);
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--amber-900);
-            letter-spacing: 0.05em;
-        }
-        .login-sub {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--amber-700);
-            margin-top: 2px;
-            margin-bottom: 32px;
-        }
-        .login-label {
-            display: block;
-            text-align: left;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--amber-800);
-            margin-bottom: 6px;
-        }
-        .login-input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid var(--amber-200);
-            border-radius: 12px;
-            font-family: var(--font);
-            font-size: 14px;
-            background: var(--amber-50);
-            color: var(--amber-950);
-            outline: none;
-            transition: border-color 0.2s;
-            margin-bottom: 16px;
-        }
-        .login-input:focus { border-color: var(--amber-500); }
-        .login-btn {
-            width: 100%;
-            background: var(--amber-900);
-            color: var(--amber-100);
-            border: none;
-            border-radius: 12px;
-            padding: 13px;
-            font-family: var(--font);
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 4px;
-        }
-        .login-btn:hover { background: var(--amber-800); }
-        .login-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: var(--red-600);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 13px;
-            margin-top: 12px;
-            display: none;
-        }
-        .login-error.show { display: block; }
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border:none;transition:background .2s,opacity .2s}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-save{background:var(--a400);color:var(--a950)}
+.btn-save:hover:not(:disabled){background:var(--a200)}
+.btn-logout{background:rgba(255,255,255,.12);color:var(--a100)}
+.btn-logout:hover{background:rgba(255,255,255,.2)}
+.btn-add{background:var(--a950);color:var(--a100);padding:8px 14px;font-size:11px}
+.btn-add:hover{background:var(--a800)}
+.btn-danger{background:#fef2f2;color:var(--red-d);border:1px solid #fecaca;padding:6px 10px;font-size:11px;border-radius:8px}
+.btn-danger:hover{background:#fee2e2}
+.btn-sm{padding:6px 12px;font-size:11px;border-radius:8px}
+.btn-ghost{background:var(--a100);color:var(--a800);border:1px solid var(--a200)}
+.btn-ghost:hover{background:var(--a200)}
 
-        /* ── ADMIN SHELL ── */
-        #admin-screen { display: none; }
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green-d)}
+#toast.error{background:var(--red-d)}
 
-        header.admin-header {
-            background: var(--amber-900);
-            color: var(--amber-100);
-            padding: 14px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 12px rgba(120,53,15,0.15);
-        }
-        .header-brand {
-            font-family: var(--brand);
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-        .header-brand span {
-            font-family: var(--font);
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            opacity: 0.65;
-            margin-left: 8px;
-        }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
+/* SETUP BANNER */
+#setup-banner{background:var(--a100);border-bottom:1px solid var(--a200);padding:12px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#setup-banner p{font-size:13px;color:var(--a900);flex:1;min-width:200px}
+#setup-banner p strong{font-weight:700}
+.token-input-wrap{display:flex;gap:8px;align-items:center}
+#token-input{padding:8px 12px;border:1.5px solid var(--a300);border-radius:8px;font-family:var(--font);font-size:13px;background:var(--white);color:var(--a950);outline:none;width:240px}
+#token-input:focus{border-color:var(--a500)}
+.btn-token{background:var(--a900);color:var(--a100);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:none;cursor:pointer}
+.btn-token:hover{background:var(--a800)}
+.token-status{font-size:12px;font-weight:600}
+.token-status.ok{color:var(--green-d)}
+.token-status.missing{color:var(--red)}
 
-        .btn {
-            padding: 9px 18px;
-            border-radius: 10px;
-            font-family: var(--font);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: none;
-            transition: background 0.2s, opacity 0.2s;
-        }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-save { background: var(--amber-400); color: var(--amber-950); }
-        .btn-save:hover:not(:disabled) { background: var(--amber-200); }
-        .btn-logout { background: rgba(255,255,255,0.12); color: var(--amber-100); }
-        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+/* TABS */
+.tabs-bar{background:var(--white);border-bottom:1px solid var(--a200);padding:0 24px;display:flex;gap:0;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab{padding:14px 18px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--g500);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:var(--font)}
+.tab.active{color:var(--a900);border-bottom-color:var(--a500)}
+.tab:hover:not(.active){color:var(--a700)}
 
-        /* ── STATUS TOAST ── */
-        #toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: var(--gray-900);
-            color: #fff;
-            padding: 12px 22px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 999;
-            transition: transform 0.3s ease;
-            white-space: nowrap;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        #toast.success { background: var(--green-600); }
-        #toast.error { background: var(--red-600); }
+/* BODY */
+.admin-body{max-width:900px;margin:0 auto;padding:28px 20px 100px}
 
-        /* ── SETUP BANNER ── */
-        #setup-banner {
-            background: var(--amber-100);
-            border-bottom: 1px solid var(--amber-200);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        #setup-banner p { font-size: 13px; color: var(--amber-900); flex: 1; min-width: 200px; }
-        #setup-banner p strong { font-weight: 700; }
-        .token-input-wrap { display: flex; gap: 8px; align-items: center; }
-        #token-input {
-            padding: 8px 12px;
-            border: 1.5px solid var(--amber-300);
-            border-radius: 8px;
-            font-family: var(--font);
-            font-size: 13px;
-            background: var(--white);
-            color: var(--amber-950);
-            outline: none;
-            width: 260px;
-        }
-        #token-input:focus { border-color: var(--amber-500); }
-        .btn-token { background: var(--amber-900); color: var(--amber-100); padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border: none; cursor: pointer; }
-        .btn-token:hover { background: var(--amber-800); }
-        .token-status { font-size: 12px; font-weight: 600; }
-        .token-status.ok { color: var(--green-600); }
-        .token-status.missing { color: var(--red-500); }
+/* SECTION BLOCK */
+.section-block{background:var(--white);border:1px solid var(--a200);border-radius:16px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(120,53,15,.05)}
+.section-header{background:var(--a950);color:var(--a100);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.section-header-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.section-title-input{font-family:var(--brand);font-size:18px;font-weight:700;letter-spacing:.04em;background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,.2);color:var(--a100);outline:none;width:160px;padding:2px 4px}
+.section-title-input:focus{border-bottom-color:var(--a400)}
+.section-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.section-count{font-size:11px;font-weight:600;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;letter-spacing:.06em}
+.section-type-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.25);color:var(--a300);padding:3px 8px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+.section-key-wrap{padding:8px 20px 0;background:var(--a950);display:flex;align-items:center;gap:8px}
+.section-key-label{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.section-key-input{font-size:11px;font-weight:600;font-family:var(--font);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.7);outline:none;padding:3px 8px;width:140px}
+.section-key-input:focus{border-color:var(--a400)}
 
-        /* ── MAIN CONTENT ── */
-        .admin-body { max-width: 860px; margin: 0 auto; padding: 28px 20px 80px; }
+/* TYPE TOGGLE */
+.type-toggle{display:flex;gap:6px;padding:12px 20px;border-bottom:1px solid var(--a100);background:var(--a50);flex-wrap:wrap;align-items:center}
+.type-toggle-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--a700);margin-right:4px}
+.type-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--a200);background:var(--white);color:var(--g500);cursor:pointer;font-family:var(--font);transition:all .15s}
+.type-btn.active{background:var(--a900);color:var(--a100);border-color:var(--a900)}
+.features-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
+.feat-btn{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--a200);background:var(--white);color:var(--g500);cursor:pointer;font-family:var(--font);transition:all .15s}
+.feat-btn.active{background:var(--a200);color:var(--a900);border-color:var(--a400)}
 
-        /* ── SECTION ── */
-        .section-block {
-            background: var(--white);
-            border: 1px solid var(--amber-200);
-            border-radius: 16px;
-            margin-bottom: 20px;
-            overflow: hidden;
-            box-shadow: 0 1px 4px rgba(120,53,15,0.05);
-        }
-        .section-header {
-            background: var(--amber-950);
-            color: var(--amber-100);
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .section-header h2 {
-            font-family: var(--brand);
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-        }
-        .section-count {
-            font-size: 11px;
-            font-weight: 600;
-            background: rgba(255,255,255,0.15);
-            padding: 3px 10px;
-            border-radius: 20px;
-            letter-spacing: 0.06em;
-        }
+/* ITEM CARD */
+.item-card{border-bottom:1px solid var(--a100);padding:16px 20px;display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:start}
+.item-card:last-child{border-bottom:none}
+.img-drop-zone{width:80px;height:80px;border-radius:10px;border:2px dashed var(--a300);background:var(--a50);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;flex-shrink:0}
+.img-drop-zone:hover{border-color:var(--a500);background:var(--a100)}
+.img-drop-zone.has-img{border-style:solid;border-color:var(--a200)}
+.img-drop-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px}
+.img-drop-overlay{position:absolute;inset:0;background:rgba(69,26,3,.55);display:flex;align-items:center;justify-content:center;border-radius:8px;opacity:0;transition:opacity .2s}
+.img-drop-zone:hover .img-drop-overlay{opacity:1}
+.img-drop-icon{font-size:20px;display:block}
+.img-drop-text{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a700);margin-top:4px;text-align:center;line-height:1.3}
+.img-drop-text-overlay{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--white)}
+.img-upload-input{display:none}
+.img-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--a500);transition:width .3s;border-radius:0 0 8px 8px}
+.item-fields{display:flex;flex-direction:column;gap:8px}
+.field-row{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.field-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a700);margin-bottom:3px}
+.field-input{width:100%;padding:8px 10px;border:1.5px solid var(--a100);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--a950);background:var(--a50);outline:none;transition:border-color .15s,background .15s}
+.field-input:focus{border-color:var(--a400);background:var(--white)}
+textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 
-        /* ── ITEM CARD ── */
-        .item-card {
-            border-bottom: 1px solid var(--amber-100);
-            padding: 16px 20px;
-            display: grid;
-            grid-template-columns: 64px 1fr;
-            gap: 16px;
-            align-items: start;
-        }
-        .item-card:last-child { border-bottom: none; }
-        .item-thumb {
-            width: 64px;
-            height: 64px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 1px solid var(--amber-100);
-            background: var(--amber-50);
-            flex-shrink: 0;
-        }
-        .item-thumb-placeholder {
-            width: 64px;
-            height: 64px;
-            border-radius: 10px;
-            background: var(--amber-50);
-            border: 1px solid var(--amber-100);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0;
-        }
-        .item-fields { display: flex; flex-direction: column; gap: 8px; }
-        .field-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
-        .field-full { grid-column: 1 / -1; }
-        .field-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--amber-700);
-            margin-bottom: 3px;
-        }
-        .field-input {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1.5px solid var(--amber-100);
-            border-radius: 8px;
-            font-family: var(--font);
-            font-size: 13px;
-            color: var(--amber-950);
-            background: var(--amber-50);
-            outline: none;
-            transition: border-color 0.15s, background 0.15s;
-        }
-        .field-input:focus { border-color: var(--amber-400); background: var(--white); }
-        textarea.field-input { resize: vertical; min-height: 60px; line-height: 1.5; }
-        .banner-field {
-            padding: 12px 20px;
-            border-top: 1px dashed var(--amber-200);
-            background: var(--amber-50);
-        }
-        .banner-field .field-label { color: var(--amber-600); }
+/* IMAGE PATH DISPLAY */
+.img-path{font-size:10px;color:var(--g400);margin-top:3px;word-break:break-all;line-height:1.3}
 
-        /* Addon card */
-        .addon-card {
-            border-bottom: 1px solid var(--amber-100);
-            padding: 16px 20px;
-            display: grid;
-            grid-template-columns: 48px 1fr;
-            gap: 14px;
-            align-items: start;
-        }
-        .addon-card:last-child { border-bottom: none; }
-        .addon-emoji {
-            font-size: 28px;
-            line-height: 1;
-            padding-top: 4px;
-        }
-        .addon-fields { display: flex; flex-direction: column; gap: 8px; }
-        .addon-row { display: grid; grid-template-columns: 1fr 100px; gap: 8px; }
+/* ADDON CARD */
+.addon-card{border-bottom:1px solid var(--a100);padding:16px 20px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}
+.addon-card:last-child{border-bottom:none}
+.addon-emoji-input{font-size:26px;width:44px;height:44px;border:1.5px solid var(--a100);border-radius:10px;background:var(--a50);text-align:center;outline:none;cursor:pointer;font-family:var(--font)}
+.addon-emoji-input:focus{border-color:var(--a400)}
+.addon-fields{display:flex;flex-direction:column;gap:8px}
+.addon-row{display:grid;grid-template-columns:1fr 100px;gap:8px}
 
-        /* ── LOADING OVERLAY ── */
-        #loading-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(252,248,238,0.85);
-            backdrop-filter: blur(4px);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 16px;
-        }
-        #loading-overlay.show { display: flex; }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--amber-200);
-            border-top-color: var(--amber-900);
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text {
-            font-family: var(--brand);
-            font-size: 18px;
-            color: var(--amber-900);
-            font-weight: 600;
-        }
-    </style>
+/* BANNER FIELD */
+.banner-field{padding:12px 20px;border-top:1px dashed var(--a200);background:var(--a50)}
+
+/* ADD ITEM FOOTER */
+.add-item-footer{padding:12px 20px;border-top:1px dashed var(--a200);background:var(--g50);display:flex;gap:8px}
+
+/* NEW CATEGORY BUTTON */
+.add-category-wrap{text-align:center;padding:8px 0 24px}
+
+/* DELETE CATEGORY */
+.btn-del-section{background:rgba(239,68,68,.12);color:var(--red-d);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.04em;transition:background .15s;flex-shrink:0}
+.btn-del-section:hover{background:rgba(239,68,68,.22)}
+
+/* DRAG HANDLE */
+.drag-handle{display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--g300);font-size:18px;padding:4px;user-select:none;margin-top:4px}
+.drag-handle:active{cursor:grabbing}
+
+/* LOADING */
+#loading-overlay{display:none;position:fixed;inset:0;background:rgba(252,248,238,.85);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#loading-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid var(--a200);border-top-color:var(--a900);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:var(--brand);font-size:18px;color:var(--a900);font-weight:600}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:20px;padding:32px;max-width:460px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal h3{font-family:var(--brand);font-size:22px;font-weight:700;color:var(--a950);margin-bottom:6px}
+.modal p{font-size:13px;color:var(--g500);margin-bottom:24px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* PREVIEW PANEL */
+#preview-panel{position:fixed;right:0;top:0;bottom:0;width:360px;background:var(--white);border-left:1px solid var(--a200);box-shadow:-4px 0 20px rgba(0,0,0,.08);z-index:90;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+#preview-panel.open{transform:translateX(0)}
+.preview-header{padding:16px 20px;border-bottom:1px solid var(--a100);display:flex;align-items:center;justify-content:space-between}
+.preview-header h4{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a900)}
+.preview-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--g400);padding:4px}
+.preview-body{flex:1;overflow-y:auto;padding:16px}
+.preview-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--a100)}
+.preview-item img{width:52px;height:52px;border-radius:8px;object-fit:cover;background:var(--a50);flex-shrink:0}
+.preview-item-info{flex:1;min-width:0}
+.preview-item-name{font-size:13px;font-weight:700;color:var(--a950)}
+.preview-item-desc{font-size:11px;color:var(--g400);line-height:1.4;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.preview-item-price{font-size:13px;font-weight:700;color:var(--a600, #d97706);flex-shrink:0}
+
+/* UNSAVED DOT */
+.unsaved-dot{width:8px;height:8px;border-radius:50%;background:var(--a400);display:inline-block;margin-left:6px;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
 <div id="loading-overlay">
-    <div class="spinner"></div>
-    <div class="loading-text" id="loading-text">Loading menu…</div>
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">Loading…</div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- ══════════════ LOGIN SCREEN ══════════════ -->
-<div id="login-screen">
-    <div class="login-card">
-        <div class="login-logo">Le Kiosk</div>
-        <div class="login-sub">Admin Panel</div>
-        <label class="login-label" for="pw-input">Password</label>
-        <input class="login-input" type="password" id="pw-input" placeholder="Enter admin password" autocomplete="current-password">
-        <button class="login-btn" onclick="tryLogin()">Sign In</button>
-        <div class="login-error" id="login-error">Wrong password. Try again.</div>
+<!-- CONFIRM MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Are you sure?</h3>
+    <p id="modal-body">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="modal-confirm-btn">Delete</button>
     </div>
+  </div>
 </div>
 
-<!-- ══════════════ ADMIN SCREEN ══════════════ -->
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Le Kiosk</div>
+    <div class="login-sub">Admin Panel</div>
+    <label class="lbl" for="pw-input">Password</label>
+    <input class="inp" type="password" id="pw-input" placeholder="Enter admin password" autocomplete="current-password">
+    <button class="login-btn" onclick="tryLogin()">Sign In</button>
+    <div class="login-error" id="login-error">Wrong password. Try again.</div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══ -->
 <div id="admin-screen">
-    <header class="admin-header">
-        <div>
-            <span class="header-brand">Le Kiosk <span>Menu CMS</span></span>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-save" id="save-btn" onclick="saveMenu()" disabled>💾 Save to GitHub</button>
-            <button class="btn btn-logout" onclick="logout()">Logout</button>
-        </div>
-    </header>
-
-    <!-- TOKEN SETUP BANNER -->
-    <div id="setup-banner">
-        <p><strong>GitHub Token</strong> — needed to save changes. Create one at github.com/settings/tokens with <em>Contents: read & write</em> for this repo.</p>
-        <div class="token-input-wrap">
-            <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-            <button class="btn-token" onclick="saveToken()">Save Token</button>
-            <span class="token-status" id="token-status"></span>
-        </div>
+  <header class="admin-header">
+    <div>
+      <span class="header-brand">Le Kiosk <span>Menu CMS</span></span>
+      <span id="unsaved-indicator" style="display:none"><span class="unsaved-dot"></span></span>
     </div>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
+      <button class="btn btn-save" id="save-btn" onclick="saveMenu()" disabled>💾 Save to GitHub</button>
+      <button class="btn btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
 
-    <div class="admin-body" id="editor-root"></div>
+  <div id="setup-banner">
+    <p><strong>GitHub Token</strong> — needed to save. Create at github.com/settings/tokens → Fine-grained → <em>Contents: read & write</em> for this repo only.</p>
+    <div class="token-input-wrap">
+      <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
+      <button class="btn-token" onclick="saveToken()">Save</button>
+      <span class="token-status" id="token-status"></span>
+    </div>
+  </div>
+
+  <div class="tabs-bar" id="tabs-bar"></div>
+
+  <div class="admin-body" id="editor-root"></div>
+
+  <div class="add-category-wrap">
+    <button class="btn btn-add" onclick="addCategory()">＋ Add New Category</button>
+  </div>
+</div>
+
+<!-- PREVIEW PANEL -->
+<div id="preview-panel">
+  <div class="preview-header">
+    <h4>Live Preview</h4>
+    <button class="preview-close" onclick="togglePreview()">✕</button>
+  </div>
+  <div class="preview-body" id="preview-body"></div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// CONFIG — change password here
-// ══════════════════════════════════════════════
-const ADMIN_PASSWORD = 'lekiosk2024';  // ← change this
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
+const ADMIN_PASSWORD = 'lekiosk2024'; // ← change this
 const REPO_OWNER     = 'joetheproz5';
 const REPO_NAME      = 'le-kiosk-menu';
-const MENU_FILE_PATH = 'menu.json';
-const GITHUB_API     = 'https://api.github.com';
+const MENU_PATH      = 'menu.json';
+const IMG_FOLDER     = 'menupictures';
+const API            = 'https://api.github.com';
 
-// ── State ──
-let menuData = [];
-let fileSha  = null; // GitHub needs the current SHA to update a file
+let menuData   = [];
+let fileSha    = null;
+let hasUnsaved = false;
+let activeTab  = 0;
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 // LOGIN
-// ══════════════════════════════════════════════
-function tryLogin() {
-    const pw = document.getElementById('pw-input').value;
-    if (pw === ADMIN_PASSWORD) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('admin-screen').style.display = 'block';
-        initAdmin();
-    } else {
-        document.getElementById('login-error').classList.add('show');
-    }
+// ══════════════════════════════════════
+function tryLogin(){
+  if(document.getElementById('pw-input').value === ADMIN_PASSWORD){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    initAdmin();
+  } else {
+    document.getElementById('login-error').classList.add('show');
+  }
 }
-document.getElementById('pw-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') tryLogin();
-});
-function logout() {
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('admin-screen').style.display = 'none';
-    document.getElementById('pw-input').value = '';
+document.getElementById('pw-input').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
+function logout(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('admin-screen').style.display='none';
+  document.getElementById('pw-input').value='';
 }
 
-// ══════════════════════════════════════════════
-// GITHUB TOKEN MANAGEMENT
-// ══════════════════════════════════════════════
-function getToken() { return localStorage.getItem('lk_gh_token') || ''; }
-function saveToken() {
-    const t = document.getElementById('token-input').value.trim();
-    if (!t) return;
-    localStorage.setItem('lk_gh_token', t);
-    document.getElementById('token-input').value = '';
-    updateTokenStatus();
-    showToast('Token saved', 'success');
+// ══════════════════════════════════════
+// TOKEN
+// ══════════════════════════════════════
+function getToken(){ return localStorage.getItem('lk_gh_token')||''; }
+function saveToken(){
+  const t=document.getElementById('token-input').value.trim();
+  if(!t) return;
+  localStorage.setItem('lk_gh_token',t);
+  document.getElementById('token-input').value='';
+  updateTokenStatus();
+  showToast('Token saved','success');
 }
-function updateTokenStatus() {
-    const el = document.getElementById('token-status');
-    const saveBtn = document.getElementById('save-btn');
-    if (getToken()) {
-        el.textContent = '✓ Token saved';
-        el.className = 'token-status ok';
-        saveBtn.disabled = false;
-    } else {
-        el.textContent = '✗ No token';
-        el.className = 'token-status missing';
-        saveBtn.disabled = true;
-    }
+function updateTokenStatus(){
+  const el=document.getElementById('token-status');
+  const ok=!!getToken();
+  el.textContent=ok?'✓ Token saved':'✗ No token';
+  el.className='token-status '+(ok?'ok':'missing');
+  document.getElementById('save-btn').disabled=!ok;
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════
-async function initAdmin() {
-    updateTokenStatus();
-    showLoading('Loading menu…');
-    try {
-        await fetchMenu();
-        renderEditor();
-    } catch(e) {
-        showToast('Failed to load menu.json: ' + e.message, 'error');
-    }
-    hideLoading();
+// ══════════════════════════════════════
+async function initAdmin(){
+  updateTokenStatus();
+  showLoading('Loading menu…');
+  try{ await fetchMenu(); renderAll(); }
+  catch(e){ showToast('Failed to load: '+e.message,'error'); }
+  hideLoading();
 }
 
-// ══════════════════════════════════════════════
-// FETCH menu.json FROM GITHUB
-// ══════════════════════════════════════════════
-async function fetchMenu() {
-    const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_FILE_PATH}`;
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    if (getToken()) headers['Authorization'] = `Bearer ${getToken()}`;
-
-    const res = await fetch(url, { headers });
-    if (!res.ok) throw new Error(`GitHub API ${res.status}`);
-    const data = await res.json();
-    fileSha  = data.sha;
-    menuData = JSON.parse(atob(data.content.replace(/\n/g, '')));
+// ══════════════════════════════════════
+// FETCH
+// ══════════════════════════════════════
+async function fetchMenu(){
+  const url=`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`;
+  const h={'Accept':'application/vnd.github.v3+json'};
+  if(getToken()) h['Authorization']='Bearer '+getToken();
+  const res=await fetch(url,{headers:h});
+  if(!res.ok) throw new Error('GitHub API '+res.status);
+  const data=await res.json();
+  fileSha=data.sha;
+  menuData=JSON.parse(atob(data.content.replace(/\n/g,'')));
 }
 
-// ══════════════════════════════════════════════
-// SAVE menu.json TO GITHUB
-// ══════════════════════════════════════════════
-async function saveMenu() {
-    if (!getToken()) { showToast('No GitHub token set', 'error'); return; }
-    collectFormData();
-
-    showLoading('Saving to GitHub…');
-    try {
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(menuData, null, 2))));
-        const url = `${GITHUB_API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_FILE_PATH}`;
-        const res = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${getToken()}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-                message: 'Update menu via Admin CMS',
-                content,
-                sha: fileSha
-            })
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.message || res.status);
-        }
-        const saved = await res.json();
-        fileSha = saved.content.sha;
-        showToast('Menu saved! Live in ~30 seconds ✓', 'success');
-    } catch(e) {
-        showToast('Save failed: ' + e.message, 'error');
-    }
-    hideLoading();
-}
-
-// ══════════════════════════════════════════════
-// COLLECT FORM → menuData
-// ══════════════════════════════════════════════
-function collectFormData() {
-    menuData.forEach((section, si) => {
-        if (section.type === 'addons') {
-            section.addonGroups.forEach((grp, gi) => {
-                grp.label = val(`addon-label-${si}-${gi}`);
-                grp.price = val(`addon-price-${si}-${gi}`);
-                grp.note  = val(`addon-note-${si}-${gi}`);
-                const optsRaw = val(`addon-options-${si}-${gi}`);
-                grp.options = optsRaw.split(',').map(s => s.trim()).filter(Boolean);
-            });
-        } else {
-            if (section.bottomBanner !== undefined) {
-                section.bottomBanner = val(`banner-${si}`);
-            }
-            section.items.forEach((item, ii) => {
-                item.name  = val(`item-name-${si}-${ii}`);
-                item.price = val(`item-price-${si}-${ii}`);
-                item.desc  = val(`item-desc-${si}-${ii}`);
-                if (item.flavors) {
-                    const raw = val(`item-flavors-${si}-${ii}`);
-                    item.flavors = raw.split(',').map(s => s.trim()).filter(Boolean);
-                }
-            });
-        }
+// ══════════════════════════════════════
+// SAVE
+// ══════════════════════════════════════
+async function saveMenu(){
+  if(!getToken()){ showToast('No GitHub token set','error'); return; }
+  collectAll();
+  showLoading('Saving to GitHub…');
+  try{
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(menuData,null,2))));
+    const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`,{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({message:'Update menu via Admin CMS',content,sha:fileSha})
     });
+    if(!res.ok){ const e=await res.json(); throw new Error(e.message||res.status); }
+    const saved=await res.json();
+    fileSha=saved.content.sha;
+    markSaved();
+    showToast('Saved! Live in ~30s ✓','success');
+  }catch(e){ showToast('Save failed: '+e.message,'error'); }
+  hideLoading();
 }
 
-function val(id) {
-    const el = document.getElementById(id);
-    return el ? el.value : '';
+// ══════════════════════════════════════
+// IMAGE UPLOAD TO GITHUB
+// ══════════════════════════════════════
+async function uploadImage(file, onProgress){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=async(e)=>{
+      const b64=e.target.result.split(',')[1];
+      const ext=file.name.split('.').pop().toLowerCase();
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase();
+      const path=IMG_FOLDER+'/'+safe;
+      if(onProgress) onProgress(30);
+      // Check if file exists (to get SHA for overwrite)
+      let existingSha=null;
+      try{
+        const chk=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{
+          headers:{'Authorization':'Bearer '+getToken(),'Accept':'application/vnd.github.v3+json'}
+        });
+        if(chk.ok){ const d=await chk.json(); existingSha=d.sha; }
+      }catch(_){}
+      if(onProgress) onProgress(60);
+      const body={message:'Upload image: '+safe,content:b64};
+      if(existingSha) body.sha=existingSha;
+      const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{
+        method:'PUT',
+        headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+        body:JSON.stringify(body)
+      });
+      if(onProgress) onProgress(100);
+      if(!res.ok){ const er=await res.json(); reject(new Error(er.message)); return; }
+      resolve(path);
+    };
+    reader.onerror=()=>reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
 }
 
-// ══════════════════════════════════════════════
-// RENDER EDITOR
-// ══════════════════════════════════════════════
-function renderEditor() {
-    const root = document.getElementById('editor-root');
-    root.innerHTML = menuData.map((section, si) => renderSection(section, si)).join('');
-}
+// ══════════════════════════════════════
+// COLLECT FORM → menuData
+// ══════════════════════════════════════
+function collectAll(){
+  menuData.forEach((sec,si)=>{
+    const titleEl=document.getElementById('sec-title-'+si);
+    const keyEl=document.getElementById('sec-key-'+si);
+    if(titleEl) sec.title=titleEl.value;
+    if(keyEl) sec.key=keyEl.value;
 
-function renderSection(section, si) {
-    const count = section.type === 'addons'
-        ? `${section.addonGroups.length} add-on${section.addonGroups.length !== 1 ? 's' : ''}`
-        : `${section.items.length} item${section.items.length !== 1 ? 's' : ''}`;
-
-    let body = '';
-    if (section.type === 'addons') {
-        body = section.addonGroups.map((grp, gi) => renderAddon(grp, si, gi)).join('');
+    if(sec.type==='addons'){
+      sec.addonGroups=(sec.addonGroups||[]).map((grp,gi)=>({
+        ...grp,
+        emoji: v('ag-emoji-'+si+'-'+gi)||grp.emoji,
+        label: v('ag-label-'+si+'-'+gi),
+        price: v('ag-price-'+si+'-'+gi),
+        note:  v('ag-note-'+si+'-'+gi),
+        options:(v('ag-opts-'+si+'-'+gi)||'').split(',').map(s=>s.trim()).filter(Boolean)
+      }));
     } else {
-        body = section.items.map((item, ii) => renderItem(item, si, ii)).join('');
-        if (section.bottomBanner !== undefined) {
-            body += `<div class="banner-field">
-                <div class="field-label">🔖 Bottom Banner</div>
-                <input class="field-input" type="text" id="banner-${si}" value="${esc(section.bottomBanner)}">
-            </div>`;
+      if(sec.bottomBanner!==undefined) sec.bottomBanner=v('banner-'+si)||'';
+      sec.items=(sec.items||[]).map((item,ii)=>{
+        const updated={...item,
+          name:  v('i-name-'+si+'-'+ii),
+          price: v('i-price-'+si+'-'+ii),
+          desc:  v('i-desc-'+si+'-'+ii)
+        };
+        if(item.flavors!==undefined){
+          updated.flavors=(v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
         }
+        return updated;
+      });
     }
+  });
+}
+function v(id){ const el=document.getElementById(id); return el?el.value:''; }
 
-    return `<div class="section-block">
-        <div class="section-header">
-            <h2>${section.title}</h2>
-            <span class="section-count">${count}</span>
-        </div>
-        ${body}
+// ══════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════
+function renderAll(){
+  renderTabs();
+  renderEditor();
+  markSaved();
+}
+
+function renderTabs(){
+  const bar=document.getElementById('tabs-bar');
+  bar.innerHTML=menuData.map((s,i)=>
+    `<button class="tab${i===activeTab?' active':''}" onclick="switchTab(${i})">${s.title||'Untitled'}</button>`
+  ).join('')+
+  `<button class="tab" onclick="addCategory()" style="color:var(--a500)">＋ Add</button>`;
+}
+
+function switchTab(i){
+  collectAll();
+  activeTab=i;
+  renderAll();
+  document.getElementById('editor-root').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderEditor(){
+  const root=document.getElementById('editor-root');
+  if(!menuData.length){ root.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No categories yet. Add one below.</div>'; return; }
+  const sec=menuData[activeTab];
+  if(!sec){ root.innerHTML=''; return; }
+  root.innerHTML=renderSection(sec,activeTab);
+}
+
+// ══════════════════════════════════════
+// RENDER SECTION
+// ══════════════════════════════════════
+function renderSection(sec,si){
+  const isAddon=sec.type==='addons';
+  const hasFlav=!!sec._hasFlav;
+  const hasBanner=sec.bottomBanner!==undefined;
+
+  let body='';
+  if(isAddon){
+    body=(sec.addonGroups||[]).map((grp,gi)=>renderAddon(grp,si,gi)).join('');
+    body+=`<div class="add-item-footer">
+      <button class="btn btn-add btn-sm" onclick="addAddonGroup(${si})">＋ Add Add-on Group</button>
     </div>`;
-}
-
-function renderItem(item, si, ii) {
-    const imgSrc = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}`;
-    const thumb = item.image
-        ? `<img class="item-thumb" src="${imgSrc}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : '';
-    const placeholder = `<div class="item-thumb-placeholder" ${item.image ? 'style="display:none"' : ''}>🍽️</div>`;
-
-    const flavorsField = item.flavors
-        ? `<div>
-            <div class="field-label">Flavors / Options <span style="font-weight:400;opacity:0.7">(comma-separated)</span></div>
-            <input class="field-input" type="text" id="item-flavors-${si}-${ii}" value="${esc(item.flavors.join(', '))}">
-           </div>`
-        : '';
-
-    return `<div class="item-card">
-        <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
-            ${thumb}
-            ${placeholder}
-        </div>
-        <div class="item-fields">
-            <div class="field-row">
-                <div>
-                    <div class="field-label">Name</div>
-                    <input class="field-input" type="text" id="item-name-${si}-${ii}" value="${esc(item.name)}">
-                </div>
-                <div>
-                    <div class="field-label">Price</div>
-                    <input class="field-input" type="text" id="item-price-${si}-${ii}" value="${esc(item.price)}">
-                </div>
-            </div>
-            <div>
-                <div class="field-label">Description</div>
-                <textarea class="field-input" id="item-desc-${si}-${ii}">${esc(item.desc)}</textarea>
-            </div>
-            ${flavorsField}
-        </div>
+  } else {
+    body=(sec.items||[]).map((item,ii)=>renderItem(item,si,ii)).join('');
+    body+=`<div class="add-item-footer">
+      <button class="btn btn-add btn-sm" onclick="addItem(${si})">＋ Add Item</button>
     </div>`;
-}
+    if(hasBanner){
+      body+=`<div class="banner-field">
+        <div class="field-label">🔖 Bottom Banner</div>
+        <input class="field-input" type="text" id="banner-${si}" value="${esc(sec.bottomBanner)}" oninput="markUnsaved()">
+      </div>`;
+    }
+  }
 
-function renderAddon(grp, si, gi) {
-    return `<div class="addon-card">
-        <div class="addon-emoji">${grp.emoji}</div>
-        <div class="addon-fields">
-            <div class="addon-row">
-                <div>
-                    <div class="field-label">Label</div>
-                    <input class="field-input" type="text" id="addon-label-${si}-${gi}" value="${esc(grp.label)}">
-                </div>
-                <div>
-                    <div class="field-label">Price</div>
-                    <input class="field-input" type="text" id="addon-price-${si}-${gi}" value="${esc(grp.price)}">
-                </div>
-            </div>
-            <div>
-                <div class="field-label">Note</div>
-                <input class="field-input" type="text" id="addon-note-${si}-${gi}" value="${esc(grp.note)}">
-            </div>
-            <div>
-                <div class="field-label">Options <span style="font-weight:400;opacity:0.7">(comma-separated)</span></div>
-                <input class="field-input" type="text" id="addon-options-${si}-${gi}" value="${esc(grp.options.join(', '))}">
-            </div>
-        </div>
+  // Feature toggles for non-addon sections
+  const featBar = isAddon ? '' : `
+    <div class="type-toggle">
+      <span class="type-toggle-label">Features:</span>
+      <div class="features-wrap">
+        <button class="feat-btn${hasBanner?' active':''}" onclick="toggleFeature(${si},'banner')" title="Bottom promo banner">📢 Banner</button>
+        <button class="feat-btn${sec._hasFlav?' active':''}" onclick="toggleFeature(${si},'flavors')" title="Flavor/option tags on items">🏷 Flavors</button>
+      </div>
     </div>`;
+
+  const typeToggle=`
+    <div class="type-toggle">
+      <span class="type-toggle-label">Type:</span>
+      <button class="type-btn${!isAddon?' active':''}" onclick="setSectionType(${si},'regular')">Regular Items</button>
+      <button class="type-btn${isAddon?' active':''}" onclick="setSectionType(${si},'addons')">Add-ons</button>
+    </div>`;
+
+  return `<div class="section-block">
+    <div class="section-header">
+      <div class="section-header-left">
+        <input class="section-title-input" type="text" id="sec-title-${si}" value="${esc(sec.title)}" placeholder="Category name" oninput="markUnsaved();updateTab(${si},this.value)">
+        <span class="section-type-badge">${isAddon?'add-ons':'items'}</span>
+      </div>
+      <div class="section-meta">
+        <span class="section-count">${isAddon?(sec.addonGroups||[]).length+' groups':(sec.items||[]).length+' items'}</span>
+        <button class="btn-del-section" onclick="confirmDeleteSection(${si})">🗑 Delete</button>
+      </div>
+    </div>
+    <div class="section-key-wrap" style="padding-bottom:8px">
+      <span class="section-key-label">URL key:</span>
+      <input class="section-key-input" type="text" id="sec-key-${si}" value="${esc(sec.key)}" placeholder="section-key" oninput="markUnsaved()">
+    </div>
+    ${typeToggle}
+    ${featBar}
+    ${body}
+  </div>`;
 }
 
-function esc(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// ══════════════════════════════════════
+// RENDER ITEM
+// ══════════════════════════════════════
+function renderItem(item,si,ii){
+  const imgSrc=item.image
+    ? `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}?v=${Date.now()}`
+    : '';
+  const sec=menuData[si];
+  const showFlavors=sec&&sec._hasFlav;
+
+  const dropZone=`
+    <div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
+      ${item.image?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''">
+        <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`
+      :`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
+      <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>
+    </div>
+    <input type="file" class="img-upload-input" id="file-${si}-${ii}" accept="image/*" onchange="handleImageUpload(${si},${ii},this)">
+    <div class="img-path" id="img-path-${si}-${ii}">${item.image?item.image:''}</div>`;
+
+  const flavorsField=showFlavors?`<div>
+    <div class="field-label">Flavors / Options <span style="font-weight:400;opacity:.7">(comma-separated)</span></div>
+    <input class="field-input" type="text" id="i-flavors-${si}-${ii}" value="${esc((item.flavors||[]).join(', '))}" oninput="markUnsaved()">
+  </div>`:'';
+
+  return `<div class="item-card" id="item-card-${si}-${ii}">
+    <div>${dropZone}</div>
+    <div class="item-fields">
+      <div class="field-row">
+        <div>
+          <div class="field-label">Name</div>
+          <input class="field-input" type="text" id="i-name-${si}-${ii}" value="${esc(item.name)}" oninput="markUnsaved()">
+        </div>
+        <div>
+          <div class="field-label">Price</div>
+          <input class="field-input" type="text" id="i-price-${si}-${ii}" value="${esc(item.price)}" oninput="markUnsaved()">
+        </div>
+      </div>
+      <div>
+        <div class="field-label">Description</div>
+        <textarea class="field-input" id="i-desc-${si}-${ii}" oninput="markUnsaved()">${esc(item.desc)}</textarea>
+      </div>
+      ${flavorsField}
+    </div>
+    <button class="btn btn-danger" onclick="confirmDeleteItem(${si},${ii})" title="Delete item">🗑</button>
+  </div>`;
 }
 
-// ══════════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════
+// RENDER ADDON GROUP
+// ══════════════════════════════════════
+function renderAddon(grp,si,gi){
+  return `<div class="addon-card" id="addon-card-${si}-${gi}">
+    <div>
+      <input class="addon-emoji-input" type="text" id="ag-emoji-${si}-${gi}" value="${esc(grp.emoji||'🔸')}" maxlength="2" oninput="markUnsaved()" title="Emoji">
+    </div>
+    <div class="addon-fields">
+      <div class="addon-row">
+        <div>
+          <div class="field-label">Label</div>
+          <input class="field-input" type="text" id="ag-label-${si}-${gi}" value="${esc(grp.label)}" oninput="markUnsaved()">
+        </div>
+        <div>
+          <div class="field-label">Price</div>
+          <input class="field-input" type="text" id="ag-price-${si}-${gi}" value="${esc(grp.price)}" oninput="markUnsaved()">
+        </div>
+      </div>
+      <div>
+        <div class="field-label">Note</div>
+        <input class="field-input" type="text" id="ag-note-${si}-${gi}" value="${esc(grp.note)}" oninput="markUnsaved()">
+      </div>
+      <div>
+        <div class="field-label">Options <span style="font-weight:400;opacity:.7">(comma-separated)</span></div>
+        <input class="field-input" type="text" id="ag-opts-${si}-${gi}" value="${esc((grp.options||[]).join(', '))}" oninput="markUnsaved()">
+      </div>
+    </div>
+    <button class="btn btn-danger" onclick="confirmDeleteAddon(${si},${gi})" title="Delete group">🗑</button>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+// MUTATIONS
+// ══════════════════════════════════════
+function addItem(si){
+  collectAll();
+  menuData[si].items.push({name:'New Item',price:'$0',desc:'Description here.',image:''});
+  markUnsaved();
+  renderAll();
+}
+
+function addAddonGroup(si){
+  collectAll();
+  if(!menuData[si].addonGroups) menuData[si].addonGroups=[];
+  menuData[si].addonGroups.push({emoji:'🔸',label:'New Add-on',price:'$0',note:'Description',options:['Option 1']});
+  markUnsaved();
+  renderAll();
+}
+
+function addCategory(){
+  collectAll();
+  const key='category-'+(Date.now()%100000);
+  menuData.push({key,title:'New Category',items:[]});
+  activeTab=menuData.length-1;
+  markUnsaved();
+  renderAll();
+}
+
+function setSectionType(si,type){
+  collectAll();
+  const sec=menuData[si];
+  if(type==='addons'){
+    sec.type='addons';
+    if(!sec.addonGroups) sec.addonGroups=[];
+    delete sec.items;
+    delete sec.bottomBanner;
+    delete sec._hasFlav;
+  } else {
+    delete sec.type;
+    if(!sec.items) sec.items=[];
+    delete sec.addonGroups;
+  }
+  markUnsaved();
+  renderAll();
+}
+
+function toggleFeature(si,feat){
+  collectAll();
+  const sec=menuData[si];
+  if(feat==='banner'){
+    if(sec.bottomBanner!==undefined) delete sec.bottomBanner;
+    else sec.bottomBanner='';
+  } else if(feat==='flavors'){
+    sec._hasFlav=!sec._hasFlav;
+    if(sec._hasFlav){
+      sec.items.forEach(item=>{ if(!item.flavors) item.flavors=[]; });
+    } else {
+      sec.items.forEach(item=>delete item.flavors);
+    }
+  }
+  markUnsaved();
+  renderAll();
+}
+
+function updateTab(si,val){
+  const tabs=document.getElementById('tabs-bar').querySelectorAll('.tab');
+  if(tabs[si]) tabs[si].textContent=val||'Untitled';
+}
+
+// ══════════════════════════════════════
+// IMAGE UPLOAD HANDLER
+// ══════════════════════════════════════
+function triggerUpload(si,ii){
+  document.getElementById('file-'+si+'-'+ii).click();
+}
+
+async function handleImageUpload(si,ii,input){
+  if(!input.files||!input.files[0]) return;
+  if(!getToken()){ showToast('Set your GitHub token first','error'); return; }
+  const file=input.files[0];
+  const progBar=document.getElementById('prog-'+si+'-'+ii);
+  const dropZone=document.getElementById('drop-'+si+'-'+ii);
+
+  try{
+    const path=await uploadImage(file,(pct)=>{
+      if(progBar) progBar.style.width=pct+'%';
+    });
+    // Update menuData and UI
+    collectAll();
+    menuData[si].items[ii].image=path;
+    markUnsaved();
+
+    // Update the drop zone image preview
+    const rawUrl=`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}?v=${Date.now()}`;
+    dropZone.classList.add('has-img');
+    dropZone.innerHTML=`<img src="${rawUrl}" alt="" id="drop-img-${si}-${ii}">
+      <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>
+      <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>`;
+    const pathEl=document.getElementById('img-path-'+si+'-'+ii);
+    if(pathEl) pathEl.textContent=path;
+
+    showToast('Image uploaded ✓','success');
+  }catch(e){
+    showToast('Upload failed: '+e.message,'error');
+    if(progBar) progBar.style.width='0';
+  }
+}
+
+// ══════════════════════════════════════
+// DELETE CONFIRMATIONS
+// ══════════════════════════════════════
+let pendingDelete=null;
+
+function confirmDeleteItem(si,ii){
+  collectAll();
+  pendingDelete={type:'item',si,ii};
+  openModal('Delete Item','Delete "'+menuData[si].items[ii].name+'"? This cannot be undone.');
+}
+function confirmDeleteAddon(si,gi){
+  collectAll();
+  pendingDelete={type:'addon',si,gi};
+  openModal('Delete Add-on Group','Remove "'+menuData[si].addonGroups[gi].label+'"? This cannot be undone.');
+}
+function confirmDeleteSection(si){
+  collectAll();
+  pendingDelete={type:'section',si};
+  openModal('Delete Category','Delete the "'+menuData[si].title+'" category and all its items? This cannot be undone.');
+}
+
+function executeDelete(){
+  if(!pendingDelete) return;
+  const {type,si,ii,gi}=pendingDelete;
+  if(type==='item'){ menuData[si].items.splice(ii,1); }
+  else if(type==='addon'){ menuData[si].addonGroups.splice(gi,1); }
+  else if(type==='section'){
+    menuData.splice(si,1);
+    if(activeTab>=menuData.length) activeTab=Math.max(0,menuData.length-1);
+  }
+  pendingDelete=null;
+  closeModal();
+  markUnsaved();
+  renderAll();
+}
+
+function openModal(title,body){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  document.getElementById('modal-confirm-btn').onclick=executeDelete;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('show');
+  pendingDelete=null;
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+// ══════════════════════════════════════
+// UNSAVED STATE
+// ══════════════════════════════════════
+function markUnsaved(){
+  hasUnsaved=true;
+  document.getElementById('unsaved-indicator').style.display='inline';
+}
+function markSaved(){
+  hasUnsaved=false;
+  document.getElementById('unsaved-indicator').style.display='none';
+}
+window.addEventListener('beforeunload',e=>{
+  if(hasUnsaved){ e.preventDefault(); e.returnValue=''; }
+});
+
+// ══════════════════════════════════════
+// PREVIEW PANEL
+// ══════════════════════════════════════
+function togglePreview(){
+  collectAll();
+  const panel=document.getElementById('preview-panel');
+  const open=panel.classList.toggle('open');
+  if(open) renderPreview();
+}
+function renderPreview(){
+  const body=document.getElementById('preview-body');
+  let html='';
+  menuData.forEach(sec=>{
+    if(sec.type==='addons') return;
+    html+=`<div style="margin-bottom:20px">
+      <div style="font-family:var(--brand);font-size:16px;font-weight:700;color:var(--a900);border-bottom:3px solid var(--a400);padding-bottom:4px;margin-bottom:10px">${sec.title}</div>`;
+    (sec.items||[]).forEach(item=>{
+      const img=item.image?`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}`:'';
+      html+=`<div class="preview-item">
+        <img src="${img}" alt="${esc(item.name)}" onerror="this.style.background='var(--a100)'">
+        <div class="preview-item-info">
+          <div class="preview-item-name">${esc(item.name)}</div>
+          <div class="preview-item-desc">${esc(item.desc)}</div>
+        </div>
+        <div class="preview-item-price">${esc(item.price)}</div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  body.innerHTML=html||'<div style="color:var(--g400);text-align:center;padding:40px;font-size:13px">No regular item categories to preview.</div>';
+}
+
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 let toastTimer;
-function showToast(msg, type='') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'show' + (type ? ' '+type : '');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { t.className = ''; }, 3500);
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show'+(type?' '+type:'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ t.className=''; },3500);
 }
 
-// ══════════════════════════════════════════════
-// LOADING
-// ══════════════════════════════════════════════
-function showLoading(msg) {
-    document.getElementById('loading-text').textContent = msg || 'Loading…';
-    document.getElementById('loading-overlay').classList.add('show');
+function showLoading(msg){
+  document.getElementById('loading-text').textContent=msg||'Loading…';
+  document.getElementById('loading-overlay').classList.add('show');
 }
-function hideLoading() {
-    document.getElementById('loading-overlay').classList.remove('show');
+function hideLoading(){
+  document.getElementById('loading-overlay').classList.remove('show');
 }
 </script>
 </body>
