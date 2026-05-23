@@ -3,15 +3,46 @@ backend:
   branch: main
 
 media_folder: "menupictures"
+public_folder: "/menupictures"
 
 collections:
-  - name: "menu"
-    label: "Menu Items"
-    folder: "_menu"
-    create: true
-    fields:
-      - { label: "Name", name: "title", widget: "string" }
-      - { label: "Price", name: "price", widget: "string" }
-      - { label: "Description", name: "desc", widget: "text" }
-      - { label: "Image", name: "image", widget: "image" }
-      - { label: "Category", name: "category", widget: "select", options: ["appetizers","sandwiches","Burgers","sajj","desserts","shisha","beverages"] }
+  - name: "appetizers"
+    label: "Appetizers"
+    files:
+      - name: "appetizers"
+        label: "Appetizers"
+        file: "_data/menu.json"
+        fields:
+          - name: "0"
+            label: "Appetizers Section"
+            widget: "object"
+            fields:
+              - { label: "Items", name: "items", widget: "list", fields: [
+                  { label: "Name", name: "name", widget: "string" },
+                  { label: "Price", name: "price", widget: "string" },
+                  { label: "Description", name: "desc", widget: "text" },
+                  { label: "Image", name: "image", widget: "image" }
+                ]}
+
+  - name: "menu_sections"
+    label: "Menu"
+    files:
+      - name: "menu"
+        label: "Full Menu"
+        file: "_data/menu.json"
+        fields:
+          - label: "Sections"
+            name: "sections"
+            widget: "list"
+            fields:
+              - { label: "Section Key", name: "key", widget: "string" }
+              - { label: "Section Title", name: "title", widget: "string" }
+              - label: "Items"
+                name: "items"
+                widget: "list"
+                required: false
+                fields:
+                  - { label: "Name", name: "name", widget: "string" }
+                  - { label: "Price", name: "price", widget: "string" }
+                  - { label: "Description", name: "desc", widget: "text" }
+                  - { label: "Image", name: "image", widget: "image", required: false }
