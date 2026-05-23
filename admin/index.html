@@ -311,7 +311,7 @@ const API        = 'https://api.github.com';
 // ── Lockout settings ─────────────────────────────────────────────────
 const MAX_ATTEMPTS   = 5;    // failed logins before lockout
 const LOCKOUT_MS     = 2 * 60 * 1000; // 2 minutes
-const SESSION_MS     = 60 * 60 * 1000; // auto-logout after 1 hour idle
+const SESSION_MS     = 20 * 60 * 1000; // auto-logout after 20 minutes idle
 
 // ── Runtime state ────────────────────────────────────────────────────
 let menuData    = [];
