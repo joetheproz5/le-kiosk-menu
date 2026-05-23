@@ -7,7 +7,12 @@
         "name": "Fries Box",
         "price": "$5",
         "desc": "Crispy golden fries served with ketchup, mayo and bbq",
-        "image": "menupictures/friesbox.jpg"
+        "image": "menupictures/friesbox.jpg",
+        "_pillColor": "pink",
+        "flavorColor": "pink",
+        "flavors": [
+          "test"
+        ]
       },
       {
         "name": "Loaded Fries",
