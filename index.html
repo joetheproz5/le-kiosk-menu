@@ -6,58 +6,18 @@
     <title>Le Kiosk - Digital Menu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            color: #2d2a26;
-            background-color: #fcf8ee;
-            background-image: 
-                linear-gradient(#f7f1e1 1.5px, transparent 1.5px),
-                linear-gradient(90deg, #f7f1e1 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-        }
+        body { font-family: 'Poppins', sans-serif; color: #2d2a26; background-color: #fcf8ee; background-image: linear-gradient(#f7f1e1 1.5px, transparent 1.5px), linear-gradient(90deg, #f7f1e1 1.5px, transparent 1.5px); background-size: 24px 24px; }
         .brand-heading { font-family: 'Fredoka', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .nav-link {
-            padding: 8px 16px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.8);
-            color: #451a03;
-            border: 1px solid rgba(251,191,36,0.3);
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: background 0.2s, color 0.2s;
-            white-space: nowrap;
-            text-decoration: none;
-            display: inline-block;
-        }
+        .nav-link { padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.8); color: #451a03; border: 1px solid rgba(251,191,36,0.3); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s, color 0.2s; white-space: nowrap; text-decoration: none; display: inline-block; }
         .nav-link:hover { background: #fef3c7; }
-        .nav-link.active {
-            background: #f59e0b;
-            color: #fff;
-            border-color: #f59e0b;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-        }
-
-        /* Contact bubble */
-        #contact-bubble {
-            transition: opacity 0.2s, transform 0.2s;
-            transform: translateY(8px);
-            opacity: 0;
-            pointer-events: none;
-        }
-        #contact-bubble.open {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: all;
-        }
+        .nav-link.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+        #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
+        #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
     </style>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body class="pb-32">
 
@@ -70,10 +30,7 @@
         <p class="text-sm text-amber-800/80 italic font-medium mt-2">"Serving Cravings, Sharing Smiles"</p>
         <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-semibold">
             <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
-            <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer"
-               class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">
-                📍 Wadi Chahrour
-            </a>
+            <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">📍 Wadi Chahrour</a>
         </div>
     </header>
 
@@ -89,64 +46,42 @@
         <a href="#savory"     class="nav-link" data-section="savory">Savory Add-Ons</a>
     </nav>
 
-    <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container"></main>
+    <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
+        <div class="text-center py-10 text-amber-400 text-sm">Loading menu...</div>
+    </main>
 
-
-
-    <!-- Divider -->
     <div class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
         <div class="flex-1 h-px bg-amber-200"></div>
         <span class="text-amber-400 text-[10px] font-bold uppercase tracking-widest px-2">✦ &nbsp; Le Kiosk &nbsp; ✦</span>
         <div class="flex-1 h-px bg-amber-200"></div>
     </div>
 
-    <!-- Leave a Review Section -->
     <section class="max-w-md mx-auto px-4 pb-6 mt-2">
         <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-5 text-center">
             <div class="text-3xl mb-2">⭐</div>
             <h3 class="brand-heading text-lg font-bold text-amber-950 uppercase tracking-wide">Enjoyed your visit?</h3>
             <p class="text-gray-400 text-xs mt-1 mb-4">Leave us a review — it means the world to us!</p>
             <div class="flex gap-3">
-                <a href="https://share.google/fmnwOKoSpsGkA0QmU" target="_blank" rel="noopener noreferrer"
-                   class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 fill-white">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
+                <a href="https://share.google/fmnwOKoSpsGkA0QmU" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     Google Review
                 </a>
-                <a href="https://wa.me/76840244?text=Hi%20Le%20Kiosk!%20I%20wanted%20to%20leave%20some%20feedback%20%F0%9F%8C%9F" target="_blank" rel="noopener noreferrer"
-                   class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                    </svg>
+                <a href="https://wa.me/76840244?text=Hi%20Le%20Kiosk!%20I%20wanted%20to%20leave%20some%20feedback%20%F0%9F%8C%9F" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                     WhatsApp
                 </a>
             </div>
         </div>
     </section>
-    <!-- Bottom bar with popup bubble -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
 
-        <!-- Contact bubble -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
         <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
-            <a href="tel:+96176840244"
-               class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
-                📞 <span>Call</span>
-            </a>
-            <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer"
-               class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
-                <!-- WhatsApp icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-                </svg>
+            <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
+            <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
                 <span>WhatsApp</span>
             </a>
         </div>
-
-        <!-- Main bar -->
         <div class="bg-amber-950 text-amber-50 rounded-2xl p-4 shadow-xl border border-amber-900 flex items-center justify-between">
             <div>
                 <span class="block text-[10px] uppercase tracking-wider text-amber-300 font-bold">Need Delivery?</span>
@@ -159,138 +94,18 @@
     </div>
 
     <script>
-        const menuData = [
-            {
-                key: "appetizers",
-                title: "Appetizers",
-                items: [
-                    { name: "Fries Box",           price: "$5",  desc: "Crispy golden fries served with ketchup, mayo and bbq",                              image: "menupictures/friesbox.jpg" },
-                    { name: "Loaded Fries",         price: "$7",  desc: "A decadent mix of crispy chicken, fries, melted cheddar and BBQ sauce",              image: "menupictures/loadedfries.jpg" },
-                    { name: "Chicken Wings (10pcs)", price: "$6",  desc: "Juicy wings tossed in your choice of Buffalo or BBQ sauce",                          image: "menupictures/wings.jpg" }
-                ]
-            },
-            {
-                key: "sandwiches",
-                title: "Sandwiches",
-                bottomBanner: { text: "🚀 BOOST YOUR MEAL: Add fries + soft drink for only $3!" },
-                items: [
-                    { name: "Crispy Sandwich", price: "$6", desc: "Golden crispy chicken, fries, pickles, fresh lettuce & mayo",                              image: "menupictures/crispysandwish.jpg" },
-                    { name: "Hotdog Sandwich", price: "$6", desc: "Hotdog sausage topped with chips, ketchup, mayo, BBQ & mustard",                           image: "menupictures/hotdog.jpg" },
-                    { name: "Fries Sandwich",  price: "$4", desc: "Golden fries with creamy coleslaw, pickles, ketchup & mayonnaise",                         image: "menupictures/friessandwish.jpg" },
-                    { name: "Taouk Sandwich",  price: "$6", desc: "House-marinated grilled chicken, fries, coleslaw, pickles, and rich garlic sauce.",        image: "menupictures/taouk.jpg" },
-                    { name: "Fajita Sandwich", price: "$6", desc: "Marinated chicken breast cooked with peppers, topped with cheese, lettuce, corn.",         image: "menupictures/fajita.jpg" }
-                ]
-            },
-            {
-                key: "Burgers",
-                title: "Burgers",
-                items: [
-                    { name: "Lebanese Burger",         price: "$6", desc: "Grilled beef patty, coleslaw, fries, tomato, pickles and our special sauce.",      image: "menupictures/lebaneseburger.jpg" },
-                    { name: "Crispy Burger",            price: "$6", desc: "Crispy chicken breast, lettuce, pickles, and our house-made special sauce",       image: "menupictures/crispyburger.jpg" },
-                    { name: "Special Le Kiosk Burger",  price: "$8", desc: "Crispy chicken, ham, cheddar, lettuce, pickles, special sauce, and garlic sauce.", image: "menupictures/lekioskburger.jpg" }
-                ]
-            },
-            {
-                key: "sajj",
-                title: "Sajj",
-                items: [
-                    { name: "Zaatar",       price: "$2", desc: "Freshly rolled sajj with fragrant thyme, olive oil and sesame",          image: "menupictures/sajj-zaatar.jpg" },
-                    { name: "Labneh",       price: "$2", desc: "Creamy strained yogurt with a drizzle of olive oil, wrapped in thin sajj",  image: "menupictures/sajj-labne.jpg" },
-                    { name: "Cheese",       price: "$3", desc: "Melted white cheese folded in a warm, crispy sajj wrap",                    image: "menupictures/sajj-jebne.jpg" },
-                    { name: "Keshek",       price: "$4", desc: "Traditional fermented wheat and yogurt spread on toasted sajj bread",       image: "menupictures/sajj-keshek.jpg" },
-                    { name: "Cheese & Ham", price: "$4", desc: "Melted white cheese and savory ham, grilled together in a golden sajj wrap", image: "menupictures/sajj-jebnejambon.jpg" }
-                ],
-                bottomBanner: { text: "🥗 Sahen Khodra — A fresh side plate of mixed greens $3" }
-            },
-            {
-                key: "desserts",
-                title: "Desserts",
-                items: [
-                    { name: "Mini Pancakes (15pcs)", price: "$7", desc: "Fluffy mini pancakes served fresh with your choice of chocolate", image: "menupictures/minipancake.jpg" },
-                    { name: "Ice Cream Cup",          price: "$2", desc: "Authentic, creamy Lebanese style premium ice cream",             image: "menupictures/icecream.jpg" }
-                ]
-            },
-            {
-                key: "shisha",
-                title: "Shisha",
-                items: [
-                    { name: "Argile",        price: "$5", desc: "Lebanese hookah with premium tobacco", image: "menupictures/shisha-argile.jpg", flavors: ["Double Apple", "Lemon & Mint"] },
-                    { name: "2 Rass",        price: "$7", desc: "Double the flavor — your shisha comes loaded with 2 heads instead of one", image: "menupictures/shisha-2rass.jpg" },
-                    { name: "Te8yir Rass",   price: "$3", desc: "Swap out your current head for a fresh one mid-session", image: "menupictures/shisha-te8yirrass.jpg" }
-                ]
-            },
-            {
-                key: "beverages",
-                title: "Beverages",
-                items: [
-                    { name: "Soft Drinks", price: "$1", desc: "Selection of your favorite carbonated sodas", image: "menupictures/soda.jpg", flavors: ["Pepsi", "7Up", "Miranda"] },
-                    { name: "Mineral Water", price: "$0.60", desc: "Pure bottled refreshing water",                        image: "menupictures/water.jpg" },
-                    { name: "Beer",          price: "$1.5",  desc: "Crisp, refreshing, and the classic Lebanese pilsner.", image: "menupictures/beer.jpg" }
-                ]
-            },
-            {
-                key: "sweet",
-                title: "Sweet Add-Ons",
-                type: "addons",
-                addonGroups: [
-                    {
-                        emoji: "🍫",
-                        label: "Sweet Sauce",
-                        price: "$2",
-                        options: ["Hershey's", "Lotus", "Pink Chocolate", "Kinder", "Oreo"],
-                        note: "Pick your favorite drizzle"
-                    },
-                    {
-                        emoji: "🍓",
-                        label: "Fresh Fruit",
-                        price: "$1",
-                        options: ["Strawberry", "Banana"],
-                        note: "Sliced fresh, added to your dessert"
-                    }
-                ]
-            },
-            {
-                key: "savory",
-                title: "Savory Add-Ons",
-                type: "addons",
-                addonGroups: [
-                    {
-                        emoji: "🧀",
-                        label: "Melted Cheddar",
-                        price: "$1",
-                        options: ["In a cup", "Inside your sandwich"],
-                        note: "Warm & gooey melted cheddar"
-                    },
-                    {
-                        emoji: "🌶️",
-                        label: "Buffalo Sauce",
-                        price: "$0.60",
-                        options: ["Dipping cup"],
-                        note: "Tangy, spicy signature buffalo"
-                    }
-                ]
-            }
-        ];
-
         function renderAddonSection(category) {
-            let html = `<section id="${category.key}" class="scroll-mt-24">`;
-            html += `<h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
-            html += `<div class="grid gap-3">`;
-            category.addonGroups.forEach((group, index) => {
-                html += `
-                <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">
-                        ${group.emoji}
-                    </div>
+            let html = `<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
+            category.addonGroups.forEach(group => {
+                html += `<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div>
                     <div class="flex-grow min-w-0">
                         <div class="flex justify-between items-center gap-2">
                             <span class="font-bold text-amber-950 text-sm">${group.label}</span>
                             <span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span>
                         </div>
                         <p class="text-gray-400 text-xs mt-0.5">${group.note}</p>
-                        <div class="flex flex-wrap gap-1 mt-2">
-                            ${group.options.map(o => `<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}
-                        </div>
+                        <div class="flex flex-wrap gap-1 mt-2">${group.options.map(o => `<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div>
                     </div>
                 </div>`;
             });
@@ -298,7 +113,7 @@
             return html;
         }
 
-        function initMenu() {
+        function renderMenu(menuData) {
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
             menuData.forEach(category => {
@@ -306,17 +121,12 @@
                     container.innerHTML += renderAddonSection(category);
                     return;
                 }
-                let html = `<section id="${category.key}" class="scroll-mt-24">`;
-                html += `<h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
-                if (category.banner) {
-                    html += `<div class="${category.banner.style} text-xs p-3 rounded-xl mb-4 text-center shadow-sm border border-amber-400/20">${category.banner.text}</div>`;
-                }
+                let html = `<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
                 if (category.items && category.items.length > 0) {
                     html += `<div class="grid gap-3.5">`;
                     category.items.forEach(item => {
-                        html += `
-                        <div class="bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex h-28 hover:shadow-md transition duration-200">
-                            <div class="w-28 h-full flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden">
+                        html += `<div class="${item.flavors ? 'min-h-28' : 'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
+                            <div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px">
                                 <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
                             </div>
                             <div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0">
@@ -332,64 +142,45 @@
                     html += `</div>`;
                 }
                 if (category.bottomBanner) {
-                    html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm border border-amber-400/20">${category.bottomBanner.text}</div>`;
+                    html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
                 }
                 html += `</section>`;
                 container.innerHTML += html;
             });
+            initScrollSpy(menuData);
         }
 
-        // Active nav highlight
-        function initScrollSpy() {
+        function initScrollSpy(menuData) {
             const navLinks = document.querySelectorAll('.nav-link');
-            const sectionIds = menuData.map(c => c.key);
             function setActive(id) {
                 navLinks.forEach(link => {
-                    if (link.dataset.section === id) {
-                        link.classList.add('active');
-                        link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    } else {
-                        link.classList.remove('active');
-                    }
+                    if (link.dataset.section === id) { link.classList.add('active'); link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+                    else link.classList.remove('active');
                 });
             }
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => { if (entry.isIntersecting) setActive(entry.target.id); });
-            }, { rootMargin: '-30% 0px -65% 0px', threshold: 0 });
-            sectionIds.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
+            const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) setActive(entry.target.id); }); }, { rootMargin: '-30% 0px -65% 0px', threshold: 0 });
+            menuData.forEach(c => { const el = document.getElementById(c.key); if (el) observer.observe(el); });
         }
 
-        // Contact bubble toggle
-        const bubble  = document.getElementById('contact-bubble');
-        const toggle  = document.getElementById('contact-toggle');
+        // Load menu from JSON file
+        fetch('/_data/menu.json')
+            .then(res => res.json())
+            .then(data => renderMenu(data))
+            .catch(() => {
+                // Fallback: if fetch fails show error
+                document.getElementById('menu-container').innerHTML = '<p class="text-center text-red-400 py-10">Could not load menu. Please refresh.</p>';
+            });
+
+        // Contact bubble
+        const bubble = document.getElementById('contact-bubble');
+        const toggle = document.getElementById('contact-toggle');
         let bubbleOpen = false;
+        toggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
+        document.addEventListener('click', (e) => { if (bubbleOpen && !bubble.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); } });
 
-        toggle.addEventListener('click', () => {
-            bubbleOpen = !bubbleOpen;
-            bubble.classList.toggle('open', bubbleOpen);
-        });
-
-        // Close bubble when tapping outside
-        document.addEventListener('click', (e) => {
-            if (bubbleOpen && !bubble.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)) {
-                bubbleOpen = false;
-                bubble.classList.remove('open');
-            }
-        });
-
-        initMenu();
-        initScrollSpy();
+        if (window.netlifyIdentity) {
+            window.netlifyIdentity.on("init", user => { if (!user) { window.netlifyIdentity.on("login", () => { document.location.href = "/admin/"; }); } });
+        }
     </script>
-    <script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {
-      if (!user) {
-        window.netlifyIdentity.on("login", () => {
-          document.location.href = "/admin/";
-        });
-      }
-    });
-  }
-</script>
 </body>
 </html>
