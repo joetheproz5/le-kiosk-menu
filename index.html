@@ -45,6 +45,14 @@
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
         .cart-footer { flex-shrink: 0; }
 
+
+        /* CART ADDON PICKER */
+        .cart-addon-row { padding: 4px 0 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .cart-addon-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #a16207; margin-bottom: 5px; }
+        .cart-addon-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+        .cart-addon-chip { padding: 3px 9px; border-radius: 20px; border: 1.5px solid #3d1f00; background: #2a1400; color: #fcd34d; font-size: 10px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; }
+        .cart-addon-chip:hover { background: #3d1f00; border-color: #a16207; }
+        .cart-addon-chip.selected { background: #f59e0b; border-color: #f59e0b; color: #1c0f00; }
         /* ORDER MODE BUTTON */
         #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
 
@@ -273,6 +281,35 @@
 
         const DELIVERY_FEES = { inside: 0.50, outside: 1.50 };
 
+        // addon selections: itemKey -> { label, price (num) }
+        let addonSelections = {};
+
+        // Which category keys trigger which addon type
+        const SWEET_ADDON_CATS  = ['desserts'];
+        const SAVORY_ADDON_CATS = ['sandwiches', 'appetizers', 'Burgers', 'sajj'];
+
+        // Loaded addon groups from menu.json — populated after load
+        let sweetAddonGroups  = [];
+        let savoryAddonGroups = [];
+
+        function categoryAddonType(catKey) {
+            const k = catKey.toLowerCase();
+            if (SWEET_ADDON_CATS.some(c => k.includes(c.toLowerCase())))  return 'sweet';
+            if (SAVORY_ADDON_CATS.some(c => k.toLowerCase() === c.toLowerCase())) return 'savory';
+            return null;
+        }
+
+        function selectCartAddon(itemKey, label, price) {
+            // Toggle off if same already selected
+            if (addonSelections[itemKey] && addonSelections[itemKey].label === label) {
+                delete addonSelections[itemKey];
+            } else {
+                addonSelections[itemKey] = { label, price };
+            }
+            renderCartPanel();
+        }
+
+
         function isOpen() {
             if (TESTING_MODE) return true;
             const now = new Date();
@@ -299,6 +336,7 @@
                 btn.classList.remove('active');
                 btn.innerHTML = '🛒 Order';
                 cart = {};
+                addonSelections = {};
                 document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
                 document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
                 updateCartBadge();
@@ -358,7 +396,7 @@
             if (!entries.length) { closeCart(); return; }
             let totalNum = 0, html = '';
             entries.forEach(([key, qty]) => {
-                const [, name, price] = key.split('|');
+                const [catKey, name, price] = key.split('|');
                 const priceNum = parseFloat(price.replace('$','')) || 0;
                 const lineTotal = priceNum * qty;
                 totalNum += lineTotal;
@@ -366,6 +404,26 @@
                     <div><div class="cart-item-name">${name}</div><div class="cart-item-qty">x${qty} @ ${price}</div></div>
                     <div class="cart-item-price">$${lineTotal.toFixed(2)}</div>
                 </div>`;
+                // Addon picker for qualifying categories
+                const addonType = categoryAddonType(catKey);
+                if (addonType) {
+                    const groups = addonType === 'sweet' ? sweetAddonGroups : savoryAddonGroups;
+                    const sel = addonSelections[key];
+                    if (sel) totalNum += sel.price;
+                    if (groups.length) {
+                        const label = addonType === 'sweet' ? '🍫 Add a sweet extra' : '🧀 Add a savory extra';
+                        html += `<div class="cart-addon-row">
+                            <div class="cart-addon-label">${label}</div>
+                            <div class="cart-addon-chips">`;
+                        groups.forEach(grp => {
+                            const chipSel = sel && sel.label === grp.label;
+                            html += `<button class="cart-addon-chip${chipSel ? ' selected' : ''}"
+                                onclick="selectCartAddon('${key.replace(/'/g,"\\'")}','${grp.label.replace(/'/g,"\\'")}',${grp.priceNum})"
+                            >${grp.emoji} ${grp.label} <span style="opacity:.7">${grp.price}</span></button>`;
+                        });
+                        html += `</div></div>`;
+                    }
+                }
             });
             container.innerHTML = html;
             document.getElementById('cart-total').textContent = '$' + totalNum.toFixed(2);
@@ -452,6 +510,14 @@
                     <div><span class="text-amber-950 text-sm font-semibold">${itemName}</span><span class="text-amber-600 text-xs font-bold ml-2">x${qty}</span></div>
                     <span class="text-amber-700 text-sm font-bold">$${lineTotal.toFixed(2)}</span>
                 </div>`;
+                const addonSel = addonSelections[key];
+                if (addonSel) {
+                    itemsTotal += addonSel.price;
+                    listHtml += `<div class="flex justify-between items-center py-1 pl-3 border-b border-amber-100">
+                        <span class="text-amber-700 text-xs font-semibold">↳ ${addonSel.label}</span>
+                        <span class="text-amber-600 text-xs font-bold">+$${addonSel.price.toFixed(2)}</span>
+                    </div>`;
+                }
             });
 
             const deliveryFee = getDeliveryFee();
@@ -505,6 +571,11 @@
                 const lineTotal = priceNum * qty;
                 itemsTotal += lineTotal;
                 msg += `• ${itemName} x${qty} — $${lineTotal.toFixed(2)}\n`;
+                const addonSel = addonSelections[key];
+                if (addonSel) {
+                    itemsTotal += addonSel.price;
+                    msg += `  ↳ + ${addonSel.label} — $${addonSel.price.toFixed(2)}\n`;
+                }
             });
 
             const deliveryFee = getDeliveryFee();
@@ -635,7 +706,23 @@
         });
 
         // Boot
-        loadMenu().then(data => { if (data) { initMenu(data); initScrollSpy(data); } });
+        loadMenu().then(data => {
+            if (data) {
+                initMenu(data);
+                initScrollSpy(data);
+                // Extract addon groups
+                data.forEach(cat => {
+                    if (cat.type !== 'addons') return;
+                    const k = (cat.key || '').toLowerCase();
+                    const groups = (cat.addonGroups || []).map(g => ({
+                        ...g,
+                        priceNum: parseFloat((g.price || '0').replace('$','')) || 0
+                    }));
+                    if (k.includes('sweet'))  sweetAddonGroups  = groups;
+                    if (k.includes('savory')) savoryAddonGroups = groups;
+                });
+            }
+        });
     </script>
 </body>
 </html>
