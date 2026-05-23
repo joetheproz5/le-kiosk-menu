@@ -1,1 +1,63 @@
 
+# ─────────────────────────────────────────────────────────────────
+#  Le Kiosk — Daily Menu Backup
+#
+#  Runs every day at 2:00 AM UTC (5 AM Beirut time in summer).
+#  Copies menu.json → backups/menu-YYYY-MM-DD.json
+#  Keeps the last 30 days of backups, deletes older ones automatically.
+#
+#  Setup (one time only):
+#    1. In your repo go to Settings → Actions → General
+#       → set "Workflow permissions" to "Read and write permissions"
+#    2. Commit this file to: .github/workflows/backup-menu.yml
+#    That's it. No secrets needed — the built-in GITHUB_TOKEN is used.
+# ─────────────────────────────────────────────────────────────────
+
+name: Daily Menu Backup
+
+on:
+  schedule:
+    # 02:00 UTC every day = ~05:00 Beirut time (UTC+3 in summer)
+    - cron: '0 2 * * *'
+
+  # Also lets you trigger it manually from the Actions tab anytime
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit the backup file
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so we can push
+
+      - name: Create backups folder if it doesn't exist
+        run: mkdir -p backups
+
+      - name: Copy menu.json with today's date
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          cp menu.json "backups/menu-${DATE}.json"
+          echo "DATE=${DATE}" >> $GITHUB_ENV
+
+      - name: Delete backups older than 30 days
+        run: |
+          cd backups
+          # List all backup files sorted oldest-first, keep newest 30
+          ls -1 menu-*.json 2>/dev/null | sort | head -n -30 | xargs -r rm --
+          echo "Cleanup done. Remaining backups:"
+          ls -1 menu-*.json 2>/dev/null | sort
+
+      - name: Commit and push backup
+        run: |
+          git config user.name  "Le Kiosk Backup Bot"
+          git config user.email "backup-bot@lekiosk.store"
+          git add backups/
+          # Only commit if there's actually something new
+          git diff --cached --quiet && echo "No changes to backup" && exit 0
+          git commit -m "📦 Daily backup: menu-${{ env.DATE }}.json"
+          git push
