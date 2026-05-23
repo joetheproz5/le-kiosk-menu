@@ -679,12 +679,10 @@ function collectAll() {
         price: v('i-price-'+si+'-'+ii),
         desc:  v('i-desc-' +si+'-'+ii)
       };
-      // Save flavors if the item has them OR if the flavors input field exists in DOM
-      const flavorsEl = document.getElementById('i-flavors-'+si+'-'+ii);
-      if(item.flavors !== undefined || flavorsEl){
-        updated.flavors = (v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
-        if(updated.flavors.length === 0) delete updated.flavors;
-      }
+      // Always save flavors — field is shown on every item
+      const _pills = (v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
+      if(_pills.length > 0) updated.flavors = _pills;
+      else delete updated.flavors;
       return updated;
     });
   }
@@ -744,10 +742,7 @@ function renderEditor() {
 function renderSection(sec,si){
   const isAddon   = sec.type==='addons';
   const hasBanner = sec.bottomBanner !== undefined;
-  // Auto-detect: if any item already has a flavors array, mark the section
-  if(!isAddon && !sec._hasFlav && (sec.items||[]).some(item => item.flavors !== undefined)){
-    sec._hasFlav = true;
-  }
+
   let body = '';
   if(isAddon){
     body = (sec.addonGroups||[]).map((grp,gi)=>renderAddon(grp,si,gi)).join('');
@@ -757,7 +752,7 @@ function renderSection(sec,si){
     body += `<div class="add-item-footer"><button class="btn btn-add btn-sm" onclick="addItem(${si})">＋ Add Item</button></div>`;
     if(hasBanner) body += `<div class="banner-field"><div class="field-label">🔖 Bottom Banner</div><input class="field-input" type="text" id="banner-${si}" value="${esc(sec.bottomBanner)}" oninput="markUnsaved()"></div>`;
   }
-  const featBar = isAddon ? '' : `<div class="type-toggle"><span class="type-toggle-label">Features:</span><div class="features-wrap"><button class="feat-btn${hasBanner?' active':''}" onclick="toggleFeature(${si},'banner')">📢 Banner</button><button class="feat-btn${sec._hasFlav?' active':''}" onclick="toggleFeature(${si},'flavors')">🏷 Flavors</button></div></div>`;
+  const featBar = isAddon ? '' : `<div class="type-toggle"><span class="type-toggle-label">Features:</span><div class="features-wrap"><button class="feat-btn${hasBanner?' active':''}" onclick="toggleFeature(${si},'banner')">📢 Banner</button></div></div>`;
   const typeToggle = `<div class="type-toggle"><span class="type-toggle-label">Type:</span><button class="type-btn${!isAddon?' active':''}" onclick="setSectionType(${si},'regular')">Regular Items</button><button class="type-btn${isAddon?' active':''}" onclick="setSectionType(${si},'addons')">Add-ons</button></div>`;
   return `<div class="section-block">
     <div class="section-header">
@@ -782,8 +777,7 @@ function renderSection(sec,si){
 function renderItem(item,si,ii){
   const imgSrc = item.image ? `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}?v=${Date.now()}` : '';
   const sec = menuData[si];
-  // Show flavors if section has flavors enabled OR this specific item already has them
-  const showFlavors = (sec && sec._hasFlav) || item.flavors !== undefined;
+  const showFlavors = true; // always show pills field on every item
   const dropZone=`<div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
     ${item.image
       ? `<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''"><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`
@@ -793,7 +787,7 @@ function renderItem(item,si,ii){
   </div>
   <input type="file" class="img-upload-input" id="file-${si}-${ii}" accept="image/*" onchange="handleImageUpload(${si},${ii},this)">
   <div class="img-path" id="img-path-${si}-${ii}">${item.image||''}</div>`;
-  const flavorsField = showFlavors ? `<div>
+  const flavorsField = `<div>
     <div class="field-label">🏷 Pills / Options <span style="font-weight:400;opacity:.7;text-transform:none">(comma-separated, e.g. Double Apple, Lemon &amp; Mint)</span></div>
     <input class="field-input" type="text" id="i-flavors-${si}-${ii}"
       value="${esc((item.flavors||[]).join(', '))}"
@@ -802,7 +796,7 @@ function renderItem(item,si,ii){
     <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px" id="pills-preview-${si}-${ii}">
       ${(item.flavors||[]).map(f=>`<span style="background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('')}
     </div>
-  </div>` : '';
+  </div>`;
   return `<div class="item-card" id="item-card-${si}-${ii}">
     <div>${dropZone}</div>
     <div class="item-fields">
