@@ -42,7 +42,6 @@
 
         /* ORDER MODE BUTTON */
         #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
-        #order-mode-btn.locked { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
 
         /* CART BADGE */
         #cart-badge { display: none; position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; align-items: center; justify-content: center; }
@@ -58,10 +57,6 @@
         .name-input { width: 100%; padding: 12px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; margin-top: 8px; }
         .name-input:focus { border-color: #f59e0b; }
         .name-input.error { border-color: #ef4444; background: #fef2f2; }
-
-        /* CLOSED BANNER */
-        #closed-banner { display: none; }
-        #closed-banner.show { display: block; }
     </style>
 </head>
 <body class="pb-40">
@@ -77,10 +72,8 @@
             <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
             <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">📍 Wadi Chahrour</a>
         </div>
-        <!-- Closed banner -->
-        <div id="closed-banner" class="mt-3 bg-gray-900 text-gray-300 text-xs font-semibold px-4 py-2 rounded-full inline-block">
-            🔒 Orders open 6 PM – 12 AM
-        </div>
+        <!-- CLOSED BANNER: re-enable by removing the "hidden" class and setting TESTING_MODE = false -->
+        <!-- <div id="closed-banner" class="mt-3 bg-gray-900 text-gray-300 text-xs font-semibold px-4 py-2 rounded-full inline-block">🔒 Orders open 6 PM – 12 AM</div> -->
     </header>
 
     <nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto"></nav>
@@ -192,7 +185,7 @@
             </div>
             <div class="flex items-center gap-2">
                 <div class="relative">
-                    <button id="order-mode-btn" onclick="handleOrderBtn()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
+                    <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
                         🛒 Order
                     </button>
                     <span id="cart-badge">0</span>
@@ -205,6 +198,11 @@
     </div>
 
     <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // TESTING MODE — set to false to re-enable the time lock
+        const TESTING_MODE = true;
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
         const PILL_COLORS = {
             amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
             red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
@@ -216,41 +214,22 @@
             dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
         };
 
-        // ── TIME LOCK ─────────────────────────────────────────────────────────
-        // Lebanon is UTC+3. Orders only allowed 18:00–00:00 Lebanon time.
         function isOpen() {
+            if (TESTING_MODE) return true; // bypass time lock during testing
             const now = new Date();
-            // Get Lebanon local hour (UTC+3)
-            const utcHour = now.getUTCHours();
-            const utcMin  = now.getUTCMinutes();
-            const lbMinutes = (utcHour * 60 + utcMin + 180) % (24 * 60); // UTC+3
-            const lbHour = Math.floor(lbMinutes / 60);
-            return lbHour >= 18; // 6 PM to midnight (00:00 = 0 which is < 18, so locked)
+            const lbMinutes = (now.getUTCHours() * 60 + now.getUTCMinutes() + 180) % (24 * 60);
+            return Math.floor(lbMinutes / 60) >= 18;
         }
 
-        function initTimeLock() {
-            const btn = document.getElementById('order-mode-btn');
-            const banner = document.getElementById('closed-banner');
-            if (!isOpen()) {
-                btn.classList.add('locked');
-                btn.title = 'Orders open 6 PM – 12 AM';
-                banner.classList.add('show');
-            }
-        }
-
-        function handleOrderBtn() {
-            if (!isOpen()) {
-                alert('⏰ Orders are only available between 6 PM and 12 AM.\n\nCome back later!');
-                return;
-            }
-            toggleOrderMode();
-        }
-
-        // ── ORDER STATE ───────────────────────────────────────────────────────
+        // ── ORDER STATE ──────────────────────────────────────────────
         let orderMode = false;
         let cart = {};
 
         function toggleOrderMode() {
+            if (!isOpen()) {
+                alert('⏰ Orders are only available between 6 PM and 12 AM.\n\nCome back later!');
+                return;
+            }
             orderMode = !orderMode;
             document.body.classList.toggle('order-mode', orderMode);
             const btn = document.getElementById('order-mode-btn');
@@ -275,12 +254,8 @@
             const card = document.getElementById('card-' + elId);
             if (card) card.classList.toggle('has-qty', newQty > 0);
             updateCartBadge();
-            if (Object.values(cart).some(v => v > 0)) {
-                renderCartPanel();
-                openCart();
-            } else {
-                closeCart();
-            }
+            if (Object.values(cart).some(v => v > 0)) { renderCartPanel(); openCart(); }
+            else closeCart();
         }
 
         function updateCartBadge() {
@@ -298,8 +273,7 @@
             const container = document.getElementById('cart-items');
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
             if (!entries.length) { closeCart(); return; }
-            let totalNum = 0;
-            let html = '';
+            let totalNum = 0, html = '';
             entries.forEach(([key, qty]) => {
                 const [, name, price] = key.split('|');
                 const priceNum = parseFloat(price.replace('$','')) || 0;
@@ -314,7 +288,7 @@
             document.getElementById('cart-total').textContent = '$' + totalNum.toFixed(2);
         }
 
-        // ── STEP 1: NAME MODAL ────────────────────────────────────────────────
+        // ── NAME MODAL ───────────────────────────────────────────────
         function openCheckoutModal() {
             document.getElementById('name-modal').classList.add('show');
             document.getElementById('customer-name').focus();
@@ -324,7 +298,6 @@
             document.getElementById('name-error').classList.add('hidden');
             document.getElementById('customer-name').classList.remove('error');
         }
-
         function proceedToConfirm() {
             const name = document.getElementById('customer-name').value.trim();
             if (!name) {
@@ -338,22 +311,18 @@
         }
         document.getElementById('customer-name').addEventListener('keydown', e => { if (e.key === 'Enter') proceedToConfirm(); });
 
-        // ── STEP 2: CONFIRM MODAL ─────────────────────────────────────────────
+        // ── CONFIRM MODAL ────────────────────────────────────────────
         function openConfirmModal(name) {
             const table = document.getElementById('customer-table').value.trim();
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
-            let total = 0;
-            let listHtml = '';
+            let total = 0, listHtml = '';
             entries.forEach(([key, qty]) => {
                 const [, itemName, price] = key.split('|');
                 const priceNum = parseFloat(price.replace('$','')) || 0;
                 const lineTotal = priceNum * qty;
                 total += lineTotal;
                 listHtml += `<div class="flex justify-between items-center py-1.5 border-b border-amber-200 last:border-0">
-                    <div>
-                        <span class="text-amber-950 text-sm font-semibold">${itemName}</span>
-                        <span class="text-amber-600 text-xs font-bold ml-2">x${qty}</span>
-                    </div>
+                    <div><span class="text-amber-950 text-sm font-semibold">${itemName}</span><span class="text-amber-600 text-xs font-bold ml-2">x${qty}</span></div>
                     <span class="text-amber-700 text-sm font-bold">$${lineTotal.toFixed(2)}</span>
                 </div>`;
             });
@@ -365,26 +334,20 @@
         }
         function closeConfirmModal() {
             document.getElementById('confirm-modal').classList.remove('show');
-            // Reopen name modal so they can go back
             document.getElementById('name-modal').classList.add('show');
         }
 
-        // ── SEND TO WHATSAPP ──────────────────────────────────────────────────
+        // ── SEND TO WHATSAPP ─────────────────────────────────────────
         function sendWhatsAppOrder() {
             const name  = document.getElementById('customer-name').value.trim();
             const table = document.getElementById('customer-table').value.trim();
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
             if (!entries.length) return;
-
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-            let msg = '🛒 *New Order — Le Kiosk*\n';
-            msg += '━━━━━━━━━━━━━━━━━━\n';
+            const timeStr = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+            let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
             msg += `👤 *Name:* ${name}\n`;
             if (table) msg += `📍 *Table/Spot:* ${table}\n`;
-            msg += `🕐 *Time:* ${timeStr}\n`;
-            msg += '━━━━━━━━━━━━━━━━━━\n';
+            msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
             let total = 0;
             entries.forEach(([key, qty]) => {
                 const [, itemName, price] = key.split('|');
@@ -393,15 +356,12 @@
                 total += lineTotal;
                 msg += `• ${itemName} x${qty} — $${lineTotal.toFixed(2)}\n`;
             });
-            msg += '━━━━━━━━━━━━━━━━━━\n';
-            msg += `💰 *Total: $${total.toFixed(2)}*\n`;
-            msg += '\nPlease confirm my order 🙏';
-
+            msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${total.toFixed(2)}*\n\nPlease confirm my order 🙏`;
             window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
             document.getElementById('confirm-modal').classList.remove('show');
         }
 
-        // ── RENDER PILLS ──────────────────────────────────────────────────────
+        // ── RENDER PILLS ─────────────────────────────────────────────
         function renderPills(item) {
             if (!item.flavors || !item.flavors.length) return '';
             const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
@@ -411,7 +371,7 @@
                 ).join('') + '</div>';
         }
 
-        // ── FETCH MENU ────────────────────────────────────────────────────────
+        // ── FETCH MENU ───────────────────────────────────────────────
         async function loadMenu() {
             try {
                 const res = await fetch('menu.json?v=' + Date.now());
@@ -448,7 +408,6 @@
             nav.innerHTML = menuData.map((c, i) =>
                 `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
             ).join('');
-
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
             menuData.forEach(category => {
@@ -519,7 +478,6 @@
         });
 
         // Boot
-        initTimeLock();
         loadMenu().then(data => { if (data) { initMenu(data); initScrollSpy(data); } });
     </script>
 </body>
