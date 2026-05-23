@@ -119,15 +119,17 @@ body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient
 .img-drop-text-overlay{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--white)}
 .img-upload-input{display:none}
 .img-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--a500);transition:width .3s;border-radius:0 0 8px 8px}
+
+/* IMAGE PATH DISPLAY */
+.img-path{font-size:10px;color:var(--g400);margin-top:3px;word-break:break-all;line-height:1.3}
+
+/* ITEM FIELDS */
 .item-fields{display:flex;flex-direction:column;gap:8px}
 .field-row{display:grid;grid-template-columns:1fr 110px;gap:8px}
 .field-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a700);margin-bottom:3px}
 .field-input{width:100%;padding:8px 10px;border:1.5px solid var(--a100);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--a950);background:var(--a50);outline:none;transition:border-color .15s,background .15s}
 .field-input:focus{border-color:var(--a400);background:var(--white)}
 textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
-
-/* IMAGE PATH DISPLAY */
-.img-path{font-size:10px;color:var(--g400);margin-top:3px;word-break:break-all;line-height:1.3}
 
 /* ADDON CARD */
 .addon-card{border-bottom:1px solid var(--a100);padding:16px 20px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}
@@ -236,7 +238,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
   </header>
 
   <div id="setup-banner">
-    <p><strong>GitHub Token</strong> — needed to save. Create at github.com/settings/tokens → Fine-grained → <em>Contents: read & write</em> for this repo only.</p>
+    <p><strong>GitHub Token</strong> — needed to save. Create at github.com/settings/tokens → Fine-grained → <em>Contents: read &amp; write</em> for this repo only.</p>
     <div class="token-input-wrap">
       <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
       <button class="btn-token" onclick="saveToken()">Save</button>
@@ -373,11 +375,9 @@ async function uploadImage(file, onProgress){
     const reader=new FileReader();
     reader.onload=async(e)=>{
       const b64=e.target.result.split(',')[1];
-      const ext=file.name.split('.').pop().toLowerCase();
       const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase();
       const path=IMG_FOLDER+'/'+safe;
       if(onProgress) onProgress(30);
-      // Check if file exists (to get SHA for overwrite)
       let existingSha=null;
       try{
         const chk=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{
@@ -403,40 +403,48 @@ async function uploadImage(file, onProgress){
 }
 
 // ══════════════════════════════════════
-// COLLECT FORM → menuData
+// COLLECT FORM → menuData  ← BUG FIX
+// Only reads the active tab's fields from the DOM.
+// Previously looped over ALL sections, but only the
+// active tab is rendered, so other tabs got wiped to "".
 // ══════════════════════════════════════
 function collectAll(){
-  menuData.forEach((sec,si)=>{
-    const titleEl=document.getElementById('sec-title-'+si);
-    const keyEl=document.getElementById('sec-key-'+si);
-    if(titleEl) sec.title=titleEl.value;
-    if(keyEl) sec.key=keyEl.value;
+  const si  = activeTab;
+  const sec = menuData[si];
+  if(!sec) return;
 
-    if(sec.type==='addons'){
-      sec.addonGroups=(sec.addonGroups||[]).map((grp,gi)=>({
-        ...grp,
-        emoji: v('ag-emoji-'+si+'-'+gi)||grp.emoji,
-        label: v('ag-label-'+si+'-'+gi),
-        price: v('ag-price-'+si+'-'+gi),
-        note:  v('ag-note-'+si+'-'+gi),
-        options:(v('ag-opts-'+si+'-'+gi)||'').split(',').map(s=>s.trim()).filter(Boolean)
-      }));
-    } else {
-      if(sec.bottomBanner!==undefined) sec.bottomBanner=v('banner-'+si)||'';
-      sec.items=(sec.items||[]).map((item,ii)=>{
-        const updated={...item,
-          name:  v('i-name-'+si+'-'+ii),
-          price: v('i-price-'+si+'-'+ii),
-          desc:  v('i-desc-'+si+'-'+ii)
-        };
-        if(item.flavors!==undefined){
-          updated.flavors=(v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
-        }
-        return updated;
-      });
-    }
-  });
+  const titleEl = document.getElementById('sec-title-' + si);
+  const keyEl   = document.getElementById('sec-key-'   + si);
+  if(titleEl) sec.title = titleEl.value;
+  if(keyEl)   sec.key   = keyEl.value;
+
+  if(sec.type === 'addons'){
+    sec.addonGroups = (sec.addonGroups || []).map((grp, gi) => ({
+      ...grp,
+      emoji:   v('ag-emoji-' + si + '-' + gi) || grp.emoji,
+      label:   v('ag-label-' + si + '-' + gi),
+      price:   v('ag-price-' + si + '-' + gi),
+      note:    v('ag-note-'  + si + '-' + gi),
+      options: (v('ag-opts-' + si + '-' + gi) || '').split(',').map(s => s.trim()).filter(Boolean)
+    }));
+  } else {
+    if(sec.bottomBanner !== undefined) sec.bottomBanner = v('banner-' + si) || '';
+    sec.items = (sec.items || []).map((item, ii) => {
+      const updated = {
+        ...item,   // ← preserves image path and any other fields not in the form
+        name:  v('i-name-'  + si + '-' + ii),
+        price: v('i-price-' + si + '-' + ii),
+        desc:  v('i-desc-'  + si + '-' + ii)
+      };
+      if(item.flavors !== undefined){
+        updated.flavors = (v('i-flavors-' + si + '-' + ii) || '')
+          .split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return updated;
+    });
+  }
 }
+
 function v(id){ const el=document.getElementById(id); return el?el.value:''; }
 
 // ══════════════════════════════════════
@@ -476,7 +484,6 @@ function renderEditor(){
 // ══════════════════════════════════════
 function renderSection(sec,si){
   const isAddon=sec.type==='addons';
-  const hasFlav=!!sec._hasFlav;
   const hasBanner=sec.bottomBanner!==undefined;
 
   let body='';
@@ -498,7 +505,6 @@ function renderSection(sec,si){
     }
   }
 
-  // Feature toggles for non-addon sections
   const featBar = isAddon ? '' : `
     <div class="type-toggle">
       <span class="type-toggle-label">Features:</span>
@@ -548,9 +554,10 @@ function renderItem(item,si,ii){
 
   const dropZone=`
     <div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
-      ${item.image?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''">
-        <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`
-      :`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
+      ${item.image
+        ?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''">
+          <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`
+        :`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
       <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>
     </div>
     <input type="file" class="img-upload-input" id="file-${si}-${ii}" accept="image/*" onchange="handleImageUpload(${si},${ii},this)">
@@ -702,12 +709,10 @@ async function handleImageUpload(si,ii,input){
     const path=await uploadImage(file,(pct)=>{
       if(progBar) progBar.style.width=pct+'%';
     });
-    // Update menuData and UI
     collectAll();
     menuData[si].items[ii].image=path;
     markUnsaved();
 
-    // Update the drop zone image preview
     const rawUrl=`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}?v=${Date.now()}`;
     dropZone.classList.add('has-img');
     dropZone.innerHTML=`<img src="${rawUrl}" alt="" id="drop-img-${si}-${ii}">
@@ -779,6 +784,7 @@ document.getElementById('modal-overlay').addEventListener('click',function(e){
 function markUnsaved(){
   hasUnsaved=true;
   document.getElementById('unsaved-indicator').style.display='inline';
+  document.getElementById('save-btn').disabled=!getToken();
 }
 function markSaved(){
   hasUnsaved=false;
