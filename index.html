@@ -17,8 +17,7 @@
         #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
 
-        /* ── ORDER MODE ── */
-        .order-bar { transition: all 0.3s ease; }
+        /* ORDER MODE */
         .qty-control { display: none; align-items: center; gap: 0; margin-top: 8px; }
         .order-mode .qty-control { display: flex; }
         .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
@@ -30,24 +29,39 @@
         .item-card-wrap { transition: box-shadow 0.2s; }
         .order-mode .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
 
-        /* ── ORDER CART PANEL ── */
-        #cart-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 28rem; z-index: 60; transition: transform 0.35s cubic-bezier(.4,0,.2,1); padding: 0 16px 16px; }
+        /* CART PANEL */
+        #cart-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 28rem; z-index: 60; transition: transform 0.35s cubic-bezier(.4,0,.2,1); padding: 0 16px 90px; }
         #cart-panel.open { transform: translateX(-50%) translateY(0); }
         .cart-inner { background: #1c0f00; border-radius: 20px; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.25); border: 1px solid #3d1f00; }
         .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
         .cart-row:last-child { border-bottom: none; }
         .cart-item-name { font-size: 13px; font-weight: 600; color: #fef3c7; }
-        .cart-item-qty  { font-size: 11px; color: #fbbf24; font-weight: 700; }
+        .cart-item-qty { font-size: 11px; color: #fbbf24; font-weight: 700; }
         .cart-item-price { font-size: 13px; font-weight: 700; color: #fbbf24; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); }
 
-        /* ── ORDER MODE TOGGLE BTN ── */
-        #order-mode-btn { transition: all 0.2s; }
+        /* ORDER MODE BUTTON */
         #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
+        #order-mode-btn.locked { background: #4b5563; color: #9ca3af; cursor: not-allowed; }
 
-        /* ── CART BADGE ── */
+        /* CART BADGE */
         #cart-badge { display: none; position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; align-items: center; justify-content: center; }
         #cart-badge.show { display: flex; }
+
+        /* MODAL OVERLAY */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: flex-end; justify-content: center; padding: 16px; padding-bottom: 32px; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: #fff; border-radius: 24px; padding: 24px; width: 100%; max-width: 28rem; box-shadow: 0 -4px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* NAME INPUT */
+        .name-input { width: 100%; padding: 12px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; margin-top: 8px; }
+        .name-input:focus { border-color: #f59e0b; }
+        .name-input.error { border-color: #ef4444; background: #fef2f2; }
+
+        /* CLOSED BANNER */
+        #closed-banner { display: none; }
+        #closed-banner.show { display: block; }
     </style>
 </head>
 <body class="pb-40">
@@ -62,6 +76,10 @@
         <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-semibold">
             <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
             <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">📍 Wadi Chahrour</a>
+        </div>
+        <!-- Closed banner -->
+        <div id="closed-banner" class="mt-3 bg-gray-900 text-gray-300 text-xs font-semibold px-4 py-2 rounded-full inline-block">
+            🔒 Orders open 6 PM – 12 AM
         </div>
     </header>
 
@@ -95,7 +113,7 @@
         </div>
     </section>
 
-    <!-- ── CART SLIDE-UP PANEL ── -->
+    <!-- ── CART PANEL ── -->
     <div id="cart-panel">
         <div class="cart-inner">
             <div class="flex items-center justify-between mb-3">
@@ -107,16 +125,59 @@
                 <span class="text-amber-300 text-xs font-bold uppercase tracking-wider">Estimated Total</span>
                 <span class="text-amber-400 font-bold text-base" id="cart-total">$0.00</span>
             </div>
-            <button onclick="sendWhatsAppOrder()" class="mt-3 w-full bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition shadow-md">
+            <button onclick="openCheckoutModal()" class="mt-3 w-full bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                Send Order on WhatsApp
+                Review & Send Order
             </button>
+        </div>
+    </div>
+
+    <!-- ── STEP 1: NAME + TABLE MODAL ── -->
+    <div class="modal-overlay" id="name-modal">
+        <div class="modal-box">
+            <div class="text-2xl mb-1">👤</div>
+            <h3 class="brand-heading text-xl font-bold text-amber-950 mb-1">Who's ordering?</h3>
+            <p class="text-gray-400 text-xs mb-3">We need your name and table so we bring it to the right person.</p>
+            <div>
+                <label class="text-xs font-bold uppercase tracking-wider text-amber-800">Your Name *</label>
+                <input id="customer-name" type="text" class="name-input" placeholder="e.g. Ahmad" autocomplete="off">
+            </div>
+            <div class="mt-3">
+                <label class="text-xs font-bold uppercase tracking-wider text-amber-800">Table / Spot</label>
+                <input id="customer-table" type="text" class="name-input" placeholder="e.g. Table 3, Near entrance, Takeaway…" autocomplete="off">
+            </div>
+            <p id="name-error" class="text-red-500 text-xs font-semibold mt-2 hidden">Please enter your name to continue.</p>
+            <div class="flex gap-3 mt-4">
+                <button onclick="closeNameModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm py-3 rounded-xl transition">Cancel</button>
+                <button onclick="proceedToConfirm()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition">Continue →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── STEP 2: CONFIRM ORDER MODAL ── -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-box">
+            <div class="text-2xl mb-1">✅</div>
+            <h3 class="brand-heading text-xl font-bold text-amber-950 mb-1">Confirm your order</h3>
+            <p class="text-gray-400 text-xs mb-3" id="confirm-for-text"></p>
+            <div id="confirm-order-list" class="bg-amber-50 rounded-xl p-3 mb-3 max-h-48 overflow-y-auto"></div>
+            <div class="flex justify-between items-center bg-amber-100 rounded-xl px-4 py-2 mb-4">
+                <span class="text-amber-900 text-xs font-bold uppercase tracking-wider">Estimated Total</span>
+                <span class="text-amber-700 font-bold text-base" id="confirm-total"></span>
+            </div>
+            <p class="text-gray-400 text-[11px] text-center mb-3">By confirming, this order will be sent to us on WhatsApp. We'll confirm it shortly.</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm py-3 rounded-xl transition">← Edit</button>
+                <button onclick="sendWhatsAppOrder()" class="flex-1 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Send Order
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- ── BOTTOM BAR ── -->
     <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
-        <!-- Contact bubble -->
         <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
             <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
             <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
@@ -124,16 +185,14 @@
                 <span>WhatsApp</span>
             </a>
         </div>
-        <!-- Main bar -->
         <div class="bg-amber-950 text-amber-50 rounded-2xl p-3 shadow-xl border border-amber-900 flex items-center justify-between gap-2">
             <div>
                 <span class="block text-[10px] uppercase tracking-wider text-amber-300 font-bold">Need Delivery?</span>
                 <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
             </div>
             <div class="flex items-center gap-2">
-                <!-- Order Mode Button -->
                 <div class="relative">
-                    <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
+                    <button id="order-mode-btn" onclick="handleOrderBtn()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
                         🛒 Order
                     </button>
                     <span id="cart-badge">0</span>
@@ -157,10 +216,39 @@
             dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
         };
 
+        // ── TIME LOCK ─────────────────────────────────────────────────────────
+        // Lebanon is UTC+3. Orders only allowed 18:00–00:00 Lebanon time.
+        function isOpen() {
+            const now = new Date();
+            // Get Lebanon local hour (UTC+3)
+            const utcHour = now.getUTCHours();
+            const utcMin  = now.getUTCMinutes();
+            const lbMinutes = (utcHour * 60 + utcMin + 180) % (24 * 60); // UTC+3
+            const lbHour = Math.floor(lbMinutes / 60);
+            return lbHour >= 18; // 6 PM to midnight (00:00 = 0 which is < 18, so locked)
+        }
+
+        function initTimeLock() {
+            const btn = document.getElementById('order-mode-btn');
+            const banner = document.getElementById('closed-banner');
+            if (!isOpen()) {
+                btn.classList.add('locked');
+                btn.title = 'Orders open 6 PM – 12 AM';
+                banner.classList.add('show');
+            }
+        }
+
+        function handleOrderBtn() {
+            if (!isOpen()) {
+                alert('⏰ Orders are only available between 6 PM and 12 AM.\n\nCome back later!');
+                return;
+            }
+            toggleOrderMode();
+        }
+
         // ── ORDER STATE ───────────────────────────────────────────────────────
         let orderMode = false;
-        let cart = {}; // key: "SectionName|ItemName|price", val: qty
-        let menuDataGlobal = [];
+        let cart = {};
 
         function toggleOrderMode() {
             orderMode = !orderMode;
@@ -169,9 +257,9 @@
             btn.classList.toggle('active', orderMode);
             btn.innerHTML = orderMode ? '✕ Cancel' : '🛒 Order';
             if (!orderMode) {
-                // Clear cart and close panel
                 cart = {};
                 document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
+                document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
                 updateCartBadge();
                 closeCart();
             }
@@ -184,7 +272,6 @@
             cart[itemKey] = newQty;
             const el = document.getElementById(elId);
             if (el) el.textContent = newQty;
-            // Highlight card
             const card = document.getElementById('card-' + elId);
             if (card) card.classList.toggle('has-qty', newQty > 0);
             updateCartBadge();
@@ -211,19 +298,15 @@
             const container = document.getElementById('cart-items');
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
             if (!entries.length) { closeCart(); return; }
-
             let totalNum = 0;
             let html = '';
             entries.forEach(([key, qty]) => {
                 const [, name, price] = key.split('|');
-                const priceNum = parseFloat(price.replace('$', '')) || 0;
+                const priceNum = parseFloat(price.replace('$','')) || 0;
                 const lineTotal = priceNum * qty;
                 totalNum += lineTotal;
                 html += `<div class="cart-row">
-                    <div>
-                        <div class="cart-item-name">${name}</div>
-                        <div class="cart-item-qty">x${qty} @ ${price}</div>
-                    </div>
+                    <div><div class="cart-item-name">${name}</div><div class="cart-item-qty">x${qty} @ ${price}</div></div>
                     <div class="cart-item-price">$${lineTotal.toFixed(2)}</div>
                 </div>`;
             });
@@ -231,27 +314,94 @@
             document.getElementById('cart-total').textContent = '$' + totalNum.toFixed(2);
         }
 
+        // ── STEP 1: NAME MODAL ────────────────────────────────────────────────
+        function openCheckoutModal() {
+            document.getElementById('name-modal').classList.add('show');
+            document.getElementById('customer-name').focus();
+        }
+        function closeNameModal() {
+            document.getElementById('name-modal').classList.remove('show');
+            document.getElementById('name-error').classList.add('hidden');
+            document.getElementById('customer-name').classList.remove('error');
+        }
+
+        function proceedToConfirm() {
+            const name = document.getElementById('customer-name').value.trim();
+            if (!name) {
+                document.getElementById('name-error').classList.remove('hidden');
+                document.getElementById('customer-name').classList.add('error');
+                document.getElementById('customer-name').focus();
+                return;
+            }
+            closeNameModal();
+            openConfirmModal(name);
+        }
+        document.getElementById('customer-name').addEventListener('keydown', e => { if (e.key === 'Enter') proceedToConfirm(); });
+
+        // ── STEP 2: CONFIRM MODAL ─────────────────────────────────────────────
+        function openConfirmModal(name) {
+            const table = document.getElementById('customer-table').value.trim();
+            const entries = Object.entries(cart).filter(([,v]) => v > 0);
+            let total = 0;
+            let listHtml = '';
+            entries.forEach(([key, qty]) => {
+                const [, itemName, price] = key.split('|');
+                const priceNum = parseFloat(price.replace('$','')) || 0;
+                const lineTotal = priceNum * qty;
+                total += lineTotal;
+                listHtml += `<div class="flex justify-between items-center py-1.5 border-b border-amber-200 last:border-0">
+                    <div>
+                        <span class="text-amber-950 text-sm font-semibold">${itemName}</span>
+                        <span class="text-amber-600 text-xs font-bold ml-2">x${qty}</span>
+                    </div>
+                    <span class="text-amber-700 text-sm font-bold">$${lineTotal.toFixed(2)}</span>
+                </div>`;
+            });
+            const label = table ? `${name} · ${table}` : name;
+            document.getElementById('confirm-for-text').textContent = `Order for: ${label}`;
+            document.getElementById('confirm-order-list').innerHTML = listHtml;
+            document.getElementById('confirm-total').textContent = '$' + total.toFixed(2);
+            document.getElementById('confirm-modal').classList.add('show');
+        }
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('show');
+            // Reopen name modal so they can go back
+            document.getElementById('name-modal').classList.add('show');
+        }
+
+        // ── SEND TO WHATSAPP ──────────────────────────────────────────────────
         function sendWhatsAppOrder() {
+            const name  = document.getElementById('customer-name').value.trim();
+            const table = document.getElementById('customer-table').value.trim();
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
             if (!entries.length) return;
-            let msg = '🛒 *Order from Le Kiosk*\n';
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            let msg = '🛒 *New Order — Le Kiosk*\n';
+            msg += '━━━━━━━━━━━━━━━━━━\n';
+            msg += `👤 *Name:* ${name}\n`;
+            if (table) msg += `📍 *Table/Spot:* ${table}\n`;
+            msg += `🕐 *Time:* ${timeStr}\n`;
             msg += '━━━━━━━━━━━━━━━━━━\n';
             let total = 0;
             entries.forEach(([key, qty]) => {
-                const [, name, price] = key.split('|');
-                const priceNum = parseFloat(price.replace('$', '')) || 0;
+                const [, itemName, price] = key.split('|');
+                const priceNum = parseFloat(price.replace('$','')) || 0;
                 const lineTotal = priceNum * qty;
                 total += lineTotal;
-                msg += `• ${name} x${qty} — $${lineTotal.toFixed(2)}\n`;
+                msg += `• ${itemName} x${qty} — $${lineTotal.toFixed(2)}\n`;
             });
             msg += '━━━━━━━━━━━━━━━━━━\n';
             msg += `💰 *Total: $${total.toFixed(2)}*\n`;
             msg += '\nPlease confirm my order 🙏';
-            const url = 'https://wa.me/76840244?text=' + encodeURIComponent(msg);
-            window.open(url, '_blank');
+
+            window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
+            document.getElementById('confirm-modal').classList.remove('show');
         }
 
-        // ── RENDER PILLS ─────────────────────────────────────────────────────
+        // ── RENDER PILLS ──────────────────────────────────────────────────────
         function renderPills(item) {
             if (!item.flavors || !item.flavors.length) return '';
             const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
@@ -276,7 +426,7 @@
 
         function renderAddonSection(category) {
             let html = `<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
-            category.addonGroups.forEach(group => {
+            (category.addonGroups||[]).forEach(group => {
                 html += `<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div>
                     <div class="flex-grow min-w-0">
@@ -294,26 +444,17 @@
         }
 
         function initMenu(menuData) {
-            menuDataGlobal = menuData;
-
-            // Build nav
             const nav = document.getElementById('main-nav');
             nav.innerHTML = menuData.map((c, i) =>
                 `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
             ).join('');
 
-            // Build menu
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
-
             menuData.forEach(category => {
-                if (category.type === 'addons') {
-                    container.innerHTML += renderAddonSection(category);
-                    return;
-                }
+                if (category.type === 'addons') { container.innerHTML += renderAddonSection(category); return; }
                 let html = `<section id="${category.key}" class="scroll-mt-24">
                     <h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
-
                 if (category.items && category.items.length > 0) {
                     html += `<div class="grid gap-3.5">`;
                     category.items.forEach((item, idx) => {
@@ -333,9 +474,9 @@
                                     <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
                                     ${renderPills(item)}
                                     <div class="qty-control">
-                                        <button class="qty-btn qty-minus" onclick="changeQty('${itemKey}', -1, '${qtyId}')">−</button>
+                                        <button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button>
                                         <div class="qty-num" id="${qtyId}">0</div>
-                                        <button class="qty-btn qty-plus" onclick="changeQty('${itemKey}', 1, '${qtyId}')">+</button>
+                                        <button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -343,7 +484,6 @@
                     });
                     html += `</div>`;
                 }
-
                 if (category.bottomBanner) {
                     html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
                 }
@@ -356,12 +496,12 @@
             const navLinks = document.querySelectorAll('.nav-link');
             function setActive(id) {
                 navLinks.forEach(link => {
-                    if (link.dataset.section === id) { link.classList.add('active'); link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+                    if (link.dataset.section === id) { link.classList.add('active'); link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' }); }
                     else link.classList.remove('active');
                 });
             }
             const observer = new IntersectionObserver(
-                (entries) => { entries.forEach(entry => { if (entry.isIntersecting) setActive(entry.target.id); }); },
+                entries => { entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }); },
                 { rootMargin: '-30% 0px -65% 0px', threshold: 0 }
             );
             menuData.forEach(c => { const el = document.getElementById(c.key); if (el) observer.observe(el); });
@@ -369,19 +509,18 @@
 
         // Contact bubble
         const bubble = document.getElementById('contact-bubble');
-        const toggle = document.getElementById('contact-toggle');
+        const ctoggle = document.getElementById('contact-toggle');
         let bubbleOpen = false;
-        toggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
-        document.addEventListener('click', (e) => {
-            if (bubbleOpen && !bubble.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)) {
+        ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
+        document.addEventListener('click', e => {
+            if (bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) {
                 bubbleOpen = false; bubble.classList.remove('open');
             }
         });
 
         // Boot
-        loadMenu().then(data => {
-            if (data) { initMenu(data); initScrollSpy(data); }
-        });
+        initTimeLock();
+        loadMenu().then(data => { if (data) { initMenu(data); initScrollSpy(data); } });
     </script>
 </body>
 </html>
