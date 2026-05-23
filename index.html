@@ -32,7 +32,7 @@
         /* CART PANEL — max-height capped so it never blocks the menu */
         #cart-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 28rem; z-index: 60; transition: transform 0.35s cubic-bezier(.4,0,.2,1); padding: 0 16px 90px; }
         #cart-panel.open { transform: translateX(-50%) translateY(0); }
-        .cart-inner { background: #1c0f00; border-radius: 20px; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.25); border: 1px solid #3d1f00; max-height: 46vh; display: flex; flex-direction: column; }
+        .cart-inner { background: #1c0f00; border-radius: 20px; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.25); border: 1px solid #3d1f00; max-height: 35vh; display: flex; flex-direction: column; }
         #cart-items { overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: thin; scrollbar-color: #3d1f00 transparent; }
         #cart-items::-webkit-scrollbar { width: 4px; }
         #cart-items::-webkit-scrollbar-track { background: transparent; }
@@ -130,8 +130,11 @@
     <div id="cart-panel">
         <div class="cart-inner">
             <div class="flex items-center justify-between mb-3 flex-shrink-0">
-                <span class="brand-heading text-base font-bold text-amber-100 uppercase tracking-wide">🛒 Your Order</span>
-                <button onclick="toggleCart()" class="text-amber-400 text-xs font-bold uppercase tracking-wider hover:text-amber-200 transition">Close ✕</button>
+                <span class="brand-heading text-base font-bold text-amber-100 uppercase tracking-wide">&#x1F6D2; Your Order</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleOrderMode()" class="text-red-400 text-xs font-bold uppercase tracking-wider hover:text-red-300 transition border border-red-900/50 rounded-lg px-2 py-1">&#x2715; Cancel</button>
+                    <button onclick="toggleCart()" class="text-amber-500 text-xs font-bold hover:text-amber-300 transition px-1" title="Collapse">&#x25BE;</button>
+                </div>
             </div>
             <div id="cart-items"></div>
             <div class="cart-footer">
