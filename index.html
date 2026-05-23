@@ -80,7 +80,9 @@
         <a href="#appetizers" class="nav-link active" data-section="appetizers">Appetizers</a>
         <a href="#sandwiches" class="nav-link" data-section="sandwiches">Sandwiches</a>
         <a href="#Burgers"    class="nav-link" data-section="Burgers">Burgers</a>
+        <a href="#sajj"       class="nav-link" data-section="sajj">Sajj</a>
         <a href="#desserts"   class="nav-link" data-section="desserts">Desserts</a>
+        <a href="#shisha"     class="nav-link" data-section="shisha">Shisha</a>
         <a href="#beverages"  class="nav-link" data-section="beverages">Beverages</a>
         <a href="#sweet"      class="nav-link" data-section="sweet">Sweet Add-Ons</a>
         <a href="#savory"     class="nav-link" data-section="savory">Savory Add-Ons</a>
@@ -133,7 +135,7 @@
             {
                 key: "sandwiches",
                 title: "Sandwiches",
-                banner: { text: "🚀 BOOST YOUR MEAL: Add fries + soft drink for only $3!", style: "bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold" },
+                bottomBanner: { text: "🚀 BOOST YOUR MEAL: Add fries + soft drink for only $3!" },
                 items: [
                     { name: "Crispy Sandwich", price: "$6", desc: "Golden crispy chicken, fries, pickles, fresh lettuce & mayo",                              image: "menupictures/crispysandwish.jpg" },
                     { name: "Hotdog Sandwich", price: "$6", desc: "Hotdog sausage topped with chips, ketchup, mayo, BBQ & mustard",                           image: "menupictures/hotdog.jpg" },
@@ -152,6 +154,18 @@
                 ]
             },
             {
+                key: "sajj",
+                title: "Sajj",
+                items: [
+                    { name: "Zaatar",       price: "", desc: "Freshly rolled sajj with fragrant thyme, olive oil and sesame",          image: "menupictures/sajj-zaatar.jpg" },
+                    { name: "Labneh",       price: "", desc: "Creamy strained yogurt with a drizzle of olive oil, wrapped in thin sajj",  image: "menupictures/sajj-labne.jpg" },
+                    { name: "Cheese",       price: "", desc: "Melted white cheese folded in a warm, crispy sajj wrap",                    image: "menupictures/sajj-jebne.jpg" },
+                    { name: "Keshek",       price: "", desc: "Traditional fermented wheat and yogurt spread on toasted sajj bread",       image: "menupictures/sajj-keshek.jpg" },
+                    { name: "Cheese & Ham", price: "", desc: "Melted white cheese and savory ham, grilled together in a golden sajj wrap", image: "menupictures/sajj-jebnejambon.jpg" }
+                ],
+                bottomBanner: { text: "🥗 Sahen Khodra — A fresh side plate of mixed greens $3" }
+            },
+            {
                 key: "desserts",
                 title: "Desserts",
                 items: [
@@ -160,10 +174,19 @@
                 ]
             },
             {
+                key: "shisha",
+                title: "Shisha",
+                items: [
+                    { name: "Argile",        price: "", desc: "Lebanese hookah with premium tobacco", image: "menupictures/shisha-argile.jpg", flavors: ["Double Apple", "Lemon & Mint"] },
+                    { name: "2 Rass",        price: "", desc: "Double the flavor — your shisha comes loaded with 2 heads instead of one", image: "menupictures/shisha-2rass.jpg" },
+                    { name: "Change Head",   price: "", desc: "Swap out your current head for a fresh one mid-session", image: "menupictures/shisha-te8yirrass.jpg" }
+                ]
+            },
+            {
                 key: "beverages",
                 title: "Beverages",
                 items: [
-                    { name: "Soft Drinks",   price: "$1",    desc: "Selection of your favorite carbonated sodas",          image: "menupictures/soda.jpg" },
+                    { name: "Soft Drinks", price: "$1", desc: "Selection of your favorite carbonated sodas", image: "menupictures/soda.jpg", flavors: ["Pepsi", "7Up", "Miranda"] },
                     { name: "Mineral Water", price: "$0.60", desc: "Pure bottled refreshing water",                        image: "menupictures/water.jpg" },
                     { name: "Beer",          price: "$1.5",  desc: "Crisp, refreshing, and the classic Lebanese pilsner.", image: "menupictures/beer.jpg" }
                 ]
@@ -174,7 +197,7 @@
                 type: "addons",
                 addonGroups: [
                     {
-                        emoji: "🍭",
+                        emoji: "🍫",
                         label: "Sweet Sauce",
                         price: "$2",
                         options: ["Hershey's", "Lotus", "Pink Chocolate", "Kinder", "Oreo"],
@@ -265,10 +288,14 @@
                                     <span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span>
                                 </div>
                                 <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
+                                ${item.flavors ? '<div class="flex flex-wrap gap-1 mt-2">' + item.flavors.map(f => '<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">' + f + '</span>').join('') + '</div>' : ''}
                             </div>
                         </div>`;
                     });
                     html += `</div>`;
+                }
+                if (category.bottomBanner) {
+                    html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm border border-amber-400/20">${category.bottomBanner.text}</div>`;
                 }
                 html += `</section>`;
                 container.innerHTML += html;
