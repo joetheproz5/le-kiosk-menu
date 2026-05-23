@@ -327,7 +327,16 @@ async function initAdmin(){
 
 // ══════════════════════════════════════
 // FETCH
+// Decode base64 → UTF-8 bytes → string (mirrors toBase64Unicode)
+// Plain atob() treats content as Latin-1 and corrupts emojis.
 // ══════════════════════════════════════
+function fromBase64Unicode(b64){
+  const binary = atob(b64);
+  const bytes  = new Uint8Array(binary.length);
+  for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 async function fetchMenu(){
   const url=`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`;
   const h={'Accept':'application/vnd.github.v3+json'};
@@ -336,7 +345,7 @@ async function fetchMenu(){
   if(!res.ok) throw new Error('GitHub API '+res.status);
   const data=await res.json();
   fileSha=data.sha;
-  menuData=JSON.parse(atob(data.content.replace(/\n/g,'')));
+  menuData=JSON.parse(fromBase64Unicode(data.content.replace(/\n/g,'')));
 }
 
 // ══════════════════════════════════════
