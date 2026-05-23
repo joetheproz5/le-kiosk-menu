@@ -26,7 +26,7 @@
   {
     "key": "sandwiches",
     "title": "Sandwiches",
-    "bottomBanner": "ð BOOST YOUR MEAL: Add fries + soft drink for only $3!",
+    "bottomBanner": "Ã°ÂÂÂ BOOST YOUR MEAL: Add fries + soft drink for only $3!",
     "items": [
       {
         "name": "Crispy Sandwich",
@@ -87,7 +87,7 @@
   {
     "key": "sajj",
     "title": "Sajj",
-    "bottomBanner": "ð¥ Sahen Khodra â A fresh side plate of mixed greens $3",
+    "bottomBanner": "Ã°ÂÂ¥Â Sahen Khodra Ã¢ÂÂ A fresh side plate of mixed greens $3",
     "items": [
       {
         "name": "Zaatar",
@@ -156,7 +156,7 @@
       {
         "name": "2 Rass",
         "price": "$7",
-        "desc": "Double the flavor â your shisha comes loaded with 2 heads instead of one",
+        "desc": "Double the flavor Ã¢ÂÂ your shisha comes loaded with 2 heads instead of one",
         "image": "menupictures/shisha-2rass.jpg"
       },
       {
@@ -202,7 +202,7 @@
     "type": "addons",
     "addonGroups": [
       {
-        "emoji": "ð«",
+        "emoji": "Ã°ÂÂÂ«",
         "label": "Sweet Sauce",
         "price": "$2",
         "options": [
@@ -215,7 +215,7 @@
         "note": "Pick your favorite drizzle"
       },
       {
-        "emoji": "ð",
+        "emoji": "Ã°ÂÂÂ",
         "label": "Fresh Fruit",
         "price": "$1",
         "options": [
@@ -232,7 +232,7 @@
     "type": "addons",
     "addonGroups": [
       {
-        "emoji": "ð§",
+        "emoji": "Ã°ÂÂ§Â",
         "label": "Melted Cheddar",
         "price": "$1",
         "options": [
@@ -242,13 +242,25 @@
         "note": "Warm & gooey melted cheddar"
       },
       {
-        "emoji": "ð¶ï¸",
+        "emoji": "Ã°ÂÂÂ¶Ã¯Â¸Â",
         "label": "Buffalo Sauce",
         "price": "$0.60",
         "options": [
           "Dipping cup"
         ],
         "note": "Tangy, spicy signature buffalo"
+      }
+    ]
+  },
+  {
+    "key": "test categorie",
+    "title": "test catego",
+    "items": [
+      {
+        "name": "test itewm",
+        "price": "$1",
+        "desc": "hello",
+        "image": "menupictures/whatsapp_image_2026-05-22_at_23.56.01.jpeg"
       }
     ]
   }
