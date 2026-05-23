@@ -466,18 +466,24 @@ document.getElementById('pw-input').addEventListener('keydown', e => { if(e.key=
 // ══════════════════════════════════════════════════════════════════════
 //  SESSION — auto-logout after SESSION_MS of inactivity
 // ══════════════════════════════════════════════════════════════════════
+let sessionListenersAttached = false;
+
 function startSession() {
   resetSessionTimer();
-  // Tick every 30s to update UI clock
   clearInterval(sessionTick);
   sessionTick = setInterval(tickSession, 30000);
-  // Reset timer on any user activity
-  document.addEventListener('mousemove', resetSessionTimer, {passive:true});
-  document.addEventListener('keydown',   resetSessionTimer, {passive:true});
-  document.addEventListener('click',     resetSessionTimer, {passive:true});
+  // Only attach listeners once — re-attaching multiplies calls and blows the stack
+  if (!sessionListenersAttached) {
+    document.addEventListener('mousemove', resetSessionTimer, {passive:true});
+    document.addEventListener('keydown',   resetSessionTimer, {passive:true});
+    document.addEventListener('click',     resetSessionTimer, {passive:true});
+    sessionListenersAttached = true;
+  }
 }
 
 function resetSessionTimer() {
+  // Guard: only run if actually logged in
+  if (document.getElementById('admin-screen').style.display === 'none') return;
   clearTimeout(sessionTimer);
   sessionExpiry = Date.now() + SESSION_MS;
   updateSessionBadge();
