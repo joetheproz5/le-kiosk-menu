@@ -907,8 +907,10 @@ function showLoading(msg){ document.getElementById('loading-text').textContent=m
 function hideLoading(){ document.getElementById('loading-overlay').classList.remove('show'); }
 
 // ── HELPER: generate hash for password updates (run in console) ──────
-window.hashPassword = async function(pw) {
-  const h = await hashPassword(pw);
+// Usage: getNewHash('yournewpassword')
+window.getNewHash = async function(pw) {
+  const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  const h = [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
   console.log('%cSHA-256 hash for "'+pw+'":', 'color:orange;font-weight:bold');
   console.log(h);
   console.log('%cReplace ADMIN_HASH in admin.html with the value above.', 'color:gray');
