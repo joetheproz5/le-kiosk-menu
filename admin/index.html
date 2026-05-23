@@ -3,18 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- ─── CONTENT SECURITY POLICY ────────────────────────────────────────────
-     Blocks inline script injection from XSS. Adjust src values if you add
-     more CDNs. 'unsafe-inline' on style is unavoidable without a full build
-     pipeline, but script injection is the dangerous one.
-──────────────────────────────────────────────────────────────────────────── -->
-<meta http-equiv="Content-Security-Policy"
-  content="default-src 'self';
-           script-src 'self' 'unsafe-inline';
-           style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-           font-src https://fonts.gstatic.com;
-           img-src 'self' https://raw.githubusercontent.com data:;
-           connect-src https://api.github.com;">
+<!-- NOTE: CSP is best enforced via server headers, not meta tags,
+     to avoid blocking crypto.subtle on certain origins. -->
 <title>Le Kiosk — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -304,13 +294,13 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 //    1. Open browser console and run: hashPassword('yournewpassword')
 //    2. Copy the printed hash and replace ADMIN_HASH below.
 //
-//  Current password: lekiosk2024
+//  Current password: lekiosk234567890
 //  To generate a new hash, paste in the console:
 //    crypto.subtle.digest('SHA-256', new TextEncoder().encode('yourpassword'))
 //      .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
 // ══════════════════════════════════════════════════════════════════════
-const ADMIN_HASH = '7077772d23530f4906d543ba23228c8824e3b27396b40dd055ba2a2e4dd1b4fe';
-// ^ SHA-256 of 'lekiosk2024' — replace when you change the password
+const ADMIN_HASH = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
+// ^ SHA-256 of 'lekiosk234567890' — replace when you change the password
 
 const REPO_OWNER = 'joetheproz5';
 const REPO_NAME  = 'le-kiosk-menu';
@@ -333,10 +323,14 @@ let sessionExpiry = 0;
 let sessionTick   = null;
 
 // ══════════════════════════════════════════════════════════════════════
-//  PASSWORD HASHING (Web Crypto API — no library needed)
+//  PASSWORD HASHING (Web Crypto API — requires HTTPS or localhost)
+//  Falls back gracefully if crypto.subtle is unavailable (file://).
 // ══════════════════════════════════════════════════════════════════════
 async function hashPassword(pw) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  if (!window.crypto || !window.crypto.subtle) {
+    throw new Error('HTTPS_REQUIRED');
+  }
+  const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
   return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
 }
 
@@ -413,8 +407,19 @@ async function tryLogin() {
   const pw = document.getElementById('pw-input').value;
   if (!pw) return;
 
-  const hash = await hashPassword(pw);
-  const lock  = getLockout();
+  let hash;
+  try {
+    hash = await hashPassword(pw);
+  } catch(e) {
+    const msg = e.message === 'HTTPS_REQUIRED'
+      ? 'Admin must be opened over HTTPS. Go to lekiosk.store/admin.html — not a local file.'
+      : 'Login error: ' + e.message;
+    document.getElementById('login-error').textContent = msg;
+    document.getElementById('login-error').classList.add('show');
+    return;
+  }
+
+  const lock = getLockout();
 
   if (hash === ADMIN_HASH) {
     // ✅ Correct
