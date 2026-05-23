@@ -302,6 +302,9 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 const ADMIN_HASH = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
 // ^ SHA-256 of 'lekiosk234567890' — replace when you change the password
 
+// ── Pill color presets ───────────────────────────────────────────────
+const PILL_PRESETS = [{"id": "amber", "bg": "#fef3c7", "border": "#fde68a", "text": "#92400e", "label": "Amber"}, {"id": "red", "bg": "#fee2e2", "border": "#fecaca", "text": "#991b1b", "label": "Red"}, {"id": "green", "bg": "#dcfce7", "border": "#bbf7d0", "text": "#166534", "label": "Green"}, {"id": "blue", "bg": "#dbeafe", "border": "#bfdbfe", "text": "#1e40af", "label": "Blue"}, {"id": "purple", "bg": "#ede9fe", "border": "#ddd6fe", "text": "#5b21b6", "label": "Purple"}, {"id": "pink", "bg": "#fce7f3", "border": "#fbcfe8", "text": "#9d174d", "label": "Pink"}, {"id": "gray", "bg": "#f3f4f6", "border": "#e5e7eb", "text": "#374151", "label": "Gray"}, {"id": "dark", "bg": "#1f2937", "border": "#374151", "text": "#f9fafb", "label": "Dark"}];
+
 const REPO_OWNER = 'joetheproz5';
 const REPO_NAME  = 'le-kiosk-menu';
 const MENU_PATH  = 'menu.json';
@@ -727,10 +730,12 @@ function collectAll() {
         price: v('i-price-'+si+'-'+ii),
         desc:  v('i-desc-' +si+'-'+ii)
       };
-      // Always save flavors — field is shown on every item
+      // Always save flavors and pill color
       const _pills = (v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
       if(_pills.length > 0) updated.flavors = _pills;
       else delete updated.flavors;
+      // Save pill color (stored on the item itself)
+      if(item._pillColor) updated.flavorColor = item._pillColor;
       return updated;
     });
   }
@@ -835,14 +840,27 @@ function renderItem(item,si,ii){
   </div>
   <input type="file" class="img-upload-input" id="file-${si}-${ii}" accept="image/*" onchange="handleImageUpload(${si},${ii},this)">
   <div class="img-path" id="img-path-${si}-${ii}">${item.image||''}</div>`;
-  const flavorsField = `<div>
-    <div class="field-label">🏷 Pills / Options <span style="font-weight:400;opacity:.7;text-transform:none">(comma-separated, e.g. Double Apple, Lemon &amp; Mint)</span></div>
+  const _pillColor = item.flavorColor || 'amber';
+  const _pc = PILL_PRESETS.find(p=>p.id===_pillColor) || PILL_PRESETS[0];
+  const flavorsField = `<div style="margin-top:4px">
+    <div class="field-label">🏷 Pills / Options <span style="font-weight:400;opacity:.7;text-transform:none">(comma-separated)</span></div>
     <input class="field-input" type="text" id="i-flavors-${si}-${ii}"
       value="${esc((item.flavors||[]).join(', '))}"
-      placeholder="e.g. Double Apple, Lemon &amp; Mint"
+      placeholder="Double Apple, Lemon & Mint"
       oninput="markUnsaved();updatePillsPreview(${si},${ii},this)">
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a700)">Pill Color:</span>
+      ${PILL_PRESETS.map(p=>`
+        <button type="button"
+          id="pill-color-btn-${si}-${ii}-${p.id}"
+          onclick="setPillColor(${si},${ii},'${p.id}')"
+          title="${p.label}"
+          style="width:22px;height:22px;border-radius:50%;background:${p.bg};border:2px solid ${p.id===_pillColor?p.text:p.border};cursor:pointer;transition:transform .15s;transform:${p.id===_pillColor?'scale(1.3)':'scale(1)'};flex-shrink:0"
+        ></button>`).join('')}
+      <span style="font-size:10px;color:var(--g400);font-style:italic">${_pc.label}</span>
+    </div>
     <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px" id="pills-preview-${si}-${ii}">
-      ${(item.flavors||[]).map(f=>`<span style="background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('')}
+      ${(item.flavors||[]).map(f=>`<span style="background:${_pc.bg};border:1px solid ${_pc.border};color:${_pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('')}
     </div>
   </div>`;
   return `<div class="item-card" id="item-card-${si}-${ii}">
@@ -970,10 +988,32 @@ function hideLoading(){ document.getElementById('loading-overlay').classList.rem
 function updatePillsPreview(si, ii, inputEl) {
   const preview = document.getElementById('pills-preview-' + si + '-' + ii);
   if (!preview) return;
+  const item = menuData[si] && menuData[si].items && menuData[si].items[ii];
+  const colorId = (item && item._pillColor) || 'amber';
+  const pc = PILL_PRESETS.find(p => p.id === colorId) || PILL_PRESETS[0];
   const pills = inputEl.value.split(',').map(s => s.trim()).filter(Boolean);
   preview.innerHTML = pills.map(f =>
-    `<span style="background:#fef3c7;border:1px solid #fde68a;color:#92400e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`
+    `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`
   ).join('');
+}
+
+function setPillColor(si, ii, colorId) {
+  if(!menuData[si] || !menuData[si].items || !menuData[si].items[ii]) return;
+  menuData[si].items[ii]._pillColor     = colorId;
+  menuData[si].items[ii].flavorColor    = colorId;
+  markUnsaved();
+  // Update swatch borders to show selection
+  PILL_PRESETS.forEach(p => {
+    const btn = document.getElementById('pill-color-btn-' + si + '-' + ii + '-' + p.id);
+    if(!btn) return;
+    btn.style.borderColor = p.id === colorId ? p.text : p.border;
+    btn.style.transform   = p.id === colorId ? 'scale(1.3)' : 'scale(1)';
+  });
+  // Update color label
+  const pc = PILL_PRESETS.find(p => p.id === colorId) || PILL_PRESETS[0];
+  // Re-render preview with new color
+  const inputEl = document.getElementById('i-flavors-' + si + '-' + ii);
+  if(inputEl) updatePillsPreview(si, ii, inputEl);
 }
 
 // ── HELPER: generate hash for password updates (run in console) ──────
