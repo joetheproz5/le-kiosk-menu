@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: joetheproz5/le-kiosk-menu # Ensure this is your exact repo name
+  repo: joetheproz5/le-kiosk-menu
   branch: main
 
 media_folder: "menupictures"
