@@ -72,12 +72,15 @@ body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient
 .token-status.ok{color:var(--green-d)}
 .token-status.missing{color:var(--red)}
 
-/* TABS */
+/* TABS — draggable */
 .tabs-bar{background:var(--white);border-bottom:1px solid var(--a200);padding:0 24px;display:flex;gap:0;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
 .tabs-bar::-webkit-scrollbar{display:none}
-.tab{padding:14px 18px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--g500);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:var(--font)}
+.tab{padding:14px 18px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--g500);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s,opacity .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:var(--font);user-select:none}
 .tab.active{color:var(--a900);border-bottom-color:var(--a500)}
 .tab:hover:not(.active){color:var(--a700)}
+.tab.drag-over{border-bottom-color:var(--a400);opacity:.6}
+.tab.dragging{opacity:.35;cursor:grabbing}
+.tab-drag-hint{font-size:9px;font-weight:600;letter-spacing:.06em;color:var(--g400);text-transform:uppercase;padding:14px 8px 14px 4px;white-space:nowrap;align-self:center}
 
 /* BODY */
 .admin-body{max-width:900px;margin:0 auto;padding:28px 20px 100px}
@@ -119,11 +122,7 @@ body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient
 .img-drop-text-overlay{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--white)}
 .img-upload-input{display:none}
 .img-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--a500);transition:width .3s;border-radius:0 0 8px 8px}
-
-/* IMAGE PATH DISPLAY */
 .img-path{font-size:10px;color:var(--g400);margin-top:3px;word-break:break-all;line-height:1.3}
-
-/* ITEM FIELDS */
 .item-fields{display:flex;flex-direction:column;gap:8px}
 .field-row{display:grid;grid-template-columns:1fr 110px;gap:8px}
 .field-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a700);margin-bottom:3px}
@@ -152,10 +151,6 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 .btn-del-section{background:rgba(239,68,68,.12);color:var(--red-d);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.04em;transition:background .15s;flex-shrink:0}
 .btn-del-section:hover{background:rgba(239,68,68,.22)}
 
-/* DRAG HANDLE */
-.drag-handle{display:flex;align-items:center;justify-content:center;cursor:grab;color:var(--g300);font-size:18px;padding:4px;user-select:none;margin-top:4px}
-.drag-handle:active{cursor:grabbing}
-
 /* LOADING */
 #loading-overlay{display:none;position:fixed;inset:0;background:rgba(252,248,238,.85);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 #loading-overlay.show{display:flex}
@@ -183,7 +178,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 .preview-item-info{flex:1;min-width:0}
 .preview-item-name{font-size:13px;font-weight:700;color:var(--a950)}
 .preview-item-desc{font-size:11px;color:var(--g400);line-height:1.4;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.preview-item-price{font-size:13px;font-weight:700;color:var(--a600, #d97706);flex-shrink:0}
+.preview-item-price{font-size:13px;font-weight:700;color:#d97706;flex-shrink:0}
 
 /* UNSAVED DOT */
 .unsaved-dot{width:8px;height:8px;border-radius:50%;background:var(--a400);display:inline-block;margin-left:6px;animation:pulse 1.5s ease-in-out infinite}
@@ -211,7 +206,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
   </div>
 </div>
 
-<!-- ══ LOGIN ══ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">Le Kiosk</div>
@@ -223,7 +218,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
   </div>
 </div>
 
-<!-- ══ ADMIN ══ -->
+<!-- ADMIN -->
 <div id="admin-screen">
   <header class="admin-header">
     <div>
@@ -268,7 +263,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 // ══════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════
-const ADMIN_PASSWORD = 'lekiosk2024'; // ← change this
+const ADMIN_PASSWORD = 'lekiosk2024';
 const REPO_OWNER     = 'joetheproz5';
 const REPO_NAME      = 'le-kiosk-menu';
 const MENU_PATH      = 'menu.json';
@@ -345,18 +340,34 @@ async function fetchMenu(){
 }
 
 // ══════════════════════════════════════
-// SAVE
+// SAVE  — FIX 1: emoji-safe base64 encoding
+// btoa() chokes on multi-byte chars (emojis).
+// Use TextEncoder → Uint8Array → base64 instead.
 // ══════════════════════════════════════
+function toBase64Unicode(str){
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
 async function saveMenu(){
   if(!getToken()){ showToast('No GitHub token set','error'); return; }
   collectAll();
+  // Strip private _hasFlav flag before saving
+  const clean = menuData.map(sec => {
+    const s = {...sec};
+    delete s._hasFlav;
+    return s;
+  });
   showLoading('Saving to GitHub…');
   try{
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(menuData,null,2))));
-    const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`,{
+    const json    = JSON.stringify(clean, null, 2);
+    const content = toBase64Unicode(json);
+    const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`,{
       method:'PUT',
       headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify({message:'Update menu via Admin CMS',content,sha:fileSha})
+      body:JSON.stringify({message:'Update menu via Admin CMS', content, sha:fileSha})
     });
     if(!res.ok){ const e=await res.json(); throw new Error(e.message||res.status); }
     const saved=await res.json();
@@ -403,10 +414,8 @@ async function uploadImage(file, onProgress){
 }
 
 // ══════════════════════════════════════
-// COLLECT FORM → menuData  ← BUG FIX
-// Only reads the active tab's fields from the DOM.
-// Previously looped over ALL sections, but only the
-// active tab is rendered, so other tabs got wiped to "".
+// COLLECT FORM → menuData
+// FIX 2: only reads the active tab — other tabs aren't in DOM
 // ══════════════════════════════════════
 function collectAll(){
   const si  = activeTab;
@@ -431,7 +440,7 @@ function collectAll(){
     if(sec.bottomBanner !== undefined) sec.bottomBanner = v('banner-' + si) || '';
     sec.items = (sec.items || []).map((item, ii) => {
       const updated = {
-        ...item,   // ← preserves image path and any other fields not in the form
+        ...item,  // preserves image and any other fields
         name:  v('i-name-'  + si + '-' + ii),
         price: v('i-price-' + si + '-' + ii),
         desc:  v('i-desc-'  + si + '-' + ii)
@@ -456,12 +465,68 @@ function renderAll(){
   markSaved();
 }
 
+// ══════════════════════════════════════
+// TABS  — FIX 3: drag-to-reorder
+// ══════════════════════════════════════
+let dragSrcIdx = null;
+
 function renderTabs(){
-  const bar=document.getElementById('tabs-bar');
-  bar.innerHTML=menuData.map((s,i)=>
-    `<button class="tab${i===activeTab?' active':''}" onclick="switchTab(${i})">${s.title||'Untitled'}</button>`
-  ).join('')+
-  `<button class="tab" onclick="addCategory()" style="color:var(--a500)">＋ Add</button>`;
+  const bar = document.getElementById('tabs-bar');
+  bar.innerHTML =
+    menuData.map((s,i) =>
+      `<button class="tab${i===activeTab?' active':''}"
+        draggable="true"
+        data-idx="${i}"
+        onclick="switchTab(${i})"
+        ondragstart="tabDragStart(event,${i})"
+        ondragover="tabDragOver(event,${i})"
+        ondragleave="tabDragLeave(event)"
+        ondrop="tabDrop(event,${i})"
+        ondragend="tabDragEnd(event)"
+        title="Drag to reorder"
+      >${s.title||'Untitled'}</button>`
+    ).join('') +
+    `<span class="tab-drag-hint">drag to reorder</span>` +
+    `<button class="tab" onclick="addCategory()" style="color:var(--a500)">＋ Add</button>`;
+}
+
+function tabDragStart(e, idx){
+  collectAll();
+  dragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+function tabDragOver(e, idx){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if(idx !== dragSrcIdx)
+    e.currentTarget.classList.add('drag-over');
+}
+function tabDragLeave(e){
+  e.currentTarget.classList.remove('drag-over');
+}
+function tabDrop(e, toIdx){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(dragSrcIdx === null || dragSrcIdx === toIdx) return;
+  // Reorder menuData
+  const moved = menuData.splice(dragSrcIdx, 1)[0];
+  menuData.splice(toIdx, 0, moved);
+  // Keep activeTab pointing at the same section
+  if(activeTab === dragSrcIdx){
+    activeTab = toIdx;
+  } else if(dragSrcIdx < activeTab && toIdx >= activeTab){
+    activeTab--;
+  } else if(dragSrcIdx > activeTab && toIdx <= activeTab){
+    activeTab++;
+  }
+  markUnsaved();
+  renderAll();
+}
+function tabDragEnd(e){
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('drag-over'));
+  dragSrcIdx = null;
 }
 
 function switchTab(i){
@@ -473,7 +538,10 @@ function switchTab(i){
 
 function renderEditor(){
   const root=document.getElementById('editor-root');
-  if(!menuData.length){ root.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No categories yet. Add one below.</div>'; return; }
+  if(!menuData.length){
+    root.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No categories yet. Add one below.</div>';
+    return;
+  }
   const sec=menuData[activeTab];
   if(!sec){ root.innerHTML=''; return; }
   root.innerHTML=renderSection(sec,activeTab);
@@ -483,22 +551,22 @@ function renderEditor(){
 // RENDER SECTION
 // ══════════════════════════════════════
 function renderSection(sec,si){
-  const isAddon=sec.type==='addons';
-  const hasBanner=sec.bottomBanner!==undefined;
+  const isAddon  = sec.type==='addons';
+  const hasBanner = sec.bottomBanner !== undefined;
 
   let body='';
   if(isAddon){
-    body=(sec.addonGroups||[]).map((grp,gi)=>renderAddon(grp,si,gi)).join('');
-    body+=`<div class="add-item-footer">
+    body = (sec.addonGroups||[]).map((grp,gi)=>renderAddon(grp,si,gi)).join('');
+    body += `<div class="add-item-footer">
       <button class="btn btn-add btn-sm" onclick="addAddonGroup(${si})">＋ Add Add-on Group</button>
     </div>`;
   } else {
-    body=(sec.items||[]).map((item,ii)=>renderItem(item,si,ii)).join('');
-    body+=`<div class="add-item-footer">
+    body = (sec.items||[]).map((item,ii)=>renderItem(item,si,ii)).join('');
+    body += `<div class="add-item-footer">
       <button class="btn btn-add btn-sm" onclick="addItem(${si})">＋ Add Item</button>
     </div>`;
     if(hasBanner){
-      body+=`<div class="banner-field">
+      body += `<div class="banner-field">
         <div class="field-label">🔖 Bottom Banner</div>
         <input class="field-input" type="text" id="banner-${si}" value="${esc(sec.bottomBanner)}" oninput="markUnsaved()">
       </div>`;
@@ -509,8 +577,8 @@ function renderSection(sec,si){
     <div class="type-toggle">
       <span class="type-toggle-label">Features:</span>
       <div class="features-wrap">
-        <button class="feat-btn${hasBanner?' active':''}" onclick="toggleFeature(${si},'banner')" title="Bottom promo banner">📢 Banner</button>
-        <button class="feat-btn${sec._hasFlav?' active':''}" onclick="toggleFeature(${si},'flavors')" title="Flavor/option tags on items">🏷 Flavors</button>
+        <button class="feat-btn${hasBanner?' active':''}" onclick="toggleFeature(${si},'banner')">📢 Banner</button>
+        <button class="feat-btn${sec._hasFlav?' active':''}" onclick="toggleFeature(${si},'flavors')">🏷 Flavors</button>
       </div>
     </div>`;
 
@@ -544,29 +612,31 @@ function renderSection(sec,si){
 
 // ══════════════════════════════════════
 // RENDER ITEM
+// FIX 4: empty image src replaced with placeholder so new items render correctly
 // ══════════════════════════════════════
 function renderItem(item,si,ii){
-  const imgSrc=item.image
+  const imgSrc = item.image
     ? `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}?v=${Date.now()}`
     : '';
-  const sec=menuData[si];
-  const showFlavors=sec&&sec._hasFlav;
+  const sec = menuData[si];
+  const showFlavors = sec && sec._hasFlav;
 
   const dropZone=`
     <div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
       ${item.image
-        ?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''">
-          <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`
-        :`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
+        ? `<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''">
+           <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`
+        : `<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`
+      }
       <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>
     </div>
     <input type="file" class="img-upload-input" id="file-${si}-${ii}" accept="image/*" onchange="handleImageUpload(${si},${ii},this)">
-    <div class="img-path" id="img-path-${si}-${ii}">${item.image?item.image:''}</div>`;
+    <div class="img-path" id="img-path-${si}-${ii}">${item.image||''}</div>`;
 
-  const flavorsField=showFlavors?`<div>
+  const flavorsField = showFlavors ? `<div>
     <div class="field-label">Flavors / Options <span style="font-weight:400;opacity:.7">(comma-separated)</span></div>
     <input class="field-input" type="text" id="i-flavors-${si}-${ii}" value="${esc((item.flavors||[]).join(', '))}" oninput="markUnsaved()">
-  </div>`:'';
+  </div>` : '';
 
   return `<div class="item-card" id="item-card-${si}-${ii}">
     <div>${dropZone}</div>
@@ -632,7 +702,6 @@ function addItem(si){
   markUnsaved();
   renderAll();
 }
-
 function addAddonGroup(si){
   collectAll();
   if(!menuData[si].addonGroups) menuData[si].addonGroups=[];
@@ -640,7 +709,6 @@ function addAddonGroup(si){
   markUnsaved();
   renderAll();
 }
-
 function addCategory(){
   collectAll();
   const key='category-'+(Date.now()%100000);
@@ -649,25 +717,20 @@ function addCategory(){
   markUnsaved();
   renderAll();
 }
-
 function setSectionType(si,type){
   collectAll();
   const sec=menuData[si];
   if(type==='addons'){
     sec.type='addons';
     if(!sec.addonGroups) sec.addonGroups=[];
-    delete sec.items;
-    delete sec.bottomBanner;
-    delete sec._hasFlav;
+    delete sec.items; delete sec.bottomBanner; delete sec._hasFlav;
   } else {
     delete sec.type;
     if(!sec.items) sec.items=[];
     delete sec.addonGroups;
   }
-  markUnsaved();
-  renderAll();
+  markUnsaved(); renderAll();
 }
-
 function toggleFeature(si,feat){
   collectAll();
   const sec=menuData[si];
@@ -676,16 +739,11 @@ function toggleFeature(si,feat){
     else sec.bottomBanner='';
   } else if(feat==='flavors'){
     sec._hasFlav=!sec._hasFlav;
-    if(sec._hasFlav){
-      sec.items.forEach(item=>{ if(!item.flavors) item.flavors=[]; });
-    } else {
-      sec.items.forEach(item=>delete item.flavors);
-    }
+    if(sec._hasFlav){ sec.items.forEach(item=>{ if(!item.flavors) item.flavors=[]; }); }
+    else            { sec.items.forEach(item=>delete item.flavors); }
   }
-  markUnsaved();
-  renderAll();
+  markUnsaved(); renderAll();
 }
-
 function updateTab(si,val){
   const tabs=document.getElementById('tabs-bar').querySelectorAll('.tab');
   if(tabs[si]) tabs[si].textContent=val||'Untitled';
@@ -697,30 +755,24 @@ function updateTab(si,val){
 function triggerUpload(si,ii){
   document.getElementById('file-'+si+'-'+ii).click();
 }
-
 async function handleImageUpload(si,ii,input){
   if(!input.files||!input.files[0]) return;
   if(!getToken()){ showToast('Set your GitHub token first','error'); return; }
   const file=input.files[0];
   const progBar=document.getElementById('prog-'+si+'-'+ii);
   const dropZone=document.getElementById('drop-'+si+'-'+ii);
-
   try{
-    const path=await uploadImage(file,(pct)=>{
-      if(progBar) progBar.style.width=pct+'%';
-    });
+    const path=await uploadImage(file,(pct)=>{ if(progBar) progBar.style.width=pct+'%'; });
     collectAll();
     menuData[si].items[ii].image=path;
     markUnsaved();
-
     const rawUrl=`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}?v=${Date.now()}`;
     dropZone.classList.add('has-img');
-    dropZone.innerHTML=`<img src="${rawUrl}" alt="" id="drop-img-${si}-${ii}">
+    dropZone.innerHTML=`<img src="${rawUrl}" alt="">
       <div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>
       <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>`;
     const pathEl=document.getElementById('img-path-'+si+'-'+ii);
     if(pathEl) pathEl.textContent=path;
-
     showToast('Image uploaded ✓','success');
   }catch(e){
     showToast('Upload failed: '+e.message,'error');
@@ -732,7 +784,6 @@ async function handleImageUpload(si,ii,input){
 // DELETE CONFIRMATIONS
 // ══════════════════════════════════════
 let pendingDelete=null;
-
 function confirmDeleteItem(si,ii){
   collectAll();
   pendingDelete={type:'item',si,ii};
@@ -748,7 +799,6 @@ function confirmDeleteSection(si){
   pendingDelete={type:'section',si};
   openModal('Delete Category','Delete the "'+menuData[si].title+'" category and all its items? This cannot be undone.');
 }
-
 function executeDelete(){
   if(!pendingDelete) return;
   const {type,si,ii,gi}=pendingDelete;
@@ -758,12 +808,8 @@ function executeDelete(){
     menuData.splice(si,1);
     if(activeTab>=menuData.length) activeTab=Math.max(0,menuData.length-1);
   }
-  pendingDelete=null;
-  closeModal();
-  markUnsaved();
-  renderAll();
+  pendingDelete=null; closeModal(); markUnsaved(); renderAll();
 }
-
 function openModal(title,body){
   document.getElementById('modal-title').textContent=title;
   document.getElementById('modal-body').textContent=body;
@@ -790,9 +836,7 @@ function markSaved(){
   hasUnsaved=false;
   document.getElementById('unsaved-indicator').style.display='none';
 }
-window.addEventListener('beforeunload',e=>{
-  if(hasUnsaved){ e.preventDefault(); e.returnValue=''; }
-});
+window.addEventListener('beforeunload',e=>{ if(hasUnsaved){ e.preventDefault(); e.returnValue=''; } });
 
 // ══════════════════════════════════════
 // PREVIEW PANEL
@@ -813,7 +857,7 @@ function renderPreview(){
     (sec.items||[]).forEach(item=>{
       const img=item.image?`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}`:'';
       html+=`<div class="preview-item">
-        <img src="${img}" alt="${esc(item.name)}" onerror="this.style.background='var(--a100)'">
+        ${img ? `<img src="${img}" alt="${esc(item.name)}" onerror="this.style.background='var(--a100)'">` : `<div style="width:52px;height:52px;border-radius:8px;background:var(--a100);flex-shrink:0"></div>`}
         <div class="preview-item-info">
           <div class="preview-item-name">${esc(item.name)}</div>
           <div class="preview-item-desc">${esc(item.desc)}</div>
@@ -833,7 +877,6 @@ function esc(s){
   if(!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-
 let toastTimer;
 function showToast(msg,type=''){
   const t=document.getElementById('toast');
@@ -841,7 +884,6 @@ function showToast(msg,type=''){
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>{ t.className=''; },3500);
 }
-
 function showLoading(msg){
   document.getElementById('loading-text').textContent=msg||'Loading…';
   document.getElementById('loading-overlay').classList.add('show');
