@@ -1,5 +1,6 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: joetheproz5/le-kiosk-menu
   branch: main
 
 media_folder: "menupictures"
