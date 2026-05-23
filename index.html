@@ -33,7 +33,7 @@
         </div>
     </header>
 
-    <nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto" id="nav-bar"></nav>
+    <nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto"></nav>
 
     <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
         <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
@@ -83,7 +83,29 @@
     </div>
 
     <script>
-        // ── Fetch menu from menu.json (with cache-bust so updates show fast) ──
+        // ── Pill color map ────────────────────────────────────────────────────
+        const PILL_COLORS = {
+            amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
+            red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
+            green:  { bg:'#dcfce7', border:'#bbf7d0', text:'#166534' },
+            blue:   { bg:'#dbeafe', border:'#bfdbfe', text:'#1e40af' },
+            purple: { bg:'#ede9fe', border:'#ddd6fe', text:'#5b21b6' },
+            pink:   { bg:'#fce7f3', border:'#fbcfe8', text:'#9d174d' },
+            gray:   { bg:'#f3f4f6', border:'#e5e7eb', text:'#374151' },
+            dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
+        };
+
+        function renderPills(item) {
+            if (!item.flavors || !item.flavors.length) return '';
+            const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
+            return '<div class="flex flex-wrap gap-1 mt-2">' +
+                item.flavors.map(f =>
+                    `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`
+                ).join('') +
+            '</div>';
+        }
+
+        // ── Fetch menu from menu.json ─────────────────────────────────────────
         async function loadMenu() {
             try {
                 const res = await fetch('menu.json?v=' + Date.now());
@@ -131,7 +153,7 @@
                 if (category.items && category.items.length > 0) {
                     html += `<div class="grid gap-3.5">`;
                     category.items.forEach(item => {
-                        html += `<div class="${item.flavors ? 'min-h-28' : 'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
+                        html += `<div class="${item.flavors && item.flavors.length ? 'min-h-28' : 'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
                             <div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px">
                                 <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
                             </div>
@@ -141,7 +163,7 @@
                                     <span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span>
                                 </div>
                                 <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
-                                ${item.flavors ? '<div class="flex flex-wrap gap-1 mt-2">' + item.flavors.map(f => '<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">' + f + '</span>').join('') + '</div>' : ''}
+                                ${renderPills(item)}
                             </div>
                         </div>`;
                     });
