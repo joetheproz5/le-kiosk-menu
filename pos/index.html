@@ -728,33 +728,26 @@ function toB64(str){
   let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
   return btoa(bin);
 }
-async function ghRead(path){
-  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
-  if(res.status===404) return {data:null,sha:null};
-  if(!res.ok) throw new Error('GitHub read '+res.status);
-  const d=await res.json();
-  return{data:JSON.parse(fromB64(d.content)), sha:d.sha};
+const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
+
+async function ghRead(path) {
+  const res = await fetch(`${WORKER_URL}/gh?file=${path}`);
+  if (!res.ok) throw new Error('Worker read ' + res.status);
+  return await res.json(); // returns { data, sha }
 }
-async function ghWrite(path, data, message){
-  if(!hasToken()) throw new Error('No GitHub token — click the 🔑 button in the top bar');
-  let sha=null;
-  try{
-    const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
-    if(res.ok){const d=await res.json();sha=d.sha;}
-  }catch(_){}
-  const content=toB64(JSON.stringify(data,null,2));
-  const body={message,content};if(sha) body.sha=sha;
-  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{
-    method:'PUT',
-    headers:{...ghHeaders(),'Content-Type':'application/json'},
-    body:JSON.stringify(body)
+
+async function ghWrite(path, data, message) {
+  // Get current sha first
+  let sha = null;
+  try { const r = await ghRead(path); sha = r.sha; } catch(_) {}
+  const res = await fetch(`${WORKER_URL}/gh?file=${path}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data, message, sha })
   });
-  if(!res.ok){
-    const e=await res.json().catch(()=>({}));
-    throw new Error(e.message||'GitHub write '+res.status);
-  }
-  const saved=await res.json();
-  return saved.content.sha;
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || res.status); }
+  const saved = await res.json();
+  return saved.sha;
 }
 
 // ═══════════════════════════════════════════════════
