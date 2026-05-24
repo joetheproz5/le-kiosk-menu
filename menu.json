@@ -138,26 +138,6 @@
             "price": "$0.60"
           }
         ]
-      },
-      {
-        "name": "Fajita Sandwich",
-        "price": "$6",
-        "desc": "Marinated chicken breast cooked with peppers, topped with cheese, lettuce, corn.",
-        "image": "menupictures/fajita.jpg",
-        "addons": [
-          {
-            "label": "Boost Your Meal (Fries + Drink)",
-            "price": "$3"
-          },
-          {
-            "label": "Melted Cheddar",
-            "price": "$1"
-          },
-          {
-            "label": "Buffalo Sauce",
-            "price": "$0.60"
-          }
-        ]
       }
     ]
   },
