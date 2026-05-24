@@ -271,6 +271,24 @@
             "price": "$3"
           }
         ]
+      },
+      {
+        "name": "mix",
+        "price": "$0",
+        "desc": "test test",
+        "image": "",
+        "_pillColor": "green",
+        "flavorColor": "green",
+        "flavors": [
+          "zaatar",
+          "jebne"
+        ],
+        "addons": [
+          {
+            "label": "khodra",
+            "price": "$0"
+          }
+        ]
       }
     ]
   },
