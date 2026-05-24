@@ -347,7 +347,7 @@
     "title": "Shisha",
     "items": [
       {
-        "name": "Argile",
+        "name": "Argile + 1 rass",
         "price": "$5",
         "desc": "Lebanese hookah with premium tobacco",
         "image": "menupictures/shisha-argile.jpg",
@@ -357,7 +357,7 @@
         ]
       },
       {
-        "name": "2 Rass",
+        "name": "Argile + 2 rass",
         "price": "$7",
         "desc": "Double the flavor — your shisha comes loaded with 2 heads instead of one",
         "image": "menupictures/shisha-2rass.jpg",
