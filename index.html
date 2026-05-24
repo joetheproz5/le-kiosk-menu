@@ -82,13 +82,12 @@
         .locate-main-btn:hover { background: #d97706; }
         .locate-main-btn:disabled { opacity: .5; cursor: not-allowed; }
         .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; margin-top: 10px; }
-        .zone-badge.free { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
-        .zone-badge.cheap { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
-        .zone-badge.far { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
+        .zone-badge.near  { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
+        .zone-badge.mid   { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .zone-badge.far   { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
         .manual-addr { margin-top: 10px; }
-        .manual-addr textarea { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
-        .manual-addr textarea:focus { border-color: #f59e0b; }
-        .manual-addr textarea.error { border-color: #ef4444; background: #fef2f2; }
+        .manual-addr textarea, .manual-addr-ta { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
+        .manual-addr textarea:focus, .manual-addr-ta:focus { border-color: #f59e0b; }
 
         /* ── TOTAL ── */
         .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
@@ -190,10 +189,10 @@
     </div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// TESTING MODE — set false to enable the 6PM-12AM time lock
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TESTING MODE — set false to re-enable time lock
 const TESTING_MODE = true;
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const PILL_COLORS = {
     amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
@@ -206,63 +205,76 @@ const PILL_COLORS = {
     dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DELIVERY ZONES — polygons traced from your maps
-// Zone 1: Haret El Sett  → FREE delivery
-// Zone 2: Wadi Chahrour  → $0.50
-// Outside both           → $1.00
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const ZONE_HARET = [
-    [33.8085, 35.6195],[33.8092, 35.6215],[33.8105, 35.6230],
-    [33.8118, 35.6242],[33.8130, 35.6255],[33.8140, 35.6248],
-    [33.8148, 35.6235],[33.8155, 35.6220],[33.8158, 35.6205],
-    [33.8155, 35.6190],[33.8148, 35.6178],[33.8138, 35.6168],
-    [33.8125, 35.6162],[33.8112, 35.6160],[33.8100, 35.6165],
-    [33.8090, 35.6175],[33.8085, 35.6195]
-];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DELIVERY ZONES
+//
+// Zone detection uses distance from Le Kiosk's center point
+// (more reliable than polygon tracing from a screenshot).
+//
+// Le Kiosk center: 33.8338°N, 35.6392°E
+//   • Inner circle  (Image 2) — radius ~0.55 km → $0.50
+//   • Outer oval    (Image 1) — approximated as ellipse:
+//       lat radius ~0.018°  (~2.0 km N-S)
+//       lng radius ~0.030°  (~2.8 km E-W)  → $1.00
+//   • Outside both → $1.50
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-const ZONE_WADI = [
-    [33.8050, 35.6140],[33.8065, 35.6165],[33.8075, 35.6185],
-    [33.8085, 35.6195],[33.8090, 35.6175],[33.8100, 35.6165],
-    [33.8112, 35.6160],[33.8125, 35.6162],[33.8138, 35.6168],
-    [33.8148, 35.6178],[33.8155, 35.6190],[33.8158, 35.6205],
-    [33.8155, 35.6220],[33.8148, 35.6235],[33.8140, 35.6248],
-    [33.8148, 35.6262],[33.8155, 35.6278],[33.8160, 35.6295],
-    [33.8158, 35.6312],[33.8150, 35.6325],[33.8138, 35.6332],
-    [33.8125, 35.6335],[33.8110, 35.6330],[33.8095, 35.6320],
-    [33.8082, 35.6305],[33.8070, 35.6285],[33.8060, 35.6265],
-    [33.8052, 35.6245],[33.8045, 35.6225],[33.8040, 35.6205],
-    [33.8038, 35.6185],[33.8040, 35.6165],[33.8050, 35.6140]
-];
+// Center of Le Kiosk (read from Image 2: "Le Kiosk" pin)
+const CENTER_LAT = 33.8338;
+const CENTER_LNG = 35.6392;
 
-// Ray-casting point-in-polygon algorithm
-function pointInPolygon(lat, lng, polygon) {
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const xi = polygon[i][0], yi = polygon[i][1];
-        const xj = polygon[j][0], yj = polygon[j][1];
-        const intersect = ((yi > lng) !== (yj > lng)) &&
-            (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-    }
-    return inside;
+// Inner circle: ~550 m radius (covers Haret El Sett tight area)
+const INNER_RADIUS_KM = 0.55;
+
+// Outer ellipse semi-axes in degrees (from Image 1)
+// The oval stretches roughly:
+//   North edge  ~33.845, South edge ~33.808  → half-height ≈ 0.0185°
+//   West edge   ~35.612, East edge  ~35.668  → half-width  ≈ 0.028°
+const OUTER_LAT_SEMI = 0.0185;   // degrees N-S
+const OUTER_LNG_SEMI = 0.028;    // degrees E-W
+// Ellipse center is slightly south-west of the shop, matching the oval in Image 1
+const OUTER_CENTER_LAT = 33.826;
+const OUTER_CENTER_LNG = 35.640;
+
+// Haversine distance in km between two lat/lng points
+function distKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Point-in-ellipse check (normalised distance ≤ 1 means inside)
+function inEllipse(lat, lng) {
+    const dLat = (lat - OUTER_CENTER_LAT) / OUTER_LAT_SEMI;
+    const dLng = (lng - OUTER_CENTER_LNG) / OUTER_LNG_SEMI;
+    return (dLat * dLat + dLng * dLng) <= 1;
 }
 
 function getDeliveryZone(lat, lng) {
-    if (pointInPolygon(lat, lng, ZONE_HARET)) return { zone: 'haret', fee: 0,    label: 'Haret El Sett',  feeLabel: 'Free',   cls: 'free' };
-    if (pointInPolygon(lat, lng, ZONE_WADI))  return { zone: 'wadi',  fee: 0.50, label: 'Wadi Chahrour',  feeLabel: '+$0.50', cls: 'cheap' };
-    return                                           { zone: 'far',   fee: 1.00, label: 'Outside area',   feeLabel: '+$1.00', cls: 'far' };
+    const d = distKm(lat, lng, CENTER_LAT, CENTER_LNG);
+
+    if (d <= INNER_RADIUS_KM) {
+        return { zone: 'near', fee: 0.50, label: 'Haret El Sett area', feeLabel: '$0.50', cls: 'near', emoji: '📍' };
+    }
+    if (inEllipse(lat, lng)) {
+        return { zone: 'mid',  fee: 1.00, label: 'Wadi Chahrour area', feeLabel: '$1.00', cls: 'mid',  emoji: '🛵' };
+    }
+    return     { zone: 'far',  fee: 1.50, label: 'Outside delivery area', feeLabel: '$1.50', cls: 'far',  emoji: '🗺️' };
 }
 
-// ── STATE ─────────────────────────────────────────────────────
+// ── STATE ──────────────────────────────────────────────────────
 let orderMode    = false;
 let cart         = {};
 let addonSel     = {};
 let shishaSel    = {};
 let itemMeta     = {};
 let selectedType = null;
-let detectedZone = null;   // result from getDeliveryZone()
-let userGPS      = null;   // { lat, lng }
+let detectedZone = null;
+let userGPS      = null;
 let deliveryAddress = '';
 let _addonMap    = [];
 
@@ -273,7 +285,7 @@ function isOpen() {
     return Math.floor(lbMin / 60) >= 18;
 }
 
-// ── ORDER MODE ────────────────────────────────────────────────
+// ── ORDER MODE ─────────────────────────────────────────────────
 function toggleOrderMode() {
     if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
     orderMode = !orderMode;
@@ -304,7 +316,7 @@ function getTotalItems() { return Object.values(cart).reduce((a, b) => a + b, 0)
 
 function getItemsSubtotal() {
     return Object.entries(cart).filter(([,v]) => v > 0).reduce((sum, [key, qty]) => {
-        const price = parseFloat(key.split('|')[2].replace('$','')) || 0;
+        const price  = parseFloat(key.split('|')[2].replace('$','')) || 0;
         const addons = (addonSel[key] || []).reduce((a, s) => a + s.price, 0);
         return sum + price * qty + addons;
     }, 0);
@@ -316,7 +328,7 @@ function getDeliveryFee() {
 
 function getGrandTotal() { return getItemsSubtotal() + getDeliveryFee(); }
 
-// ── FLOATING PILL ─────────────────────────────────────────────
+// ── FLOATING PILL ──────────────────────────────────────────────
 function updatePill() {
     const count = getTotalItems();
     const pill  = document.getElementById('checkout-pill');
@@ -327,7 +339,7 @@ function updatePill() {
     }
 }
 
-// ── SHEET ─────────────────────────────────────────────────────
+// ── SHEET ──────────────────────────────────────────────────────
 function openSheet()  { renderSheet(); document.getElementById('checkout-sheet').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeSheet() { document.getElementById('checkout-sheet').classList.remove('open'); document.body.style.overflow = ''; }
 
@@ -342,21 +354,16 @@ function renderSheet() {
 
     let html = '<div style="padding-top:12px">';
 
-    // Items
     entries.forEach(([key, qty]) => {
         const [, name, price] = key.split('|');
         const pn = parseFloat(price.replace('$','')) || 0;
         html += `<div class="sheet-item">
-            <div class="sheet-item-left">
-                <div class="sheet-item-name">${name}</div>
-                <div class="sheet-item-qty">x${qty} @ ${price}</div>
-            </div>
+            <div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div>
             <div class="sheet-item-price">$${(pn * qty).toFixed(2)}</div>
         </div>`;
 
         const meta = itemMeta[key];
 
-        // Flavor chips
         if (meta && meta.flavors && meta.flavors.length) {
             const shSel = shishaSel[key];
             const ki = _addonMap.length; _addonMap.push({ key, type: 'shisha' });
@@ -367,7 +374,6 @@ function renderSheet() {
             html += `</div></div>`;
         }
 
-        // Item addons
         if (meta && meta.addons && meta.addons.length) {
             const selArr = addonSel[key] || [];
             const ki = _addonMap.length; _addonMap.push({ key, type: 'addon' });
@@ -389,7 +395,6 @@ function renderSheet() {
         <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${existingName}" autocomplete="off">
         <div class="err-text" id="err-name">Please enter your name.</div>
     </div>
-
     <div style="margin-bottom:4px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
         <div class="order-type-grid">
@@ -399,21 +404,26 @@ function renderSheet() {
         </div>
         <div class="err-text" id="err-type">Please select an order type.</div>
     </div>
-
     <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-bottom:8px">Your Location</label>
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-top:8px;margin-bottom:8px">Your Location</label>
         ${renderLocationBox()}
     </div>`;
 
-    // Total + Send
+    // Delivery fee breakdown (only show when delivery selected)
     const fee   = getDeliveryFee();
-    const total = getItemsSubtotal() + fee;
+    const sub   = getItemsSubtotal();
+    const total = sub + fee;
+
+    const feeBreakdown = (selectedType === 'delivery' && detectedZone)
+        ? `<div style="font-size:11px;color:#b45309;margin-top:2px">Items $${sub.toFixed(2)} + delivery ${detectedZone.feeLabel}</div>`
+        : '';
+
     html += `<div class="total-row">
         <div>
             <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
-            ${fee > 0 ? `<div style="font-size:10px;color:#b45309;margin-top:1px">Includes $${fee.toFixed(2)} delivery</div>` : ''}
+            ${feeBreakdown}
         </div>
-        <span style="font-size:16px;font-weight:800;color:#d97706" id="grand-total-display">$${total.toFixed(2)}</span>
+        <span style="font-size:18px;font-weight:800;color:#d97706" id="grand-total-display">$${total.toFixed(2)}</span>
     </div>
     <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
@@ -427,31 +437,28 @@ function renderLocationBox() {
     if (!detectedZone) {
         return `<div class="location-detect-box">
             <div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div>
-            <div style="font-size:11px;color:#b45309">So we can calculate your delivery fee automatically.</div>
-            <button class="locate-main-btn" id="locate-btn" onclick="detectLocation()">
-                📍 Detect My Location
-            </button>
+            <div style="font-size:11px;color:#b45309">Tap below so we can calculate your exact delivery fee.</div>
+            <button class="locate-main-btn" id="locate-btn" onclick="detectLocation()">📍 Detect My Location</button>
             <div class="err-text" id="err-location" style="margin-top:8px">Please share your location or add your address manually.</div>
             <div class="manual-addr" style="margin-top:12px;text-align:left">
                 <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Or type your address</label>
-                <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
+                <textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
             </div>
         </div>`;
     }
 
-    const zoneEmoji = detectedZone.zone === 'haret' ? '🎉' : detectedZone.zone === 'wadi' ? '📍' : '🗺️';
     const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
 
     return `<div class="location-detect-box detected">
         <div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div>
         <div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">
-            ${zoneEmoji} ${detectedZone.label} — <strong>${detectedZone.fee === 0 ? 'Free delivery!' : detectedZone.feeLabel + ' delivery'}</strong>
+            ${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong>
         </div>
-        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on maps ↗</a></div>` : ''}
+        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
         <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" onclick="resetLocation()">↺ Change location</button>
         <div class="manual-addr" style="margin-top:10px;text-align:left">
             <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label>
-            <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
+            <textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
         </div>
     </div>`;
 }
@@ -464,19 +471,15 @@ function detectLocation() {
         (pos) => {
             userGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             detectedZone = getDeliveryZone(userGPS.lat, userGPS.lng);
-            // Save typed address before re-render
             const ta = document.getElementById('delivery-address-ta');
             if (ta) deliveryAddress = ta.value;
             renderSheet();
-            // Update total display
-            const totalEl = document.getElementById('grand-total-display');
-            if (totalEl) totalEl.textContent = '$' + getGrandTotal().toFixed(2);
         },
         (err) => {
             if (btn) { btn.disabled = false; btn.innerHTML = '📍 Detect My Location'; }
             let msg = 'Could not get location.';
             if (err.code === 1) msg = 'Location access denied. Please type your address below.';
-            if (err.code === 3) msg = 'Location timed out. Please type your address below.';
+            if (err.code === 3) msg = 'Location timed out. Try again or type your address.';
             const errEl = document.getElementById('err-location');
             if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
         },
@@ -492,14 +495,12 @@ function resetLocation() {
     renderSheet();
 }
 
-// ── ORDER TYPE ────────────────────────────────────────────────
 function selectType(type) {
     selectedType = type;
     renderSheet();
-    // Restore name
 }
 
-// ── CHIP CLICKS (delegated) ───────────────────────────────────
+// ── CHIP CLICKS ────────────────────────────────────────────────
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('[data-type]');
     if (!btn) return;
@@ -507,15 +508,14 @@ document.addEventListener('click', function(e) {
     const entry = _addonMap[ki];
     if (!entry) return;
     const { key } = entry;
+    const scrollTop = document.getElementById('sheet-scroll').scrollTop;
     if (type === 'shisha') {
         const fi  = parseInt(btn.dataset.fi);
         const meta = itemMeta[key];
         if (!meta || !meta.flavors) return;
         const flv = meta.flavors[fi];
         shishaSel[key] = shishaSel[key] === flv ? null : flv;
-        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
-        renderSheet();
-        document.getElementById('sheet-scroll').scrollTop = scrollTop;
+        renderSheet(); document.getElementById('sheet-scroll').scrollTop = scrollTop;
     } else if (type === 'addon') {
         const ai  = parseInt(btn.dataset.ai);
         const meta = itemMeta[key];
@@ -526,13 +526,11 @@ document.addEventListener('click', function(e) {
         const idx = addonSel[key].findIndex(s => s.label === addon.label);
         if (idx > -1) addonSel[key].splice(idx, 1);
         else addonSel[key].push({ label: addon.label, price: pn });
-        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
-        renderSheet();
-        document.getElementById('sheet-scroll').scrollTop = scrollTop;
+        renderSheet(); document.getElementById('sheet-scroll').scrollTop = scrollTop;
     }
 });
 
-// ── SEND ORDER ────────────────────────────────────────────────
+// ── SEND ORDER ─────────────────────────────────────────────────
 function sendOrder() {
     const nameEl = document.getElementById('sheet-name');
     const name   = nameEl ? nameEl.value.trim() : '';
@@ -546,17 +544,14 @@ function sendOrder() {
         document.getElementById('err-name').classList.remove('show');
         if (nameEl) nameEl.classList.remove('error');
     }
-
     if (!selectedType) {
         document.getElementById('err-type').classList.add('show');
         valid = false;
     } else {
         document.getElementById('err-type').classList.remove('show');
     }
-
     if (selectedType === 'delivery' && !detectedZone) {
-        // Check if they at least typed an address
-        const ta = document.getElementById('delivery-address-ta');
+        const ta   = document.getElementById('delivery-address-ta');
         const addr = ta ? ta.value.trim() : '';
         if (!addr) {
             const errEl = document.getElementById('err-location');
@@ -564,11 +559,10 @@ function sendOrder() {
             valid = false;
         }
     }
-
     if (!valid) return;
 
-    const entries = Object.entries(cart).filter(([,v]) => v > 0);
-    const timeStr = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+    const entries  = Object.entries(cart).filter(([,v]) => v > 0);
+    const timeStr  = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
     const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
 
     let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
@@ -577,13 +571,12 @@ function sendOrder() {
 
     if (selectedType === 'delivery') {
         if (detectedZone) {
-            const feeStr = detectedZone.fee === 0 ? 'Free' : `$${detectedZone.fee.toFixed(2)}`;
-            msg += `📍 *Zone:* ${detectedZone.label} (Delivery: ${feeStr})\n`;
+            msg += `📍 *Zone:* ${detectedZone.label} (Fee: ${detectedZone.feeLabel})\n`;
             if (userGPS) msg += `🗺️ *GPS:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
         }
-        const ta = document.getElementById('delivery-address-ta');
+        const ta   = document.getElementById('delivery-address-ta');
         const addr = ta ? ta.value.trim() : deliveryAddress;
-        if (addr) msg += `🏠 *Address details:* ${addr}\n`;
+        if (addr) msg += `🏠 *Address:* ${addr}\n`;
     }
 
     msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
@@ -601,14 +594,14 @@ function sendOrder() {
     });
 
     const fee = getDeliveryFee();
-    if (fee > 0) { subtotal += fee; msg += `• 🛵 Delivery fee — $${fee.toFixed(2)}\n`; }
+    if (fee > 0) { subtotal += fee; msg += `• 🛵 Delivery — $${fee.toFixed(2)}\n`; }
     msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
 
     window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
     closeSheet();
 }
 
-// ── PILLS ─────────────────────────────────────────────────────
+// ── PILLS ──────────────────────────────────────────────────────
 function renderPills(item) {
     if (!item.flavors || !item.flavors.length) return '';
     const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
@@ -616,7 +609,7 @@ function renderPills(item) {
         item.flavors.map(f => `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
 }
 
-// ── FETCH & RENDER MENU ───────────────────────────────────────
+// ── FETCH & RENDER MENU ────────────────────────────────────────
 async function loadMenu() {
     try {
         const res = await fetch('menu.json?v=' + Date.now());
@@ -652,7 +645,6 @@ function initMenu(menuData) {
     nav.innerHTML = menuData.map((c, i) =>
         `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
     ).join('');
-
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
     menuData.forEach(category => {
