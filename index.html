@@ -86,97 +86,105 @@
         #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
         #send-order-btn:hover { background: #16a34a; }
         #send-order-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        /* Inbox status toast */
+        #inbox-toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1c0f00; color: #fef3c7; padding: 10px 20px; border-radius: 100px; font-size: 12px; font-weight: 700; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        #inbox-toast.show { transform: translateX(-50%) translateY(0); }
+        #inbox-toast.ok  { background: #166534; }
+        #inbox-toast.err { background: #dc2626; }
     </style>
 </head>
 <body class="pb-32">
 
-    <header class="text-center pt-8 pb-6 px-4 max-w-md mx-auto">
-        <div class="w-28 h-28 mx-auto bg-white border-4 border-amber-900 rounded-full shadow-md mb-4 overflow-hidden relative">
-            <img src="menupictures/logo.png" alt="Le Kiosk Logo" class="w-full h-full object-cover object-center">
-        </div>
-        <h1 class="brand-heading text-4xl font-extrabold text-amber-900 tracking-wide uppercase drop-shadow-sm">Le Kiosk</h1>
-        <p class="text-xs font-semibold uppercase tracking-wider text-amber-700 mt-1">Waffle & Ice Cream Menu</p>
-        <p class="text-sm text-amber-800/80 italic font-medium mt-2">"Serving Cravings, Sharing Smiles"</p>
-        <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-semibold">
-            <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
-            <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">📍 Wadi Chahrour</a>
-        </div>
-    </header>
+<!-- Inbox status indicator -->
+<div id="inbox-toast"></div>
 
-    <nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto"></nav>
-
-    <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
-        <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
-    </main>
-
-    <div class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
-        <div class="flex-1 h-px bg-amber-200"></div>
-        <span class="text-amber-400 text-[10px] font-bold uppercase tracking-widest px-2">✦ &nbsp; Le Kiosk &nbsp; ✦</span>
-        <div class="flex-1 h-px bg-amber-200"></div>
+<header class="text-center pt-8 pb-6 px-4 max-w-md mx-auto">
+    <div class="w-28 h-28 mx-auto bg-white border-4 border-amber-900 rounded-full shadow-md mb-4 overflow-hidden relative">
+        <img src="menupictures/logo.png" alt="Le Kiosk Logo" class="w-full h-full object-cover object-center">
     </div>
-
-    <section class="max-w-md mx-auto px-4 pb-6 mt-2">
-        <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-5 text-center">
-            <div class="text-3xl mb-2">⭐</div>
-            <h3 class="brand-heading text-lg font-bold text-amber-950 uppercase tracking-wide">Enjoyed your visit?</h3>
-            <p class="text-gray-400 text-xs mt-1 mb-4">Leave us a review — it means the world to us!</p>
-            <div class="flex gap-3">
-                <a href="https://share.google/fmnwOKoSpsGkA0QmU" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                    Google Review
-                </a>
-                <a href="https://wa.me/76840244?text=Hi%20Le%20Kiosk!%20I%20wanted%20to%20leave%20some%20feedback%20%F0%9F%8C%9F" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    WhatsApp
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- FLOATING CHECKOUT PILL -->
-    <div id="checkout-pill">
-        <div class="pill-inner" id="checkout-pill-inner">
-            <span class="pill-count" id="pill-count">0 items</span>
-            <span class="pill-total" id="pill-total">$0.00</span>
-            <span class="pill-cta">Checkout →</span>
-        </div>
+    <h1 class="brand-heading text-4xl font-extrabold text-amber-900 tracking-wide uppercase drop-shadow-sm">Le Kiosk</h1>
+    <p class="text-xs font-semibold uppercase tracking-wider text-amber-700 mt-1">Waffle & Ice Cream Menu</p>
+    <p class="text-sm text-amber-800/80 italic font-medium mt-2">"Serving Cravings, Sharing Smiles"</p>
+    <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-semibold">
+        <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
+        <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">📍 Wadi Chahrour</a>
     </div>
+</header>
 
-    <!-- CHECKOUT BOTTOM SHEET -->
-    <div id="checkout-sheet">
-        <div id="sheet-backdrop"></div>
-        <div id="sheet-body">
-            <div class="sheet-handle"></div>
-            <div class="sheet-header">
-                <div class="flex items-center justify-between">
-                    <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
-                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
-                </div>
-            </div>
-            <div class="sheet-scroll" id="sheet-scroll"></div>
-        </div>
-    </div>
+<nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto"></nav>
 
-    <!-- BOTTOM BAR -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
-        <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
-            <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
-            <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                <span>WhatsApp</span>
+<main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
+    <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
+</main>
+
+<div class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
+    <div class="flex-1 h-px bg-amber-200"></div>
+    <span class="text-amber-400 text-[10px] font-bold uppercase tracking-widest px-2">✦ &nbsp; Le Kiosk &nbsp; ✦</span>
+    <div class="flex-1 h-px bg-amber-200"></div>
+</div>
+
+<section class="max-w-md mx-auto px-4 pb-6 mt-2">
+    <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-5 text-center">
+        <div class="text-3xl mb-2">⭐</div>
+        <h3 class="brand-heading text-lg font-bold text-amber-950 uppercase tracking-wide">Enjoyed your visit?</h3>
+        <p class="text-gray-400 text-xs mt-1 mb-4">Leave us a review — it means the world to us!</p>
+        <div class="flex gap-3">
+            <a href="https://share.google/fmnwOKoSpsGkA0QmU" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google Review
+            </a>
+            <a href="https://wa.me/76840244?text=Hi%20Le%20Kiosk!%20I%20wanted%20to%20leave%20some%20feedback%20%F0%9F%8C%9F" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                WhatsApp
             </a>
         </div>
-        <div class="bg-amber-950 text-amber-50 rounded-2xl p-3 shadow-xl border border-amber-900 flex items-center justify-between gap-2">
-            <div>
-                <span class="block text-[10px] uppercase tracking-wider text-amber-300 font-bold">Need Delivery?</span>
-                <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <button id="order-mode-btn" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">🛒 Order</button>
-                <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md"><span>📞</span> Contact</button>
+    </div>
+</section>
+
+<!-- FLOATING CHECKOUT PILL -->
+<div id="checkout-pill">
+    <div class="pill-inner" id="checkout-pill-inner">
+        <span class="pill-count" id="pill-count">0 items</span>
+        <span class="pill-total" id="pill-total">$0.00</span>
+        <span class="pill-cta">Checkout →</span>
+    </div>
+</div>
+
+<!-- CHECKOUT BOTTOM SHEET -->
+<div id="checkout-sheet">
+    <div id="sheet-backdrop"></div>
+    <div id="sheet-body">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <div class="flex items-center justify-between">
+                <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
+                <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
             </div>
         </div>
+        <div class="sheet-scroll" id="sheet-scroll"></div>
     </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
+    <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
+        <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
+        <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            <span>WhatsApp</span>
+        </a>
+    </div>
+    <div class="bg-amber-950 text-amber-50 rounded-2xl p-3 shadow-xl border border-amber-900 flex items-center justify-between gap-2">
+        <div>
+            <span class="block text-[10px] uppercase tracking-wider text-amber-300 font-bold">Need Delivery?</span>
+            <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="order-mode-btn" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">🛒 Order</button>
+            <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md"><span>📞</span> Contact</button>
+        </div>
+    </div>
+</div>
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -184,15 +192,22 @@
 const TESTING_MODE = true;
 
 // ── GITHUB INBOX CONFIG ──────────────────────────────────────
-// Orders are written to inbox.json in your repo so a future POS
-// can read them. WhatsApp is always sent as backup regardless.
-const GH_OWNER = 'joetheproz5';
-const GH_REPO  = 'le-kiosk-menu';
-const GH_INBOX = 'inbox.json';
-const GH_API   = 'https://api.github.com';
-// Paste your GitHub fine-grained token here (Contents: read & write)
-// Leave blank to skip inbox and use WhatsApp only
-const GH_TOKEN = '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';
+// ⚠️  IMPORTANT: Generate a NEW fine-grained token at:
+//     github.com/settings/tokens → Fine-grained tokens
+//     → Only repo: le-kiosk-menu → Contents: Read & Write
+//     Your previous token was auto-revoked by GitHub because
+//     it was committed publicly to the repository.
+// ⚠️  DO NOT commit this file to GitHub with the token visible.
+//     Instead: paste the token, test locally, then either use
+//     a GitHub Secret or clear it before committing.
+const GH_OWNER  = 'joetheproz5';
+const GH_REPO   = 'le-kiosk-menu';
+// inbox.json lives at the ROOT of the repo (not inside /pos/)
+// so the POS at /pos/index.html can read it via GitHub API
+const GH_INBOX  = 'inbox.json';
+const GH_API    = 'https://api.github.com';
+// ← Paste your NEW token here:
+const GH_TOKEN  = '';
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const PILL_COLORS = {
@@ -206,196 +221,190 @@ const PILL_COLORS = {
     dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DELIVERY ZONES — centered on Le Kiosk exact GPS pin
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DELIVERY ZONES
 const CENTER_LAT = 33.821091538427524;
 const CENTER_LNG = 35.56496110422372;
-
-// Zone A — inner circle ~600m radius → $0.50
-const ZONE_A_RADIUS_KM = 0.60;
-
-// Zone B — medium ellipse → $1.00
-const ZONE_B_LAT_SEMI   = 0.010;
-const ZONE_B_LNG_SEMI   = 0.022;
-const ZONE_B_CENTER_LAT = 33.821091538427524;
-const ZONE_B_CENTER_LNG = 35.56496110422372;
-
-// Zone C — wider polygon → $1.50
+const ZONE_A_RADIUS_KM = 0.60;                     // $0.50
+const ZONE_B_LAT_SEMI = 0.010, ZONE_B_LNG_SEMI = 0.022; // $1.00
 const ZONE_C_POLYGON = [
-    [33.870, 35.535],[33.867, 35.558],[33.862, 35.590],
-    [33.848, 35.608],[33.825, 35.622],[33.808, 35.610],
-    [33.792, 35.590],[33.785, 35.555],[33.787, 35.520],
-    [33.797, 35.502],[33.816, 35.490],[33.835, 35.492],
-    [33.843, 35.542],[33.858, 35.542],[33.864, 35.538],
-];
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    [33.870,35.535],[33.867,35.558],[33.862,35.590],
+    [33.848,35.608],[33.825,35.622],[33.808,35.610],
+    [33.792,35.590],[33.785,35.555],[33.787,35.520],
+    [33.797,35.502],[33.816,35.490],[33.835,35.492],
+    [33.843,35.542],[33.858,35.542],[33.864,35.538],
+];                                                   // $1.50
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-function distKm(lat1, lng1, lat2, lng2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-function inEllipse(lat, lng, cLat, cLng, latS, lngS) {
-    return ((lat-cLat)/latS)**2 + ((lng-cLng)/lngS)**2 <= 1;
-}
-function pointInPolygon(lat, lng, poly) {
-    let inside = false;
-    for (let i=0, j=poly.length-1; i<poly.length; j=i++) {
-        const [xi,yi]=[poly[i][0],poly[i][1]], [xj,yj]=[poly[j][0],poly[j][1]];
-        if (((yi>lng)!==(yj>lng)) && (lat < (xj-xi)*(lng-yi)/(yj-yi)+xi)) inside=!inside;
-    }
-    return inside;
-}
-function getDeliveryZone(lat, lng) {
-    const d = distKm(lat, lng, CENTER_LAT, CENTER_LNG);
-    if (d <= ZONE_A_RADIUS_KM)
-        return { zone:'zone-a', fee:0.50, label:'Zone A', feeLabel:'$0.50', cls:'zone-a', emoji:'📍', canDeliver:true };
-    if (inEllipse(lat, lng, ZONE_B_CENTER_LAT, ZONE_B_CENTER_LNG, ZONE_B_LAT_SEMI, ZONE_B_LNG_SEMI))
-        return { zone:'zone-b', fee:1.00, label:'Zone B', feeLabel:'$1.00', cls:'zone-b', emoji:'🛵', canDeliver:true };
-    if (pointInPolygon(lat, lng, ZONE_C_POLYGON))
-        return { zone:'zone-c', fee:1.50, label:'Zone C', feeLabel:'$1.50', cls:'zone-c', emoji:'🗺️', canDeliver:true };
-    return { zone:'none', fee:0, label:'Outside delivery area', feeLabel:'$0.00', cls:'no-del', emoji:'🚫', canDeliver:false };
+function distKm(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function inEllipse(la,ln,cL,cN,lS,nS){return((la-cL)/lS)**2+((ln-cN)/nS)**2<=1;}
+function pointInPolygon(lat,lng,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const[xi,yi]=[poly[i][0],poly[i][1]],[xj,yj]=[poly[j][0],poly[j][1]];if(((yi>lng)!==(yj>lng))&&(lat<(xj-xi)*(lng-yi)/(yj-yi)+xi))inside=!inside;}return inside;}
+function getDeliveryZone(lat,lng){
+    const d=distKm(lat,lng,CENTER_LAT,CENTER_LNG);
+    if(d<=ZONE_A_RADIUS_KM) return{zone:'zone-a',fee:.5,label:'Zone A',feeLabel:'$0.50',cls:'zone-a',emoji:'📍',canDeliver:true};
+    if(inEllipse(lat,lng,CENTER_LAT,CENTER_LNG,ZONE_B_LAT_SEMI,ZONE_B_LNG_SEMI)) return{zone:'zone-b',fee:1,label:'Zone B',feeLabel:'$1.00',cls:'zone-b',emoji:'🛵',canDeliver:true};
+    if(pointInPolygon(lat,lng,ZONE_C_POLYGON)) return{zone:'zone-c',fee:1.5,label:'Zone C',feeLabel:'$1.50',cls:'zone-c',emoji:'🗺️',canDeliver:true};
+    return{zone:'none',fee:0,label:'Outside delivery area',feeLabel:'$0.00',cls:'no-del',emoji:'🚫',canDeliver:false};
 }
 
-// ── STATE ──────────────────────────────────────────────────────
-let orderMode = false, cart = {}, addonSel = {}, shishaSel = {}, itemMeta = {};
-let selectedType = null, detectedZone = null, userGPS = null, deliveryAddress = '';
-let _addonMap = [], _inboxSha = null;
+// ── STATE ──────────────────────────────────────────────────
+let orderMode=false,cart={},addonSel={},shishaSel={},itemMeta={};
+let selectedType=null,detectedZone=null,userGPS=null,deliveryAddress='';
+let _addonMap=[],_inboxSha=null;
 
-function isOpen() {
-    if (TESTING_MODE) return true;
-    const now = new Date();
-    const lbMin = (now.getUTCHours()*60 + now.getUTCMinutes() + 180) % 1440;
-    return Math.floor(lbMin/60) >= 18;
+function isOpen(){
+    if(TESTING_MODE) return true;
+    const now=new Date(),lbMin=(now.getUTCHours()*60+now.getUTCMinutes()+180)%1440;
+    return Math.floor(lbMin/60)>=18;
 }
 
-// ── GITHUB INBOX HELPERS ───────────────────────────────────────
-async function fetchInboxSha() {
-    const h = { 'Accept':'application/vnd.github.v3+json' };
-    if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
-    const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, { headers:h });
-    if (res.status === 404) { _inboxSha = null; return []; }
-    if (!res.ok) throw new Error('GitHub ' + res.status);
-    const d = await res.json();
-    _inboxSha = d.sha;
-    const bin = atob(d.content.replace(/\n/g,''));
-    const bytes = new Uint8Array(bin.length);
-    for (let i=0; i<bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return JSON.parse(new TextDecoder().decode(bytes));
+// ── INBOX TOAST ───────────────────────────────────────────
+let _toastTimer;
+function showInboxToast(msg,type=''){
+    const t=document.getElementById('inbox-toast');
+    t.textContent=msg; t.className='show'+(type?' '+type:'');
+    clearTimeout(_toastTimer);
+    _toastTimer=setTimeout(()=>{t.className='';},4000);
 }
-async function writeToInbox(order) {
-    let inbox = [];
-    try { inbox = await fetchInboxSha(); } catch(e) {}
+
+// ── GITHUB INBOX — robust write with SHA retry ────────────
+async function ghFetch(path, opts={}){
+    const h={'Accept':'application/vnd.github.v3+json',...(opts.headers||{})};
+    if(GH_TOKEN) h['Authorization']='Bearer '+GH_TOKEN;
+    const res=await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`,{...opts,headers:h});
+    return res;
+}
+
+async function readInbox(){
+    const res=await ghFetch(GH_INBOX);
+    if(res.status===404){_inboxSha=null;return[];}
+    if(!res.ok) throw new Error('Read failed: '+res.status);
+    const d=await res.json();
+    _inboxSha=d.sha;
+    const bin=atob(d.content.replace(/\n/g,''));
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    try{ return JSON.parse(new TextDecoder().decode(bytes)); }
+    catch(e){ return []; }
+}
+
+function toB64(str){
+    const bytes=new TextEncoder().encode(str);
+    let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
+    return btoa(bin);
+}
+
+async function writeToInbox(order){
+    // Step 1: always read fresh SHA to avoid 409 conflicts
+    let inbox=[];
+    try{ inbox=await readInbox(); } catch(e){ _inboxSha=null; inbox=[]; }
+
     inbox.unshift(order);
-    if (inbox.length > 100) inbox = inbox.slice(0, 100);
-    const bytes = new TextEncoder().encode(JSON.stringify(inbox, null, 2));
-    let binary = '';
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    const body = { message:'New customer order', content: btoa(binary) };
-    if (_inboxSha) body.sha = _inboxSha;
-    const h = { 'Content-Type':'application/json', 'Accept':'application/vnd.github.v3+json' };
-    if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
-    const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, {
-        method:'PUT', headers:h, body:JSON.stringify(body)
+    if(inbox.length>100) inbox=inbox.slice(0,100);
+
+    const body={message:'New order: '+order.id, content:toB64(JSON.stringify(inbox,null,2))};
+    if(_inboxSha) body.sha=_inboxSha;
+
+    const res=await ghFetch(GH_INBOX,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(body)
     });
-    if (!res.ok) throw new Error('Could not save to inbox');
-    const saved = await res.json();
-    _inboxSha = saved.content.sha;
+
+    // If 409 (SHA conflict) — re-read and retry once
+    if(res.status===409){
+        inbox=await readInbox();
+        inbox.unshift(order);
+        if(inbox.length>100) inbox=inbox.slice(0,100);
+        const body2={message:'New order: '+order.id+' (retry)', content:toB64(JSON.stringify(inbox,null,2)), sha:_inboxSha};
+        const res2=await ghFetch(GH_INBOX,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body2)});
+        if(!res2.ok){const e=await res2.json();throw new Error(e.message||res2.status);}
+        const saved2=await res2.json(); _inboxSha=saved2.content.sha;
+        return;
+    }
+    if(!res.ok){const e=await res.json();throw new Error(e.message||res.status);}
+    const saved=await res.json(); _inboxSha=saved.content.sha;
 }
 
-// ── ORDER MODE ─────────────────────────────────────────────────
-function toggleOrderMode() {
-    if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
-    orderMode = !orderMode;
-    document.body.classList.toggle('order-mode', orderMode);
-    const btn = document.getElementById('order-mode-btn');
-    btn.classList.toggle('active', orderMode);
-    btn.textContent = orderMode ? '✕ Cancel' : '🛒 Order';
-    if (!orderMode) {
-        cart = {}; addonSel = {}; shishaSel = {};
-        document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
-        document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
-        updatePill(); closeSheet();
+// ── ORDER MODE ────────────────────────────────────────────
+function toggleOrderMode(){
+    if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
+    orderMode=!orderMode;
+    document.body.classList.toggle('order-mode',orderMode);
+    const btn=document.getElementById('order-mode-btn');
+    btn.classList.toggle('active',orderMode);
+    btn.textContent=orderMode?'✕ Cancel':'🛒 Order';
+    if(!orderMode){
+        cart={};addonSel={};shishaSel={};
+        document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
+        document.querySelectorAll('.item-card-wrap').forEach(el=>el.classList.remove('has-qty'));
+        updatePill();closeSheet();
     }
 }
-function changeQty(itemKey, delta, elId) {
-    if (!orderMode) return;
-    cart[itemKey] = Math.max(0, (cart[itemKey]||0) + delta);
-    const el = document.getElementById(elId);
-    if (el) el.textContent = cart[itemKey];
-    const card = document.getElementById('card-'+elId);
-    if (card) card.classList.toggle('has-qty', cart[itemKey] > 0);
+function changeQty(itemKey,delta,elId){
+    if(!orderMode) return;
+    cart[itemKey]=Math.max(0,(cart[itemKey]||0)+delta);
+    const el=document.getElementById(elId);
+    if(el) el.textContent=cart[itemKey];
+    const card=document.getElementById('card-'+elId);
+    if(card) card.classList.toggle('has-qty',cart[itemKey]>0);
     updatePill();
 }
-function getTotalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
-function getItemsSubtotal() {
+function getTotalItems(){return Object.values(cart).reduce((a,b)=>a+b,0);}
+function getItemsSubtotal(){
     return Object.entries(cart).filter(([,v])=>v>0).reduce((sum,[key,qty])=>{
-        const price = parseFloat(key.split('|')[2].replace('$',''))||0;
-        const addons = (addonSel[key]||[]).reduce((a,s)=>a+s.price,0);
-        return sum + price*qty + addons;
+        const price=parseFloat(key.split('|')[2].replace('$',''))||0;
+        const addons=(addonSel[key]||[]).reduce((a,s)=>a+s.price,0);
+        return sum+price*qty+addons;
     },0);
 }
-function getDeliveryFee() {
-    return selectedType==='delivery' && detectedZone && detectedZone.canDeliver ? detectedZone.fee : 0;
-}
-function getGrandTotal() { return getItemsSubtotal() + getDeliveryFee(); }
+function getDeliveryFee(){return selectedType==='delivery'&&detectedZone&&detectedZone.canDeliver?detectedZone.fee:0;}
+function getGrandTotal(){return getItemsSubtotal()+getDeliveryFee();}
 
-// ── PILL ───────────────────────────────────────────────────────
-function updatePill() {
-    const count = getTotalItems();
-    document.getElementById('checkout-pill').classList.toggle('show', count>0 && orderMode);
-    if (count > 0) {
-        document.getElementById('pill-count').textContent = count+' item'+(count!==1?'s':'');
-        document.getElementById('pill-total').textContent = '$'+getItemsSubtotal().toFixed(2);
+// ── PILL ──────────────────────────────────────────────────
+function updatePill(){
+    const count=getTotalItems();
+    document.getElementById('checkout-pill').classList.toggle('show',count>0&&orderMode);
+    if(count>0){
+        document.getElementById('pill-count').textContent=count+' item'+(count!==1?'s':'');
+        document.getElementById('pill-total').textContent='$'+getItemsSubtotal().toFixed(2);
     }
 }
 
-// ── SHEET ──────────────────────────────────────────────────────
-function openSheet()  { renderSheet(); document.getElementById('checkout-sheet').classList.add('open'); document.body.style.overflow='hidden'; }
-function closeSheet() { document.getElementById('checkout-sheet').classList.remove('open'); document.body.style.overflow=''; }
+// ── SHEET ─────────────────────────────────────────────────
+function openSheet(){renderSheet();document.getElementById('checkout-sheet').classList.add('open');document.body.style.overflow='hidden';}
+function closeSheet(){document.getElementById('checkout-sheet').classList.remove('open');document.body.style.overflow='';}
 
-function renderSheet() {
-    _addonMap = [];
-    const addrEl = document.getElementById('delivery-address-ta');
-    if (addrEl) deliveryAddress = addrEl.value;
-    const existingName = (document.getElementById('sheet-name')||{}).value || '';
-    const entries = Object.entries(cart).filter(([,v])=>v>0);
-    if (!entries.length) return;
+function renderSheet(){
+    _addonMap=[];
+    const addrEl=document.getElementById('delivery-address-ta');
+    if(addrEl) deliveryAddress=addrEl.value;
+    const existingName=(document.getElementById('sheet-name')||{}).value||'';
+    const entries=Object.entries(cart).filter(([,v])=>v>0);
+    if(!entries.length) return;
 
-    let html = '<div style="padding-top:12px">';
-    entries.forEach(([key,qty]) => {
-        const [,name,price] = key.split('|');
-        const pn = parseFloat(price.replace('$',''))||0;
-        html += `<div class="sheet-item">
-            <div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div>
-            <div class="sheet-item-price">$${(pn*qty).toFixed(2)}</div>
-        </div>`;
-        const meta = itemMeta[key];
-        if (meta && meta.flavors && meta.flavors.length) {
-            const shSel = shishaSel[key];
-            const ki = _addonMap.length; _addonMap.push({key, type:'shisha'});
-            html += `<div class="addon-section"><div class="addon-section-title">💨 Choose flavor</div><div class="addon-chips">`;
-            meta.flavors.forEach((f,fi) => {
-                html += `<button class="addon-chip${shSel===f?' selected':''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`;
-            });
-            html += `</div></div>`;
+    let html='<div style="padding-top:12px">';
+    entries.forEach(([key,qty])=>{
+        const[,name,price]=key.split('|');
+        const pn=parseFloat(price.replace('$',''))||0;
+        html+=`<div class="sheet-item"><div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div><div class="sheet-item-price">$${(pn*qty).toFixed(2)}</div></div>`;
+        const meta=itemMeta[key];
+        if(meta&&meta.flavors&&meta.flavors.length){
+            const shSel=shishaSel[key],ki=_addonMap.length;_addonMap.push({key,type:'shisha'});
+            html+=`<div class="addon-section"><div class="addon-section-title">💨 Choose flavor</div><div class="addon-chips">`;
+            meta.flavors.forEach((f,fi)=>{ html+=`<button class="addon-chip${shSel===f?' selected':''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`; });
+            html+=`</div></div>`;
         }
-        if (meta && meta.addons && meta.addons.length) {
-            const selArr = addonSel[key]||[];
-            const ki = _addonMap.length; _addonMap.push({key, type:'addon'});
-            html += `<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
-            meta.addons.forEach((addon,ai) => {
-                const on = selArr.some(s=>s.label===addon.label);
-                html += `<button class="addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`;
-            });
-            html += `</div></div>`;
+        if(meta&&meta.addons&&meta.addons.length){
+            const selArr=addonSel[key]||[],ki=_addonMap.length;_addonMap.push({key,type:'addon'});
+            html+=`<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
+            meta.addons.forEach((addon,ai)=>{ const on=selArr.some(s=>s.label===addon.label); html+=`<button class="addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`; });
+            html+=`</div></div>`;
         }
     });
-    html += '</div>';
+    html+='</div>';
 
-    html += `<div class="sheet-divider"></div>
+    html+=`<div class="sheet-divider"></div>
     <div class="sheet-section-title">👤 Your Details</div>
     <div style="margin-bottom:12px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
@@ -416,360 +425,249 @@ function renderSheet() {
         ${renderLocationBox()}
     </div>`;
 
-    const canProceed = selectedType !== 'delivery' || (detectedZone && detectedZone.canDeliver);
-    const fee = getDeliveryFee(), sub = getItemsSubtotal(), total = sub + fee;
-    const feeBreakdown = (selectedType==='delivery' && detectedZone && detectedZone.canDeliver)
-        ? `<div style="font-size:11px;color:#b45309;margin-top:2px">Items $${sub.toFixed(2)} + delivery ${detectedZone.feeLabel}</div>` : '';
+    const canProceed=selectedType!=='delivery'||(detectedZone&&detectedZone.canDeliver);
+    const fee=getDeliveryFee(),sub=getItemsSubtotal(),total=sub+fee;
+    const feeBreakdown=(selectedType==='delivery'&&detectedZone&&detectedZone.canDeliver)
+        ?`<div style="font-size:11px;color:#b45309;margin-top:2px">Items $${sub.toFixed(2)} + delivery ${detectedZone.feeLabel}</div>`:'';
 
-    if (canProceed) {
-        html += `<div class="total-row">
-            <div>
-                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
-                ${feeBreakdown}
-            </div>
-            <span style="font-size:18px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span>
-        </div>
+    if(canProceed){
+        html+=`<div class="total-row"><div><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>${feeBreakdown}</div><span style="font-size:18px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span></div>
         <button id="send-order-btn">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
             Send Order on WhatsApp
         </button>`;
     }
-
-    document.getElementById('sheet-scroll').innerHTML = html;
+    document.getElementById('sheet-scroll').innerHTML=html;
 }
 
-function renderLocationBox() {
-    if (!detectedZone) {
-        return `<div class="location-detect-box">
-            <div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div>
-            <div style="font-size:11px;color:#b45309">Tap below so we can calculate your exact delivery fee.</div>
-            <button class="locate-main-btn" id="locate-btn">📍 Detect My Location</button>
-            <div class="err-text" id="err-location" style="margin-top:8px">Please detect your location to continue.</div>
-        </div>`;
+function renderLocationBox(){
+    if(!detectedZone){
+        return`<div class="location-detect-box"><div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div><div style="font-size:11px;color:#b45309">Tap below so we can calculate your exact delivery fee.</div><button class="locate-main-btn" id="locate-btn">📍 Detect My Location</button><div class="err-text" id="err-location" style="margin-top:8px">Please detect your location to continue.</div></div>`;
     }
-    if (!detectedZone.canDeliver) {
-        const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
-        return `<div class="location-detect-box no-delivery">
-            <div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div>
-            <div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>You're welcome to <strong>dine in</strong> or <strong>take away</strong>!</div>
-            <div class="zone-badge no-del" style="margin-top:8px">🚫 No delivery available</div>
-            ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
-            <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button>
-        </div>`;
+    if(!detectedZone.canDeliver){
+        const mu=userGPS?`https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}`:'';
+        return`<div class="location-detect-box no-delivery"><div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div><div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>You're welcome to <strong>dine in</strong> or <strong>take away</strong>!</div><div class="zone-badge no-del" style="margin-top:8px">🚫 No delivery available</div>${mu?`<div style="margin-top:8px"><a href="${mu}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}<button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button></div>`;
     }
-    const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
-    return `<div class="location-detect-box detected">
-        <div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div>
-        <div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">
-            ${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong>
-        </div>
-        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
-        <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Change location</button>
-        <div style="margin-top:10px;text-align:left">
-            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label>
-            <textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
-        </div>
-    </div>`;
+    const mu=userGPS?`https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}`:'';
+    return`<div class="location-detect-box detected"><div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div><div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong></div>${mu?`<div style="margin-top:8px"><a href="${mu}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}<button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Change location</button><div style="margin-top:10px;text-align:left"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label><textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea></div></div>`;
 }
 
-function detectLocation() {
-    if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
-    const btn = document.getElementById('locate-btn');
-    if (btn) { btn.disabled=true; btn.innerHTML='<span class="spin">⏳</span> Getting location…'; }
+function detectLocation(){
+    if(!navigator.geolocation){alert('Geolocation not supported.');return;}
+    const btn=document.getElementById('locate-btn');
+    if(btn){btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Getting location…';}
     navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            userGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            detectedZone = getDeliveryZone(userGPS.lat, userGPS.lng);
-            const ta = document.getElementById('delivery-address-ta');
-            if (ta) deliveryAddress = ta.value;
+        (pos)=>{
+            userGPS={lat:pos.coords.latitude,lng:pos.coords.longitude};
+            detectedZone=getDeliveryZone(userGPS.lat,userGPS.lng);
+            const ta=document.getElementById('delivery-address-ta');
+            if(ta) deliveryAddress=ta.value;
             renderSheet();
         },
-        (err) => {
-            if (btn) { btn.disabled=false; btn.innerHTML='📍 Detect My Location'; }
-            let msg = 'Could not get location. Please try again.';
-            if (err.code===1) msg='Location access denied. Please allow location and try again.';
-            if (err.code===3) msg='Location timed out. Please try again.';
-            const errEl = document.getElementById('err-location');
-            if (errEl) { errEl.textContent=msg; errEl.classList.add('show'); }
+        (err)=>{
+            if(btn){btn.disabled=false;btn.innerHTML='📍 Detect My Location';}
+            let msg='Could not get location. Please try again.';
+            if(err.code===1) msg='Location access denied. Please allow location and try again.';
+            if(err.code===3) msg='Location timed out. Please try again.';
+            const e=document.getElementById('err-location');
+            if(e){e.textContent=msg;e.classList.add('show');}
         },
-        { timeout:12000, enableHighAccuracy:true }
+        {timeout:12000,enableHighAccuracy:true}
     );
 }
-function resetLocation() {
-    const ta = document.getElementById('delivery-address-ta');
-    if (ta) deliveryAddress = ta.value;
-    userGPS=null; detectedZone=null; renderSheet();
+function resetLocation(){
+    const ta=document.getElementById('delivery-address-ta');
+    if(ta) deliveryAddress=ta.value;
+    userGPS=null;detectedZone=null;renderSheet();
 }
 
-// ── SEND ORDER ─────────────────────────────────────────────────
-async function sendOrder() {
-    const nameEl = document.getElementById('sheet-name');
-    const name   = nameEl ? nameEl.value.trim() : '';
-    let valid = true;
+// ── SEND ORDER ────────────────────────────────────────────
+async function sendOrder(){
+    const nameEl=document.getElementById('sheet-name');
+    const name=nameEl?nameEl.value.trim():'';
+    let valid=true;
 
-    if (!name) {
-        const e = document.getElementById('err-name');
-        if (e) e.classList.add('show');
-        if (nameEl) nameEl.classList.add('error');
-        valid = false;
+    if(!name){
+        const e=document.getElementById('err-name');if(e)e.classList.add('show');
+        if(nameEl)nameEl.classList.add('error');valid=false;
     } else {
-        const e = document.getElementById('err-name');
-        if (e) e.classList.remove('show');
-        if (nameEl) nameEl.classList.remove('error');
+        const e=document.getElementById('err-name');if(e)e.classList.remove('show');
+        if(nameEl)nameEl.classList.remove('error');
     }
-    if (!selectedType) {
-        const e = document.getElementById('err-type');
-        if (e) e.classList.add('show');
-        valid = false;
+    if(!selectedType){
+        const e=document.getElementById('err-type');if(e)e.classList.add('show');valid=false;
     } else {
-        const e = document.getElementById('err-type');
-        if (e) e.classList.remove('show');
+        const e=document.getElementById('err-type');if(e)e.classList.remove('show');
     }
-    if (selectedType === 'delivery') {
-        if (detectedZone && !detectedZone.canDeliver) {
-            valid = false;
-        } else if (!detectedZone) {
-            const e = document.getElementById('err-location');
-            if (e) { e.textContent='Please detect your location to continue.'; e.classList.add('show'); }
-            valid = false;
+    if(selectedType==='delivery'){
+        if(detectedZone&&!detectedZone.canDeliver){ valid=false; }
+        else if(!detectedZone){
+            const e=document.getElementById('err-location');
+            if(e){e.textContent='Please detect your location to continue.';e.classList.add('show');}
+            valid=false;
         }
     }
-    if (!valid) return;
+    if(!valid) return;
 
-    const sendBtn = document.getElementById('send-order-btn');
-    if (sendBtn) { sendBtn.disabled=true; sendBtn.textContent='⏳ Sending…'; }
+    const sendBtn=document.getElementById('send-order-btn');
+    if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Sending…';}
 
-    const entries   = Object.entries(cart).filter(([,v])=>v>0);
-    const timeStr   = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-    const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
-    const ta        = document.getElementById('delivery-address-ta');
-    const addr      = ta ? ta.value.trim() : deliveryAddress;
-    const fee       = getDeliveryFee();
+    const entries=Object.entries(cart).filter(([,v])=>v>0);
+    const timeStr=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+    const typeNames={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
+    const ta=document.getElementById('delivery-address-ta');
+    const addr=ta?ta.value.trim():deliveryAddress;
+    const fee=getDeliveryFee();
 
-    // Build structured order object for inbox
-    let subtotal = 0;
-    const orderItems = entries.map(([key,qty]) => {
-        const [,itemName,price] = key.split('|');
-        const pn = parseFloat(price.replace('$',''))||0;
-        subtotal += pn*qty;
-        const addonsForItem = (addonSel[key]||[]).map(a => { subtotal+=a.price; return {label:a.label, price:a.price}; });
-        return { name:itemName, price:pn, priceStr:price, qty, flavor:shishaSel[key]||null, addons:addonsForItem };
+    let subtotal=0;
+    const orderItems=entries.map(([key,qty])=>{
+        const[,itemName,price]=key.split('|');
+        const pn=parseFloat(price.replace('$',''))||0;
+        subtotal+=pn*qty;
+        const addonsForItem=(addonSel[key]||[]).map(a=>{subtotal+=a.price;return{label:a.label,price:a.price};});
+        return{name:itemName,price:pn,priceStr:price,qty,flavor:shishaSel[key]||null,addons:addonsForItem};
     });
-    subtotal += fee;
+    subtotal+=fee;
 
-    const order = {
-        id: 'MENU-'+Date.now(),
-        status: 'pending',
-        timestamp: new Date().toISOString(),
-        source: 'menu',
-        name, orderType: selectedType,
-        deliveryZone: (selectedType==='delivery' && detectedZone) ? detectedZone.label : null,
-        deliveryFee: fee,
-        gps: userGPS||null,
-        address: addr||null,
-        items: orderItems,
-        total: subtotal
+    const order={
+        id:'MENU-'+Date.now(),
+        status:'pending',
+        timestamp:new Date().toISOString(),
+        source:'menu',
+        name,orderType:selectedType,
+        deliveryZone:(selectedType==='delivery'&&detectedZone)?detectedZone.label:null,
+        deliveryFee:fee,
+        gps:userGPS||null,
+        address:addr||null,
+        items:orderItems,
+        total:subtotal
     };
 
-    // Try writing to GitHub inbox (if token provided)
-    if (GH_TOKEN) {
-        try { await writeToInbox(order); }
-        catch(e) { console.warn('Inbox write failed:', e.message); }
-    }
-
-    // Build WhatsApp message — always sent
-    let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
-    msg += `👤 *Name:* ${name}\n`;
-    msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
-    msg += `🕐 *Time:* ${timeStr}\n`;
-    if (selectedType === 'delivery') {
-        if (detectedZone && detectedZone.canDeliver) {
-            msg += `📍 *Zone:* ${detectedZone.label} — Fee: ${detectedZone.feeLabel}\n`;
+    // ── Write to GitHub inbox with visible feedback ──
+    if(GH_TOKEN){
+        showInboxToast('📥 Sending to POS…');
+        try{
+            await writeToInbox(order);
+            showInboxToast('✅ Order received by POS','ok');
+        } catch(e){
+            console.error('Inbox write failed:',e);
+            showInboxToast('⚠️ POS sync failed — WhatsApp still sent','err');
         }
-        if (userGPS) msg += `🗺️ *Customer Location:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
-        if (addr)    msg += `🏠 *Address details:* ${addr}\n`;
     }
-    msg += `━━━━━━━━━━━━━━━━━━\n`;
-    orderItems.forEach(it => {
-        msg += `• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
-        if (it.flavor) msg += `  ↳ Flavor: ${it.flavor}\n`;
-        (it.addons||[]).forEach(a => { msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
-    });
-    if (fee > 0) msg += `• 🛵 Delivery — $${fee.toFixed(2)}\n`;
-    msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
 
-    window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
+    // ── Build WhatsApp message — always sent ──
+    let msg='🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
+    msg+=`👤 *Name:* ${name}\n`;
+    msg+=`📦 *Type:* ${typeNames[selectedType]}\n`;
+    msg+=`🕐 *Time:* ${timeStr}\n`;
+    if(selectedType==='delivery'){
+        if(detectedZone&&detectedZone.canDeliver) msg+=`📍 *Zone:* ${detectedZone.label} — Fee: ${detectedZone.feeLabel}\n`;
+        if(userGPS) msg+=`🗺️ *Customer Location:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
+        if(addr) msg+=`🏠 *Address details:* ${addr}\n`;
+    }
+    msg+='━━━━━━━━━━━━━━━━━━\n';
+    orderItems.forEach(it=>{
+        msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
+        if(it.flavor) msg+=`  ↳ Flavor: ${it.flavor}\n`;
+        (it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;});
+    });
+    if(fee>0) msg+=`• 🛵 Delivery — $${fee.toFixed(2)}\n`;
+    msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
+
+    window.open('https://wa.me/76840244?text='+encodeURIComponent(msg),'_blank');
     closeSheet();
 }
 
-// ── ALL DELEGATED CLICKS ────────────────────────────────────────
-document.addEventListener('click', function(e) {
-    // Order mode toggle
-    if (e.target.closest('#order-mode-btn'))   { toggleOrderMode(); return; }
-    // Pill → open sheet
-    if (e.target.closest('#checkout-pill-inner')) { openSheet(); return; }
-    // Close sheet
-    if (e.target.closest('#close-sheet-btn') || e.target === document.getElementById('sheet-backdrop')) { closeSheet(); return; }
-    // Send order
-    if (e.target.closest('#send-order-btn'))  { sendOrder(); return; }
-    // Detect location
-    if (e.target.closest('#locate-btn'))      { detectLocation(); return; }
-    // Reset location
-    if (e.target.closest('#reset-loc-btn'))   { resetLocation(); return; }
-    // Order type selector
-    const typeBtn = e.target.closest('[data-select-type]');
-    if (typeBtn) { selectedType = typeBtn.dataset.selectType; renderSheet(); return; }
-    // Addon / shisha chips
-    const chip = e.target.closest('[data-type]');
-    if (!chip) return;
-    const type = chip.dataset.type, ki = parseInt(chip.dataset.ki);
-    const entry = _addonMap[ki];
-    if (!entry) return;
-    const { key } = entry;
-    const scrollTop = document.getElementById('sheet-scroll').scrollTop;
-    if (type === 'shisha') {
-        const fi = parseInt(chip.dataset.fi);
-        const meta = itemMeta[key];
-        if (!meta || !meta.flavors) return;
-        const flv = meta.flavors[fi];
-        shishaSel[key] = shishaSel[key]===flv ? null : flv;
-    } else if (type === 'addon') {
-        const ai = parseInt(chip.dataset.ai);
-        const meta = itemMeta[key];
-        if (!meta || !meta.addons) return;
-        const addon = meta.addons[ai];
-        const pn = parseFloat((addon.price||'0').replace('$',''))||0;
-        if (!addonSel[key]) addonSel[key]=[];
-        const idx = addonSel[key].findIndex(s=>s.label===addon.label);
-        if (idx>-1) addonSel[key].splice(idx,1);
-        else addonSel[key].push({label:addon.label, price:pn});
+// ── DELEGATED CLICKS ──────────────────────────────────────
+document.addEventListener('click',function(e){
+    if(e.target.closest('#order-mode-btn')){toggleOrderMode();return;}
+    if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
+    if(e.target.closest('#close-sheet-btn')||e.target===document.getElementById('sheet-backdrop')){closeSheet();return;}
+    if(e.target.closest('#send-order-btn')){sendOrder();return;}
+    if(e.target.closest('#locate-btn')){detectLocation();return;}
+    if(e.target.closest('#reset-loc-btn')){resetLocation();return;}
+    const typeBtn=e.target.closest('[data-select-type]');
+    if(typeBtn){selectedType=typeBtn.dataset.selectType;renderSheet();return;}
+    const chip=e.target.closest('[data-type]');
+    if(!chip) return;
+    const type=chip.dataset.type,ki=parseInt(chip.dataset.ki),entry=_addonMap[ki];
+    if(!entry) return;
+    const{key}=entry;
+    const scrollTop=document.getElementById('sheet-scroll').scrollTop;
+    if(type==='shisha'){
+        const fi=parseInt(chip.dataset.fi),meta=itemMeta[key];
+        if(!meta||!meta.flavors) return;
+        const flv=meta.flavors[fi];
+        shishaSel[key]=shishaSel[key]===flv?null:flv;
+    } else if(type==='addon'){
+        const ai=parseInt(chip.dataset.ai),meta=itemMeta[key];
+        if(!meta||!meta.addons) return;
+        const addon=meta.addons[ai];
+        const pn=parseFloat((addon.price||'0').replace('$',''))||0;
+        if(!addonSel[key]) addonSel[key]=[];
+        const idx=addonSel[key].findIndex(s=>s.label===addon.label);
+        if(idx>-1) addonSel[key].splice(idx,1); else addonSel[key].push({label:addon.label,price:pn});
     }
     renderSheet();
-    document.getElementById('sheet-scroll').scrollTop = scrollTop;
+    document.getElementById('sheet-scroll').scrollTop=scrollTop;
 });
 
-// ── PILLS & MENU RENDER ────────────────────────────────────────
-function renderPills(item) {
-    if (!item.flavors || !item.flavors.length) return '';
-    const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
-    return '<div class="flex flex-wrap gap-1 mt-2">' +
-        item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
+// ── MENU RENDER ───────────────────────────────────────────
+function renderPills(item){
+    if(!item.flavors||!item.flavors.length) return '';
+    const pc=PILL_COLORS[item.flavorColor]||PILL_COLORS.amber;
+    return'<div class="flex flex-wrap gap-1 mt-2">'+item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('')+'</div>';
 }
-
-async function loadMenu() {
-    try {
-        const res = await fetch('menu.json?v=' + Date.now());
-        if (!res.ok) throw new Error();
-        return await res.json();
-    } catch(e) {
-        document.getElementById('menu-container').innerHTML = '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
-        return null;
-    }
+async function loadMenu(){
+    try{const res=await fetch('menu.json?v='+Date.now());if(!res.ok) throw new Error();return await res.json();}
+    catch(e){document.getElementById('menu-container').innerHTML='<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';return null;}
 }
-
-function renderAddonSection(category) {
-    let html = `<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
-    (category.addonGroups||[]).forEach(group => {
-        html += `<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div>
-            <div class="flex-grow min-w-0">
-                <div class="flex justify-between items-center gap-2">
-                    <span class="font-bold text-amber-950 text-sm">${group.label}</span>
-                    <span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span>
-                </div>
-                <p class="text-gray-400 text-xs mt-0.5">${group.note}</p>
-                <div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div>
-            </div>
-        </div>`;
+function renderAddonSection(category){
+    let html=`<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
+    (category.addonGroups||[]).forEach(group=>{
+        html+=`<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div><div class="flex-grow min-w-0"><div class="flex justify-between items-center gap-2"><span class="font-bold text-amber-950 text-sm">${group.label}</span><span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span></div><p class="text-gray-400 text-xs mt-0.5">${group.note}</p><div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div></div></div>`;
     });
-    html += `</div></section>`;
-    return html;
+    return html+'</div></section>';
 }
-
-function initMenu(menuData) {
-    const nav = document.getElementById('main-nav');
-    nav.innerHTML = menuData.map((c,i)=>
-        `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
-    ).join('');
-    const container = document.getElementById('menu-container');
-    container.innerHTML = '';
-    menuData.forEach(category => {
-        if (category.type==='addons') { container.innerHTML+=renderAddonSection(category); return; }
-        let html = `<section id="${category.key}" class="scroll-mt-24">
-            <h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
-        if (category.items && category.items.length) {
-            html += `<div class="grid gap-3.5">`;
-            category.items.forEach((item,idx) => {
-                const itemKey = `${category.key}|${item.name}|${item.price}`;
-                const qtyId   = `qty-${category.key}-${idx}`;
-                const cardId  = `card-${qtyId}`;
-                html += `<div class="item-card-wrap" id="${cardId}">
-                    <div class="${item.flavors&&item.flavors.length?'min-h-28':'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
-                        <div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px">
-                            <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
-                        </div>
-                        <div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0">
-                            <div class="flex justify-between items-start gap-2">
-                                <h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3>
-                                <span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span>
-                            </div>
-                            <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
-                            ${renderPills(item)}
-                            <div class="qty-control">
-                                <button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button>
-                                <div class="qty-num" id="${qtyId}">0</div>
-                                <button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+function initMenu(menuData){
+    document.getElementById('main-nav').innerHTML=menuData.map((c,i)=>`<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`).join('');
+    const container=document.getElementById('menu-container');
+    container.innerHTML='';
+    menuData.forEach(category=>{
+        if(category.type==='addons'){container.innerHTML+=renderAddonSection(category);return;}
+        let html=`<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
+        if(category.items&&category.items.length){
+            html+='<div class="grid gap-3.5">';
+            category.items.forEach((item,idx)=>{
+                const itemKey=`${category.key}|${item.name}|${item.price}`;
+                const qtyId=`qty-${category.key}-${idx}`,cardId=`card-${qtyId}`;
+                html+=`<div class="item-card-wrap" id="${cardId}"><div class="${item.flavors&&item.flavors.length?'min-h-28':'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200"><div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px"><img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block"></div><div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0"><div class="flex justify-between items-start gap-2"><h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3><span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span></div><p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button><div class="qty-num" id="${qtyId}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button></div></div></div></div>`;
             });
-            html += `</div>`;
+            html+='</div>';
         }
-        if (category.bottomBanner) {
-            html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
-        }
-        html += `</section>`;
-        container.innerHTML += html;
+        if(category.bottomBanner) html+=`<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
+        container.innerHTML+=html+'</section>';
     });
 }
-
-function initScrollSpy(menuData) {
-    const navLinks = document.querySelectorAll('.nav-link');
-    function setActive(id) {
-        navLinks.forEach(link => {
-            if (link.dataset.section===id) { link.classList.add('active'); link.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
-            else link.classList.remove('active');
-        });
-    }
-    const observer = new IntersectionObserver(
-        entries => { entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }); },
-        { rootMargin:'-30% 0px -65% 0px', threshold:0 }
-    );
-    menuData.forEach(c => { const el=document.getElementById(c.key); if(el) observer.observe(el); });
+function initScrollSpy(menuData){
+    const navLinks=document.querySelectorAll('.nav-link');
+    function setActive(id){navLinks.forEach(link=>{if(link.dataset.section===id){link.classList.add('active');link.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}else link.classList.remove('active');});}
+    const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:'-30% 0px -65% 0px',threshold:0});
+    menuData.forEach(c=>{const el=document.getElementById(c.key);if(el)observer.observe(el);});
 }
 
 // Contact bubble
-const bubble  = document.getElementById('contact-bubble');
-const ctoggle = document.getElementById('contact-toggle');
-let bubbleOpen = false;
-ctoggle.addEventListener('click', () => { bubbleOpen=!bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
-document.addEventListener('click', e => {
-    if (bubbleOpen && !bubble.contains(e.target) && e.target!==ctoggle && !ctoggle.contains(e.target)) { bubbleOpen=false; bubble.classList.remove('open'); }
-});
+const bubble=document.getElementById('contact-bubble'),ctoggle=document.getElementById('contact-toggle');
+let bubbleOpen=false;
+ctoggle.addEventListener('click',()=>{bubbleOpen=!bubbleOpen;bubble.classList.toggle('open',bubbleOpen);});
+document.addEventListener('click',e=>{if(bubbleOpen&&!bubble.contains(e.target)&&e.target!==ctoggle&&!ctoggle.contains(e.target)){bubbleOpen=false;bubble.classList.remove('open');}});
 
 // Boot
-loadMenu().then(data => {
-    if (!data) return;
-    initMenu(data);
-    initScrollSpy(data);
-    itemMeta = {};
-    data.forEach(cat => {
-        if (cat.type==='addons') return;
-        (cat.items||[]).forEach(item => {
-            itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
-        });
-    });
+loadMenu().then(data=>{
+    if(!data) return;
+    initMenu(data);initScrollSpy(data);
+    itemMeta={};
+    data.forEach(cat=>{if(cat.type==='addons')return;(cat.items||[]).forEach(item=>{itemMeta[`${cat.key}|${item.name}|${item.price}`]=item;});});
 });
 </script>
 </body>
