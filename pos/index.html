@@ -479,9 +479,9 @@ input,textarea,select{font-family:var(--font);outline:none}
       </div>
       <div class="order-scroll" id="order-scroll"></div>
       <div class="order-proceed-bar" id="order-proceed-bar">
-        <div class="action-btns" style="padding:12px 14px">
-          <button class="act-btn btn-charge" onclick="showOrderDetails()" id="proceed-btn">Proceed →</button>
-        </div>
+        <div class="order-proceed-bar" id="order-proceed-bar" style="padding:12px 14px;border-top:1px solid var(--g200)">
+  <button class="act-btn btn-charge" style="width:100%;justify-content:center" onclick="showOrderDetails()">Proceed →</button>
+</div>
       </div>
       <div class="order-details-section" id="order-details-section" style="display:none;flex-direction:column;flex:0 0 auto">
         <div class="order-form" id="order-form" style="padding-top:10px">
@@ -894,6 +894,7 @@ function showOrderDetails(){
   if(!orderLines.length){ showToast('Add items first','error'); return; }
   document.getElementById('order-proceed-bar').style.display='none';
   document.getElementById('order-details-section').style.display='flex';
+  document.getElementById('order-details-section').style.flexDirection='column';
 }
 function hideOrderDetails(){
   document.getElementById('order-details-section').style.display='none';
