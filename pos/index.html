@@ -15,24 +15,22 @@
   --green:#22c55e;--green-d:#16a34a;--red:#ef4444;--red-d:#dc2626;
   --blue:#3b82f6;--blue-d:#2563eb;
   --white:#fff;--font:'Poppins',sans-serif;--brand:'Fredoka',sans-serif;
-  --sidebar-order:320px;--cat-sidebar:100px;
+  --sidebar-order:320px;--cat-sidebar:160px;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:var(--g100);color:var(--g900);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button{font-family:var(--font);cursor:pointer;border:none;outline:none}
 input,textarea,select{font-family:var(--font);outline:none}
-
-/* ── ITEM TILE PALETTE (light pastel per category) ── */
 :root{
-  --tp0-bg:#fffbeb;--tp0-border:#fbbf24;--tp0-text:#92400e;--tp0-dot:#f59e0b;--tp0-price:#b45309;
-  --tp1-bg:#eff6ff;--tp1-border:#93c5fd;--tp1-text:#1e40af;--tp1-dot:#3b82f6;--tp1-price:#1d4ed8;
-  --tp2-bg:#f0fdf4;--tp2-border:#86efac;--tp2-text:#166534;--tp2-dot:#22c55e;--tp2-price:#15803d;
-  --tp3-bg:#fdf4ff;--tp3-border:#d8b4fe;--tp3-text:#7e22ce;--tp3-dot:#a855f7;--tp3-price:#7c3aed;
-  --tp4-bg:#fff7ed;--tp4-border:#fdba74;--tp4-text:#9a3412;--tp4-dot:#f97316;--tp4-price:#c2410c;
-  --tp5-bg:#f0f9ff;--tp5-border:#7dd3fc;--tp5-text:#075985;--tp5-dot:#0ea5e9;--tp5-price:#0369a1;
-  --tp6-bg:#f0fdf4;--tp6-border:#6ee7b7;--tp6-text:#065f46;--tp6-dot:#10b981;--tp6-price:#047857;
-  --tp7-bg:#fff7ed;--tp7-border:#fca5a5;--tp7-text:#991b1b;--tp7-dot:#ef4444;--tp7-price:#b91c1c;
-  --tp8-bg:#fefce8;--tp8-border:#fde047;--tp8-text:#854d0e;--tp8-dot:#eab308;--tp8-price:#a16207;
+  --cat0-bg:#fef3c7;--cat0-border:#f59e0b;--cat0-text:#92400e;--cat0-head:#f59e0b;--cat0-headtext:#fff;
+  --cat1-bg:#dbeafe;--cat1-border:#3b82f6;--cat1-text:#1e40af;--cat1-head:#3b82f6;--cat1-headtext:#fff;
+  --cat2-bg:#dcfce7;--cat2-border:#22c55e;--cat2-text:#166534;--cat2-head:#22c55e;--cat2-headtext:#fff;
+  --cat3-bg:#fce7f3;--cat3-border:#ec4899;--cat3-text:#9d174d;--cat3-head:#ec4899;--cat3-headtext:#fff;
+  --cat4-bg:#ede9fe;--cat4-border:#8b5cf6;--cat4-text:#5b21b6;--cat4-head:#8b5cf6;--cat4-headtext:#fff;
+  --cat5-bg:#fee2e2;--cat5-border:#ef4444;--cat5-text:#991b1b;--cat5-head:#ef4444;--cat5-headtext:#fff;
+  --cat6-bg:#d1fae5;--cat6-border:#10b981;--cat6-text:#065f46;--cat6-head:#10b981;--cat6-headtext:#fff;
+  --cat7-bg:#ffedd5;--cat7-border:#f97316;--cat7-text:#9a3412;--cat7-head:#f97316;--cat7-headtext:#fff;
+  --cat8-bg:#e0f2fe;--cat8-border:#0ea5e9;--cat8-text:#075985;--cat8-head:#0ea5e9;--cat8-headtext:#fff;
 }
 
 /* ── LOGIN ── */
@@ -54,6 +52,8 @@ input,textarea,select{font-family:var(--font);outline:none}
 .attempt-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--a200)}
 .dot.used{background:var(--red)}
+
+/* Token section in login box */
 .token-divider{border-top:1px solid var(--a200);margin:20px 0 16px;text-align:center;position:relative}
 .token-divider span{background:var(--white);padding:0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);position:relative;top:-9px}
 .token-note{font-size:11px;color:var(--g500);margin-bottom:10px;line-height:1.5}
@@ -109,49 +109,65 @@ input,textarea,select{font-family:var(--font);outline:none}
 .token-modal-skip:hover{background:var(--g200)}
 
 .pos-main{display:flex;flex:1;min-height:0}
-
-/* ── CATEGORY SIDEBAR ── */
-.cat-sidebar{width:var(--cat-sidebar);flex-shrink:0;background:var(--a950);display:flex;flex-direction:column;overflow-y:auto;padding:8px 6px;gap:4px;-webkit-overflow-scrolling:touch}
+.cat-sidebar{width:var(--cat-sidebar);flex-shrink:0;background:var(--a950);display:flex;flex-direction:column;overflow-y:auto;padding:10px 8px;gap:6px;-webkit-overflow-scrolling:touch}
 .cat-sidebar::-webkit-scrollbar{display:none}
-.cat-sidebar-btn{padding:9px 6px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.03em;text-align:center;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);border:1.5px solid transparent;cursor:pointer;transition:all .15s;line-height:1.3;word-break:break-word;display:flex;flex-direction:column;align-items:center;gap:4px}
+.cat-sidebar-btn{padding:10px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);border:1.5px solid transparent;cursor:pointer;transition:all .15s;line-height:1.3;word-break:break-word}
 .cat-sidebar-btn:hover{background:rgba(255,255,255,.14);color:var(--white)}
-.cat-sidebar-btn.active{color:var(--white);background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3)}
-.cat-sidebar-btn .cat-icon{font-size:18px}
-.cat-sidebar-btn .cat-dot-sb{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-
-/* ── MENU PANEL ── */
-.menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow:hidden}
-
-/* Search bar */
-.menu-search-bar{padding:10px 12px;background:var(--white);border-bottom:1px solid var(--g200);flex-shrink:0;display:flex;align-items:center;gap:8px}
-.menu-search-wrap{flex:1;position:relative}
-.menu-search-input{width:100%;padding:8px 12px 8px 34px;border:1.5px solid var(--a200);border-radius:10px;font-size:12px;font-weight:500;color:var(--a950);background:var(--a50);transition:border-color .2s}
-.menu-search-input:focus{border-color:var(--a500);background:var(--white)}
-.menu-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--g400);pointer-events:none}
-.menu-item-count{font-size:10px;font-weight:700;color:var(--g400);white-space:nowrap}
-
-/* Item grid */
-.menu-grid{flex:1;overflow-y:auto;padding:10px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;align-content:start;-webkit-overflow-scrolling:touch}
-.menu-grid::-webkit-scrollbar{width:4px}
-.menu-grid::-webkit-scrollbar-thumb{background:var(--g300);border-radius:4px}
-.menu-grid::-webkit-scrollbar-track{background:transparent}
-
-/* Item tile */
-.item-tile{border-radius:11px;padding:9px 10px 10px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;position:relative;user-select:none;display:flex;flex-direction:column;touch-action:manipulation}
-.item-tile:hover{filter:brightness(.97)}
-.item-tile:active{transform:scale(.96)}
-.item-tile-cat{display:flex;align-items:center;gap:4px;margin-bottom:5px}
-.item-tile-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.item-tile-cat-label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.75}
-.item-tile-name{font-size:11.5px;font-weight:700;line-height:1.3;margin-bottom:5px;flex:1}
-.item-tile-price{font-size:13px;font-weight:800}
-.item-tile-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px;margin-bottom:6px;background:rgba(0,0,0,.05);display:block}
-.item-qty-badge{position:absolute;top:6px;right:7px;background:var(--a950);color:var(--a300);font-size:9px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 3px}
-.item-tile.has-qty .item-qty-badge{display:flex}
-.item-tile.has-qty{box-shadow:0 0 0 2px var(--tile-dot-color,#f59e0b)}
-
-.menu-empty{text-align:center;padding:60px 20px;color:var(--g400);font-size:13px;grid-column:1/-1}
-.menu-empty-icon{font-size:40px;margin-bottom:10px}
+.cat-sidebar-btn.active{color:var(--white);border-color:currentColor}
+.cat-sidebar-btn .cat-icon{font-size:18px;display:block;margin-bottom:4px}
+.menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
+.menu-cat-section{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--g200)}
+.menu-cat-header{padding:10px 14px;display:flex;align-items:center;gap:8px;font-family:var(--brand);font-size:15px;font-weight:700;letter-spacing:.04em}
+.menu-cat-header .cat-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.25);color:inherit;margin-left:auto}
+.menu-cat-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:10px;background:var(--white)}
+.item-card-wrap{position:relative}
+.item-card{background:var(--white);border-radius:10px;border:2px solid var(--g200);overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation}
+.item-card:hover{border-color:var(--a300);box-shadow:0 2px 12px rgba(245,158,11,.15)}
+.item-card:active{transform:scale(.97)}
+.item-card.in-cart{border-color:var(--a400)!important}
+.item-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--g100)}
+.item-info{padding:6px 8px 8px}
+.item-name{font-size:11px;font-weight:700;color:var(--a950);line-height:1.3;margin-bottom:2px}
+.item-price{font-size:12px;font-weight:800;color:var(--a600)}
+.item-qty-badge{display:none;position:absolute;top:5px;right:5px;background:var(--a500);color:var(--white);font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:10px;align-items:center;justify-content:center;padding:0 4px}
+.item-card-wrap.has-qty .item-qty-badge{display:flex}
+.item-card-wrap.has-qty .item-card{background:var(--a50)}
+.cat-color-0 .menu-cat-header{background:var(--cat0-head);color:var(--cat0-headtext)}
+.cat-color-0 .menu-cat-section{border-color:var(--cat0-border)}
+.cat-color-0 .item-card-wrap.has-qty .item-card{border-color:var(--cat0-border)!important}
+.cat-color-1 .menu-cat-header{background:var(--cat1-head);color:var(--cat1-headtext)}
+.cat-color-1 .menu-cat-section{border-color:var(--cat1-border)}
+.cat-color-1 .item-card-wrap.has-qty .item-card{border-color:var(--cat1-border)!important}
+.cat-color-2 .menu-cat-header{background:var(--cat2-head);color:var(--cat2-headtext)}
+.cat-color-2 .menu-cat-section{border-color:var(--cat2-border)}
+.cat-color-2 .item-card-wrap.has-qty .item-card{border-color:var(--cat2-border)!important}
+.cat-color-3 .menu-cat-header{background:var(--cat3-head);color:var(--cat3-headtext)}
+.cat-color-3 .menu-cat-section{border-color:var(--cat3-border)}
+.cat-color-3 .item-card-wrap.has-qty .item-card{border-color:var(--cat3-border)!important}
+.cat-color-4 .menu-cat-header{background:var(--cat4-head);color:var(--cat4-headtext)}
+.cat-color-4 .menu-cat-section{border-color:var(--cat4-border)}
+.cat-color-4 .item-card-wrap.has-qty .item-card{border-color:var(--cat4-border)!important}
+.cat-color-5 .menu-cat-header{background:var(--cat5-head);color:var(--cat5-headtext)}
+.cat-color-5 .menu-cat-section{border-color:var(--cat5-border)}
+.cat-color-5 .item-card-wrap.has-qty .item-card{border-color:var(--cat5-border)!important}
+.cat-color-6 .menu-cat-header{background:var(--cat6-head);color:var(--cat6-headtext)}
+.cat-color-6 .menu-cat-section{border-color:var(--cat6-border)}
+.cat-color-6 .item-card-wrap.has-qty .item-card{border-color:var(--cat6-border)!important}
+.cat-color-7 .menu-cat-header{background:var(--cat7-head);color:var(--cat7-headtext)}
+.cat-color-7 .menu-cat-section{border-color:var(--cat7-border)}
+.cat-color-7 .item-card-wrap.has-qty .item-card{border-color:var(--cat7-border)!important}
+.cat-color-8 .menu-cat-header{background:var(--cat8-head);color:var(--cat8-headtext)}
+.cat-color-8 .menu-cat-section{border-color:var(--cat8-border)}
+.cat-color-8 .item-card-wrap.has-qty .item-card{border-color:var(--cat8-border)!important}
+.cat-sidebar-btn[data-ci="0"].active{background:var(--cat0-head);border-color:var(--cat0-head);color:#fff}
+.cat-sidebar-btn[data-ci="1"].active{background:var(--cat1-head);border-color:var(--cat1-head);color:#fff}
+.cat-sidebar-btn[data-ci="2"].active{background:var(--cat2-head);border-color:var(--cat2-head);color:#fff}
+.cat-sidebar-btn[data-ci="3"].active{background:var(--cat3-head);border-color:var(--cat3-head);color:#fff}
+.cat-sidebar-btn[data-ci="4"].active{background:var(--cat4-head);border-color:var(--cat4-head);color:#fff}
+.cat-sidebar-btn[data-ci="5"].active{background:var(--cat5-head);border-color:var(--cat5-head);color:#fff}
+.cat-sidebar-btn[data-ci="6"].active{background:var(--cat6-head);border-color:var(--cat6-head);color:#fff}
+.cat-sidebar-btn[data-ci="7"].active{background:var(--cat7-head);border-color:var(--cat7-head);color:#fff}
+.cat-sidebar-btn[data-ci="8"].active{background:var(--cat8-head);border-color:var(--cat8-head);color:#fff}
 
 /* ── ORDERS VIEW ── */
 #orders-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
@@ -340,6 +356,7 @@ input,textarea,select{font-family:var(--font);outline:none}
   </div>
 </div>
 
+<!-- TOKEN MODAL (shown when token is missing after login) -->
 <div id="token-modal">
   <div class="token-modal-box">
     <h3>GitHub Token Required</h3>
@@ -366,6 +383,8 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div class="login-err" id="login-err"></div>
     <div class="lockout-bar" id="lockout-bar"></div>
     <div class="attempt-dots" id="attempt-dots"></div>
+
+    <!-- Token entry right on login screen so staff can set it before booting -->
     <div class="token-divider"><span>GitHub Token</span></div>
     <p class="token-note">Needed to save orders &amp; update inbox. <a href="https://github.com/settings/tokens" target="_blank">Create one here</a> → Fine-grained → Contents: read &amp; write.</p>
     <div class="token-row">
@@ -395,16 +414,7 @@ input,textarea,select{font-family:var(--font);outline:none}
   </div>
   <div class="pos-main">
     <div class="cat-sidebar" id="cat-sidebar"></div>
-    <div class="menu-panel" id="menu-panel-wrap">
-      <div class="menu-search-bar">
-        <div class="menu-search-wrap">
-          <span class="menu-search-icon">🔍</span>
-          <input type="text" id="menu-search" class="menu-search-input" placeholder="Search items…" autocomplete="off" oninput="onMenuSearch()">
-        </div>
-        <span class="menu-item-count" id="menu-item-count"></span>
-      </div>
-      <div class="menu-grid" id="menu-panel"></div>
-    </div>
+    <div class="menu-panel" id="menu-panel"></div>
     <div id="orders-view">
       <div class="orders-toolbar">
         <h2>Orders Log</h2>
@@ -498,20 +508,6 @@ const CAT_ICONS    = {
 };
 const XOR_KEY = 'pos_k3y_!2024';
 
-// Pastel palette per category index — keeps Le Kiosk amber brand feel
-// each entry: bg, border (active), text, dot color, price color
-const TILE_PALETTE = [
-  {bg:'#fffbeb',border:'#fbbf24',text:'#92400e',dot:'#f59e0b',price:'#b45309'},  // amber
-  {bg:'#eff6ff',border:'#93c5fd',text:'#1e40af',dot:'#3b82f6',price:'#1d4ed8'},  // blue
-  {bg:'#f0fdf4',border:'#86efac',text:'#166534',dot:'#22c55e',price:'#15803d'},  // green
-  {bg:'#fdf4ff',border:'#d8b4fe',text:'#7e22ce',dot:'#a855f7',price:'#7c3aed'},  // purple
-  {bg:'#fff7ed',border:'#fdba74',text:'#9a3412',dot:'#f97316',price:'#c2410c'},  // orange
-  {bg:'#f0f9ff',border:'#7dd3fc',text:'#075985',dot:'#0ea5e9',price:'#0369a1'},  // sky
-  {bg:'#f0fdf4',border:'#6ee7b7',text:'#065f46',dot:'#10b981',price:'#047857'},  // teal
-  {bg:'#fef2f2',border:'#fca5a5',text:'#991b1b',dot:'#ef4444',price:'#b91c1c'},  // red
-  {bg:'#fefce8',border:'#fde047',text:'#854d0e',dot:'#eab308',price:'#a16207'},  // yellow
-];
-
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
@@ -521,11 +517,12 @@ let ordersFilter='all',showingOrders=false,showingInbox=false;
 let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=false;
 let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0;
+// FIX: track in-flight inbox writes so poll doesn't clobber them
 let inboxWritePending=false;
-let menuSearchQuery='';
 
 // ═══════════════════════════════════════════════════
-// TOKEN
+// TOKEN — XOR-obfuscated in sessionStorage
+// (clears when browser tab closes)
 // ═══════════════════════════════════════════════════
 function xorStr(str, key=XOR_KEY){
   return Array.from(str).map((c,i)=>
@@ -665,11 +662,14 @@ async function bootPOS(){
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
   hideLoading();
+  // Poll every 15s using Contents API (no CDN cache)
   inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
 
 // ═══════════════════════════════════════════════════
 // GITHUB HELPERS
+// All reads/writes go through the Contents API — no raw.githubusercontent.com
+// raw has a 5-min CDN cache; Contents API always returns live data.
 // ═══════════════════════════════════════════════════
 function ghHeaders(){
   const h={'Accept':'application/vnd.github.v3+json','User-Agent':'LeKiosk-POS/1.0'};
@@ -688,6 +688,9 @@ function toB64(str){
   let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
   return btoa(bin);
 }
+
+// Read a file — returns {data, sha}
+// FIX: always uses Contents API, never raw CDN
 async function ghRead(path){
   const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
   if(res.status===404) return {data:null,sha:null};
@@ -695,8 +698,11 @@ async function ghRead(path){
   const d=await res.json();
   return{data:JSON.parse(fromB64(d.content)), sha:d.sha};
 }
+
+// Write a file — fetches fresh SHA right before writing to avoid conflicts
 async function ghWrite(path, data, message){
   if(!hasToken()) throw new Error('No GitHub token — click the 🔑 button in the top bar');
+  // Always fetch fresh SHA immediately before write (avoids stale SHA conflicts)
   let sha=null;
   try{
     const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
@@ -729,94 +735,46 @@ async function loadMenu(){
 }
 
 // ═══════════════════════════════════════════════════
-// CATEGORY SIDEBAR — now with color dots & All button
+// CATEGORY SIDEBAR
 // ═══════════════════════════════════════════════════
 function renderCatSidebar(){
   const sidebar=document.getElementById('cat-sidebar');
-  const allActive=activeCatKey===null;
-  let html=`<button class="cat-sidebar-btn${allActive?' active':''}" onclick="filterByCategory(null,this)" style="gap:5px">
-    <span class="cat-icon">🍽️</span>
-    <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,${allActive?1:.6});letter-spacing:.03em">All</span>
-  </button>`;
-  menuData.forEach((cat,i)=>{
-    const p=TILE_PALETTE[i%TILE_PALETTE.length];
+  sidebar.innerHTML=menuData.map((cat,i)=>{
     const icon=CAT_ICONS[cat.key]||CAT_ICONS[cat.key.toLowerCase()]||'🍽️';
-    const isActive=activeCatKey===cat.key;
-    html+=`<button class="cat-sidebar-btn${isActive?' active':''}" data-ci="${i}" onclick="filterByCategory('${cat.key}',this)">
-      <span class="cat-icon">${icon}</span>
-      <span class="cat-dot-sb" style="background:${p.dot}"></span>
-      <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,${isActive?1:.6});letter-spacing:.02em;text-align:center;line-height:1.2">${cat.title}</span>
-    </button>`;
-  });
-  sidebar.innerHTML=html;
+    return`<button class="cat-sidebar-btn${cat.key===activeCatKey?' active':''}" data-ci="${i}" onclick="scrollToCategory('${cat.key}',${i},this)"><span class="cat-icon">${icon}</span>${cat.title}</button>`;
+  }).join('');
 }
-
-function filterByCategory(key,btn){
+function scrollToCategory(key,idx,btn){
   activeCatKey=key;
-  document.getElementById('menu-search').value='';
-  menuSearchQuery='';
   document.querySelectorAll('.cat-sidebar-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderMenuPanel();
-}
-
-function onMenuSearch(){
-  menuSearchQuery=document.getElementById('menu-search').value.toLowerCase();
-  // When searching, show all categories
-  if(menuSearchQuery){
-    activeCatKey=null;
-    document.querySelectorAll('.cat-sidebar-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
-  }
-  renderMenuPanel();
+  const el=document.getElementById('cat-section-'+key);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ═══════════════════════════════════════════════════
-// MENU PANEL — flat colored tile grid
+// MENU PANEL
 // ═══════════════════════════════════════════════════
 function renderMenuPanel(){
   const panel=document.getElementById('menu-panel');
-  let html='';
-  let totalVisible=0;
-
-  menuData.forEach((cat,ci)=>{
-    // Skip if filtering by category and this isn't it
-    if(activeCatKey!==null && cat.key!==activeCatKey) return;
-    const p=TILE_PALETTE[ci%TILE_PALETTE.length];
+  panel.innerHTML=menuData.map((cat,ci)=>{
     const icon=CAT_ICONS[cat.key]||'🍽️';
-
-    (cat.items||[]).forEach((item,idx)=>{
-      // Apply search filter
-      if(menuSearchQuery && !item.name.toLowerCase().includes(menuSearchQuery)) return;
-
-      const qty=getQtyForItem(cat.key,idx);
-      const wrapId=`wrap-${cat.key}-${idx}`;
-      const hasImg=item.image&&item.image.trim()!=='';
-      totalVisible++;
-
-      html+=`<div class="item-tile${qty>0?' has-qty':''}" id="${wrapId}"
-        style="background:${p.bg};border-color:${qty>0?p.border:'transparent'};--tile-dot-color:${p.dot}"
-        onclick="addToOrder('${cat.key}',${idx})">
-        ${hasImg?`<img class="item-tile-img" src="${item.image}" alt="${item.name}" onerror="this.style.display='none'">`:''}
-        <div class="item-tile-cat">
-          <span class="item-tile-dot" style="background:${p.dot}"></span>
-          <span class="item-tile-cat-label" style="color:${p.dot}">${cat.title}</span>
-        </div>
-        <div class="item-tile-name" style="color:${p.text}">${item.name}</div>
-        <div class="item-tile-price" style="color:${p.price}">${item.price}</div>
-        <div class="item-qty-badge" id="badge-${cat.key}-${idx}">${qty>0?qty:''}</div>
-      </div>`;
-    });
-  });
-
-  if(!totalVisible){
-    html=`<div class="menu-empty"><div class="menu-empty-icon">🔍</div>No items found</div>`;
-  }
-
-  panel.innerHTML=html;
-
-  // Update count badge
-  const countEl=document.getElementById('menu-item-count');
-  if(countEl) countEl.textContent=totalVisible>0?`${totalVisible} item${totalVisible===1?'':'s'}`:'';
+    const itemsHtml=(cat.items||[]).map((item,idx)=>{
+      const wrapId=`wrap-${cat.key}-${idx}`,qty=getQtyForItem(cat.key,idx);
+      return`<div class="item-card-wrap${qty>0?' has-qty':''}" id="${wrapId}"><div class="item-card${qty>0?' in-cart':''}" onclick="addToOrder('${cat.key}',${idx})"><img class="item-img" src="${item.image||''}" alt="${item.name}" onerror="this.style.display='none'"><div class="item-info"><div class="item-name">${item.name}</div><div class="item-price">${item.price}</div></div></div><div class="item-qty-badge" id="badge-${cat.key}-${idx}">${qty>0?qty:''}</div></div>`;
+    }).join('');
+    return`<div class="menu-cat-section cat-color-${ci%9}" id="cat-section-${cat.key}"><div class="menu-cat-header">${icon} ${cat.title}<span class="cat-badge">${(cat.items||[]).length} items</span></div><div class="menu-cat-items">${itemsHtml}</div></div>`;
+  }).join('');
+  setupScrollSpy();
+}
+function setupScrollSpy(){
+  const panel=document.getElementById('menu-panel');
+  panel.addEventListener('scroll',()=>{
+    const sections=menuData.map(cat=>document.getElementById('cat-section-'+cat.key)).filter(Boolean);
+    let ai=0;sections.forEach((sec,i)=>{if(sec.offsetTop-panel.scrollTop<=50)ai=i;});
+    document.querySelectorAll('.cat-sidebar-btn').forEach((btn,i)=>btn.classList.toggle('active',i===ai));
+    if(menuData[ai]) activeCatKey=menuData[ai].key;
+  },{passive:true});
 }
 
 // ═══════════════════════════════════════════════════
@@ -825,6 +783,7 @@ function renderMenuPanel(){
 function priceNum(p){return parseFloat((p||'0').replace(/[^0-9.]/g,''))||0;}
 function getQtyForItem(catKey,itemIdx){
   const cat=menuData.find(c=>c.key===catKey);if(!cat||!cat.items||!cat.items[itemIdx]) return 0;
+  const item=cat.items[itemIdx];
   const line=orderLines.find(l=>l.catKey===catKey&&l.itemIdx===itemIdx);
   return line?line.qty:0;
 }
@@ -839,15 +798,9 @@ function addToOrder(catKey,itemIdx){
 }
 function updateItemBadge(catKey,itemIdx){
   const qty=getQtyForItem(catKey,itemIdx);
-  const tile=document.getElementById(`wrap-${catKey}-${itemIdx}`);
+  const wrap=document.getElementById(`wrap-${catKey}-${itemIdx}`);
   const badge=document.getElementById(`badge-${catKey}-${itemIdx}`);
-  if(tile){
-    tile.classList.toggle('has-qty',qty>0);
-    // Find the palette for this cat
-    const ci=menuData.findIndex(c=>c.key===catKey);
-    const p=TILE_PALETTE[ci%TILE_PALETTE.length];
-    tile.style.borderColor=qty>0?p.border:'transparent';
-  }
+  if(wrap){wrap.classList.toggle('has-qty',qty>0);const card=wrap.querySelector('.item-card');if(card)card.classList.toggle('in-cart',qty>0);}
   if(badge)badge.textContent=qty>0?qty:'';
 }
 function changeQty(id,delta){
@@ -859,9 +812,8 @@ function changeQty(id,delta){
 function removeLine(id){
   const line=orderLines.find(l=>l.id===id);
   if(line){
-    const tile=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`);
-    const badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
-    if(tile){tile.classList.remove('has-qty');tile.style.borderColor='transparent';}
+    const wrap=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`),badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
+    if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}
     if(badge)badge.textContent='';
   }
   orderLines=orderLines.filter(l=>l.id!==id);renderOrderPanel();
@@ -886,9 +838,8 @@ function clearOrder(){
   document.getElementById('note-label').style.display='none';
   document.getElementById('order-note').style.display='none';
   prev.forEach(line=>{
-    const tile=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`);
-    const badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
-    if(tile){tile.classList.remove('has-qty');tile.style.borderColor='transparent';}
+    const wrap=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`),badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
+    if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}
     if(badge)badge.textContent='';
   });
   renderOrderPanel();
@@ -993,6 +944,7 @@ function loadOrderIntoCurrent(order){
 
 // ═══════════════════════════════════════════════════
 // CHARGE & SAVE
+// FIX: fetch fresh orders, prepend, trim to 200, write back
 // ═══════════════════════════════════════════════════
 async function chargeOrder(){
   if(!validateOrder()) return;
@@ -1001,11 +953,14 @@ async function chargeOrder(){
   chargeBtn.disabled=true;chargeBtn.textContent='Saving…';
   showLoading('Saving order…');
   try{
+    // Read current orders (fresh, not cached)
     let orders=[];
     try{ const r=await ghRead(ORDERS_PATH); orders=r.data||[]; }catch(_){ orders=[]; }
+    // Prepend new order, cap at MAX_ORDERS
     orders.unshift(order);
     if(orders.length>MAX_ORDERS) orders=orders.slice(0,MAX_ORDERS);
     ordersData=orders;
+    // Write back — ghWrite always fetches fresh SHA
     await ghWrite(ORDERS_PATH,orders,`Order ${order.id} — ${order.name}`);
     showToast(`Order ${order.id} saved ✓`,'success');
     clearOrder();
@@ -1042,12 +997,16 @@ async function updateOrderStatus(id,status){
 
 // ═══════════════════════════════════════════════════
 // INBOX POLL
+// FIX 1: uses Contents API (live data, no CDN cache)
+// FIX 2: skips read while a write is in-flight (inboxWritePending)
+//        so a confirmed order can't reappear from a stale read
 // ═══════════════════════════════════════════════════
 async function pollInbox(force=false){
-  if(inboxWritePending && !force) return;
+  if(inboxWritePending && !force) return; // don't clobber an in-flight write
   try{
     const{data,sha}=await ghRead(INBOX_PATH);
     inboxData=data||[];
+    // Only update sha if we're NOT mid-write
     if(!inboxWritePending) inboxSha=sha;
     const pending=inboxData.filter(o=>o.status==='pending');
     const newCount=pending.length;
@@ -1065,16 +1024,23 @@ function updateInboxBadge(count){
   const badge=document.getElementById('inbox-badge');
   badge.textContent=count;badge.classList.toggle('show',count>0);
 }
+
+// FIX: confirm writes status BEFORE loading into current order
+// and sets inboxWritePending to block poll from overwriting
 async function confirmInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
+  // Disable buttons immediately to prevent double-tap
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
+  // Optimistically mark as confirmed in local state
   order.status='confirmed';
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
   renderInboxList();
+  // Write to GitHub with write-lock so poll doesn't clobber
   inboxWritePending=true;
   try{
     await ghWrite(INBOX_PATH,inboxData,`Confirm order ${id}`);
   }catch(e){
+    // Write failed — revert local state so it doesn't disappear wrongly
     order.status='pending';
     renderInboxList();
     updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
@@ -1082,9 +1048,11 @@ async function confirmInboxOrder(id){
   }finally{
     inboxWritePending=false;
   }
+  // Load into current order AFTER write succeeds
   loadOrderIntoCurrent(order);
   document.getElementById('inbox-tab-btn').classList.remove('has-new');
 }
+
 async function declineInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
@@ -1104,6 +1072,7 @@ async function declineInboxOrder(id){
   renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
 }
+
 function renderInboxList(){
   const list=document.getElementById('inbox-list');
   const pending=inboxData.filter(o=>o.status==='pending');
@@ -1139,7 +1108,7 @@ function toggleOrdersView(){
   if(showingInbox) toggleInboxView();
   showingOrders=!showingOrders;
   document.getElementById('cat-sidebar').style.display=showingOrders?'none':'flex';
-  document.getElementById('menu-panel-wrap').style.display=showingOrders?'none':'flex';
+  document.getElementById('menu-panel').style.display=showingOrders?'none':'block';
   document.getElementById('orders-view').classList.toggle('show',showingOrders);
   document.getElementById('orders-tab-btn').classList.toggle('active',showingOrders);
   if(showingOrders) loadOrders(true);
@@ -1148,7 +1117,7 @@ function toggleInboxView(){
   if(showingOrders) toggleOrdersView();
   showingInbox=!showingInbox;
   document.getElementById('cat-sidebar').style.display=showingInbox?'none':'flex';
-  document.getElementById('menu-panel-wrap').style.display=showingInbox?'none':'flex';
+  document.getElementById('menu-panel').style.display=showingInbox?'none':'block';
   document.getElementById('inbox-view').classList.toggle('show',showingInbox);
   document.getElementById('inbox-tab-btn').classList.toggle('active',showingInbox);
   if(showingInbox){
