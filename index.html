@@ -281,30 +281,15 @@
 
         const DELIVERY_FEES = { inside: 0.50, outside: 1.50 };
 
-        // addon selections: itemKey -> { label, price (num) }
+        // addonSelections: itemKey -> { label, price (num) }  (one per item)
         let addonSelections = {};
-
-        // Shisha flavor selections: itemKey -> flavor string
+        // shishaSelections: itemKey -> flavor string
         let shishaSelections = {};
-        const SHISHA_CATS = ['shisha'];
-        const SHISHA_FLAVORS = ['Double Apple', 'Lemon & Mint'];
 
-        // Which category keys trigger which addon type
-        const SWEET_ADDON_CATS  = ['desserts'];
-        const SAVORY_ADDON_CATS = ['sandwiches', 'appetizers', 'Burgers', 'sajj'];
+        // itemMeta: itemKey -> item object from menu.json (addons[], flavors[])
+        let itemMeta = {};
 
-        // Loaded addon groups from menu.json — populated after load
-        let sweetAddonGroups  = [];
-        let savoryAddonGroups = [];
-
-        function categoryAddonType(catKey) {
-            const k = catKey.toLowerCase();
-            if (SWEET_ADDON_CATS.some(c => k.includes(c.toLowerCase())))  return 'sweet';
-            if (SAVORY_ADDON_CATS.some(c => k.toLowerCase() === c.toLowerCase())) return 'savory';
-            return null;
-        }
-
-        // selectCartAddon handled via event delegation on #cart-items
+        // selectCartAddon handled via event delegation
 
 
         function isOpen() {
@@ -410,32 +395,29 @@
                     <div class="cart-item-price">$${lineTotal.toFixed(2)}</div>
                 </div>`;
 
-                // ── Addon picker (sweet / savory) ──
-                const addonType = categoryAddonType(catKey);
-                if (addonType) {
-                    const groups = addonType === 'sweet' ? sweetAddonGroups : savoryAddonGroups;
-                    const sel    = addonSelections[key];
+                // ── Per-item addon picker ──
+                const meta = itemMeta[key];
+                if (meta && meta.addons && meta.addons.length) {
+                    const sel = addonSelections[key];
                     if (sel) totalNum += sel.price;
-                    if (groups.length) {
-                        const ki = _addonKeyMap.length;
-                        _addonKeyMap.push(key);
-                        const rowLabel = addonType === 'sweet' ? '🍫 Add a sweet extra' : '🧀 Add a savory extra';
-                        html += `<div class="cart-addon-row"><div class="cart-addon-label">${rowLabel}</div><div class="cart-addon-chips">`;
-                        groups.forEach((grp, gi) => {
-                            const on = sel && sel.label === grp.label;
-                            html += `<button class="cart-addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-gi="${gi}">${grp.emoji} ${grp.label} <span style="opacity:.7">${grp.price}</span></button>`;
-                        });
-                        html += `</div></div>`;
-                    }
+                    const ki = _addonKeyMap.length;
+                    _addonKeyMap.push(key);
+                    html += `<div class="cart-addon-row"><div class="cart-addon-label">➕ Add extra</div><div class="cart-addon-chips">`;
+                    meta.addons.forEach((addon, ai) => {
+                        const pn = parseFloat((addon.price||'0').replace('$','')) || 0;
+                        const on = sel && sel.label === addon.label;
+                        html += `<button class="cart-addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.7">${addon.price}</span></button>`;
+                    });
+                    html += `</div></div>`;
                 }
 
-                // ── Shisha flavor picker ──
-                if (SHISHA_CATS.some(c => catKey.toLowerCase() === c.toLowerCase())) {
+                // ── Shisha / item flavor picker (from item.flavors array) ──
+                if (meta && meta.flavors && meta.flavors.length) {
                     const shSel = shishaSelections[key];
                     const ki = _addonKeyMap.length;
                     _addonKeyMap.push(key);
                     html += `<div class="cart-addon-row"><div class="cart-addon-label">💨 Choose flavor</div><div class="cart-addon-chips">`;
-                    SHISHA_FLAVORS.forEach((flv, fi) => {
+                    meta.flavors.forEach((flv, fi) => {
                         const on = shSel === flv;
                         html += `<button class="cart-addon-chip${on?' selected':''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${flv}</button>`;
                     });
@@ -456,20 +438,21 @@
             if (!itemKey) return;
 
             if (type === 'addon') {
-                const gi       = parseInt(btn.dataset.gi);
-                const catKey   = itemKey.split('|')[0];
-                const addonType = categoryAddonType(catKey);
-                const groups   = addonType === 'sweet' ? sweetAddonGroups : savoryAddonGroups;
-                const grp      = groups[gi];
-                if (!grp) return;
-                if (addonSelections[itemKey] && addonSelections[itemKey].label === grp.label)
+                const ai   = parseInt(btn.dataset.ai);
+                const meta = itemMeta[itemKey];
+                if (!meta || !meta.addons || !meta.addons[ai]) return;
+                const addon = meta.addons[ai];
+                const pn    = parseFloat((addon.price||'0').replace('$','')) || 0;
+                if (addonSelections[itemKey] && addonSelections[itemKey].label === addon.label)
                     delete addonSelections[itemKey];
                 else
-                    addonSelections[itemKey] = { label: grp.label, price: grp.priceNum };
+                    addonSelections[itemKey] = { label: addon.label, price: pn };
                 renderCartPanel();
             } else if (type === 'shisha') {
-                const fi  = parseInt(btn.dataset.fi);
-                const flv = SHISHA_FLAVORS[fi];
+                const fi   = parseInt(btn.dataset.fi);
+                const meta = itemMeta[itemKey];
+                if (!meta || !meta.flavors || !meta.flavors[fi]) return;
+                const flv  = meta.flavors[fi];
                 if (shishaSelections[itemKey] === flv) delete shishaSelections[itemKey];
                 else shishaSelections[itemKey] = flv;
                 renderCartPanel();
@@ -768,16 +751,14 @@
             if (data) {
                 initMenu(data);
                 initScrollSpy(data);
-                // Extract addon groups
+                // Build itemMeta lookup: itemKey -> item data
+                itemMeta = {};
                 data.forEach(cat => {
-                    if (cat.type !== 'addons') return;
-                    const k = (cat.key || '').toLowerCase();
-                    const groups = (cat.addonGroups || []).map(g => ({
-                        ...g,
-                        priceNum: parseFloat((g.price || '0').replace('$','')) || 0
-                    }));
-                    if (k.includes('sweet'))  sweetAddonGroups  = groups;
-                    if (k.includes('savory')) savoryAddonGroups = groups;
+                    if (cat.type === 'addons') return;
+                    (cat.items || []).forEach(item => {
+                        const key = cat.key + '|' + item.name + '|' + item.price;
+                        itemMeta[key] = item;
+                    });
                 });
             }
         });
