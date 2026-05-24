@@ -16,8 +16,6 @@
         .nav-link.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
         #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
-
-        /* ── ORDER MODE ── */
         .qty-control { display: none; align-items: center; margin-top: 8px; }
         .order-mode .qty-control { display: flex; }
         .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
@@ -27,8 +25,6 @@
         .qty-plus:hover { background: #d97706; }
         .qty-num { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: #451a03; background: #fff; border-top: 1.5px solid #fde68a; border-bottom: 1.5px solid #fde68a; height: 28px; line-height: 28px; }
         .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
-
-        /* ── FLOATING CHECKOUT PILL ── */
         #checkout-pill { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 55; white-space: nowrap; }
         #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
         .pill-inner { background: #1c0f00; border: 1px solid #f59e0b; border-radius: 100px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.15s; }
@@ -36,8 +32,6 @@
         .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
         .pill-total { color: #fef3c7; font-size: 13px; font-weight: 700; }
         .pill-cta { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 5px 12px; border-radius: 100px; }
-
-        /* ── CHECKOUT BOTTOM SHEET ── */
         #checkout-sheet { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
         #checkout-sheet.open { pointer-events: all; }
         #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
@@ -47,8 +41,6 @@
         .sheet-handle { width: 40px; height: 4px; background: #e5e7eb; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; }
         .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
         .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 24px; -webkit-overflow-scrolling: touch; }
-
-        /* ── ORDER ITEMS ── */
         .sheet-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #fef3c7; }
         .sheet-item:last-child { border-bottom: none; }
         .sheet-item-name { font-size: 13px; font-weight: 700; color: #451a03; }
@@ -60,8 +52,6 @@
         .addon-chip { padding: 5px 12px; border-radius: 100px; border: 1.5px solid #fde68a; background: #fffbeb; color: #92400e; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s; }
         .addon-chip:hover { border-color: #f59e0b; background: #fef3c7; }
         .addon-chip.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
-
-        /* ── FORM ── */
         .sheet-divider { height: 1px; background: #fde68a; margin: 16px 0; }
         .sheet-section-title { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 700; color: #451a03; margin-bottom: 10px; }
         .sheet-input { width: 100%; padding: 11px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; }
@@ -72,31 +62,30 @@
         .order-type-btn:hover { background: #fef3c7; border-color: #fcd34d; }
         .order-type-btn.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
         .order-type-btn .type-icon { font-size: 20px; display: block; margin-bottom: 3px; }
-
-        /* ── DELIVERY LOCATION BOX ── */
         .delivery-sub { margin-top: 12px; display: none; }
         .delivery-sub.show { display: block; }
         .location-detect-box { border: 2px dashed #fde68a; border-radius: 14px; padding: 16px; text-align: center; background: #fffbeb; }
         .location-detect-box.detected { border-style: solid; border-color: #f59e0b; background: #fef3c7; }
+        .location-detect-box.no-delivery { border-style: solid; border-color: #ef4444; background: #fef2f2; }
         .locate-main-btn { background: #f59e0b; color: #1c0f00; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; margin-top: 8px; }
         .locate-main-btn:hover { background: #d97706; }
         .locate-main-btn:disabled { opacity: .5; cursor: not-allowed; }
         .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; margin-top: 10px; }
-        .zone-badge.free { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
-        .zone-badge.cheap { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
-        .zone-badge.far { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
-        .manual-addr { margin-top: 10px; }
-        .manual-addr textarea { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
-        .manual-addr textarea:focus { border-color: #f59e0b; }
-        .manual-addr textarea.error { border-color: #ef4444; background: #fef2f2; }
-
-        /* ── TOTAL ── */
+        .zone-badge.zone-a { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
+        .zone-badge.zone-b { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .zone-badge.zone-c { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
+        .zone-badge.no-del { background: #f3f4f6; color: #374151; border: 1.5px solid #e5e7eb; }
+        .manual-addr-ta { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
+        .manual-addr-ta:focus { border-color: #f59e0b; }
         .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
         .err-text { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
         .err-text.show { display: block; }
         #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin .7s linear infinite; display: inline-block; }
+        #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+        #send-order-btn:hover { background: #16a34a; }
+        #send-order-btn:disabled { background: #9ca3af; cursor: not-allowed; }
     </style>
 </head>
 <body class="pb-32">
@@ -146,7 +135,7 @@
 
     <!-- FLOATING CHECKOUT PILL -->
     <div id="checkout-pill">
-        <div class="pill-inner" onclick="openSheet()">
+        <div class="pill-inner" id="checkout-pill-inner">
             <span class="pill-count" id="pill-count">0 items</span>
             <span class="pill-total" id="pill-total">$0.00</span>
             <span class="pill-cta">Checkout →</span>
@@ -155,13 +144,13 @@
 
     <!-- CHECKOUT BOTTOM SHEET -->
     <div id="checkout-sheet">
-        <div id="sheet-backdrop" onclick="closeSheet()"></div>
+        <div id="sheet-backdrop"></div>
         <div id="sheet-body">
             <div class="sheet-handle"></div>
             <div class="sheet-header">
                 <div class="flex items-center justify-between">
                     <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
-                    <button onclick="closeSheet()" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
                 </div>
             </div>
             <div class="sheet-scroll" id="sheet-scroll"></div>
@@ -183,17 +172,28 @@
                 <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
             </div>
             <div class="flex items-center gap-2">
-                <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">🛒 Order</button>
+                <button id="order-mode-btn" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">🛒 Order</button>
                 <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md"><span>📞</span> Contact</button>
             </div>
         </div>
     </div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// TESTING MODE — set false to enable the 6PM-12AM time lock
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TESTING MODE — set false to re-enable 6PM-12AM time lock
 const TESTING_MODE = true;
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// ── GITHUB INBOX CONFIG ──────────────────────────────────────
+// Orders are written to inbox.json in your repo so a future POS
+// can read them. WhatsApp is always sent as backup regardless.
+const GH_OWNER = 'joetheproz5';
+const GH_REPO  = 'le-kiosk-menu';
+const GH_INBOX = 'inbox.json';
+const GH_API   = 'https://api.github.com';
+// Paste your GitHub fine-grained token here (Contents: read & write)
+// Leave blank to skip inbox and use WhatsApp only
+const GH_TOKEN = '';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const PILL_COLORS = {
     amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
@@ -206,265 +206,234 @@ const PILL_COLORS = {
     dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DELIVERY ZONES — polygons traced from your maps
-// Zone 1: Haret El Sett  → FREE delivery
-// Zone 2: Wadi Chahrour  → $0.50
-// Outside both           → $1.00
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const ZONE_HARET = [
-    [33.8085, 35.6195],[33.8092, 35.6215],[33.8105, 35.6230],
-    [33.8118, 35.6242],[33.8130, 35.6255],[33.8140, 35.6248],
-    [33.8148, 35.6235],[33.8155, 35.6220],[33.8158, 35.6205],
-    [33.8155, 35.6190],[33.8148, 35.6178],[33.8138, 35.6168],
-    [33.8125, 35.6162],[33.8112, 35.6160],[33.8100, 35.6165],
-    [33.8090, 35.6175],[33.8085, 35.6195]
-];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DELIVERY ZONES — centered on Le Kiosk exact GPS pin
+const CENTER_LAT = 33.821091538427524;
+const CENTER_LNG = 35.56496110422372;
 
-const ZONE_WADI = [
-    [33.8050, 35.6140],[33.8065, 35.6165],[33.8075, 35.6185],
-    [33.8085, 35.6195],[33.8090, 35.6175],[33.8100, 35.6165],
-    [33.8112, 35.6160],[33.8125, 35.6162],[33.8138, 35.6168],
-    [33.8148, 35.6178],[33.8155, 35.6190],[33.8158, 35.6205],
-    [33.8155, 35.6220],[33.8148, 35.6235],[33.8140, 35.6248],
-    [33.8148, 35.6262],[33.8155, 35.6278],[33.8160, 35.6295],
-    [33.8158, 35.6312],[33.8150, 35.6325],[33.8138, 35.6332],
-    [33.8125, 35.6335],[33.8110, 35.6330],[33.8095, 35.6320],
-    [33.8082, 35.6305],[33.8070, 35.6285],[33.8060, 35.6265],
-    [33.8052, 35.6245],[33.8045, 35.6225],[33.8040, 35.6205],
-    [33.8038, 35.6185],[33.8040, 35.6165],[33.8050, 35.6140]
-];
+// Zone A — inner circle ~600m radius → $0.50
+const ZONE_A_RADIUS_KM = 0.60;
 
-// Ray-casting point-in-polygon algorithm
-function pointInPolygon(lat, lng, polygon) {
+// Zone B — medium ellipse → $1.00
+const ZONE_B_LAT_SEMI   = 0.010;
+const ZONE_B_LNG_SEMI   = 0.022;
+const ZONE_B_CENTER_LAT = 33.821091538427524;
+const ZONE_B_CENTER_LNG = 35.56496110422372;
+
+// Zone C — wider polygon → $1.50
+const ZONE_C_POLYGON = [
+    [33.870, 35.535],[33.867, 35.558],[33.862, 35.590],
+    [33.848, 35.608],[33.825, 35.622],[33.808, 35.610],
+    [33.792, 35.590],[33.785, 35.555],[33.787, 35.520],
+    [33.797, 35.502],[33.816, 35.490],[33.835, 35.492],
+    [33.843, 35.542],[33.858, 35.542],[33.864, 35.538],
+];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function distKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function inEllipse(lat, lng, cLat, cLng, latS, lngS) {
+    return ((lat-cLat)/latS)**2 + ((lng-cLng)/lngS)**2 <= 1;
+}
+function pointInPolygon(lat, lng, poly) {
     let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const xi = polygon[i][0], yi = polygon[i][1];
-        const xj = polygon[j][0], yj = polygon[j][1];
-        const intersect = ((yi > lng) !== (yj > lng)) &&
-            (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
+    for (let i=0, j=poly.length-1; i<poly.length; j=i++) {
+        const [xi,yi]=[poly[i][0],poly[i][1]], [xj,yj]=[poly[j][0],poly[j][1]];
+        if (((yi>lng)!==(yj>lng)) && (lat < (xj-xi)*(lng-yi)/(yj-yi)+xi)) inside=!inside;
     }
     return inside;
 }
-
 function getDeliveryZone(lat, lng) {
-    if (pointInPolygon(lat, lng, ZONE_HARET)) return { zone: 'haret', fee: 0,    label: 'Haret El Sett',  feeLabel: 'Free',   cls: 'free' };
-    if (pointInPolygon(lat, lng, ZONE_WADI))  return { zone: 'wadi',  fee: 0.50, label: 'Wadi Chahrour',  feeLabel: '+$0.50', cls: 'cheap' };
-    return                                           { zone: 'far',   fee: 1.00, label: 'Outside area',   feeLabel: '+$1.00', cls: 'far' };
+    const d = distKm(lat, lng, CENTER_LAT, CENTER_LNG);
+    if (d <= ZONE_A_RADIUS_KM)
+        return { zone:'zone-a', fee:0.50, label:'Zone A', feeLabel:'$0.50', cls:'zone-a', emoji:'📍', canDeliver:true };
+    if (inEllipse(lat, lng, ZONE_B_CENTER_LAT, ZONE_B_CENTER_LNG, ZONE_B_LAT_SEMI, ZONE_B_LNG_SEMI))
+        return { zone:'zone-b', fee:1.00, label:'Zone B', feeLabel:'$1.00', cls:'zone-b', emoji:'🛵', canDeliver:true };
+    if (pointInPolygon(lat, lng, ZONE_C_POLYGON))
+        return { zone:'zone-c', fee:1.50, label:'Zone C', feeLabel:'$1.50', cls:'zone-c', emoji:'🗺️', canDeliver:true };
+    return { zone:'none', fee:0, label:'Outside delivery area', feeLabel:'$0.00', cls:'no-del', emoji:'🚫', canDeliver:false };
 }
 
+// ── STATE ──────────────────────────────────────────────────────
+let orderMode = false, cart = {}, addonSel = {}, shishaSel = {}, itemMeta = {};
+let selectedType = null, detectedZone = null, userGPS = null, deliveryAddress = '';
+let _addonMap = [], _inboxSha = null;
 
-// ── GITHUB INBOX CONFIG ──────────────────────────────────────────────
-const GH_OWNER = 'joetheproz5';
-const GH_REPO  = 'le-kiosk-menu';
-const GH_INBOX = 'inbox.json';
-const GH_API   = 'https://api.github.com';
-const GH_TOKEN = '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';
+function isOpen() {
+    if (TESTING_MODE) return true;
+    const now = new Date();
+    const lbMin = (now.getUTCHours()*60 + now.getUTCMinutes() + 180) % 1440;
+    return Math.floor(lbMin/60) >= 18;
+}
 
-let _inboxSha = null;
-
+// ── GITHUB INBOX HELPERS ───────────────────────────────────────
 async function fetchInboxSha() {
-    const h = { 'Accept': 'application/vnd.github.v3+json' };
+    const h = { 'Accept':'application/vnd.github.v3+json' };
     if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
-    const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, { headers: h });
+    const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, { headers:h });
     if (res.status === 404) { _inboxSha = null; return []; }
     if (!res.ok) throw new Error('GitHub ' + res.status);
     const d = await res.json();
     _inboxSha = d.sha;
-    const bin = atob(d.content.replace(/\n/g, ''));
+    const bin = atob(d.content.replace(/\n/g,''));
     const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    for (let i=0; i<bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return JSON.parse(new TextDecoder().decode(bytes));
 }
-
 async function writeToInbox(order) {
     let inbox = [];
     try { inbox = await fetchInboxSha(); } catch(e) {}
     inbox.unshift(order);
     if (inbox.length > 100) inbox = inbox.slice(0, 100);
-    const json  = JSON.stringify(inbox, null, 2);
-    const bytes = new TextEncoder().encode(json);
-    let binary  = '';
+    const bytes = new TextEncoder().encode(JSON.stringify(inbox, null, 2));
+    let binary = '';
     bytes.forEach(b => binary += String.fromCharCode(b));
-    const content = btoa(binary);
-    const body = { message: 'New customer order', content };
+    const body = { message:'New customer order', content: btoa(binary) };
     if (_inboxSha) body.sha = _inboxSha;
-    const h = { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
+    const h = { 'Content-Type':'application/json', 'Accept':'application/vnd.github.v3+json' };
     if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
     const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, {
-        method: 'PUT', headers: h, body: JSON.stringify(body)
+        method:'PUT', headers:h, body:JSON.stringify(body)
     });
     if (!res.ok) throw new Error('Could not save to inbox');
     const saved = await res.json();
     _inboxSha = saved.content.sha;
 }
 
-// ── STATE ─────────────────────────────────────────────────────
-let orderMode    = false;
-let cart         = {};
-let addonSel     = {};
-let shishaSel    = {};
-let itemMeta     = {};
-let selectedType = null;
-let detectedZone = null;   // result from getDeliveryZone()
-let userGPS      = null;   // { lat, lng }
-let deliveryAddress = '';
-let _addonMap    = [];
-
-function isOpen() {
-    if (TESTING_MODE) return true;
-    const now = new Date();
-    const lbMin = (now.getUTCHours() * 60 + now.getUTCMinutes() + 180) % 1440;
-    return Math.floor(lbMin / 60) >= 18;
-}
-
-// ── ORDER MODE ────────────────────────────────────────────────
+// ── ORDER MODE ─────────────────────────────────────────────────
 function toggleOrderMode() {
     if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
     orderMode = !orderMode;
     document.body.classList.toggle('order-mode', orderMode);
     const btn = document.getElementById('order-mode-btn');
     btn.classList.toggle('active', orderMode);
-    btn.innerHTML = orderMode ? '✕ Cancel' : '🛒 Order';
+    btn.textContent = orderMode ? '✕ Cancel' : '🛒 Order';
     if (!orderMode) {
         cart = {}; addonSel = {}; shishaSel = {};
         document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
         document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
-        updatePill();
-        closeSheet();
+        updatePill(); closeSheet();
     }
 }
-
 function changeQty(itemKey, delta, elId) {
     if (!orderMode) return;
-    cart[itemKey] = Math.max(0, (cart[itemKey] || 0) + delta);
+    cart[itemKey] = Math.max(0, (cart[itemKey]||0) + delta);
     const el = document.getElementById(elId);
     if (el) el.textContent = cart[itemKey];
-    const card = document.getElementById('card-' + elId);
+    const card = document.getElementById('card-'+elId);
     if (card) card.classList.toggle('has-qty', cart[itemKey] > 0);
     updatePill();
 }
-
-function getTotalItems() { return Object.values(cart).reduce((a, b) => a + b, 0); }
-
+function getTotalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
 function getItemsSubtotal() {
-    return Object.entries(cart).filter(([,v]) => v > 0).reduce((sum, [key, qty]) => {
-        const price = parseFloat(key.split('|')[2].replace('$','')) || 0;
-        const addons = (addonSel[key] || []).reduce((a, s) => a + s.price, 0);
-        return sum + price * qty + addons;
-    }, 0);
+    return Object.entries(cart).filter(([,v])=>v>0).reduce((sum,[key,qty])=>{
+        const price = parseFloat(key.split('|')[2].replace('$',''))||0;
+        const addons = (addonSel[key]||[]).reduce((a,s)=>a+s.price,0);
+        return sum + price*qty + addons;
+    },0);
 }
-
 function getDeliveryFee() {
-    return selectedType === 'delivery' && detectedZone ? detectedZone.fee : 0;
+    return selectedType==='delivery' && detectedZone && detectedZone.canDeliver ? detectedZone.fee : 0;
 }
-
 function getGrandTotal() { return getItemsSubtotal() + getDeliveryFee(); }
 
-// ── FLOATING PILL ─────────────────────────────────────────────
+// ── PILL ───────────────────────────────────────────────────────
 function updatePill() {
     const count = getTotalItems();
-    const pill  = document.getElementById('checkout-pill');
-    pill.classList.toggle('show', count > 0 && orderMode);
+    document.getElementById('checkout-pill').classList.toggle('show', count>0 && orderMode);
     if (count > 0) {
-        document.getElementById('pill-count').textContent = count + ' item' + (count !== 1 ? 's' : '');
-        document.getElementById('pill-total').textContent = '$' + getItemsSubtotal().toFixed(2);
+        document.getElementById('pill-count').textContent = count+' item'+(count!==1?'s':'');
+        document.getElementById('pill-total').textContent = '$'+getItemsSubtotal().toFixed(2);
     }
 }
 
-// ── SHEET ─────────────────────────────────────────────────────
-function openSheet()  { renderSheet(); document.getElementById('checkout-sheet').classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeSheet() { document.getElementById('checkout-sheet').classList.remove('open'); document.body.style.overflow = ''; }
+// ── SHEET ──────────────────────────────────────────────────────
+function openSheet()  { renderSheet(); document.getElementById('checkout-sheet').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeSheet() { document.getElementById('checkout-sheet').classList.remove('open'); document.body.style.overflow=''; }
 
 function renderSheet() {
     _addonMap = [];
-    const existingAddrEl = document.getElementById('delivery-address-ta');
-    if (existingAddrEl) deliveryAddress = existingAddrEl.value;
-    const existingName = document.getElementById('sheet-name') ? document.getElementById('sheet-name').value : '';
-
-    const entries = Object.entries(cart).filter(([,v]) => v > 0);
+    const addrEl = document.getElementById('delivery-address-ta');
+    if (addrEl) deliveryAddress = addrEl.value;
+    const existingName = (document.getElementById('sheet-name')||{}).value || '';
+    const entries = Object.entries(cart).filter(([,v])=>v>0);
     if (!entries.length) return;
 
     let html = '<div style="padding-top:12px">';
-
-    // Items
-    entries.forEach(([key, qty]) => {
-        const [, name, price] = key.split('|');
-        const pn = parseFloat(price.replace('$','')) || 0;
+    entries.forEach(([key,qty]) => {
+        const [,name,price] = key.split('|');
+        const pn = parseFloat(price.replace('$',''))||0;
         html += `<div class="sheet-item">
-            <div class="sheet-item-left">
-                <div class="sheet-item-name">${name}</div>
-                <div class="sheet-item-qty">x${qty} @ ${price}</div>
-            </div>
-            <div class="sheet-item-price">$${(pn * qty).toFixed(2)}</div>
+            <div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div>
+            <div class="sheet-item-price">$${(pn*qty).toFixed(2)}</div>
         </div>`;
-
         const meta = itemMeta[key];
-
-        // Flavor chips
         if (meta && meta.flavors && meta.flavors.length) {
             const shSel = shishaSel[key];
-            const ki = _addonMap.length; _addonMap.push({ key, type: 'shisha' });
+            const ki = _addonMap.length; _addonMap.push({key, type:'shisha'});
             html += `<div class="addon-section"><div class="addon-section-title">💨 Choose flavor</div><div class="addon-chips">`;
-            meta.flavors.forEach((f, fi) => {
-                html += `<button class="addon-chip${shSel === f ? ' selected' : ''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`;
+            meta.flavors.forEach((f,fi) => {
+                html += `<button class="addon-chip${shSel===f?' selected':''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`;
             });
             html += `</div></div>`;
         }
-
-        // Item addons
         if (meta && meta.addons && meta.addons.length) {
-            const selArr = addonSel[key] || [];
-            const ki = _addonMap.length; _addonMap.push({ key, type: 'addon' });
+            const selArr = addonSel[key]||[];
+            const ki = _addonMap.length; _addonMap.push({key, type:'addon'});
             html += `<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
-            meta.addons.forEach((addon, ai) => {
-                const on = selArr.some(s => s.label === addon.label);
-                html += `<button class="addon-chip${on ? ' selected' : ''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`;
+            meta.addons.forEach((addon,ai) => {
+                const on = selArr.some(s=>s.label===addon.label);
+                html += `<button class="addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`;
             });
             html += `</div></div>`;
         }
     });
     html += '</div>';
 
-    // Details form
     html += `<div class="sheet-divider"></div>
     <div class="sheet-section-title">👤 Your Details</div>
     <div style="margin-bottom:12px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
-        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${existingName}" autocomplete="off">
+        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Elie" value="${existingName}" autocomplete="off">
         <div class="err-text" id="err-name">Please enter your name.</div>
     </div>
-
     <div style="margin-bottom:4px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
         <div class="order-type-grid">
-            <button type="button" class="order-type-btn${selectedType==='dinein'?' selected':''}" onclick="selectType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
-            <button type="button" class="order-type-btn${selectedType==='takeaway'?' selected':''}" onclick="selectType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
-            <button type="button" class="order-type-btn${selectedType==='delivery'?' selected':''}" onclick="selectType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
+            <button type="button" class="order-type-btn${selectedType==='dinein'?' selected':''}" data-select-type="dinein"><span class="type-icon">🪑</span>Dine In</button>
+            <button type="button" class="order-type-btn${selectedType==='takeaway'?' selected':''}" data-select-type="takeaway"><span class="type-icon">🥡</span>Takeaway</button>
+            <button type="button" class="order-type-btn${selectedType==='delivery'?' selected':''}" data-select-type="delivery"><span class="type-icon">🛵</span>Delivery</button>
         </div>
         <div class="err-text" id="err-type">Please select an order type.</div>
     </div>
-
     <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-bottom:8px">Your Location</label>
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-top:8px;margin-bottom:8px">Your Location</label>
         ${renderLocationBox()}
     </div>`;
 
-    // Total + Send
-    const fee   = getDeliveryFee();
-    const total = getItemsSubtotal() + fee;
-    html += `<div class="total-row">
-        <div>
-            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
-            ${fee > 0 ? `<div style="font-size:10px;color:#b45309;margin-top:1px">Includes $${fee.toFixed(2)} delivery</div>` : ''}
+    const canProceed = selectedType !== 'delivery' || (detectedZone && detectedZone.canDeliver);
+    const fee = getDeliveryFee(), sub = getItemsSubtotal(), total = sub + fee;
+    const feeBreakdown = (selectedType==='delivery' && detectedZone && detectedZone.canDeliver)
+        ? `<div style="font-size:11px;color:#b45309;margin-top:2px">Items $${sub.toFixed(2)} + delivery ${detectedZone.feeLabel}</div>` : '';
+
+    if (canProceed) {
+        html += `<div class="total-row">
+            <div>
+                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
+                ${feeBreakdown}
+            </div>
+            <span style="font-size:18px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span>
         </div>
-        <span style="font-size:16px;font-weight:800;color:#d97706" id="grand-total-display">$${total.toFixed(2)}</span>
-    </div>
-    <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-        Send Order on WhatsApp
-    </button>`;
+        <button id="send-order-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            Send Order on WhatsApp
+        </button>`;
+    }
 
     document.getElementById('sheet-scroll').innerHTML = html;
 }
@@ -473,202 +442,156 @@ function renderLocationBox() {
     if (!detectedZone) {
         return `<div class="location-detect-box">
             <div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div>
-            <div style="font-size:11px;color:#b45309">So we can calculate your delivery fee automatically.</div>
-            <button class="locate-main-btn" id="locate-btn" onclick="detectLocation()">
-                📍 Detect My Location
-            </button>
-            <div class="err-text" id="err-location" style="margin-top:8px">Please share your location or add your address manually.</div>
-            <div class="manual-addr" style="margin-top:12px;text-align:left">
-                <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Or type your address</label>
-                <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
-            </div>
+            <div style="font-size:11px;color:#b45309">Tap below so we can calculate your exact delivery fee.</div>
+            <button class="locate-main-btn" id="locate-btn">📍 Detect My Location</button>
+            <div class="err-text" id="err-location" style="margin-top:8px">Please detect your location to continue.</div>
         </div>`;
     }
-
-    const zoneEmoji = detectedZone.zone === 'haret' ? '🎉' : detectedZone.zone === 'wadi' ? '📍' : '🗺️';
+    if (!detectedZone.canDeliver) {
+        const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
+        return `<div class="location-detect-box no-delivery">
+            <div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div>
+            <div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>You're welcome to <strong>dine in</strong> or <strong>take away</strong>!</div>
+            <div class="zone-badge no-del" style="margin-top:8px">🚫 No delivery available</div>
+            ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
+            <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button>
+        </div>`;
+    }
     const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
-
     return `<div class="location-detect-box detected">
         <div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div>
         <div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">
-            ${zoneEmoji} ${detectedZone.label} — <strong>${detectedZone.fee === 0 ? 'Free delivery!' : detectedZone.feeLabel + ' delivery'}</strong>
+            ${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong>
         </div>
-        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on maps ↗</a></div>` : ''}
-        <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" onclick="resetLocation()">↺ Change location</button>
-        <div class="manual-addr" style="margin-top:10px;text-align:left">
+        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
+        <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Change location</button>
+        <div style="margin-top:10px;text-align:left">
             <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label>
-            <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
+            <textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
         </div>
     </div>`;
 }
 
 function detectLocation() {
-    if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return; }
+    if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
     const btn = document.getElementById('locate-btn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin">⏳</span> Getting location…'; }
+    if (btn) { btn.disabled=true; btn.innerHTML='<span class="spin">⏳</span> Getting location…'; }
     navigator.geolocation.getCurrentPosition(
         (pos) => {
             userGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             detectedZone = getDeliveryZone(userGPS.lat, userGPS.lng);
-            // Save typed address before re-render
             const ta = document.getElementById('delivery-address-ta');
             if (ta) deliveryAddress = ta.value;
             renderSheet();
-            // Update total display
-            const totalEl = document.getElementById('grand-total-display');
-            if (totalEl) totalEl.textContent = '$' + getGrandTotal().toFixed(2);
         },
         (err) => {
-            if (btn) { btn.disabled = false; btn.innerHTML = '📍 Detect My Location'; }
-            let msg = 'Could not get location.';
-            if (err.code === 1) msg = 'Location access denied. Please type your address below.';
-            if (err.code === 3) msg = 'Location timed out. Please type your address below.';
+            if (btn) { btn.disabled=false; btn.innerHTML='📍 Detect My Location'; }
+            let msg = 'Could not get location. Please try again.';
+            if (err.code===1) msg='Location access denied. Please allow location and try again.';
+            if (err.code===3) msg='Location timed out. Please try again.';
             const errEl = document.getElementById('err-location');
-            if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+            if (errEl) { errEl.textContent=msg; errEl.classList.add('show'); }
         },
-        { timeout: 12000, enableHighAccuracy: true }
+        { timeout:12000, enableHighAccuracy:true }
     );
 }
-
 function resetLocation() {
     const ta = document.getElementById('delivery-address-ta');
     if (ta) deliveryAddress = ta.value;
-    userGPS = null;
-    detectedZone = null;
-    renderSheet();
+    userGPS=null; detectedZone=null; renderSheet();
 }
 
-// ── ORDER TYPE ────────────────────────────────────────────────
-function selectType(type) {
-    selectedType = type;
-    renderSheet();
-    // Restore name
-}
-
-// ── CHIP CLICKS (delegated) ───────────────────────────────────
-document.addEventListener('click', function(e) {
-    const btn = e.target.closest('[data-type]');
-    if (!btn) return;
-    const type = btn.dataset.type, ki = parseInt(btn.dataset.ki);
-    const entry = _addonMap[ki];
-    if (!entry) return;
-    const { key } = entry;
-    if (type === 'shisha') {
-        const fi  = parseInt(btn.dataset.fi);
-        const meta = itemMeta[key];
-        if (!meta || !meta.flavors) return;
-        const flv = meta.flavors[fi];
-        shishaSel[key] = shishaSel[key] === flv ? null : flv;
-        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
-        renderSheet();
-        document.getElementById('sheet-scroll').scrollTop = scrollTop;
-    } else if (type === 'addon') {
-        const ai  = parseInt(btn.dataset.ai);
-        const meta = itemMeta[key];
-        if (!meta || !meta.addons) return;
-        const addon = meta.addons[ai];
-        const pn    = parseFloat((addon.price || '0').replace('$','')) || 0;
-        if (!addonSel[key]) addonSel[key] = [];
-        const idx = addonSel[key].findIndex(s => s.label === addon.label);
-        if (idx > -1) addonSel[key].splice(idx, 1);
-        else addonSel[key].push({ label: addon.label, price: pn });
-        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
-        renderSheet();
-        document.getElementById('sheet-scroll').scrollTop = scrollTop;
-    }
-});
-
-// ── SEND ORDER ────────────────────────────────────────────────
+// ── SEND ORDER ─────────────────────────────────────────────────
 async function sendOrder() {
     const nameEl = document.getElementById('sheet-name');
     const name   = nameEl ? nameEl.value.trim() : '';
     let valid = true;
 
     if (!name) {
-        document.getElementById('err-name').classList.add('show');
+        const e = document.getElementById('err-name');
+        if (e) e.classList.add('show');
         if (nameEl) nameEl.classList.add('error');
         valid = false;
     } else {
-        document.getElementById('err-name').classList.remove('show');
+        const e = document.getElementById('err-name');
+        if (e) e.classList.remove('show');
         if (nameEl) nameEl.classList.remove('error');
     }
     if (!selectedType) {
-        document.getElementById('err-type').classList.add('show');
+        const e = document.getElementById('err-type');
+        if (e) e.classList.add('show');
         valid = false;
     } else {
-        document.getElementById('err-type').classList.remove('show');
+        const e = document.getElementById('err-type');
+        if (e) e.classList.remove('show');
     }
-    if (selectedType === 'delivery' && !detectedZone) {
-        const ta = document.getElementById('delivery-address-ta');
-        const addr = ta ? ta.value.trim() : '';
-        if (!addr) {
-            const errEl = document.getElementById('err-location');
-            if (errEl) { errEl.textContent = 'Please detect your location or type your address.'; errEl.classList.add('show'); }
+    if (selectedType === 'delivery') {
+        if (detectedZone && !detectedZone.canDeliver) {
+            valid = false;
+        } else if (!detectedZone) {
+            const e = document.getElementById('err-location');
+            if (e) { e.textContent='Please detect your location to continue.'; e.classList.add('show'); }
             valid = false;
         }
     }
     if (!valid) return;
 
-    const entries   = Object.entries(cart).filter(([,v]) => v > 0);
-    const timeStr   = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+    const sendBtn = document.getElementById('send-order-btn');
+    if (sendBtn) { sendBtn.disabled=true; sendBtn.textContent='⏳ Sending…'; }
+
+    const entries   = Object.entries(cart).filter(([,v])=>v>0);
+    const timeStr   = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
     const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
+    const ta        = document.getElementById('delivery-address-ta');
+    const addr      = ta ? ta.value.trim() : deliveryAddress;
+    const fee       = getDeliveryFee();
 
-    // Build structured order object
+    // Build structured order object for inbox
     let subtotal = 0;
-    const orderItems = entries.map(([key, qty]) => {
-        const [, itemName, price] = key.split('|');
-        const pn = parseFloat(price.replace('$','')) || 0;
-        const lt = pn * qty;
-        subtotal += lt;
-        const addonsForItem = (addonSel[key] || []).map(a => { subtotal += a.price; return { label: a.label, price: a.price }; });
-        return { name: itemName, price: pn, priceStr: price, qty, flavor: shishaSel[key] || null, addons: addonsForItem };
+    const orderItems = entries.map(([key,qty]) => {
+        const [,itemName,price] = key.split('|');
+        const pn = parseFloat(price.replace('$',''))||0;
+        subtotal += pn*qty;
+        const addonsForItem = (addonSel[key]||[]).map(a => { subtotal+=a.price; return {label:a.label, price:a.price}; });
+        return { name:itemName, price:pn, priceStr:price, qty, flavor:shishaSel[key]||null, addons:addonsForItem };
     });
-
-    const fee = getDeliveryFee();
-    if (fee > 0) subtotal += fee;
-
-    const ta   = document.getElementById('delivery-address-ta');
-    const addr = ta ? ta.value.trim() : deliveryAddress;
+    subtotal += fee;
 
     const order = {
-        id: 'MENU-' + Date.now(),
+        id: 'MENU-'+Date.now(),
         status: 'pending',
         timestamp: new Date().toISOString(),
         source: 'menu',
-        name,
-        orderType: selectedType,
-        deliveryZone: (selectedType === 'delivery' && detectedZone) ? detectedZone.label : null,
+        name, orderType: selectedType,
+        deliveryZone: (selectedType==='delivery' && detectedZone) ? detectedZone.label : null,
         deliveryFee: fee,
-        gps: userGPS || null,
-        address: addr || null,
+        gps: userGPS||null,
+        address: addr||null,
         items: orderItems,
         total: subtotal
     };
 
-    // Disable send button while processing
-    const sendBtn = document.querySelector('[onclick="sendOrder()"]');
-    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
-
-    // Write to GitHub inbox (best effort — WhatsApp is always the backup)
-    try {
-        await writeToInbox(order);
-    } catch(e) {
-        console.warn('Inbox write failed (order still sent via WhatsApp):', e.message);
+    // Try writing to GitHub inbox (if token provided)
+    if (GH_TOKEN) {
+        try { await writeToInbox(order); }
+        catch(e) { console.warn('Inbox write failed:', e.message); }
     }
 
-    // Always send WhatsApp message
+    // Build WhatsApp message — always sent
     let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
     msg += `👤 *Name:* ${name}\n`;
     msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
-    if (selectedType === 'delivery' && detectedZone) {
-        const feeStr = detectedZone.fee === 0 ? 'Free' : `$${detectedZone.fee.toFixed(2)}`;
-        msg += `📍 *Zone:* ${detectedZone.label} (Delivery: ${feeStr})\n`;
-        if (userGPS) msg += `🗺️ *GPS:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
+    msg += `🕐 *Time:* ${timeStr}\n`;
+    if (selectedType === 'delivery') {
+        if (detectedZone && detectedZone.canDeliver) {
+            msg += `📍 *Zone:* ${detectedZone.label} — Fee: ${detectedZone.feeLabel}\n`;
+        }
+        if (userGPS) msg += `🗺️ *Customer Location:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
+        if (addr)    msg += `🏠 *Address details:* ${addr}\n`;
     }
-    if (addr) msg += `🏠 *Address:* ${addr}\n`;
-    msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
+    msg += `━━━━━━━━━━━━━━━━━━\n`;
     orderItems.forEach(it => {
-        msg += `• ${it.name} x${it.qty} — $${(it.price * it.qty).toFixed(2)}\n`;
+        msg += `• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
         if (it.flavor) msg += `  ↳ Flavor: ${it.flavor}\n`;
         (it.addons||[]).forEach(a => { msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
     });
@@ -679,15 +602,60 @@ async function sendOrder() {
     closeSheet();
 }
 
-// ── PILLS ─────────────────────────────────────────────────────
+// ── ALL DELEGATED CLICKS ────────────────────────────────────────
+document.addEventListener('click', function(e) {
+    // Order mode toggle
+    if (e.target.closest('#order-mode-btn'))   { toggleOrderMode(); return; }
+    // Pill → open sheet
+    if (e.target.closest('#checkout-pill-inner')) { openSheet(); return; }
+    // Close sheet
+    if (e.target.closest('#close-sheet-btn') || e.target === document.getElementById('sheet-backdrop')) { closeSheet(); return; }
+    // Send order
+    if (e.target.closest('#send-order-btn'))  { sendOrder(); return; }
+    // Detect location
+    if (e.target.closest('#locate-btn'))      { detectLocation(); return; }
+    // Reset location
+    if (e.target.closest('#reset-loc-btn'))   { resetLocation(); return; }
+    // Order type selector
+    const typeBtn = e.target.closest('[data-select-type]');
+    if (typeBtn) { selectedType = typeBtn.dataset.selectType; renderSheet(); return; }
+    // Addon / shisha chips
+    const chip = e.target.closest('[data-type]');
+    if (!chip) return;
+    const type = chip.dataset.type, ki = parseInt(chip.dataset.ki);
+    const entry = _addonMap[ki];
+    if (!entry) return;
+    const { key } = entry;
+    const scrollTop = document.getElementById('sheet-scroll').scrollTop;
+    if (type === 'shisha') {
+        const fi = parseInt(chip.dataset.fi);
+        const meta = itemMeta[key];
+        if (!meta || !meta.flavors) return;
+        const flv = meta.flavors[fi];
+        shishaSel[key] = shishaSel[key]===flv ? null : flv;
+    } else if (type === 'addon') {
+        const ai = parseInt(chip.dataset.ai);
+        const meta = itemMeta[key];
+        if (!meta || !meta.addons) return;
+        const addon = meta.addons[ai];
+        const pn = parseFloat((addon.price||'0').replace('$',''))||0;
+        if (!addonSel[key]) addonSel[key]=[];
+        const idx = addonSel[key].findIndex(s=>s.label===addon.label);
+        if (idx>-1) addonSel[key].splice(idx,1);
+        else addonSel[key].push({label:addon.label, price:pn});
+    }
+    renderSheet();
+    document.getElementById('sheet-scroll').scrollTop = scrollTop;
+});
+
+// ── PILLS & MENU RENDER ────────────────────────────────────────
 function renderPills(item) {
     if (!item.flavors || !item.flavors.length) return '';
     const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
     return '<div class="flex flex-wrap gap-1 mt-2">' +
-        item.flavors.map(f => `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
+        item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
 }
 
-// ── FETCH & RENDER MENU ───────────────────────────────────────
 async function loadMenu() {
     try {
         const res = await fetch('menu.json?v=' + Date.now());
@@ -710,7 +678,7 @@ function renderAddonSection(category) {
                     <span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span>
                 </div>
                 <p class="text-gray-400 text-xs mt-0.5">${group.note}</p>
-                <div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o => `<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div>
+                <div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div>
             </div>
         </div>`;
     });
@@ -720,24 +688,23 @@ function renderAddonSection(category) {
 
 function initMenu(menuData) {
     const nav = document.getElementById('main-nav');
-    nav.innerHTML = menuData.map((c, i) =>
+    nav.innerHTML = menuData.map((c,i)=>
         `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
     ).join('');
-
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
     menuData.forEach(category => {
-        if (category.type === 'addons') { container.innerHTML += renderAddonSection(category); return; }
+        if (category.type==='addons') { container.innerHTML+=renderAddonSection(category); return; }
         let html = `<section id="${category.key}" class="scroll-mt-24">
             <h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
-        if (category.items && category.items.length > 0) {
+        if (category.items && category.items.length) {
             html += `<div class="grid gap-3.5">`;
-            category.items.forEach((item, idx) => {
+            category.items.forEach((item,idx) => {
                 const itemKey = `${category.key}|${item.name}|${item.price}`;
                 const qtyId   = `qty-${category.key}-${idx}`;
                 const cardId  = `card-${qtyId}`;
                 html += `<div class="item-card-wrap" id="${cardId}">
-                    <div class="${item.flavors && item.flavors.length ? 'min-h-28' : 'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
+                    <div class="${item.flavors&&item.flavors.length?'min-h-28':'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
                         <div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px">
                             <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
                         </div>
@@ -771,24 +738,24 @@ function initScrollSpy(menuData) {
     const navLinks = document.querySelectorAll('.nav-link');
     function setActive(id) {
         navLinks.forEach(link => {
-            if (link.dataset.section === id) { link.classList.add('active'); link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' }); }
+            if (link.dataset.section===id) { link.classList.add('active'); link.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
             else link.classList.remove('active');
         });
     }
     const observer = new IntersectionObserver(
         entries => { entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }); },
-        { rootMargin: '-30% 0px -65% 0px', threshold: 0 }
+        { rootMargin:'-30% 0px -65% 0px', threshold:0 }
     );
-    menuData.forEach(c => { const el = document.getElementById(c.key); if (el) observer.observe(el); });
+    menuData.forEach(c => { const el=document.getElementById(c.key); if(el) observer.observe(el); });
 }
 
 // Contact bubble
 const bubble  = document.getElementById('contact-bubble');
 const ctoggle = document.getElementById('contact-toggle');
 let bubbleOpen = false;
-ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
+ctoggle.addEventListener('click', () => { bubbleOpen=!bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
 document.addEventListener('click', e => {
-    if (bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); }
+    if (bubbleOpen && !bubble.contains(e.target) && e.target!==ctoggle && !ctoggle.contains(e.target)) { bubbleOpen=false; bubble.classList.remove('open'); }
 });
 
 // Boot
@@ -798,8 +765,8 @@ loadMenu().then(data => {
     initScrollSpy(data);
     itemMeta = {};
     data.forEach(cat => {
-        if (cat.type === 'addons') return;
-        (cat.items || []).forEach(item => {
+        if (cat.type==='addons') return;
+        (cat.items||[]).forEach(item => {
             itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
         });
     });
