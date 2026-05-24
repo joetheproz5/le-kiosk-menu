@@ -18,7 +18,8 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": false
       },
       {
         "name": "Loaded Fries",
@@ -34,7 +35,8 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": true
       },
       {
         "name": "Chicken Wings (8pcs)",
@@ -50,7 +52,8 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": true
       }
     ]
   },
