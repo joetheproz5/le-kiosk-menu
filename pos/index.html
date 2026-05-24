@@ -468,6 +468,7 @@ input,textarea,select{font-family:var(--font);outline:none}
           <div class="action-btns">
             <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
             <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
+            <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
             <div style="grid-column:1/-1; background:var(--a50); border:1.5px solid var(--a200); border-radius:11px; padding:10px 12px; display:flex; align-items:center; gap:8px">
   <span style="font-size:11px;font-weight:700;color:var(--a800);white-space:nowrap">💵 Cash</span>
   <input id="cash-input" type="number" step="0.01" min="0" placeholder="0.00"
@@ -475,7 +476,6 @@ input,textarea,select{font-family:var(--font);outline:none}
     oninput="calcChange()">
   <span id="change-display" style="font-size:13px;font-weight:800;color:var(--g400);white-space:nowrap;min-width:60px;text-align:right">Change: —</span>
 </div>
-            <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
           </div>
         </div>
       </div>
