@@ -583,7 +583,7 @@ function initMenu(menuData){
         let html=`<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
         if(category.items&&category.items.length){
             html+='<div class="grid gap-3.5">';
-            category.items.forEach((item,idx)=>{
+                category.items.filter(item => item.active !== false).forEach((item,idx)=>{
                 const itemKey=`${category.key}|${item.name}|${item.price}`;
                 const qtyId=`qty-${category.key}-${idx}`,cardId=`card-${qtyId}`;
                 html+=`<div class="item-card-wrap" id="${cardId}"><div class="${item.flavors&&item.flavors.length?'min-h-28':'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200"><div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px"><img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block"></div><div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0"><div class="flex justify-between items-start gap-2"><h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3><span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span></div><p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button><div class="qty-num" id="${qtyId}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button></div></div></div></div>`;
@@ -612,8 +612,7 @@ loadMenu().then(data=>{
     if(!data) return;
     initMenu(data);initScrollSpy(data);
     itemMeta={};
-    data.forEach(cat=>{if(cat.type==='addons')return;(cat.items||[]).forEach(item=>{itemMeta[`${cat.key}|${item.name}|${item.price}`]=item;});});
-});
+    data.forEach(cat=>{if(cat.type==='addons')return;(cat.items||[]).filter(item=>item.active!==false).forEach(item=>{itemMeta[`${cat.key}|${item.name}|${item.price}`]=item;});});});
 </script>
 </body>
 </html>
