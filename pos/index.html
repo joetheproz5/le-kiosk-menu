@@ -16,12 +16,26 @@
   --green:#22c55e;--green-d:#16a34a;--red:#ef4444;--red-d:#dc2626;
   --blue:#3b82f6;--blue-d:#2563eb;
   --white:#fff;--font:'Poppins',sans-serif;--brand:'Fredoka',sans-serif;
-  --sidebar:340px;
+  --sidebar-order:320px;
+  --cat-sidebar:160px;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:var(--g100);color:var(--g900);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button{font-family:var(--font);cursor:pointer;border:none;outline:none}
 input,textarea,select{font-family:var(--font);outline:none}
+
+/* ── CATEGORY COLOR PALETTE ── */
+:root{
+  --cat0-bg:#fef3c7;--cat0-border:#f59e0b;--cat0-text:#92400e;--cat0-head:#f59e0b;--cat0-headtext:#fff;
+  --cat1-bg:#dbeafe;--cat1-border:#3b82f6;--cat1-text:#1e40af;--cat1-head:#3b82f6;--cat1-headtext:#fff;
+  --cat2-bg:#dcfce7;--cat2-border:#22c55e;--cat2-text:#166534;--cat2-head:#22c55e;--cat2-headtext:#fff;
+  --cat3-bg:#fce7f3;--cat3-border:#ec4899;--cat3-text:#9d174d;--cat3-head:#ec4899;--cat3-headtext:#fff;
+  --cat4-bg:#ede9fe;--cat4-border:#8b5cf6;--cat4-text:#5b21b6;--cat4-head:#8b5cf6;--cat4-headtext:#fff;
+  --cat5-bg:#fee2e2;--cat5-border:#ef4444;--cat5-text:#991b1b;--cat5-head:#ef4444;--cat5-headtext:#fff;
+  --cat6-bg:#d1fae5;--cat6-border:#10b981;--cat6-text:#065f46;--cat6-head:#10b981;--cat6-headtext:#fff;
+  --cat7-bg:#ffedd5;--cat7-border:#f97316;--cat7-text:#9a3412;--cat7-head:#f97316;--cat7-headtext:#fff;
+  --cat8-bg:#e0f2fe;--cat8-border:#0ea5e9;--cat8-text:#075985;--cat8-head:#0ea5e9;--cat8-headtext:#fff;
+}
 
 /* ── LOGIN ── */
 #login-screen{position:fixed;inset:0;background:var(--a950);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px}
@@ -54,6 +68,11 @@ input,textarea,select{font-family:var(--font);outline:none}
 .tb-orders{background:rgba(255,255,255,.12);color:var(--a100)}
 .tb-orders:hover{background:rgba(255,255,255,.22)}
 .tb-orders.active{background:var(--a400);color:var(--a950)}
+.tb-inbox{background:rgba(34,197,94,.2);color:#86efac;position:relative}
+.tb-inbox:hover{background:rgba(34,197,94,.3)}
+.tb-inbox.active{background:var(--green);color:var(--white)}
+.inbox-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;display:none}
+.inbox-badge.show{display:flex}
 .tb-logout{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
 .tb-logout:hover{background:rgba(255,255,255,.15)}
 .session-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.2);color:var(--a300);padding:3px 10px;border-radius:20px;letter-spacing:.06em}
@@ -61,101 +80,79 @@ input,textarea,select{font-family:var(--font);outline:none}
 /* ── MAIN AREA ── */
 .pos-main{display:flex;flex:1;min-height:0}
 
-/* ── LEFT: MENU ── */
-.menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100)}
-.cat-tabs{display:flex;overflow-x:auto;background:var(--white);border-bottom:2px solid var(--g200);flex-shrink:0;-ms-overflow-style:none;scrollbar-width:none}
-.cat-tabs::-webkit-scrollbar{display:none}
-.cat-tab{padding:14px 20px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--g500);border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0;background:none;transition:all .15s;border-top:none;border-left:none;border-right:none}
-.cat-tab.active{color:var(--a700);border-bottom-color:var(--a500);background:var(--a50)}
-.cat-tab:hover:not(.active){color:var(--a800);background:var(--a50)}
-.items-grid{flex:1;overflow-y:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;align-content:start;-webkit-overflow-scrolling:touch}
-.item-card{background:var(--white);border-radius:14px;border:2px solid var(--g200);overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation}
-.item-card:hover{border-color:var(--a300);box-shadow:0 2px 12px rgba(245,158,11,.15)}
-.item-card:active{transform:scale(.97);border-color:var(--a500)}
-.item-card.in-cart{border-color:var(--a400);background:var(--a50)}
-.item-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--g100)}
-.item-info{padding:8px 10px 10px}
-.item-name{font-size:12px;font-weight:700;color:var(--a950);line-height:1.3;margin-bottom:3px}
-.item-price{font-size:13px;font-weight:800;color:var(--a600)}
-.item-qty-badge{display:none;position:absolute;top:6px;right:6px;background:var(--a500);color:var(--white);font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center}
+/* ── LEFT: CATEGORY SIDEBAR ── */
+.cat-sidebar{width:var(--cat-sidebar);flex-shrink:0;background:var(--a950);display:flex;flex-direction:column;overflow-y:auto;padding:10px 8px;gap:6px;-webkit-overflow-scrolling:touch}
+.cat-sidebar::-webkit-scrollbar{display:none}
+.cat-sidebar-btn{padding:10px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);border:1.5px solid transparent;cursor:pointer;transition:all .15s;line-height:1.3;word-break:break-word}
+.cat-sidebar-btn:hover{background:rgba(255,255,255,.14);color:var(--white)}
+.cat-sidebar-btn.active{color:var(--white);border-color:currentColor}
+.cat-sidebar-btn .cat-icon{font-size:18px;display:block;margin-bottom:4px}
+
+/* ── CENTER: MENU ── */
+.menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
+
+/* Category section in menu */
+.menu-cat-section{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--g200)}
+.menu-cat-header{padding:10px 14px;display:flex;align-items:center;gap:8px;font-family:var(--brand);font-size:15px;font-weight:700;letter-spacing:.04em}
+.menu-cat-header .cat-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.25);color:inherit;margin-left:auto}
+.menu-cat-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:10px;background:var(--white)}
+
+/* Item card */
 .item-card-wrap{position:relative}
+.item-card{background:var(--white);border-radius:10px;border:2px solid var(--g200);overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation}
+.item-card:hover{border-color:var(--a300);box-shadow:0 2px 12px rgba(245,158,11,.15)}
+.item-card:active{transform:scale(.97)}
+.item-card.in-cart{border-color:var(--a400)!important}
+.item-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--g100)}
+.item-info{padding:6px 8px 8px}
+.item-name{font-size:11px;font-weight:700;color:var(--a950);line-height:1.3;margin-bottom:2px}
+.item-price{font-size:12px;font-weight:800;color:var(--a600)}
+.item-qty-badge{display:none;position:absolute;top:5px;right:5px;background:var(--a500);color:var(--white);font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:10px;align-items:center;justify-content:center;padding:0 4px}
 .item-card-wrap.has-qty .item-qty-badge{display:flex}
-.item-card-wrap.has-qty .item-card{border-color:var(--a400)}
+.item-card-wrap.has-qty .item-card{background:var(--a50)}
 
-/* ── RIGHT: ORDER PANEL ── */
-.order-panel{width:var(--sidebar);flex-shrink:0;background:var(--white);border-left:2px solid var(--g200);display:flex;flex-direction:column;overflow:hidden}
-.order-header{padding:14px 16px 10px;border-bottom:1px solid var(--g200);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
-.order-title{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a950)}
-.clear-btn{font-size:11px;font-weight:700;color:var(--red-d);background:#fef2f2;border:1px solid #fecaca;padding:5px 10px;border-radius:8px}
-.clear-btn:hover{background:#fee2e2}
-.order-scroll{flex:1;overflow-y:auto;padding:10px 14px;-webkit-overflow-scrolling:touch}
-.order-empty{text-align:center;padding:40px 20px;color:var(--g400);font-size:13px}
-.order-empty-icon{font-size:36px;margin-bottom:8px}
+/* Cat color classes applied per section */
+.cat-color-0 .menu-cat-header{background:var(--cat0-head);color:var(--cat0-headtext)}
+.cat-color-0 .menu-cat-section{border-color:var(--cat0-border)}
+.cat-color-0 .item-card-wrap.has-qty .item-card{border-color:var(--cat0-border)!important}
+.cat-color-1 .menu-cat-header{background:var(--cat1-head);color:var(--cat1-headtext)}
+.cat-color-1 .menu-cat-section{border-color:var(--cat1-border)}
+.cat-color-1 .item-card-wrap.has-qty .item-card{border-color:var(--cat1-border)!important}
+.cat-color-2 .menu-cat-header{background:var(--cat2-head);color:var(--cat2-headtext)}
+.cat-color-2 .menu-cat-section{border-color:var(--cat2-border)}
+.cat-color-2 .item-card-wrap.has-qty .item-card{border-color:var(--cat2-border)!important}
+.cat-color-3 .menu-cat-header{background:var(--cat3-head);color:var(--cat3-headtext)}
+.cat-color-3 .menu-cat-section{border-color:var(--cat3-border)}
+.cat-color-3 .item-card-wrap.has-qty .item-card{border-color:var(--cat3-border)!important}
+.cat-color-4 .menu-cat-header{background:var(--cat4-head);color:var(--cat4-headtext)}
+.cat-color-4 .menu-cat-section{border-color:var(--cat4-border)}
+.cat-color-4 .item-card-wrap.has-qty .item-card{border-color:var(--cat4-border)!important}
+.cat-color-5 .menu-cat-header{background:var(--cat5-head);color:var(--cat5-headtext)}
+.cat-color-5 .menu-cat-section{border-color:var(--cat5-border)}
+.cat-color-5 .item-card-wrap.has-qty .item-card{border-color:var(--cat5-border)!important}
+.cat-color-6 .menu-cat-header{background:var(--cat6-head);color:var(--cat6-headtext)}
+.cat-color-6 .menu-cat-section{border-color:var(--cat6-border)}
+.cat-color-6 .item-card-wrap.has-qty .item-card{border-color:var(--cat6-border)!important}
+.cat-color-7 .menu-cat-header{background:var(--cat7-head);color:var(--cat7-headtext)}
+.cat-color-7 .menu-cat-section{border-color:var(--cat7-border)}
+.cat-color-7 .item-card-wrap.has-qty .item-card{border-color:var(--cat7-border)!important}
+.cat-color-8 .menu-cat-header{background:var(--cat8-head);color:var(--cat8-headtext)}
+.cat-color-8 .menu-cat-section{border-color:var(--cat8-border)}
+.cat-color-8 .item-card-wrap.has-qty .item-card{border-color:var(--cat8-border)!important}
 
-/* ── ORDER LINE ITEMS ── */
-.order-line{background:var(--g50);border-radius:10px;margin-bottom:8px;overflow:hidden}
-.order-line-main{display:flex;align-items:center;gap:8px;padding:10px 10px 8px}
-.order-line-name{flex:1;font-size:13px;font-weight:700;color:var(--a950);line-height:1.3}
-.order-line-price{font-size:13px;font-weight:700;color:var(--a600);flex-shrink:0}
-.qty-row{display:flex;align-items:center;gap:0;margin-top:4px}
-.q-btn{width:30px;height:30px;border-radius:8px;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-.q-minus{background:var(--a100);color:var(--a800)}
-.q-minus:hover{background:var(--a200)}
-.q-plus{background:var(--a500);color:var(--white)}
-.q-plus:hover{background:var(--a600)}
-.q-num{width:34px;text-align:center;font-size:14px;font-weight:800;color:var(--a950);background:var(--white);border-top:1.5px solid var(--a200);border-bottom:1.5px solid var(--a200);height:30px;line-height:30px}
-.q-del{margin-left:6px;width:28px;height:28px;border-radius:7px;background:#fef2f2;color:var(--red-d);font-size:14px;display:flex;align-items:center;justify-content:center}
-.q-del:hover{background:#fee2e2}
+/* Cat sidebar active color matching */
+.cat-sidebar-btn[data-ci="0"].active{background:var(--cat0-head);border-color:var(--cat0-head);color:#fff}
+.cat-sidebar-btn[data-ci="1"].active{background:var(--cat1-head);border-color:var(--cat1-head);color:#fff}
+.cat-sidebar-btn[data-ci="2"].active{background:var(--cat2-head);border-color:var(--cat2-head);color:#fff}
+.cat-sidebar-btn[data-ci="3"].active{background:var(--cat3-head);border-color:var(--cat3-head);color:#fff}
+.cat-sidebar-btn[data-ci="4"].active{background:var(--cat4-head);border-color:var(--cat4-head);color:#fff}
+.cat-sidebar-btn[data-ci="5"].active{background:var(--cat5-head);border-color:var(--cat5-head);color:#fff}
+.cat-sidebar-btn[data-ci="6"].active{background:var(--cat6-head);border-color:var(--cat6-head);color:#fff}
+.cat-sidebar-btn[data-ci="7"].active{background:var(--cat7-head);border-color:var(--cat7-head);color:#fff}
+.cat-sidebar-btn[data-ci="8"].active{background:var(--cat8-head);border-color:var(--cat8-head);color:#fff}
 
-/* ── ADDON/FLAVOR CHIPS IN ORDER ── */
-.order-addons{padding:0 10px 10px}
-.oa-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px}
-.oa-chips{display:flex;flex-wrap:wrap;gap:4px}
-.oa-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--a200);background:var(--a50);color:var(--a800);cursor:pointer;transition:all .12s;touch-action:manipulation}
-.oa-chip:hover{border-color:var(--a400);background:var(--a100)}
-.oa-chip.selected{background:var(--a500);border-color:var(--a500);color:var(--white)}
-
-/* ── CUSTOMER & ORDER TYPE ── */
-.order-form{padding:10px 14px 0;border-top:1px solid var(--g200);flex-shrink:0}
-.form-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px;display:block}
-.form-input{width:100%;padding:10px 12px;border:2px solid var(--a200);border-radius:10px;font-size:13px;font-weight:600;color:var(--a950);background:var(--a50);transition:border-color .2s;margin-bottom:10px}
-.form-input:focus{border-color:var(--a500);background:var(--white)}
-.form-input.error{border-color:var(--red);background:#fef2f2}
-.type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
-.type-btn{padding:9px 4px;border-radius:10px;border:2px solid var(--a200);background:var(--a50);color:var(--a800);font-size:11px;font-weight:700;text-align:center;cursor:pointer;transition:all .15s;touch-action:manipulation}
-.type-btn:hover{background:var(--a100);border-color:var(--a300)}
-.type-btn.sel{background:var(--a500);border-color:var(--a500);color:var(--white)}
-.type-icon{font-size:18px;display:block;margin-bottom:2px}
-.zone-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
-.zone-btn{padding:8px 4px;border-radius:10px;border:2px solid var(--g200);background:var(--g50);color:var(--g700);font-size:10px;font-weight:700;text-align:center;cursor:pointer;transition:all .15s;touch-action:manipulation;line-height:1.3}
-.zone-btn:hover{border-color:var(--a300);background:var(--a50)}
-.zone-btn.sel{color:var(--white);border-color:transparent}
-.zone-btn.sel.za{background:#16a34a}
-.zone-btn.sel.zb{background:var(--a600)}
-.zone-btn.sel.zc{background:#dc2626}
-.zone-fee{font-size:9px;font-weight:800;opacity:.85;display:block;margin-top:2px}
-.err-msg{font-size:11px;color:var(--red-d);font-weight:600;margin-top:-6px;margin-bottom:8px;display:none}
-.err-msg.show{display:block}
-
-/* ── ORDER FOOTER ── */
-.order-footer{padding:10px 14px 14px;border-top:1px solid var(--g200);flex-shrink:0;background:var(--white)}
-.total-display{display:flex;justify-content:space-between;align-items:center;background:var(--a100);border-radius:10px;padding:10px 14px;margin-bottom:10px}
-.total-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a800)}
-.total-amount{font-size:20px;font-weight:800;color:var(--a700)}
-.action-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.act-btn{padding:13px 8px;border-radius:12px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;touch-action:manipulation}
-.act-btn:active{transform:scale(.97)}
-.btn-charge{background:var(--green);color:var(--white);grid-column:1/-1}
-.btn-charge:hover{background:var(--green-d)}
-.btn-print-thermal{background:var(--g800);color:var(--white)}
-.btn-print-thermal:hover{background:var(--g900)}
-.btn-whatsapp{background:#22c55e;color:var(--white)}
-.btn-whatsapp:hover{background:#16a34a}
-.btn-print-card{background:var(--blue);color:var(--white)}
-.btn-print-card:hover{background:var(--blue-d)}
-
-/* ── ORDERS LOG TAB ── */
-#orders-view{display:none;flex:1;min-height:0;flex-direction:column}
+/* ── ORDERS LOG VIEW (full-width center) ── */
+#orders-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
 #orders-view.show{display:flex}
 .orders-toolbar{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
 .orders-toolbar h2{font-family:var(--brand);font-size:20px;font-weight:700;color:var(--a950);flex:1}
@@ -190,6 +187,102 @@ input,textarea,select{font-family:var(--font);outline:none}
 .oc-print-c:hover{background:var(--blue-d)}
 .oc-wa{background:#22c55e;color:var(--white)}
 .oc-wa:hover{background:#16a34a}
+.oc-load{background:var(--a500);color:var(--white)}
+.oc-load:hover{background:var(--a600)}
+
+/* ── INBOX VIEW ── */
+#inbox-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
+#inbox-view.show{display:flex}
+.inbox-toolbar{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.inbox-toolbar h2{font-family:var(--brand);font-size:20px;font-weight:700;color:var(--a950);flex:1}
+.inbox-list{flex:1;overflow-y:auto;padding:14px 20px;-webkit-overflow-scrolling:touch}
+.inbox-card{background:var(--white);border-radius:14px;border:2px solid var(--green);margin-bottom:12px;overflow:hidden;box-shadow:0 2px 12px rgba(34,197,94,.1);animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.inbox-card-header{background:linear-gradient(135deg,#dcfce7,#bbf7d0);padding:12px 14px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.inbox-card-header .new-badge{background:var(--green-d);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.inbox-oc-name{font-size:15px;font-weight:800;color:var(--a950)}
+.inbox-oc-meta{font-size:11px;color:var(--g600);margin-top:2px}
+.inbox-oc-time{font-size:10px;font-weight:700;color:var(--green-d)}
+.inbox-actions{display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap}
+.inbox-confirm-btn{background:var(--green);color:#fff;padding:9px 18px;border-radius:10px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;border:none;transition:all .15s;flex:1}
+.inbox-confirm-btn:hover{background:var(--green-d)}
+.inbox-decline-btn{background:#fee2e2;color:var(--red-d);padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
+.inbox-decline-btn:hover{background:#fecaca}
+.inbox-empty{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px}
+.inbox-empty-icon{font-size:48px;margin-bottom:12px}
+
+/* ── RIGHT: ORDER PANEL ── */
+.order-panel{width:var(--sidebar-order);flex-shrink:0;background:var(--white);border-left:2px solid var(--g200);display:flex;flex-direction:column;overflow:hidden}
+.order-header{padding:14px 16px 10px;border-bottom:1px solid var(--g200);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.order-title{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a950)}
+.clear-btn{font-size:11px;font-weight:700;color:var(--red-d);background:#fef2f2;border:1px solid #fecaca;padding:5px 10px;border-radius:8px}
+.clear-btn:hover{background:#fee2e2}
+.order-scroll{flex:1;overflow-y:auto;padding:10px 14px;-webkit-overflow-scrolling:touch}
+.order-empty{text-align:center;padding:40px 20px;color:var(--g400);font-size:13px}
+.order-empty-icon{font-size:36px;margin-bottom:8px}
+
+/* ── ORDER LINE ITEMS ── */
+.order-line{background:var(--g50);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.order-line-main{display:flex;align-items:flex-start;gap:8px;padding:10px 10px 8px}
+.order-line-name{flex:1;font-size:12px;font-weight:700;color:var(--a950);line-height:1.3}
+.order-line-price{font-size:12px;font-weight:700;color:var(--a600);flex-shrink:0}
+.qty-row{display:flex;align-items:center;gap:0;margin-top:4px}
+.q-btn{width:28px;height:28px;border-radius:7px;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.q-minus{background:var(--a100);color:var(--a800)}
+.q-minus:hover{background:var(--a200)}
+.q-plus{background:var(--a500);color:var(--white)}
+.q-plus:hover{background:var(--a600)}
+.q-num{width:30px;text-align:center;font-size:13px;font-weight:800;color:var(--a950);background:var(--white);border-top:1.5px solid var(--a200);border-bottom:1.5px solid var(--a200);height:28px;line-height:28px}
+.q-del{margin-left:5px;width:26px;height:26px;border-radius:6px;background:#fef2f2;color:var(--red-d);font-size:13px;display:flex;align-items:center;justify-content:center}
+.q-del:hover{background:#fee2e2}
+
+/* ── ADDON/FLAVOR CHIPS IN ORDER ── */
+.order-addons{padding:0 10px 10px}
+.oa-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px}
+.oa-chips{display:flex;flex-wrap:wrap;gap:4px}
+.oa-chip{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--a200);background:var(--a50);color:var(--a800);cursor:pointer;transition:all .12s;touch-action:manipulation}
+.oa-chip:hover{border-color:var(--a400);background:var(--a100)}
+.oa-chip.selected{background:var(--a500);border-color:var(--a500);color:var(--white)}
+
+/* ── CUSTOMER & ORDER TYPE ── */
+.order-form{padding:10px 14px 0;border-top:1px solid var(--g200);flex-shrink:0}
+.form-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px;display:block}
+.form-input{width:100%;padding:9px 11px;border:2px solid var(--a200);border-radius:10px;font-size:12px;font-weight:600;color:var(--a950);background:var(--a50);transition:border-color .2s;margin-bottom:8px}
+.form-input:focus{border-color:var(--a500);background:var(--white)}
+.form-input.error{border-color:var(--red);background:#fef2f2}
+.type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px}
+.type-btn{padding:8px 3px;border-radius:9px;border:2px solid var(--a200);background:var(--a50);color:var(--a800);font-size:10px;font-weight:700;text-align:center;cursor:pointer;transition:all .15s;touch-action:manipulation}
+.type-btn:hover{background:var(--a100);border-color:var(--a300)}
+.type-btn.sel{background:var(--a500);border-color:var(--a500);color:var(--white)}
+.type-icon{font-size:16px;display:block;margin-bottom:2px}
+.zone-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px}
+.zone-btn{padding:7px 3px;border-radius:9px;border:2px solid var(--g200);background:var(--g50);font-size:10px;font-weight:700;text-align:center;cursor:pointer;transition:all .15s;touch-action:manipulation;line-height:1.3}
+.zone-btn:hover{border-color:var(--a300);background:var(--a50)}
+.zone-btn.sel{color:var(--white);border-color:transparent}
+.zone-btn.sel.za{background:#16a34a}
+.zone-btn.sel.zb{background:var(--a600)}
+.zone-btn.sel.zc{background:#dc2626}
+.zone-fee{font-size:9px;font-weight:800;opacity:.85;display:block;margin-top:2px}
+.err-msg{font-size:11px;color:var(--red-d);font-weight:600;margin-top:-5px;margin-bottom:7px;display:none}
+.err-msg.show{display:block}
+
+/* ── ORDER FOOTER ── */
+.order-footer{padding:10px 14px 12px;border-top:1px solid var(--g200);flex-shrink:0;background:var(--white)}
+.total-display{display:flex;justify-content:space-between;align-items:center;background:var(--a100);border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.total-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a800)}
+.total-amount{font-size:20px;font-weight:800;color:var(--a700)}
+.action-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.act-btn{padding:11px 6px;border-radius:11px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;touch-action:manipulation}
+.act-btn:active{transform:scale(.97)}
+.btn-charge{background:var(--green);color:var(--white);grid-column:1/-1}
+.btn-charge:hover{background:var(--green-d)}
+.btn-print-thermal{background:var(--g800);color:var(--white)}
+.btn-print-thermal:hover{background:var(--g900)}
+.btn-whatsapp{background:#22c55e;color:var(--white)}
+.btn-whatsapp:hover{background:#16a34a}
+.btn-print-card{background:var(--blue);color:var(--white)}
+.btn-print-card:hover{background:var(--blue-d)}
 
 /* ── TOAST ── */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:var(--white);padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9998;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25)}
@@ -222,7 +315,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 }
 #print-area { display: none; }
 
-/* thermal receipt */
 .thermal-receipt { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; color: #000; background: #fff; padding: 8px 12px; max-width: 280px; }
 .th-center { text-align: center; }
 .th-logo { font-size: 18px; font-weight: 900; letter-spacing: .1em; margin-bottom: 2px; }
@@ -234,7 +326,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .th-total { font-size: 14px; font-weight: 900; border-top: 2px solid #000; padding-top: 4px; margin-top: 4px; }
 .th-footer { text-align: center; font-size: 10px; margin-top: 8px; }
 
-/* styled card receipt */
 .card-receipt { font-family: 'Poppins', sans-serif; background: #fff; padding: 24px; max-width: 400px; margin: 0 auto; }
 .cr-header { text-align: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #fde68a; }
 .cr-logo { font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: #78350f; }
@@ -252,13 +343,9 @@ input,textarea,select{font-family:var(--font);outline:none}
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading"><div class="spinner"></div><div style="font-family:var(--brand);font-size:16px;color:var(--a900);font-weight:600" id="loading-text">Loading…</div></div>
-
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- MODAL -->
 <div id="modal-overlay">
   <div class="modal-box">
     <h3 id="modal-title">Confirm</h3>
@@ -270,7 +357,6 @@ input,textarea,select{font-family:var(--font);outline:none}
   </div>
 </div>
 
-<!-- PRINT AREA -->
 <div id="print-area"></div>
 
 <!-- LOGIN -->
@@ -289,26 +375,28 @@ input,textarea,select{font-family:var(--font);outline:none}
 
 <!-- POS -->
 <div id="pos-screen">
-  <!-- TOP BAR -->
   <div class="pos-topbar">
     <div style="display:flex;align-items:center;gap:12px">
       <span class="pos-logo">Le Kiosk <span>POS</span></span>
       <span class="session-badge" id="session-badge"></span>
     </div>
     <div class="pos-topbar-right">
+      <button class="topbar-btn tb-inbox" id="inbox-tab-btn" onclick="toggleInboxView()" style="position:relative">
+        📥 Incoming
+        <span class="inbox-badge" id="inbox-badge">0</span>
+      </button>
       <button class="topbar-btn tb-orders" id="orders-tab-btn" onclick="toggleOrdersView()">📋 Orders Log</button>
       <button class="topbar-btn tb-logout" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- MAIN -->
   <div class="pos-main">
 
-    <!-- LEFT: MENU PANEL -->
-    <div class="menu-panel" id="menu-panel">
-      <div class="cat-tabs" id="cat-tabs"></div>
-      <div class="items-grid" id="items-grid"></div>
-    </div>
+    <!-- LEFT: CATEGORY SIDEBAR -->
+    <div class="cat-sidebar" id="cat-sidebar"></div>
+
+    <!-- CENTER: MENU PANEL (all items listed) -->
+    <div class="menu-panel" id="menu-panel"></div>
 
     <!-- ORDERS LOG (hidden by default) -->
     <div id="orders-view">
@@ -327,20 +415,25 @@ input,textarea,select{font-family:var(--font);outline:none}
       </div>
     </div>
 
-    <!-- RIGHT: ORDER PANEL -->
+    <!-- INBOX VIEW (hidden by default) -->
+    <div id="inbox-view">
+      <div class="inbox-toolbar">
+        <h2>📥 Incoming Orders</h2>
+        <button class="topbar-btn" onclick="pollInbox()" style="background:var(--a100);color:var(--a950)">🔄 Refresh</button>
+      </div>
+      <div class="inbox-list" id="inbox-list">
+        <div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders yet</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: ORDER PANEL (always visible) -->
     <div class="order-panel">
       <div class="order-header">
         <span class="order-title">🛒 Current Order</span>
         <button class="clear-btn" onclick="clearOrder()">Clear ✕</button>
       </div>
-      <div class="order-scroll" id="order-scroll">
-        <div class="order-empty" id="order-empty">
-          <div class="order-empty-icon">🛒</div>
-          <div>Tap items to add them</div>
-        </div>
-      </div>
+      <div class="order-scroll" id="order-scroll"></div>
 
-      <!-- FORM -->
       <div class="order-form" id="order-form">
         <label class="form-label">Customer Name *</label>
         <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
@@ -368,7 +461,6 @@ input,textarea,select{font-family:var(--font);outline:none}
         <textarea id="order-note" class="form-input" rows="2" placeholder="Table number, address, special requests…" style="display:none;resize:none"></textarea>
       </div>
 
-      <!-- FOOTER -->
       <div class="order-footer">
         <div class="total-display">
           <div>
@@ -386,8 +478,8 @@ input,textarea,select{font-family:var(--font);outline:none}
       </div>
     </div>
 
-  </div><!-- end pos-main -->
-</div><!-- end pos-screen -->
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -398,32 +490,43 @@ const REPO_OWNER   = 'joetheproz5';
 const REPO_NAME    = 'le-kiosk-menu';
 const MENU_PATH    = 'menu.json';
 const ORDERS_PATH  = 'orders.json';
+const INBOX_PATH   = 'inbox.json';   // NEW: customer orders from menu page
 const API          = 'https://api.github.com';
 const MAX_ORDERS   = 200;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS   = 2 * 60 * 1000;
-const SESSION_MS   = 4 * 60 * 60 * 1000; // 4 hours for POS
+const SESSION_MS   = 4 * 60 * 60 * 1000;
+const WA_NUMBER    = '96176840244'; // Le Kiosk WhatsApp
 
 const ZONE_FEES = { A: 0.50, B: 1.00, C: 1.50 };
+
+// Category icons for sidebar
+const CAT_ICONS = {
+  appetizers:'🍟', sandwiches:'🥪', burgers:'🍔', sajj:'🫓',
+  desserts:'🍨', shisha:'💨', beverages:'🥤', sweet:'🍫', savory:'🧀'
+};
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
 let menuData     = [];
-let orderLines   = [];   // [{itemKey, name, price, qty, addons:[], flavor:null}]
-let orderType    = null; // 'dinein' | 'takeaway' | 'delivery'
-let deliveryZone = null; // 'A' | 'B' | 'C'
-let activeCat    = 0;
+let orderLines   = [];
+let orderType    = null;
+let deliveryZone = null;
 let ordersData   = [];
 let ordersSha    = null;
+let inboxData    = [];
+let inboxSha     = null;
 let ordersFilter = 'all';
 let showingOrders= false;
-let orderCounter = 1;
+let showingInbox = false;
 let sessionExpiry= 0;
 let sessionTimer = null;
 let sessionTick  = null;
 let sessionListenersAttached = false;
 let pendingModalFn = null;
+let inboxPollInterval = null;
+let activeCatKey = null;
 
 // ═══════════════════════════════════════════════════════════════
 // HASH & LOGIN
@@ -433,10 +536,7 @@ async function sha256(str) {
   const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
 }
-
-function getLockout() {
-  try { return JSON.parse(sessionStorage.getItem('pos_lock') || '{"a":0,"u":0}'); } catch { return {a:0,u:0}; }
-}
+function getLockout() { try { return JSON.parse(sessionStorage.getItem('pos_lock') || '{"a":0,"u":0}'); } catch { return {a:0,u:0}; } }
 function setLockout(d) { sessionStorage.setItem('pos_lock', JSON.stringify(d)); }
 function resetLockout() { sessionStorage.removeItem('pos_lock'); }
 function renderDots(n) {
@@ -466,7 +566,7 @@ async function tryLogin() {
   if (!pw) return;
   let hash;
   try { hash = await sha256(pw); }
-  catch(e) { showLoginErr(e.message === 'HTTPS required' ? 'Open POS over HTTPS (lekiosk.store/pos.html).' : e.message); return; }
+  catch(e) { showLoginErr(e.message === 'HTTPS required' ? 'Open POS over HTTPS.' : e.message); return; }
   if (hash === ADMIN_HASH) {
     resetLockout(); hideLockBar();
     document.getElementById('login-screen').style.display = 'none';
@@ -515,6 +615,7 @@ function updateSessionBadge() {
 }
 function logout() {
   clearTimeout(sessionTimer); clearInterval(sessionTick); clearInterval(lockCountdown);
+  clearInterval(inboxPollInterval);
   sessionStorage.removeItem('pos_gh_token');
   document.getElementById('pos-screen').classList.remove('show');
   document.getElementById('login-screen').style.display = 'flex';
@@ -522,9 +623,6 @@ function logout() {
   document.getElementById('pw').focus();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// GITHUB TOKEN (reuse same key as admin for convenience)
-// ═══════════════════════════════════════════════════════════════
 function getToken() { return sessionStorage.getItem('lk_gh_token') || sessionStorage.getItem('pos_gh_token') || ''; }
 
 // ═══════════════════════════════════════════════════════════════
@@ -534,20 +632,23 @@ async function bootPOS() {
   showLoading('Loading menu…');
   try {
     await loadMenu();
-    renderCatTabs();
-    renderItemsGrid();
+    renderCatSidebar();
+    renderMenuPanel();
   } catch(e) {
     showToast('Menu load failed: ' + e.message, 'error');
   }
-  // Load orders in background
-  loadOrders(false).catch(() => {});
+  renderOrderPanel();
+  loadOrders(false).catch(()=>{});
+  pollInbox();
   hideLoading();
-  // Prompt for token if missing
   if (!getToken()) promptToken();
+
+  // Poll inbox every 30 seconds
+  inboxPollInterval = setInterval(pollInbox, 30000);
 }
 
 function promptToken() {
-  const t = prompt('Enter GitHub token (needed to save orders):\n(Leave blank to skip — orders won\'t save to file)');
+  const t = prompt('Enter GitHub token (needed to save orders):\n(Leave blank to skip)');
   if (t && t.trim()) {
     sessionStorage.setItem('pos_gh_token', t.trim());
     showToast('Token saved ✓', 'success');
@@ -560,43 +661,84 @@ function promptToken() {
 async function loadMenu() {
   const res = await fetch('../menu.json?v=' + Date.now());
   if (!res.ok) throw new Error('Could not load menu.json');
-  menuData = (await res.json()).filter(c => c.type !== 'addons');
+  const all = await res.json();
+  menuData = all.filter(c => c.type !== 'addons');
+  if (menuData.length) activeCatKey = menuData[0].key;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MENU RENDER
+// CATEGORY SIDEBAR
 // ═══════════════════════════════════════════════════════════════
-function renderCatTabs() {
-  document.getElementById('cat-tabs').innerHTML =
-    menuData.map((cat, i) =>
-      `<button class="cat-tab${i===activeCat?' active':''}" onclick="switchCat(${i})">${cat.title}</button>`
-    ).join('');
+function renderCatSidebar() {
+  const sidebar = document.getElementById('cat-sidebar');
+  sidebar.innerHTML = menuData.map((cat, i) => {
+    const icon = CAT_ICONS[cat.key] || CAT_ICONS[cat.key.toLowerCase()] || '🍽️';
+    const isActive = cat.key === activeCatKey;
+    return `<button class="cat-sidebar-btn${isActive?' active':''}" data-ci="${i}" onclick="scrollToCategory('${cat.key}', ${i}, this)">
+      <span class="cat-icon">${icon}</span>
+      ${cat.title}
+    </button>`;
+  }).join('');
 }
 
-function switchCat(i) {
-  activeCat = i;
-  renderCatTabs();
-  renderItemsGrid();
+function scrollToCategory(key, idx, btn) {
+  activeCatKey = key;
+  // update active state
+  document.querySelectorAll('.cat-sidebar-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // scroll menu panel to that section
+  const el = document.getElementById('cat-section-' + key);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderItemsGrid() {
-  const cat = menuData[activeCat];
-  if (!cat) return;
-  const grid = document.getElementById('items-grid');
-  grid.innerHTML = (cat.items || []).map((item, idx) => {
-    const line = orderLines.find(l => l.name === item.name && l.price === priceNum(item.price));
-    const qty  = line ? line.qty : 0;
-    return `<div class="item-card-wrap${qty>0?' has-qty':''}" id="wrap-${activeCat}-${idx}">
-      <div class="item-card${qty>0?' in-cart':''}" onclick="addToOrder(${activeCat},${idx})">
-        <img class="item-img" src="${item.image}" alt="${item.name}" onerror="this.style.display='none'">
-        <div class="item-info">
-          <div class="item-name">${item.name}</div>
-          <div class="item-price">${item.price}</div>
+// ═══════════════════════════════════════════════════════════════
+// MENU PANEL (all categories listed vertically)
+// ═══════════════════════════════════════════════════════════════
+function renderMenuPanel() {
+  const panel = document.getElementById('menu-panel');
+  panel.innerHTML = menuData.map((cat, ci) => {
+    const icon = CAT_ICONS[cat.key] || '🍽️';
+    const itemsHtml = (cat.items || []).map((item, idx) => {
+      const wrapId = `wrap-${cat.key}-${idx}`;
+      const qty = getQtyForItem(cat.key, idx);
+      return `<div class="item-card-wrap${qty>0?' has-qty':''}" id="${wrapId}">
+        <div class="item-card${qty>0?' in-cart':''}" onclick="addToOrder('${cat.key}',${idx})">
+          <img class="item-img" src="${item.image||''}" alt="${item.name}" onerror="this.style.display='none'">
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">${item.price}</div>
+          </div>
         </div>
+        <div class="item-qty-badge" id="badge-${cat.key}-${idx}">${qty>0?qty:''}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="menu-cat-section cat-color-${ci % 9}" id="cat-section-${cat.key}">
+      <div class="menu-cat-header">
+        ${icon} ${cat.title}
+        <span class="cat-badge">${(cat.items||[]).length} items</span>
       </div>
-      <div class="item-qty-badge">${qty}</div>
+      <div class="menu-cat-items">${itemsHtml}</div>
     </div>`;
   }).join('');
+
+  // Set up scroll spy to highlight active category in sidebar
+  setupScrollSpy();
+}
+
+function setupScrollSpy() {
+  const panel = document.getElementById('menu-panel');
+  panel.addEventListener('scroll', () => {
+    const sections = menuData.map(cat => document.getElementById('cat-section-' + cat.key)).filter(Boolean);
+    let activeIdx = 0;
+    sections.forEach((sec, i) => {
+      if (sec.offsetTop - panel.scrollTop <= 50) activeIdx = i;
+    });
+    document.querySelectorAll('.cat-sidebar-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === activeIdx);
+    });
+    if (menuData[activeIdx]) activeCatKey = menuData[activeIdx].key;
+  }, { passive: true });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -604,44 +746,85 @@ function renderItemsGrid() {
 // ═══════════════════════════════════════════════════════════════
 function priceNum(p) { return parseFloat((p||'0').replace('$','')) || 0; }
 
-function addToOrder(catIdx, itemIdx) {
-  const cat  = menuData[catIdx];
-  const item = cat?.items?.[itemIdx];
+function getQtyForItem(catKey, itemIdx) {
+  const cat = menuData.find(c => c.key === catKey);
+  if (!cat || !cat.items || !cat.items[itemIdx]) return 0;
+  const item = cat.items[itemIdx];
+  const pn = priceNum(item.price);
+  const line = orderLines.find(l => l.name === item.name && l.price === pn && l.catKey === catKey && l.itemIdx === itemIdx);
+  return line ? line.qty : 0;
+}
+
+function addToOrder(catKey, itemIdx) {
+  const cat  = menuData.find(c => c.key === catKey);
+  if (!cat) return;
+  const item = cat.items?.[itemIdx];
   if (!item) return;
-  const pn   = priceNum(item.price);
-  // Find existing line (same name+price)
-  const existing = orderLines.find(l => l.name === item.name && l.price === pn);
+  const pn = priceNum(item.price);
+
+  // Find existing line by catKey+itemIdx (unique identifier)
+  const existing = orderLines.find(l => l.catKey === catKey && l.itemIdx === itemIdx);
   if (existing) {
     existing.qty++;
   } else {
     orderLines.push({
       id: Date.now() + Math.random(),
+      catKey, itemIdx,
       name: item.name,
       price: pn,
       priceStr: item.price,
       qty: 1,
-      addons: [],    // [{label, price}]
-      flavor: null,  // string
-      meta: item     // reference for addons/flavors
+      addons: [],
+      flavor: null,
+      meta: item
     });
   }
+  updateItemBadge(catKey, itemIdx);
   renderOrderPanel();
-  renderItemsGrid();
+}
+
+function updateItemBadge(catKey, itemIdx) {
+  const qty = getQtyForItem(catKey, itemIdx);
+  const wrap = document.getElementById(`wrap-${catKey}-${itemIdx}`);
+  const badge = document.getElementById(`badge-${catKey}-${itemIdx}`);
+  if (wrap) {
+    wrap.classList.toggle('has-qty', qty > 0);
+    const card = wrap.querySelector('.item-card');
+    if (card) card.classList.toggle('in-cart', qty > 0);
+  }
+  if (badge) badge.textContent = qty > 0 ? qty : '';
+}
+
+function refreshAllBadges() {
+  menuData.forEach((cat, ci) => {
+    (cat.items || []).forEach((item, idx) => {
+      updateItemBadge(cat.key, idx);
+    });
+  });
 }
 
 function changeQty(id, delta) {
   const line = orderLines.find(l => l.id === id);
   if (!line) return;
+  const prevQty = line.qty;
   line.qty = Math.max(0, line.qty + delta);
   if (line.qty === 0) orderLines = orderLines.filter(l => l.id !== id);
+  updateItemBadge(line.catKey, line.itemIdx);
   renderOrderPanel();
-  renderItemsGrid();
 }
 
 function removeLine(id) {
+  const line = orderLines.find(l => l.id === id);
+  if (line) updateItemBadge(line.catKey, line.itemIdx);
   orderLines = orderLines.filter(l => l.id !== id);
+  // after removal, update badge
+  if (line) {
+    const wrap = document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`);
+    const badge = document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
+    if (wrap) { wrap.classList.remove('has-qty'); const card = wrap.querySelector('.item-card'); if(card) card.classList.remove('in-cart'); }
+    if (badge) badge.textContent = '';
+  }
   renderOrderPanel();
-  renderItemsGrid();
 }
 
 function toggleAddon(lineId, addonLabel, addonPrice) {
@@ -661,6 +844,7 @@ function toggleFlavor(lineId, flavor) {
 }
 
 function clearOrder() {
+  const prevLines = [...orderLines];
   orderLines = []; orderType = null; deliveryZone = null;
   document.getElementById('cust-name').value = '';
   document.getElementById('order-note').value = '';
@@ -669,8 +853,14 @@ function clearOrder() {
   document.getElementById('zone-section').style.display = 'none';
   document.getElementById('note-label').style.display = 'none';
   document.getElementById('order-note').style.display = 'none';
+  // Clear all badges
+  prevLines.forEach(line => {
+    const wrap = document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`);
+    const badge = document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
+    if (wrap) { wrap.classList.remove('has-qty'); const card = wrap.querySelector('.item-card'); if(card) card.classList.remove('in-cart'); }
+    if (badge) badge.textContent = '';
+  });
   renderOrderPanel();
-  renderItemsGrid();
 }
 
 function selType(t) {
@@ -690,9 +880,8 @@ function selZone(z) {
   deliveryZone = z;
   document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('sel'));
   document.querySelectorAll('.zone-btn').forEach(b => {
-    if ((b.classList.contains('za') && z==='A') ||
-        (b.classList.contains('zb') && z==='B') ||
-        (b.classList.contains('zc') && z==='C')) b.classList.add('sel');
+    if ((b.classList.contains('za')&&z==='A')||(b.classList.contains('zb')&&z==='B')||(b.classList.contains('zc')&&z==='C'))
+      b.classList.add('sel');
   });
   document.getElementById('err-zone').classList.remove('show');
   updateTotal();
@@ -718,49 +907,49 @@ function updateTotal() {
 function renderOrderPanel() {
   updateTotal();
   const scroll = document.getElementById('order-scroll');
-  const empty  = document.getElementById('order-empty');
+
   if (!orderLines.length) {
-    scroll.innerHTML = '';
-    scroll.appendChild(empty);
-    empty.style.display = 'block';
+    scroll.innerHTML = `<div class="order-empty"><div class="order-empty-icon">🛒</div><div>Tap items to add them</div></div>`;
     return;
   }
-  empty.style.display = 'none';
-  const savedScroll = scroll.scrollTop;
 
+  const savedScroll = scroll.scrollTop;
   let html = '';
+
   orderLines.forEach(line => {
-    const lineTotal = line.price * line.qty + line.addons.reduce((a,x) => a+x.price,0);
+    const lineTotal = line.price * line.qty + line.addons.reduce((a,x) => a+x.price, 0);
+    // Use numeric id safely in onclick
+    const lineId = line.id;
     html += `<div class="order-line">
       <div class="order-line-main">
-        <div>
+        <div style="flex:1">
           <div class="order-line-name">${line.name}</div>
           <div class="qty-row">
-            <button class="q-btn q-minus" onclick="changeQty(${line.id},-1)">−</button>
+            <button class="q-btn q-minus" onclick="changeQtyById(${lineId},-1)">−</button>
             <div class="q-num">${line.qty}</div>
-            <button class="q-btn q-plus" onclick="changeQty(${line.id},1)">+</button>
-            <button class="q-del" onclick="removeLine(${line.id})">✕</button>
+            <button class="q-btn q-plus" onclick="changeQtyById(${lineId},1)">+</button>
+            <button class="q-del" onclick="removeLineById(${lineId})">✕</button>
           </div>
         </div>
         <div class="order-line-price">$${lineTotal.toFixed(2)}</div>
       </div>`;
 
-    // Flavor picker
     if (line.meta?.flavors?.length) {
       html += `<div class="order-addons"><div class="oa-label">💨 Flavor</div><div class="oa-chips">`;
       line.meta.flavors.forEach(f => {
-        html += `<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavor(${line.id},'${f.replace(/'/g,"\\'")}')">` + f + `</button>`;
+        const safe = f.replace(/'/g, "\\'");
+        html += `<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavorById(${lineId},'${safe}')">${f}</button>`;
       });
       html += `</div></div>`;
     }
 
-    // Addon picker
     if (line.meta?.addons?.length) {
-      html += `<div class="order-addons"><div class="oa-label">➕ Add extras</div><div class="oa-chips">`;
+      html += `<div class="order-addons"><div class="oa-label">➕ Extras</div><div class="oa-chips">`;
       line.meta.addons.forEach(a => {
         const pn  = priceNum(a.price);
         const sel = line.addons.some(x => x.label === a.label);
-        html += `<button class="oa-chip${sel?' selected':''}" onclick="toggleAddon(${line.id},'${a.label.replace(/'/g,"\\'")}',${pn})">${a.label} <span style="opacity:.7">${a.price}</span></button>`;
+        const safe = a.label.replace(/'/g, "\\'");
+        html += `<button class="oa-chip${sel?' selected':''}" onclick="toggleAddonById(${lineId},'${safe}',${pn})">${a.label} <span style="opacity:.7">${a.price}</span></button>`;
       });
       html += `</div></div>`;
     }
@@ -771,6 +960,12 @@ function renderOrderPanel() {
   scroll.innerHTML = html;
   scroll.scrollTop = savedScroll;
 }
+
+// Safe id-based wrappers (avoid floating point issues in onclick)
+function changeQtyById(id, delta) { changeQty(id, delta); }
+function removeLineById(id) { removeLine(id); }
+function toggleAddonById(id, label, price) { toggleAddon(id, label, price); }
+function toggleFlavorById(id, flavor) { toggleFlavor(id, flavor); }
 
 // ═══════════════════════════════════════════════════════════════
 // VALIDATION
@@ -797,7 +992,6 @@ function buildOrderObj(status='pending') {
   const fee   = getDeliveryFee();
   const total = getGrandTotal();
   const id    = 'ORD-' + Date.now();
-  const typeLabels = {dinein:'Dine In', takeaway:'Takeaway', delivery:'Delivery'};
   return {
     id, status,
     timestamp: new Date().toISOString(),
@@ -819,6 +1013,55 @@ function buildOrderObj(status='pending') {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// LOAD ORDER INTO CURRENT ORDER (from inbox confirmation)
+// ═══════════════════════════════════════════════════════════════
+function loadOrderIntoCurrent(order) {
+  clearOrder();
+  // Set form fields
+  document.getElementById('cust-name').value = order.name || '';
+  if (order.note) {
+    document.getElementById('order-note').value = order.note;
+    document.getElementById('note-label').style.display = 'block';
+    document.getElementById('order-note').style.display = 'block';
+  }
+  if (order.orderType) selType(order.orderType);
+  if (order.deliveryZone) selZone(order.deliveryZone);
+
+  // Rebuild orderLines from order items
+  order.items.forEach(it => {
+    // Try to find matching item in menu for meta (addons/flavors)
+    let foundCatKey = null, foundIdx = null, foundMeta = null;
+    menuData.forEach(cat => {
+      (cat.items || []).forEach((mitem, idx) => {
+        if (mitem.name === it.name) { foundCatKey = cat.key; foundIdx = idx; foundMeta = mitem; }
+      });
+    });
+
+    const line = {
+      id: Date.now() + Math.random(),
+      catKey: foundCatKey,
+      itemIdx: foundIdx,
+      name: it.name,
+      price: it.price,
+      priceStr: it.priceStr || ('$' + it.price),
+      qty: it.qty,
+      addons: (it.addons || []).map(a => ({label:a.label, price:a.price})),
+      flavor: it.flavor || null,
+      meta: foundMeta || {}
+    };
+    orderLines.push(line);
+    if (foundCatKey !== null && foundIdx !== null) updateItemBadge(foundCatKey, foundIdx);
+  });
+
+  renderOrderPanel();
+  showToast('Order loaded into current order ✓', 'success');
+
+  // Switch back to menu view
+  if (showingInbox) toggleInboxView();
+  if (showingOrders) toggleOrdersView();
+}
+
+// ═══════════════════════════════════════════════════════════════
 // CHARGE & SAVE
 // ═══════════════════════════════════════════════════════════════
 async function chargeOrder() {
@@ -827,17 +1070,17 @@ async function chargeOrder() {
   showLoading('Saving order…');
   try {
     await saveOrderToGitHub(order);
-    showToast(`Order #${order.id} saved ✓`, 'success');
+    showToast(`Order ${order.id} saved ✓`, 'success');
     clearOrder();
     loadOrders(false).catch(()=>{});
   } catch(e) {
-    showToast('Save failed: ' + e.message + ' (order not stored)', 'error');
+    showToast('Save failed: ' + e.message, 'error');
   }
   hideLoading();
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ORDERS FILE (orders.json in GitHub)
+// GITHUB: ORDERS FILE
 // ═══════════════════════════════════════════════════════════════
 function fromB64(b64) {
   const bin = atob(b64); const b = new Uint8Array(bin.length);
@@ -850,31 +1093,39 @@ function toB64(str) {
   return btoa(s);
 }
 
-async function fetchOrdersFile() {
+async function fetchGitHubFile(path) {
   const h = {'Accept':'application/vnd.github.v3+json'};
   if (getToken()) h['Authorization'] = 'Bearer ' + getToken();
-  const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ORDERS_PATH}`, {headers:h});
-  if (res.status === 404) { ordersSha=null; return []; }
+  const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {headers:h});
+  if (res.status === 404) return { data: null, sha: null };
   if (!res.ok) throw new Error('GitHub ' + res.status);
-  const data = await res.json();
-  ordersSha = data.sha;
-  return JSON.parse(fromB64(data.content.replace(/\n/g,'')));
+  const d = await res.json();
+  return { data: JSON.parse(fromB64(d.content.replace(/\n/g,''))), sha: d.sha };
 }
 
-async function saveOrdersFile(orders) {
-  if (!getToken()) throw new Error('No GitHub token — enter it at login prompt');
-  const json    = JSON.stringify(orders, null, 2);
-  const content = toB64(json);
-  const body    = { message: 'Update orders', content };
-  if (ordersSha) body.sha = ordersSha;
-  const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${ORDERS_PATH}`, {
+async function putGitHubFile(path, data, sha, message) {
+  if (!getToken()) throw new Error('No GitHub token');
+  const content = toB64(JSON.stringify(data, null, 2));
+  const body = { message, content };
+  if (sha) body.sha = sha;
+  const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
     method: 'PUT',
     headers: {'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
     body: JSON.stringify(body)
   });
   if (!res.ok) { const e=await res.json(); throw new Error(e.message||res.status); }
   const saved = await res.json();
-  ordersSha = saved.content.sha;
+  return saved.content.sha;
+}
+
+async function fetchOrdersFile() {
+  const { data, sha } = await fetchGitHubFile(ORDERS_PATH);
+  ordersSha = sha;
+  return data || [];
+}
+
+async function saveOrdersFile(orders) {
+  ordersSha = await putGitHubFile(ORDERS_PATH, orders, ordersSha, 'Update orders');
 }
 
 async function saveOrderToGitHub(order) {
@@ -911,14 +1162,110 @@ async function updateOrderStatus(id, status) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// INBOX (orders from menu page → inbox.json on GitHub)
+// ═══════════════════════════════════════════════════════════════
+async function pollInbox() {
+  try {
+    const { data, sha } = await fetchGitHubFile(INBOX_PATH);
+    inboxSha = sha;
+    const pending = (data || []).filter(o => o.status === 'pending');
+    inboxData = data || [];
+    updateInboxBadge(pending.length);
+    if (showingInbox) renderInboxList();
+  } catch(e) {
+    // silently fail if inbox.json doesn't exist yet
+  }
+}
+
+function updateInboxBadge(count) {
+  const badge = document.getElementById('inbox-badge');
+  badge.textContent = count;
+  badge.classList.toggle('show', count > 0);
+}
+
+async function confirmInboxOrder(id) {
+  const order = inboxData.find(o => o.id === id);
+  if (!order) return;
+  // Load into current order
+  loadOrderIntoCurrent(order);
+  // Mark as confirmed in inbox
+  order.status = 'confirmed';
+  try {
+    inboxSha = await putGitHubFile(INBOX_PATH, inboxData, inboxSha, 'Confirm order ' + id);
+  } catch(e) {}
+  renderInboxList();
+  updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
+}
+
+async function declineInboxOrder(id) {
+  const order = inboxData.find(o => o.id === id);
+  if (!order) return;
+  order.status = 'declined';
+  showLoading('Declining…');
+  try {
+    inboxSha = await putGitHubFile(INBOX_PATH, inboxData, inboxSha, 'Decline order ' + id);
+    showToast('Order declined', '');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  hideLoading();
+  renderInboxList();
+  updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
+}
+
+function renderInboxList() {
+  const list = document.getElementById('inbox-list');
+  const pending = inboxData.filter(o => o.status === 'pending');
+  if (!pending.length) {
+    list.innerHTML = `<div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders right now</div><div style="font-size:12px;margin-top:8px;color:var(--g400)">Orders from customers on the menu page will appear here</div></div>`;
+    return;
+  }
+  const typeEmoji = {dinein:'🪑', takeaway:'🥡', delivery:'🛵'};
+  list.innerHTML = pending.map(o => {
+    const dt = new Date(o.timestamp);
+    const ts = dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+    let metaStr = `${typeEmoji[o.orderType]||''} ${o.orderType||''}`;
+    if (o.deliveryZone) metaStr += ` · Zone ${o.deliveryZone}`;
+    let itemsHtml = (o.items||[]).map(it => `<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`).join('');
+    const safeO = JSON.stringify(o).replace(/"/g,'&quot;');
+    return `<div class="inbox-card">
+      <div class="inbox-card-header">
+        <div>
+          <div class="inbox-oc-name">${o.name}</div>
+          <div class="inbox-oc-meta">${metaStr}</div>
+          <div class="inbox-oc-time">🕐 ${ts}</div>
+        </div>
+        <span class="new-badge">NEW</span>
+      </div>
+      <div class="oc-items" style="border-top:1px solid #dcfce7">${itemsHtml}</div>
+      <div class="oc-total"><span>Total</span><span>$${(o.total||0).toFixed(2)}</span></div>
+      <div class="inbox-actions">
+        <button class="inbox-confirm-btn" onclick="confirmInboxOrder('${o.id}')">✅ Confirm & Load</button>
+        <button class="inbox-decline-btn" onclick="declineInboxOrder('${o.id}')">✕ Decline</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
 // ORDERS LOG UI
 // ═══════════════════════════════════════════════════════════════
 function toggleOrdersView() {
+  if (showingInbox) toggleInboxView(); // close inbox first
   showingOrders = !showingOrders;
-  document.getElementById('menu-panel').style.display  = showingOrders ? 'none' : 'flex';
+  document.getElementById('cat-sidebar').style.display  = showingOrders ? 'none' : 'flex';
+  document.getElementById('menu-panel').style.display   = showingOrders ? 'none' : 'block';
   document.getElementById('orders-view').classList.toggle('show', showingOrders);
   document.getElementById('orders-tab-btn').classList.toggle('active', showingOrders);
   if (showingOrders) loadOrders(true);
+}
+
+function toggleInboxView() {
+  if (showingOrders) toggleOrdersView(); // close orders first
+  showingInbox = !showingInbox;
+  document.getElementById('cat-sidebar').style.display  = showingInbox ? 'none' : 'flex';
+  document.getElementById('menu-panel').style.display   = showingInbox ? 'none' : 'block';
+  document.getElementById('inbox-view').classList.toggle('show', showingInbox);
+  document.getElementById('inbox-tab-btn').classList.toggle('active', showingInbox);
+  if (showingInbox) renderInboxList();
 }
 
 function setFilter(btn, filter) {
@@ -933,7 +1280,7 @@ function renderOrdersList() {
   let filtered = ordersData;
   if (ordersFilter !== 'all') filtered = ordersData.filter(o => o.status === ordersFilter);
   if (!filtered.length) {
-    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No ${ordersFilter === 'all' ? '' : ordersFilter} orders found.</div>`;
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No ${ordersFilter==='all'?'':ordersFilter} orders found.</div>`;
     return;
   }
   const typeEmoji = {dinein:'🪑', takeaway:'🥡', delivery:'🛵'};
@@ -949,14 +1296,13 @@ function renderOrdersList() {
     o.items.forEach(it => {
       itemRows += `<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;
       if (it.flavor) itemRows += `<div class="oc-item-row addon-row"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
-      (it.addons||[]).forEach(a => {
-        itemRows += `<div class="oc-item-row addon-row"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;
-      });
+      (it.addons||[]).forEach(a => { itemRows += `<div class="oc-item-row addon-row"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`; });
     });
     if (o.deliveryFee > 0) itemRows += `<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
 
     const canDone   = o.status !== 'done';
     const canCancel = o.status !== 'cancelled';
+    const safeO = JSON.stringify(o).replace(/"/g,'&quot;');
 
     return `<div class="order-card status-${o.status}">
       <div class="oc-header">
@@ -972,9 +1318,10 @@ function renderOrdersList() {
       <div class="oc-actions">
         ${canDone   ? `<button class="oc-btn oc-done"     onclick="confirmStatus('${o.id}','done')">✅ Done</button>` : ''}
         ${canCancel ? `<button class="oc-btn oc-cancel"   onclick="confirmStatus('${o.id}','cancelled')">✕ Cancel</button>` : ''}
-        <button class="oc-btn oc-print-t" onclick="printFromOrder(${JSON.stringify(o).replace(/"/g,'&quot;')},'thermal')">🖨 Thermal</button>
-        <button class="oc-btn oc-print-c" onclick="printFromOrder(${JSON.stringify(o).replace(/"/g,'&quot;')},'card')">🖨 Card</button>
-        <button class="oc-btn oc-wa"      onclick="sendWhatsAppFromOrder(${JSON.stringify(o).replace(/"/g,'&quot;')})">💬 WA</button>
+        <button class="oc-btn oc-load"    onclick="loadOrderIntoCurrent(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" title="Load into current order">📋 Load</button>
+        <button class="oc-btn oc-print-t" onclick="printFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')),'thermal')">🖨 Thermal</button>
+        <button class="oc-btn oc-print-c" onclick="printFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')),'card')">🖨 Card</button>
+        <button class="oc-btn oc-wa"      onclick="sendWhatsAppFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" >💬 WA</button>
       </div>
     </div>`;
   }).join('');
@@ -1011,17 +1358,13 @@ function buildThermal(o) {
   const typeLabels = {dinein:'Dine In', takeaway:'Takeaway', delivery:'Delivery'};
   let lines = '';
   o.items.forEach(it => {
-    const lt = (it.price*it.qty).toFixed(2);
-    lines += `<div class="th-row"><span>${it.name} x${it.qty}</span><span>$${lt}</span></div>`;
+    lines += `<div class="th-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;
     if (it.flavor) lines += `<div class="th-addon">↳ Flavor: ${it.flavor}</div>`;
-    (it.addons||[]).forEach(a => {
-      lines += `<div class="th-addon">↳ ${a.label}: +$${a.price.toFixed(2)}</div>`;
-    });
+    (it.addons||[]).forEach(a => { lines += `<div class="th-addon">↳ ${a.label}: +$${a.price.toFixed(2)}</div>`; });
   });
-  if (o.deliveryFee > 0) lines += `<div class="th-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+  if (o.deliveryFee > 0) lines += `<div class="th-row"><span>Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
   return `<div class="thermal-receipt">
-    <div class="th-center"><div class="th-logo">LE KIOSK</div>
-    <div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div>
+    <div class="th-center"><div class="th-logo">LE KIOSK</div><div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div>
     <div class="th-divider"></div>
     <div class="th-row"><span>Order:</span><span>${o.id||'POS'}</span></div>
     <div class="th-row"><span>Name:</span><span>${o.name}</span></div>
@@ -1046,17 +1389,11 @@ function buildCard(o) {
   o.items.forEach(it => {
     rows += `<div class="cr-row"><span style="font-weight:700">${it.name} <span style="color:#9ca3af;font-weight:500">x${it.qty}</span></span><span style="font-weight:700">$${(it.price*it.qty).toFixed(2)}</span></div>`;
     if (it.flavor) rows += `<div class="cr-addon"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
-    (it.addons||[]).forEach(a => {
-      rows += `<div class="cr-addon"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;
-    });
+    (it.addons||[]).forEach(a => { rows += `<div class="cr-addon"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`; });
   });
   if (o.deliveryFee > 0) rows += `<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
   return `<div class="card-receipt">
-    <div class="cr-header">
-      <div class="cr-logo">Le Kiosk</div>
-      <div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>
-      ${o.id ? `<div class="cr-order-num">${o.id}</div>` : ''}
-    </div>
+    <div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div>
     <div class="cr-meta">
       <div>Customer: <span>${o.name}</span></div>
       <div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>
@@ -1071,7 +1408,7 @@ function buildCard(o) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// WHATSAPP
+// WHATSAPP — fixed to store number
 // ═══════════════════════════════════════════════════════════════
 function sendWhatsApp() {
   if (!validateOrder()) return;
@@ -1096,7 +1433,7 @@ function doWhatsApp(o) {
   });
   if (o.deliveryFee > 0) msg += `• 🛵 Delivery — $${o.deliveryFee.toFixed(2)}\n`;
   msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${o.total.toFixed(2)}*`;
-  window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
+  window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 // ═══════════════════════════════════════════════════════════════
