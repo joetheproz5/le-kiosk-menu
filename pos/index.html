@@ -478,37 +478,54 @@ input,textarea,select{font-family:var(--font);outline:none}
         <button class="clear-btn" onclick="clearOrder()">Clear ✕</button>
       </div>
       <div class="order-scroll" id="order-scroll"></div>
-      <div class="order-form" id="order-form">
-        <label class="form-label">Customer Name *</label>
-        <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
-        <div class="err-msg" id="err-name">Name is required.</div>
-        <label class="form-label">Order Type *</label>
-        <div class="type-grid">
-          <button class="type-btn" onclick="selType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
-          <button class="type-btn" onclick="selType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
-          <button class="type-btn" onclick="selType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
+      <div class="order-proceed-bar" id="order-proceed-bar">
+        <div class="action-btns" style="padding:12px 14px">
+          <button class="act-btn btn-charge" onclick="showOrderDetails()" id="proceed-btn">Proceed →</button>
         </div>
-        <div class="err-msg" id="err-type">Select an order type.</div>
-        <div id="zone-section" style="display:none">
-          <label class="form-label">Delivery Zone *</label>
-          <div class="zone-grid">
-            <button class="zone-btn za" onclick="selZone('A')">Zone A<span class="zone-fee">$0.50</span></button>
-            <button class="zone-btn zb" onclick="selZone('B')">Zone B<span class="zone-fee">$1.00</span></button>
-            <button class="zone-btn zc" onclick="selZone('C')">Zone C<span class="zone-fee">$1.50</span></button>
-          </div>
-          <div class="err-msg" id="err-zone">Select a delivery zone.</div>
-        </div>
-        <label class="form-label" id="note-label" style="display:none">Note (optional)</label>
-        <textarea id="order-note" class="form-input" rows="2" placeholder="Table number, address, special requests…" style="display:none;resize:none"></textarea>
       </div>
-      <div class="order-footer">
-        <div class="total-display">
-          <div>
-            <div class="total-label">Total</div>
-            <div id="delivery-fee-label" style="font-size:10px;color:var(--a700);font-weight:600;display:none"></div>
+      <div class="order-details-section" id="order-details-section" style="display:none;flex-direction:column;flex:0 0 auto">
+        <div class="order-form" id="order-form" style="padding-top:10px">
+          <label class="form-label">Customer Name *</label>
+          <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
+          <div class="err-msg" id="err-name">Name is required.</div>
+          <label class="form-label">Order Type *</label>
+          <div class="type-grid">
+            <button class="type-btn" onclick="selType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
+            <button class="type-btn" onclick="selType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
+            <button class="type-btn" onclick="selType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
           </div>
-          <div class="total-amount" id="total-display">$0.00</div>
+          <div class="err-msg" id="err-type">Select an order type.</div>
+          <div id="zone-section" style="display:none">
+            <label class="form-label">Delivery Zone *</label>
+            <div class="zone-grid">
+              <button class="zone-btn za" onclick="selZone('A')">Zone A<span class="zone-fee">$0.50</span></button>
+              <button class="zone-btn zb" onclick="selZone('B')">Zone B<span class="zone-fee">$1.00</span></button>
+              <button class="zone-btn zc" onclick="selZone('C')">Zone C<span class="zone-fee">$1.50</span></button>
+            </div>
+            <div class="err-msg" id="err-zone">Select a delivery zone.</div>
+          </div>
+          <label class="form-label" id="note-label" style="display:none">Note (optional)</label>
+          <textarea id="order-note" class="form-input" rows="2" placeholder="Table number, address, special requests…" style="display:none;resize:none"></textarea>
         </div>
+        <div class="order-footer">
+          <div class="total-display">
+            <div>
+              <div class="total-label">Total</div>
+              <div id="delivery-fee-label" style="font-size:10px;color:var(--a700);font-weight:600;display:none"></div>
+            </div>
+            <div class="total-amount" id="total-display">$0.00</div>
+          </div>
+          <div style="padding:0 0 4px">
+            <button class="act-btn" onclick="hideOrderDetails()" style="width:100%;background:var(--g200);color:var(--g700);border-radius:10px;padding:9px;font-size:11px;font-weight:700;margin-bottom:6px">← Back to Order</button>
+          </div>
+          <div class="action-btns">
+            <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
+            <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
+            <button class="act-btn btn-whatsapp" onclick="sendWhatsApp()">💬 WhatsApp</button>
+            <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
+          </div>
+        </div>
+      </div>
         <div class="action-btns">
           <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
           <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
@@ -873,6 +890,15 @@ function clearOrder(){
     if(badge)badge.textContent='';
   });
   renderOrderPanel();
+function showOrderDetails(){
+  if(!orderLines.length){ showToast('Add items first','error'); return; }
+  document.getElementById('order-proceed-bar').style.display='none';
+  document.getElementById('order-details-section').style.display='flex';
+}
+function hideOrderDetails(){
+  document.getElementById('order-details-section').style.display='none';
+  document.getElementById('order-proceed-bar').style.display='block';
+}
 }
 function selType(t){
   orderType=t;
@@ -1006,6 +1032,8 @@ function loadOrderIntoCurrent(order){
     document.getElementById('order-note').value=noteVal;
     document.getElementById('note-label').style.display='block';
     document.getElementById('order-note').style.display='block';
+    document.getElementById('order-proceed-bar').style.display='block';
+    document.getElementById('order-details-section').style.display='none';
   }
   if(order.orderType) selType(order.orderType);
   const zone=normalizeZone(order.deliveryZone);
