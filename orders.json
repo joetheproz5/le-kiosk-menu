@@ -1,5 +1,35 @@
 [
   {
+    "id": "ORD-1779653710617",
+    "status": "pending",
+    "timestamp": "2026-05-24T20:15:10.617Z",
+    "name": "Joe",
+    "note": "",
+    "orderType": "delivery",
+    "deliveryZone": "A",
+    "deliveryFee": 0.5,
+    "items": [
+      {
+        "name": "Loaded Fries",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "subtotal": 12,
+    "total": 12.5
+  },
+  {
     "id": "ORD-1779650048705",
     "status": "pending",
     "timestamp": "2026-05-24T19:14:08.705Z",
