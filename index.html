@@ -17,7 +17,7 @@
         #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
 
-        /* ── ORDER MODE: +/- controls ── */
+        /* ── ORDER MODE ── */
         .qty-control { display: none; align-items: center; margin-top: 8px; }
         .order-mode .qty-control { display: flex; }
         .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
@@ -29,85 +29,31 @@
         .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
 
         /* ── FLOATING CHECKOUT PILL ── */
-        #checkout-pill {
-            position: fixed;
-            bottom: 88px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(.4,0,.2,1);
-            z-index: 55;
-            white-space: nowrap;
-        }
-        #checkout-pill.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-            pointer-events: all;
-        }
-        .pill-inner {
-            background: #1c0f00;
-            border: 1px solid #f59e0b;
-            border-radius: 100px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: transform 0.15s;
-        }
+        #checkout-pill { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 55; white-space: nowrap; }
+        #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
+        .pill-inner { background: #1c0f00; border: 1px solid #f59e0b; border-radius: 100px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.15s; }
         .pill-inner:hover { transform: scale(1.03); }
         .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
         .pill-total { color: #fef3c7; font-size: 13px; font-weight: 700; }
         .pill-cta { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 5px 12px; border-radius: 100px; }
 
         /* ── CHECKOUT BOTTOM SHEET ── */
-        #checkout-sheet {
-            position: fixed;
-            inset: 0;
-            z-index: 150;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            pointer-events: none;
-        }
+        #checkout-sheet { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
         #checkout-sheet.open { pointer-events: all; }
-        #sheet-backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0);
-            transition: background 0.35s ease;
-        }
+        #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
         #checkout-sheet.open #sheet-backdrop { background: rgba(0,0,0,0.55); }
-        #sheet-body {
-            position: relative;
-            background: #fff;
-            border-radius: 24px 24px 0 0;
-            max-height: 92vh;
-            display: flex;
-            flex-direction: column;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(.4,0,.2,1);
-            max-width: 28rem;
-            margin: 0 auto;
-            width: 100%;
-        }
+        #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; }
         #checkout-sheet.open #sheet-body { transform: translateY(0); }
-
         .sheet-handle { width: 40px; height: 4px; background: #e5e7eb; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; }
         .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
-        .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 20px; }
+        .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 24px; -webkit-overflow-scrolling: touch; }
 
-        /* ── ORDER ITEMS IN SHEET ── */
+        /* ── ORDER ITEMS ── */
         .sheet-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #fef3c7; }
         .sheet-item:last-child { border-bottom: none; }
-        .sheet-item-left { flex: 1; min-width: 0; }
         .sheet-item-name { font-size: 13px; font-weight: 700; color: #451a03; }
         .sheet-item-qty { font-size: 11px; color: #f59e0b; font-weight: 700; margin-top: 1px; }
         .sheet-item-price { font-size: 13px; font-weight: 700; color: #d97706; flex-shrink: 0; margin-left: 12px; }
-
-        /* ── ADDON CHIPS IN SHEET ── */
         .addon-section { padding: 6px 0 10px; border-bottom: 1px solid #fef3c7; }
         .addon-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #b45309; margin-bottom: 6px; }
         .addon-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -115,7 +61,7 @@
         .addon-chip:hover { border-color: #f59e0b; background: #fef3c7; }
         .addon-chip.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
 
-        /* ── NAME / TYPE FORM IN SHEET ── */
+        /* ── FORM ── */
         .sheet-divider { height: 1px; background: #fde68a; margin: 16px 0; }
         .sheet-section-title { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 700; color: #451a03; margin-bottom: 10px; }
         .sheet-input { width: 100%; padding: 11px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; }
@@ -126,35 +72,31 @@
         .order-type-btn:hover { background: #fef3c7; border-color: #fcd34d; }
         .order-type-btn.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
         .order-type-btn .type-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+
+        /* ── DELIVERY LOCATION BOX ── */
         .delivery-sub { margin-top: 12px; display: none; }
         .delivery-sub.show { display: block; }
-        .zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
-        .zone-btn { padding: 10px 8px; border-radius: 12px; border: 2px solid #fde68a; background: #fffbeb; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
-        .zone-btn:hover { background: #fef3c7; }
-        .zone-btn.selected { background: #451a03; border-color: #451a03; color: #fef3c7; }
-        .zone-fee { font-size: 12px; color: #f59e0b; font-weight: 800; display: block; margin-top: 2px; }
-        .zone-btn.selected .zone-fee { color: #fcd34d; }
+        .location-detect-box { border: 2px dashed #fde68a; border-radius: 14px; padding: 16px; text-align: center; background: #fffbeb; }
+        .location-detect-box.detected { border-style: solid; border-color: #f59e0b; background: #fef3c7; }
+        .locate-main-btn { background: #f59e0b; color: #1c0f00; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; margin-top: 8px; }
+        .locate-main-btn:hover { background: #d97706; }
+        .locate-main-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; margin-top: 10px; }
+        .zone-badge.free { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
+        .zone-badge.cheap { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .zone-badge.far { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
+        .manual-addr { margin-top: 10px; }
+        .manual-addr textarea { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
+        .manual-addr textarea:focus { border-color: #f59e0b; }
+        .manual-addr textarea.error { border-color: #ef4444; background: #fef2f2; }
 
-        /* ── TOTAL ROW ── */
+        /* ── TOTAL ── */
         .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
-
-        /* ── ORDER MODE BUTTON ── */
-        #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
-
-        /* ── ERROR TEXT ── */
         .err-text { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
         .err-text.show { display: block; }
+        #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .address-box { margin-top: 10px; display: none; }
-        .address-box.show { display: block; }
-        .address-wrap { position: relative; }
-        .address-input { width: 100%; padding: 11px 44px 11px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; resize: none; min-height: 70px; line-height: 1.5; }
-        .address-input:focus { border-color: #f59e0b; }
-        .address-input.error { border-color: #ef4444; background: #fef2f2; }
-        .locate-btn { position: absolute; bottom: 8px; right: 8px; background: #f59e0b; border: none; border-radius: 8px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 700; color: #1c0f00; transition: background 0.15s; }
-        .locate-btn:hover { background: #d97706; color: #fff; }
-        .locate-btn.got-location { background: #22c55e; color: #fff; }
-        .locate-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .spin { animation: spin .7s linear infinite; display: inline-block; }
     </style>
 </head>
 <body class="pb-32">
@@ -202,7 +144,7 @@
         </div>
     </section>
 
-    <!-- ── FLOATING CHECKOUT PILL ── -->
+    <!-- FLOATING CHECKOUT PILL -->
     <div id="checkout-pill">
         <div class="pill-inner" onclick="openSheet()">
             <span class="pill-count" id="pill-count">0 items</span>
@@ -211,7 +153,7 @@
         </div>
     </div>
 
-    <!-- ── CHECKOUT BOTTOM SHEET ── -->
+    <!-- CHECKOUT BOTTOM SHEET -->
     <div id="checkout-sheet">
         <div id="sheet-backdrop" onclick="closeSheet()"></div>
         <div id="sheet-body">
@@ -222,13 +164,11 @@
                     <button onclick="closeSheet()" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
                 </div>
             </div>
-            <div class="sheet-scroll" id="sheet-scroll">
-                <!-- filled dynamically -->
-            </div>
+            <div class="sheet-scroll" id="sheet-scroll"></div>
         </div>
     </div>
 
-    <!-- ── BOTTOM BAR ── -->
+    <!-- BOTTOM BAR -->
     <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
         <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
             <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
@@ -243,507 +183,556 @@
                 <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
             </div>
             <div class="flex items-center gap-2">
-                <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
-                    🛒 Order
-                </button>
-                <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
-                    <span>📞</span> Contact
-                </button>
+                <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">🛒 Order</button>
+                <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md"><span>📞</span> Contact</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // ── TESTING MODE (set false to enable time lock) ──────────────
-        const TESTING_MODE = true;
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TESTING MODE — set false to enable the 6PM-12AM time lock
+const TESTING_MODE = true;
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-        const PILL_COLORS = {
-            amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
-            red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
-            green:  { bg:'#dcfce7', border:'#bbf7d0', text:'#166534' },
-            blue:   { bg:'#dbeafe', border:'#bfdbfe', text:'#1e40af' },
-            purple: { bg:'#ede9fe', border:'#ddd6fe', text:'#5b21b6' },
-            pink:   { bg:'#fce7f3', border:'#fbcfe8', text:'#9d174d' },
-            gray:   { bg:'#f3f4f6', border:'#e5e7eb', text:'#374151' },
-            dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
-        };
+const PILL_COLORS = {
+    amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
+    red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
+    green:  { bg:'#dcfce7', border:'#bbf7d0', text:'#166534' },
+    blue:   { bg:'#dbeafe', border:'#bfdbfe', text:'#1e40af' },
+    purple: { bg:'#ede9fe', border:'#ddd6fe', text:'#5b21b6' },
+    pink:   { bg:'#fce7f3', border:'#fbcfe8', text:'#9d174d' },
+    gray:   { bg:'#f3f4f6', border:'#e5e7eb', text:'#374151' },
+    dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
+};
 
-        const DELIVERY_FEES = { inside: 0.50, outside: 1.50 };
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DELIVERY ZONES — polygons traced from your maps
+// Zone 1: Haret El Sett  → FREE delivery
+// Zone 2: Wadi Chahrour  → $0.50
+// Outside both           → $1.00
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const ZONE_HARET = [
+    [33.8085, 35.6195],[33.8092, 35.6215],[33.8105, 35.6230],
+    [33.8118, 35.6242],[33.8130, 35.6255],[33.8140, 35.6248],
+    [33.8148, 35.6235],[33.8155, 35.6220],[33.8158, 35.6205],
+    [33.8155, 35.6190],[33.8148, 35.6178],[33.8138, 35.6168],
+    [33.8125, 35.6162],[33.8112, 35.6160],[33.8100, 35.6165],
+    [33.8090, 35.6175],[33.8085, 35.6195]
+];
 
-        function isOpen() {
-            if (TESTING_MODE) return true;
-            const now = new Date();
-            const lbMin = (now.getUTCHours() * 60 + now.getUTCMinutes() + 180) % 1440;
-            return Math.floor(lbMin / 60) >= 18;
+const ZONE_WADI = [
+    [33.8050, 35.6140],[33.8065, 35.6165],[33.8075, 35.6185],
+    [33.8085, 35.6195],[33.8090, 35.6175],[33.8100, 35.6165],
+    [33.8112, 35.6160],[33.8125, 35.6162],[33.8138, 35.6168],
+    [33.8148, 35.6178],[33.8155, 35.6190],[33.8158, 35.6205],
+    [33.8155, 35.6220],[33.8148, 35.6235],[33.8140, 35.6248],
+    [33.8148, 35.6262],[33.8155, 35.6278],[33.8160, 35.6295],
+    [33.8158, 35.6312],[33.8150, 35.6325],[33.8138, 35.6332],
+    [33.8125, 35.6335],[33.8110, 35.6330],[33.8095, 35.6320],
+    [33.8082, 35.6305],[33.8070, 35.6285],[33.8060, 35.6265],
+    [33.8052, 35.6245],[33.8045, 35.6225],[33.8040, 35.6205],
+    [33.8038, 35.6185],[33.8040, 35.6165],[33.8050, 35.6140]
+];
+
+// Ray-casting point-in-polygon algorithm
+function pointInPolygon(lat, lng, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i][0], yi = polygon[i][1];
+        const xj = polygon[j][0], yj = polygon[j][1];
+        const intersect = ((yi > lng) !== (yj > lng)) &&
+            (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
+
+function getDeliveryZone(lat, lng) {
+    if (pointInPolygon(lat, lng, ZONE_HARET)) return { zone: 'haret', fee: 0,    label: 'Haret El Sett',  feeLabel: 'Free',   cls: 'free' };
+    if (pointInPolygon(lat, lng, ZONE_WADI))  return { zone: 'wadi',  fee: 0.50, label: 'Wadi Chahrour',  feeLabel: '+$0.50', cls: 'cheap' };
+    return                                           { zone: 'far',   fee: 1.00, label: 'Outside area',   feeLabel: '+$1.00', cls: 'far' };
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+let orderMode    = false;
+let cart         = {};
+let addonSel     = {};
+let shishaSel    = {};
+let itemMeta     = {};
+let selectedType = null;
+let detectedZone = null;   // result from getDeliveryZone()
+let userGPS      = null;   // { lat, lng }
+let deliveryAddress = '';
+let _addonMap    = [];
+
+function isOpen() {
+    if (TESTING_MODE) return true;
+    const now = new Date();
+    const lbMin = (now.getUTCHours() * 60 + now.getUTCMinutes() + 180) % 1440;
+    return Math.floor(lbMin / 60) >= 18;
+}
+
+// ── ORDER MODE ────────────────────────────────────────────────
+function toggleOrderMode() {
+    if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
+    orderMode = !orderMode;
+    document.body.classList.toggle('order-mode', orderMode);
+    const btn = document.getElementById('order-mode-btn');
+    btn.classList.toggle('active', orderMode);
+    btn.innerHTML = orderMode ? '✕ Cancel' : '🛒 Order';
+    if (!orderMode) {
+        cart = {}; addonSel = {}; shishaSel = {};
+        document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
+        document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
+        updatePill();
+        closeSheet();
+    }
+}
+
+function changeQty(itemKey, delta, elId) {
+    if (!orderMode) return;
+    cart[itemKey] = Math.max(0, (cart[itemKey] || 0) + delta);
+    const el = document.getElementById(elId);
+    if (el) el.textContent = cart[itemKey];
+    const card = document.getElementById('card-' + elId);
+    if (card) card.classList.toggle('has-qty', cart[itemKey] > 0);
+    updatePill();
+}
+
+function getTotalItems() { return Object.values(cart).reduce((a, b) => a + b, 0); }
+
+function getItemsSubtotal() {
+    return Object.entries(cart).filter(([,v]) => v > 0).reduce((sum, [key, qty]) => {
+        const price = parseFloat(key.split('|')[2].replace('$','')) || 0;
+        const addons = (addonSel[key] || []).reduce((a, s) => a + s.price, 0);
+        return sum + price * qty + addons;
+    }, 0);
+}
+
+function getDeliveryFee() {
+    return selectedType === 'delivery' && detectedZone ? detectedZone.fee : 0;
+}
+
+function getGrandTotal() { return getItemsSubtotal() + getDeliveryFee(); }
+
+// ── FLOATING PILL ─────────────────────────────────────────────
+function updatePill() {
+    const count = getTotalItems();
+    const pill  = document.getElementById('checkout-pill');
+    pill.classList.toggle('show', count > 0 && orderMode);
+    if (count > 0) {
+        document.getElementById('pill-count').textContent = count + ' item' + (count !== 1 ? 's' : '');
+        document.getElementById('pill-total').textContent = '$' + getItemsSubtotal().toFixed(2);
+    }
+}
+
+// ── SHEET ─────────────────────────────────────────────────────
+function openSheet()  { renderSheet(); document.getElementById('checkout-sheet').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeSheet() { document.getElementById('checkout-sheet').classList.remove('open'); document.body.style.overflow = ''; }
+
+function renderSheet() {
+    _addonMap = [];
+    const existingAddrEl = document.getElementById('delivery-address-ta');
+    if (existingAddrEl) deliveryAddress = existingAddrEl.value;
+    const existingName = document.getElementById('sheet-name') ? document.getElementById('sheet-name').value : '';
+
+    const entries = Object.entries(cart).filter(([,v]) => v > 0);
+    if (!entries.length) return;
+
+    let html = '<div style="padding-top:12px">';
+
+    // Items
+    entries.forEach(([key, qty]) => {
+        const [, name, price] = key.split('|');
+        const pn = parseFloat(price.replace('$','')) || 0;
+        html += `<div class="sheet-item">
+            <div class="sheet-item-left">
+                <div class="sheet-item-name">${name}</div>
+                <div class="sheet-item-qty">x${qty} @ ${price}</div>
+            </div>
+            <div class="sheet-item-price">$${(pn * qty).toFixed(2)}</div>
+        </div>`;
+
+        const meta = itemMeta[key];
+
+        // Flavor chips
+        if (meta && meta.flavors && meta.flavors.length) {
+            const shSel = shishaSel[key];
+            const ki = _addonMap.length; _addonMap.push({ key, type: 'shisha' });
+            html += `<div class="addon-section"><div class="addon-section-title">💨 Choose flavor</div><div class="addon-chips">`;
+            meta.flavors.forEach((f, fi) => {
+                html += `<button class="addon-chip${shSel === f ? ' selected' : ''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`;
+            });
+            html += `</div></div>`;
         }
 
-        // ── STATE ─────────────────────────────────────────────────────
-        let orderMode       = false;
-        let cart            = {};       // itemKey -> qty
-        let addonSel        = {};       // itemKey -> [{label, price}]
-        let shishaSel       = {};       // itemKey -> flavor string
-        let itemMeta        = {};       // itemKey -> item object
-        let selectedType    = null;
-        let selectedZone    = null;
-        let userLocation    = null;  // { lat, lng, label }
-
-        // ── ORDER MODE TOGGLE ─────────────────────────────────────────
-        function toggleOrderMode() {
-            if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
-            orderMode = !orderMode;
-            document.body.classList.toggle('order-mode', orderMode);
-            const btn = document.getElementById('order-mode-btn');
-            btn.classList.toggle('active', orderMode);
-            btn.innerHTML = orderMode ? '✕ Cancel' : '🛒 Order';
-            if (!orderMode) {
-                cart = {}; addonSel = {}; shishaSel = {};
-                document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
-                document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
-                updatePill();
-                closeSheet();
-            }
+        // Item addons
+        if (meta && meta.addons && meta.addons.length) {
+            const selArr = addonSel[key] || [];
+            const ki = _addonMap.length; _addonMap.push({ key, type: 'addon' });
+            html += `<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
+            meta.addons.forEach((addon, ai) => {
+                const on = selArr.some(s => s.label === addon.label);
+                html += `<button class="addon-chip${on ? ' selected' : ''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`;
+            });
+            html += `</div></div>`;
         }
+    });
+    html += '</div>';
 
-        // ── QTY CHANGE ────────────────────────────────────────────────
-        function changeQty(itemKey, delta, elId) {
-            if (!orderMode) return;
-            cart[itemKey] = Math.max(0, (cart[itemKey] || 0) + delta);
-            const el = document.getElementById(elId);
-            if (el) el.textContent = cart[itemKey];
-            const card = document.getElementById('card-' + elId);
-            if (card) card.classList.toggle('has-qty', cart[itemKey] > 0);
-            updatePill();
-        }
+    // Details form
+    html += `<div class="sheet-divider"></div>
+    <div class="sheet-section-title">👤 Your Details</div>
+    <div style="margin-bottom:12px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
+        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${existingName}" autocomplete="off">
+        <div class="err-text" id="err-name">Please enter your name.</div>
+    </div>
 
-        function getTotalItems() { return Object.values(cart).reduce((a,b) => a+b, 0); }
+    <div style="margin-bottom:4px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
+        <div class="order-type-grid">
+            <button type="button" class="order-type-btn${selectedType==='dinein'?' selected':''}" onclick="selectType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
+            <button type="button" class="order-type-btn${selectedType==='takeaway'?' selected':''}" onclick="selectType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
+            <button type="button" class="order-type-btn${selectedType==='delivery'?' selected':''}" onclick="selectType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
+        </div>
+        <div class="err-text" id="err-type">Please select an order type.</div>
+    </div>
 
-        function getItemsTotal() {
-            return Object.entries(cart).filter(([,v]) => v > 0).reduce((sum, [key, qty]) => {
-                const price = parseFloat(key.split('|')[2].replace('$','')) || 0;
-                const addons = (addonSel[key] || []).reduce((a,s) => a + s.price, 0);
-                return sum + price * qty + addons;
-            }, 0);
-        }
+    <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-bottom:8px">Your Location</label>
+        ${renderLocationBox()}
+    </div>`;
 
-        function getGrandTotal() { return getItemsTotal() + (selectedType === 'delivery' && selectedZone ? DELIVERY_FEES[selectedZone] || 0 : 0); }
+    // Total + Send
+    const fee   = getDeliveryFee();
+    const total = getItemsSubtotal() + fee;
+    html += `<div class="total-row">
+        <div>
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
+            ${fee > 0 ? `<div style="font-size:10px;color:#b45309;margin-top:1px">Includes $${fee.toFixed(2)} delivery</div>` : ''}
+        </div>
+        <span style="font-size:16px;font-weight:800;color:#d97706" id="grand-total-display">$${total.toFixed(2)}</span>
+    </div>
+    <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+        Send Order on WhatsApp
+    </button>`;
 
-        // ── FLOATING PILL ─────────────────────────────────────────────
-        function updatePill() {
-            const count = getTotalItems();
-            const pill  = document.getElementById('checkout-pill');
-            pill.classList.toggle('show', count > 0 && orderMode);
-            if (count > 0) {
-                document.getElementById('pill-count').textContent = count + ' item' + (count !== 1 ? 's' : '');
-                document.getElementById('pill-total').textContent = '$' + getItemsTotal().toFixed(2);
-            }
-        }
+    document.getElementById('sheet-scroll').innerHTML = html;
+}
 
-        // ── SHEET ─────────────────────────────────────────────────────
-        function openSheet() {
+function renderLocationBox() {
+    if (!detectedZone) {
+        return `<div class="location-detect-box">
+            <div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div>
+            <div style="font-size:11px;color:#b45309">So we can calculate your delivery fee automatically.</div>
+            <button class="locate-main-btn" id="locate-btn" onclick="detectLocation()">
+                📍 Detect My Location
+            </button>
+            <div class="err-text" id="err-location" style="margin-top:8px">Please share your location or add your address manually.</div>
+            <div class="manual-addr" style="margin-top:12px;text-align:left">
+                <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Or type your address</label>
+                <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
+            </div>
+        </div>`;
+    }
+
+    const zoneEmoji = detectedZone.zone === 'haret' ? '🎉' : detectedZone.zone === 'wadi' ? '📍' : '🗺️';
+    const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
+
+    return `<div class="location-detect-box detected">
+        <div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div>
+        <div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">
+            ${zoneEmoji} ${detectedZone.label} — <strong>${detectedZone.fee === 0 ? 'Free delivery!' : detectedZone.feeLabel + ' delivery'}</strong>
+        </div>
+        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on maps ↗</a></div>` : ''}
+        <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" onclick="resetLocation()">↺ Change location</button>
+        <div class="manual-addr" style="margin-top:10px;text-align:left">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label>
+            <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
+        </div>
+    </div>`;
+}
+
+function detectLocation() {
+    if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return; }
+    const btn = document.getElementById('locate-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin">⏳</span> Getting location…'; }
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            userGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            detectedZone = getDeliveryZone(userGPS.lat, userGPS.lng);
+            // Save typed address before re-render
+            const ta = document.getElementById('delivery-address-ta');
+            if (ta) deliveryAddress = ta.value;
             renderSheet();
-            document.getElementById('checkout-sheet').classList.add('open');
-            document.body.style.overflow = 'hidden';
+            // Update total display
+            const totalEl = document.getElementById('grand-total-display');
+            if (totalEl) totalEl.textContent = '$' + getGrandTotal().toFixed(2);
+        },
+        (err) => {
+            if (btn) { btn.disabled = false; btn.innerHTML = '📍 Detect My Location'; }
+            let msg = 'Could not get location.';
+            if (err.code === 1) msg = 'Location access denied. Please type your address below.';
+            if (err.code === 3) msg = 'Location timed out. Please type your address below.';
+            const errEl = document.getElementById('err-location');
+            if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+        },
+        { timeout: 12000, enableHighAccuracy: true }
+    );
+}
+
+function resetLocation() {
+    const ta = document.getElementById('delivery-address-ta');
+    if (ta) deliveryAddress = ta.value;
+    userGPS = null;
+    detectedZone = null;
+    renderSheet();
+}
+
+// ── ORDER TYPE ────────────────────────────────────────────────
+function selectType(type) {
+    selectedType = type;
+    renderSheet();
+    // Restore name
+}
+
+// ── CHIP CLICKS (delegated) ───────────────────────────────────
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-type]');
+    if (!btn) return;
+    const type = btn.dataset.type, ki = parseInt(btn.dataset.ki);
+    const entry = _addonMap[ki];
+    if (!entry) return;
+    const { key } = entry;
+    if (type === 'shisha') {
+        const fi  = parseInt(btn.dataset.fi);
+        const meta = itemMeta[key];
+        if (!meta || !meta.flavors) return;
+        const flv = meta.flavors[fi];
+        shishaSel[key] = shishaSel[key] === flv ? null : flv;
+        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
+        renderSheet();
+        document.getElementById('sheet-scroll').scrollTop = scrollTop;
+    } else if (type === 'addon') {
+        const ai  = parseInt(btn.dataset.ai);
+        const meta = itemMeta[key];
+        if (!meta || !meta.addons) return;
+        const addon = meta.addons[ai];
+        const pn    = parseFloat((addon.price || '0').replace('$','')) || 0;
+        if (!addonSel[key]) addonSel[key] = [];
+        const idx = addonSel[key].findIndex(s => s.label === addon.label);
+        if (idx > -1) addonSel[key].splice(idx, 1);
+        else addonSel[key].push({ label: addon.label, price: pn });
+        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
+        renderSheet();
+        document.getElementById('sheet-scroll').scrollTop = scrollTop;
+    }
+});
+
+// ── SEND ORDER ────────────────────────────────────────────────
+function sendOrder() {
+    const nameEl = document.getElementById('sheet-name');
+    const name   = nameEl ? nameEl.value.trim() : '';
+    let valid = true;
+
+    if (!name) {
+        document.getElementById('err-name').classList.add('show');
+        if (nameEl) nameEl.classList.add('error');
+        valid = false;
+    } else {
+        document.getElementById('err-name').classList.remove('show');
+        if (nameEl) nameEl.classList.remove('error');
+    }
+
+    if (!selectedType) {
+        document.getElementById('err-type').classList.add('show');
+        valid = false;
+    } else {
+        document.getElementById('err-type').classList.remove('show');
+    }
+
+    if (selectedType === 'delivery' && !detectedZone) {
+        // Check if they at least typed an address
+        const ta = document.getElementById('delivery-address-ta');
+        const addr = ta ? ta.value.trim() : '';
+        if (!addr) {
+            const errEl = document.getElementById('err-location');
+            if (errEl) { errEl.textContent = 'Please share your location or type your address.'; errEl.classList.add('show'); }
+            valid = false;
         }
-        function closeSheet() {
-            document.getElementById('checkout-sheet').classList.remove('open');
-            document.body.style.overflow = '';
+    }
+
+    if (!valid) return;
+
+    const entries = Object.entries(cart).filter(([,v]) => v > 0);
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+    const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
+
+    let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
+    msg += `👤 *Name:* ${name}\n`;
+    msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
+
+    if (selectedType === 'delivery') {
+        if (detectedZone) {
+            const feeStr = detectedZone.fee === 0 ? 'Free' : `$${detectedZone.fee.toFixed(2)}`;
+            msg += `📍 *Zone:* ${detectedZone.label} (Delivery: ${feeStr})\n`;
+            if (userGPS) msg += `🗺️ *GPS:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
         }
+        const ta = document.getElementById('delivery-address-ta');
+        const addr = ta ? ta.value.trim() : deliveryAddress;
+        if (addr) msg += `🏠 *Address details:* ${addr}\n`;
+    }
 
-        // Addon chip delegation map
-        let _addonMap = [];
+    msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
 
-        let deliveryAddress = '';
+    let subtotal = 0;
+    entries.forEach(([key, qty]) => {
+        const [, itemName, price] = key.split('|');
+        const pn = parseFloat(price.replace('$','')) || 0;
+        const lt = pn * qty;
+        subtotal += lt;
+        msg += `• ${itemName} x${qty} — $${lt.toFixed(2)}\n`;
+        (addonSel[key] || []).forEach(a => { subtotal += a.price; msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
+        const sf = shishaSel[key];
+        if (sf) msg += `  ↳ Flavor: ${sf}\n`;
+    });
 
-        function renderSheet() {
-            _addonMap = [];
-            // Preserve address if already typed
-            const existingAddr = document.getElementById('delivery-address');
-            if (existingAddr) deliveryAddress = existingAddr.value;
-            const entries = Object.entries(cart).filter(([,v]) => v > 0);
-            if (!entries.length) return;
+    const fee = getDeliveryFee();
+    if (fee > 0) { subtotal += fee; msg += `• 🛵 Delivery fee — $${fee.toFixed(2)}\n`; }
+    msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
 
-            let html = '';
+    window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
+    closeSheet();
+}
 
-            // ── Items + per-item addons ──
-            html += `<div style="padding-top:12px">`;
-            entries.forEach(([key, qty]) => {
-                const [, name, price] = key.split('|');
-                const priceNum = parseFloat(price.replace('$','')) || 0;
-                const lineTotal = priceNum * qty;
-                html += `<div class="sheet-item">
-                    <div class="sheet-item-left">
-                        <div class="sheet-item-name">${name}</div>
-                        <div class="sheet-item-qty">x${qty} @ ${price}</div>
+// ── PILLS ─────────────────────────────────────────────────────
+function renderPills(item) {
+    if (!item.flavors || !item.flavors.length) return '';
+    const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
+    return '<div class="flex flex-wrap gap-1 mt-2">' +
+        item.flavors.map(f => `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
+}
+
+// ── FETCH & RENDER MENU ───────────────────────────────────────
+async function loadMenu() {
+    try {
+        const res = await fetch('menu.json?v=' + Date.now());
+        if (!res.ok) throw new Error();
+        return await res.json();
+    } catch(e) {
+        document.getElementById('menu-container').innerHTML = '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
+        return null;
+    }
+}
+
+function renderAddonSection(category) {
+    let html = `<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
+    (category.addonGroups||[]).forEach(group => {
+        html += `<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div>
+            <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-center gap-2">
+                    <span class="font-bold text-amber-950 text-sm">${group.label}</span>
+                    <span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span>
+                </div>
+                <p class="text-gray-400 text-xs mt-0.5">${group.note}</p>
+                <div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o => `<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div>
+            </div>
+        </div>`;
+    });
+    html += `</div></section>`;
+    return html;
+}
+
+function initMenu(menuData) {
+    const nav = document.getElementById('main-nav');
+    nav.innerHTML = menuData.map((c, i) =>
+        `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
+    ).join('');
+
+    const container = document.getElementById('menu-container');
+    container.innerHTML = '';
+    menuData.forEach(category => {
+        if (category.type === 'addons') { container.innerHTML += renderAddonSection(category); return; }
+        let html = `<section id="${category.key}" class="scroll-mt-24">
+            <h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
+        if (category.items && category.items.length > 0) {
+            html += `<div class="grid gap-3.5">`;
+            category.items.forEach((item, idx) => {
+                const itemKey = `${category.key}|${item.name}|${item.price}`;
+                const qtyId   = `qty-${category.key}-${idx}`;
+                const cardId  = `card-${qtyId}`;
+                html += `<div class="item-card-wrap" id="${cardId}">
+                    <div class="${item.flavors && item.flavors.length ? 'min-h-28' : 'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
+                        <div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px">
+                            <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
+                        </div>
+                        <div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0">
+                            <div class="flex justify-between items-start gap-2">
+                                <h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3>
+                                <span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span>
+                            </div>
+                            <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
+                            ${renderPills(item)}
+                            <div class="qty-control">
+                                <button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button>
+                                <div class="qty-num" id="${qtyId}">0</div>
+                                <button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="sheet-item-price">$${lineTotal.toFixed(2)}</div>
                 </div>`;
-
-                const meta = itemMeta[key];
-
-                // Flavors (shisha / soft drinks)
-                if (meta && meta.flavors && meta.flavors.length) {
-                    const shSel = shishaSel[key];
-                    const ki = _addonMap.length; _addonMap.push({ key, type: 'shisha' });
-                    html += `<div class="addon-section"><div class="addon-section-title">💨 Choose flavor</div><div class="addon-chips">`;
-                    meta.flavors.forEach((f, fi) => {
-                        html += `<button class="addon-chip${shSel === f ? ' selected' : ''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`;
-                    });
-                    html += `</div></div>`;
-                }
-
-                // Item-level addons
-                if (meta && meta.addons && meta.addons.length) {
-                    const selArr = addonSel[key] || [];
-                    const ki = _addonMap.length; _addonMap.push({ key, type: 'addon' });
-                    html += `<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
-                    meta.addons.forEach((addon, ai) => {
-                        const on = selArr.some(s => s.label === addon.label);
-                        html += `<button class="addon-chip${on ? ' selected' : ''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`;
-                    });
-                    html += `</div></div>`;
-                }
             });
             html += `</div>`;
-
-            // ── Details form ──
-            html += `<div class="sheet-divider"></div>
-            <div class="sheet-section-title">👤 Your Details</div>
-            <div style="margin-bottom:10px">
-                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
-                <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${document.getElementById('sheet-name') ? document.getElementById('sheet-name').value : ''}" autocomplete="off">
-                <div class="err-text" id="err-name">Please enter your name.</div>
-            </div>
-
-            <div style="margin-bottom:10px">
-                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
-                <div class="order-type-grid">
-                    <button type="button" class="order-type-btn${selectedType==='dinein'?' selected':''}" id="stype-dinein" onclick="selectType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
-                    <button type="button" class="order-type-btn${selectedType==='takeaway'?' selected':''}" id="stype-takeaway" onclick="selectType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
-                    <button type="button" class="order-type-btn${selectedType==='delivery'?' selected':''}" id="stype-delivery" onclick="selectType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
-                </div>
-                <div class="err-text" id="err-type">Please select an order type.</div>
-            </div>
-
-            <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
-                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Delivery Zone</label>
-                <div class="zone-grid">
-                    <button type="button" class="zone-btn${selectedZone==='inside'?' selected':''}" id="szone-inside" onclick="selectZone('inside')">
-                        <span style="font-size:18px">📍</span><br>Inside Wadi Chahrour<span class="zone-fee">+$0.50</span>
-                    </button>
-                    <button type="button" class="zone-btn${selectedZone==='outside'?' selected':''}" id="szone-outside" onclick="selectZone('outside')">
-                        <span style="font-size:18px">🗺️</span><br>Outside Wadi Chahrour<span class="zone-fee">+$1.50</span>
-                    </button>
-                </div>
-                <div class="err-text" id="err-zone">Please select a delivery zone.</div>
-                <div class="address-box${selectedZone==='outside'?' show':''}" id="address-box">
-                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Address *</label>
-                    <div class="address-wrap" style="margin-top:6px">
-                        <textarea id="delivery-address" class="address-input" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
-                        <button class="locate-btn${userLocation?' got-location':''}" id="locate-btn" onclick="getLocation()" title="Use my GPS location">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                            ${userLocation?'📍 Got it':'📍 Use GPS'}
-                        </button>
-                    </div>
-                    <div class="err-text" id="err-address">Please enter your delivery address.</div>
-                </div>
-            </div>`;
-
-            // ── Total + send ──
-            const fee = selectedType === 'delivery' && selectedZone ? DELIVERY_FEES[selectedZone] || 0 : 0;
-            const total = getItemsTotal() + fee;
-            html += `<div class="total-row">
-                <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Estimated Total</span>
-                <span style="font-size:16px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span>
-            </div>
-
-            <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                Send Order on WhatsApp
-            </button>`;
-
-            document.getElementById('sheet-scroll').innerHTML = html;
         }
+        if (category.bottomBanner) {
+            html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
+        }
+        html += `</section>`;
+        container.innerHTML += html;
+    });
+}
 
-        // ── ADDON / SHISHA CHIP CLICKS (delegated) ────────────────────
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('[data-type]');
-            if (!btn) return;
-            const type = btn.dataset.type;
-            const ki   = parseInt(btn.dataset.ki);
-            const entry = _addonMap[ki];
-            if (!entry) return;
-            const { key } = entry;
-
-            if (type === 'shisha') {
-                const fi  = parseInt(btn.dataset.fi);
-                const meta = itemMeta[key];
-                if (!meta || !meta.flavors) return;
-                const flv = meta.flavors[fi];
-                shishaSel[key] = shishaSel[key] === flv ? null : flv;
-                renderSheet();
-                document.getElementById('sheet-scroll').scrollTop = 0;
-            } else if (type === 'addon') {
-                const ai   = parseInt(btn.dataset.ai);
-                const meta = itemMeta[key];
-                if (!meta || !meta.addons) return;
-                const addon = meta.addons[ai];
-                const pn    = parseFloat((addon.price || '0').replace('$','')) || 0;
-                if (!addonSel[key]) addonSel[key] = [];
-                const idx = addonSel[key].findIndex(s => s.label === addon.label);
-                if (idx > -1) addonSel[key].splice(idx, 1);
-                else addonSel[key].push({ label: addon.label, price: pn });
-                renderSheet();
-            }
+function initScrollSpy(menuData) {
+    const navLinks = document.querySelectorAll('.nav-link');
+    function setActive(id) {
+        navLinks.forEach(link => {
+            if (link.dataset.section === id) { link.classList.add('active'); link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' }); }
+            else link.classList.remove('active');
         });
+    }
+    const observer = new IntersectionObserver(
+        entries => { entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }); },
+        { rootMargin: '-30% 0px -65% 0px', threshold: 0 }
+    );
+    menuData.forEach(c => { const el = document.getElementById(c.key); if (el) observer.observe(el); });
+}
 
-        // ── ORDER TYPE / ZONE SELECTION ───────────────────────────────
-        function selectType(type) {
-            selectedType = type;
-            ['dinein','takeaway','delivery'].forEach(t => {
-                const el = document.getElementById('stype-' + t);
-                if (el) el.classList.toggle('selected', t === type);
-            });
-            const sub = document.getElementById('sheet-delivery-sub');
-            if (sub) sub.classList.toggle('show', type === 'delivery');
-            if (type !== 'delivery') selectedZone = null;
-            const errType = document.getElementById('err-type');
-            if (errType) errType.classList.remove('show');
-            updatePill();
-        }
+// Contact bubble
+const bubble  = document.getElementById('contact-bubble');
+const ctoggle = document.getElementById('contact-toggle');
+let bubbleOpen = false;
+ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
+document.addEventListener('click', e => {
+    if (bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); }
+});
 
-        function selectZone(zone) {
-            selectedZone = zone;
-            if (zone !== 'outside') { userLocation = null; deliveryAddress = ''; }
-            ['inside','outside'].forEach(z => {
-                const el = document.getElementById('szone-' + z);
-                if (el) el.classList.toggle('selected', z === zone);
-            });
-            const errZone = document.getElementById('err-zone');
-            if (errZone) errZone.classList.remove('show');
-            // Show/hide address box
-            const addrBox = document.getElementById('address-box');
-            if (addrBox) addrBox.classList.toggle('show', zone === 'outside');
-            // Re-render total
-            const fee = DELIVERY_FEES[zone] || 0;
-            const total = getItemsTotal() + fee;
-            const totalEl = document.querySelector('.total-row span:last-child');
-            if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
-        }
-
-        // GPS location
-        function getLocation() {
-            if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
-            const btn = document.getElementById('locate-btn');
-            if (btn) { btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;animation:spin .7s linear infinite"><path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg> Getting…'; }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                    const mapsUrl = 'https://maps.google.com/?q=' + userLocation.lat + ',' + userLocation.lng;
-                    userLocation.url = mapsUrl;
-                    const addrEl = document.getElementById('delivery-address');
-                    // Append map link to address field if empty
-                    if (addrEl && !addrEl.value.includes('maps.google')) {
-                        const current = addrEl.value.trim();
-                        addrEl.value = current ? current + '\n📍 ' + mapsUrl : '📍 ' + mapsUrl;
-                        deliveryAddress = addrEl.value;
-                    }
-                    if (btn) { btn.className = 'locate-btn got-location'; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 📍 Got it'; }
-                },
-                (err) => {
-                    let msg = 'Could not get location.';
-                    if (err.code === 1) msg = 'Location access denied. Please type your address manually.';
-                    alert(msg);
-                    if (btn) { btn.className = 'locate-btn'; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 📍 Use GPS'; }
-                },
-                { timeout: 10000 }
-            );
-        }
-
-        // ── SEND ORDER ────────────────────────────────────────────────
-        function sendOrder() {
-            const nameEl = document.getElementById('sheet-name');
-            const name   = nameEl ? nameEl.value.trim() : '';
-            let valid = true;
-
-            if (!name) {
-                document.getElementById('err-name').classList.add('show');
-                nameEl.classList.add('error');
-                valid = false;
-            } else {
-                document.getElementById('err-name').classList.remove('show');
-                nameEl.classList.remove('error');
-            }
-            if (!selectedType) { document.getElementById('err-type').classList.add('show'); valid = false; }
-            if (selectedType === 'delivery' && !selectedZone) { document.getElementById('err-zone').classList.add('show'); valid = false; }
-            if (selectedType === 'delivery' && selectedZone === 'outside') {
-                const addrEl = document.getElementById('delivery-address');
-                const addr = addrEl ? addrEl.value.trim() : '';
-                if (!addr) { document.getElementById('err-address').classList.add('show'); if(addrEl) addrEl.classList.add('error'); valid = false; }
-                else { document.getElementById('err-address').classList.remove('show'); if(addrEl) addrEl.classList.remove('error'); }
-            }
-            if (!valid) return;
-
-            const entries = Object.entries(cart).filter(([,v]) => v > 0);
-            const timeStr = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
-            const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
-
-            let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
-            msg += `👤 *Name:* ${name}\n`;
-            msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
-            if (selectedType === 'delivery' && selectedZone) {
-                msg += `📍 *Zone:* ${selectedZone === 'inside' ? 'Inside Wadi Chahrour (+$0.50)' : 'Outside Wadi Chahrour (+$1.50)'}\n`;
-                if (selectedZone === 'outside') {
-                    const addrEl = document.getElementById('delivery-address');
-                    const addr = addrEl ? addrEl.value.trim() : deliveryAddress;
-                    if (addr) msg += `🏠 *Address:* ${addr}\n`;
-                }
-            }
-            msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
-
-            let itemsTotal = 0;
-            entries.forEach(([key, qty]) => {
-                const [, itemName, price] = key.split('|');
-                const pn = parseFloat(price.replace('$','')) || 0;
-                const lt = pn * qty;
-                itemsTotal += lt;
-                msg += `• ${itemName} x${qty} — $${lt.toFixed(2)}\n`;
-                (addonSel[key] || []).forEach(a => { itemsTotal += a.price; msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
-                const sf = shishaSel[key];
-                if (sf) msg += `  ↳ Flavor: ${sf}\n`;
-            });
-
-            const fee = selectedType === 'delivery' && selectedZone ? DELIVERY_FEES[selectedZone] || 0 : 0;
-            if (fee > 0) { itemsTotal += fee; msg += `• 🛵 Delivery fee — $${fee.toFixed(2)}\n`; }
-            msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${itemsTotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
-            window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
-            closeSheet();
-        }
-
-        // ── RENDER PILLS ──────────────────────────────────────────────
-        function renderPills(item) {
-            if (!item.flavors || !item.flavors.length) return '';
-            const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
-            return '<div class="flex flex-wrap gap-1 mt-2">' +
-                item.flavors.map(f => `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
-        }
-
-        // ── FETCH MENU ────────────────────────────────────────────────
-        async function loadMenu() {
-            try {
-                const res = await fetch('menu.json?v=' + Date.now());
-                if (!res.ok) throw new Error();
-                return await res.json();
-            } catch(e) {
-                document.getElementById('menu-container').innerHTML = '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
-                return null;
-            }
-        }
-
-        function renderAddonSection(category) {
-            let html = `<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
-            (category.addonGroups||[]).forEach(group => {
-                html += `<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div>
-                    <div class="flex-grow min-w-0">
-                        <div class="flex justify-between items-center gap-2">
-                            <span class="font-bold text-amber-950 text-sm">${group.label}</span>
-                            <span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span>
-                        </div>
-                        <p class="text-gray-400 text-xs mt-0.5">${group.note}</p>
-                        <div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o => `<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div>
-                    </div>
-                </div>`;
-            });
-            html += `</div></section>`;
-            return html;
-        }
-
-        function initMenu(menuData) {
-            const nav = document.getElementById('main-nav');
-            nav.innerHTML = menuData.map((c, i) =>
-                `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
-            ).join('');
-
-            const container = document.getElementById('menu-container');
-            container.innerHTML = '';
-            menuData.forEach(category => {
-                if (category.type === 'addons') { container.innerHTML += renderAddonSection(category); return; }
-                let html = `<section id="${category.key}" class="scroll-mt-24">
-                    <h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
-                if (category.items && category.items.length > 0) {
-                    html += `<div class="grid gap-3.5">`;
-                    category.items.forEach((item, idx) => {
-                        const itemKey = `${category.key}|${item.name}|${item.price}`;
-                        const qtyId   = `qty-${category.key}-${idx}`;
-                        const cardId  = `card-${qtyId}`;
-                        html += `<div class="item-card-wrap" id="${cardId}">
-                            <div class="${item.flavors && item.flavors.length ? 'min-h-28' : 'h-28'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200">
-                                <div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:112px">
-                                    <img src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block">
-                                </div>
-                                <div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0">
-                                    <div class="flex justify-between items-start gap-2">
-                                        <h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3>
-                                        <span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span>
-                                    </div>
-                                    <p class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed pr-1">${item.desc}</p>
-                                    ${renderPills(item)}
-                                    <div class="qty-control">
-                                        <button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button>
-                                        <div class="qty-num" id="${qtyId}">0</div>
-                                        <button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    });
-                    html += `</div>`;
-                }
-                if (category.bottomBanner) {
-                    html += `<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
-                }
-                html += `</section>`;
-                container.innerHTML += html;
-            });
-        }
-
-        function initScrollSpy(menuData) {
-            const navLinks = document.querySelectorAll('.nav-link');
-            function setActive(id) {
-                navLinks.forEach(link => {
-                    if (link.dataset.section === id) { link.classList.add('active'); link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' }); }
-                    else link.classList.remove('active');
-                });
-            }
-            const observer = new IntersectionObserver(
-                entries => { entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }); },
-                { rootMargin: '-30% 0px -65% 0px', threshold: 0 }
-            );
-            menuData.forEach(c => { const el = document.getElementById(c.key); if (el) observer.observe(el); });
-        }
-
-        // Contact bubble
-        const bubble  = document.getElementById('contact-bubble');
-        const ctoggle = document.getElementById('contact-toggle');
-        let bubbleOpen = false;
-        ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
-        document.addEventListener('click', e => {
-            if (bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); }
+// Boot
+loadMenu().then(data => {
+    if (!data) return;
+    initMenu(data);
+    initScrollSpy(data);
+    itemMeta = {};
+    data.forEach(cat => {
+        if (cat.type === 'addons') return;
+        (cat.items || []).forEach(item => {
+            itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
         });
-
-        // Boot
-        loadMenu().then(data => {
-            if (!data) return;
-            initMenu(data);
-            initScrollSpy(data);
-            itemMeta = {};
-            data.forEach(cat => {
-                if (cat.type === 'addons') return;
-                (cat.items || []).forEach(item => {
-                    itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
-                });
-            });
-        });
-    </script>
+    });
+});
+</script>
 </body>
 </html>
