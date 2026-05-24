@@ -428,8 +428,12 @@ input,textarea,select{font-family:var(--font);outline:none}
       </div>
       <div class="order-scroll" id="order-scroll"></div>
         <div class="order-proceed-bar" id="order-proceed-bar" style="padding:12px 14px;border-top:1px solid var(--g200)">
+  <div style="display:flex;justify-content:space-between;align-items:baseline;background:var(--a100);border-radius:10px;padding:10px 14px;margin-bottom:8px">
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a800)">Total</span>
+    <span style="font-size:20px;font-weight:800;color:var(--a700)" id="total-display-mini"></span>
+  </div>
   <button class="act-btn btn-charge" style="width:100%;justify-content:center" onclick="showOrderDetails()">Proceed →</button>
-      </div>
+</div>
       <div class="order-details-section" id="order-details-section" style="display:none;flex-direction:column;flex:0 0 auto">
         <div class="order-form" id="order-form" style="padding-top:10px">
           <label class="form-label">Customer Name *</label>
@@ -785,6 +789,7 @@ function updateTotal(){
   if(fee>0){fl.style.display='block';fl.textContent=`Items $${getItemsTotal().toFixed(2)} + delivery $${fee.toFixed(2)}`;}
   else fl.style.display='none';
   calcChange();
+  const mini=document.getElementById('total-display-mini');if(mini)mini.textContent='$'+total.toFixed(2);
 }
 
 // ═══════════════════════════════════════════════════
