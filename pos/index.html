@@ -32,15 +32,17 @@ input,textarea,select{font-family:var(--font);outline:none}
   --cat7-bg:#ffedd5;--cat7-border:#f97316;--cat7-text:#9a3412;--cat7-head:#f97316;--cat7-headtext:#fff;
   --cat8-bg:#e0f2fe;--cat8-border:#0ea5e9;--cat8-text:#075985;--cat8-head:#0ea5e9;--cat8-headtext:#fff;
 }
+
+/* ── LOGIN ── */
 #login-screen{position:fixed;inset:0;background:var(--a950);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px}
-.login-box{background:var(--white);border-radius:24px;padding:40px 36px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.login-box{background:var(--white);border-radius:24px;padding:40px 36px;width:100%;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .login-logo{font-family:var(--brand);font-size:34px;font-weight:700;color:var(--a900)}
 .login-sub{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--a700);margin-top:2px;margin-bottom:28px}
 .login-label{display:block;text-align:left;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--a800);margin-bottom:6px}
 .login-input{width:100%;padding:13px 16px;border:2px solid var(--a200);border-radius:12px;font-size:15px;color:var(--a950);background:var(--a50);transition:border-color .2s;margin-bottom:16px}
 .login-input:focus{border-color:var(--a500)}
 .login-input:disabled{opacity:.5}
-.login-btn-main{width:100%;padding:14px;background:var(--a900);color:var(--a100);border-radius:12px;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;transition:background .2s}
+.login-btn-main{width:100%;padding:14px;background:var(--a900);color:var(--a100);border-radius:12px;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;transition:background .2s;margin-bottom:0}
 .login-btn-main:hover:not(:disabled){background:var(--a800)}
 .login-btn-main:disabled{opacity:.5;cursor:not-allowed}
 .login-err{background:#fef2f2;border:1px solid #fecaca;color:var(--red-d);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;display:none}
@@ -50,6 +52,22 @@ input,textarea,select{font-family:var(--font);outline:none}
 .attempt-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--a200)}
 .dot.used{background:var(--red)}
+
+/* Token section in login box */
+.token-divider{border-top:1px solid var(--a200);margin:20px 0 16px;text-align:center;position:relative}
+.token-divider span{background:var(--white);padding:0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);position:relative;top:-9px}
+.token-note{font-size:11px;color:var(--g500);margin-bottom:10px;line-height:1.5}
+.token-note a{color:var(--a700);text-decoration:underline}
+.token-row{display:flex;gap:8px}
+.token-inp{flex:1;padding:10px 12px;border:2px solid var(--a200);border-radius:10px;font-size:13px;color:var(--a950);background:var(--a50)}
+.token-inp:focus{border-color:var(--a500)}
+.token-save-btn{padding:10px 14px;background:var(--a900);color:var(--a100);border-radius:10px;font-size:12px;font-weight:700;white-space:nowrap}
+.token-save-btn:hover{background:var(--a800)}
+.token-status{font-size:11px;font-weight:700;margin-top:8px}
+.token-status.ok{color:var(--green-d)}
+.token-status.missing{color:var(--red)}
+
+/* ── POS SHELL ── */
 #pos-screen{display:none;height:100vh;flex-direction:column}
 #pos-screen.show{display:flex}
 .pos-topbar{background:var(--a950);color:var(--a100);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
@@ -68,9 +86,28 @@ input,textarea,select{font-family:var(--font);outline:none}
 .tb-logout{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
 .tb-logout:hover{background:rgba(255,255,255,.15)}
 .session-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.2);color:var(--a300);padding:3px 10px;border-radius:20px;letter-spacing:.06em}
-/* ── INBOX PULSE RING on topbar btn ── */
+.token-topbar-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;cursor:pointer;transition:all .15s}
+.token-topbar-badge.ok{background:rgba(34,197,94,.2);color:#86efac}
+.token-topbar-badge.missing{background:rgba(239,68,68,.2);color:#fca5a5;animation:pulse-badge 2s ease-in-out infinite}
+@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes ring{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
 .tb-inbox.has-new{animation:ring 1.4s ease-in-out infinite}
+
+/* ── TOKEN MODAL ── */
+#token-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9996;display:none;align-items:center;justify-content:center;padding:20px}
+#token-modal.show{display:flex}
+.token-modal-box{background:var(--white);border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+.token-modal-box h3{font-family:var(--brand);font-size:22px;font-weight:700;color:var(--a950);margin-bottom:6px}
+.token-modal-box p{font-size:13px;color:var(--g500);margin-bottom:4px;line-height:1.6}
+.token-modal-box p a{color:var(--a700);text-decoration:underline}
+.token-modal-inp{width:100%;padding:11px 14px;border:2px solid var(--a200);border-radius:10px;font-size:13px;color:var(--a950);background:var(--a50);margin:12px 0 8px}
+.token-modal-inp:focus{border-color:var(--a500)}
+.token-modal-actions{display:flex;gap:10px;margin-top:4px}
+.token-modal-save{flex:1;padding:11px;background:var(--a900);color:var(--a100);border-radius:10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.token-modal-save:hover{background:var(--a800)}
+.token-modal-skip{padding:11px 16px;background:var(--g100);color:var(--g600);border-radius:10px;font-size:13px;font-weight:700}
+.token-modal-skip:hover{background:var(--g200)}
+
 .pos-main{display:flex;flex:1;min-height:0}
 .cat-sidebar{width:var(--cat-sidebar);flex-shrink:0;background:var(--a950);display:flex;flex-direction:column;overflow-y:auto;padding:10px 8px;gap:6px;-webkit-overflow-scrolling:touch}
 .cat-sidebar::-webkit-scrollbar{display:none}
@@ -131,6 +168,8 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-sidebar-btn[data-ci="6"].active{background:var(--cat6-head);border-color:var(--cat6-head);color:#fff}
 .cat-sidebar-btn[data-ci="7"].active{background:var(--cat7-head);border-color:var(--cat7-head);color:#fff}
 .cat-sidebar-btn[data-ci="8"].active{background:var(--cat8-head);border-color:var(--cat8-head);color:#fff}
+
+/* ── ORDERS VIEW ── */
 #orders-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
 #orders-view.show{display:flex}
 .orders-toolbar{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
@@ -168,6 +207,8 @@ input,textarea,select{font-family:var(--font);outline:none}
 .oc-wa:hover{background:#16a34a}
 .oc-load{background:var(--a500);color:var(--white)}
 .oc-load:hover{background:var(--a600)}
+
+/* ── INBOX VIEW ── */
 #inbox-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
 #inbox-view.show{display:flex}
 .inbox-toolbar{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0}
@@ -184,12 +225,15 @@ input,textarea,select{font-family:var(--font);outline:none}
 .inbox-actions{display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap}
 .inbox-confirm-btn{background:var(--green);color:#fff;padding:9px 18px;border-radius:10px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;border:none;transition:all .15s;flex:1}
 .inbox-confirm-btn:hover{background:var(--green-d)}
+.inbox-confirm-btn:disabled{opacity:.5;cursor:not-allowed}
 .inbox-decline-btn{background:#fee2e2;color:var(--red-d);padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
 .inbox-decline-btn:hover{background:#fecaca}
+.inbox-decline-btn:disabled{opacity:.5;cursor:not-allowed}
 .inbox-empty{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px}
 .inbox-empty-icon{font-size:48px;margin-bottom:12px}
-/* GPS info in inbox card */
 .inbox-gps-row{font-size:10px;color:var(--green-d);font-weight:600;padding:0 14px 8px;display:flex;align-items:center;gap:6px}
+
+/* ── ORDER PANEL ── */
 .order-panel{width:var(--sidebar-order);flex-shrink:0;background:var(--white);border-left:2px solid var(--g200);display:flex;flex-direction:column;overflow:hidden}
 .order-header{padding:14px 16px 10px;border-bottom:1px solid var(--g200);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .order-title{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a950)}
@@ -244,14 +288,17 @@ input,textarea,select{font-family:var(--font);outline:none}
 .action-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .act-btn{padding:11px 6px;border-radius:11px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;touch-action:manipulation}
 .act-btn:active{transform:scale(.97)}
+.act-btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-charge{background:var(--green);color:var(--white);grid-column:1/-1}
-.btn-charge:hover{background:var(--green-d)}
+.btn-charge:hover:not(:disabled){background:var(--green-d)}
 .btn-print-thermal{background:var(--g800);color:var(--white)}
 .btn-print-thermal:hover{background:var(--g900)}
 .btn-whatsapp{background:#22c55e;color:var(--white)}
 .btn-whatsapp:hover{background:#16a34a}
 .btn-print-card{background:var(--blue);color:var(--white)}
 .btn-print-card:hover{background:var(--blue-d)}
+
+/* ── MISC ── */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:var(--white);padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9998;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.success{background:var(--green-d)}
@@ -308,6 +355,21 @@ input,textarea,select{font-family:var(--font);outline:none}
     </div>
   </div>
 </div>
+
+<!-- TOKEN MODAL (shown when token is missing after login) -->
+<div id="token-modal">
+  <div class="token-modal-box">
+    <h3>GitHub Token Required</h3>
+    <p>To save orders and update the inbox, the POS needs a GitHub token with <strong>Contents: read &amp; write</strong> access to the <code>le-kiosk-menu</code> repo.</p>
+    <p style="margin-top:6px">Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → Fine-grained tokens → Contents: read &amp; write.</p>
+    <input type="password" class="token-modal-inp" id="token-modal-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="token-modal-actions">
+      <button class="token-modal-save" onclick="saveTokenFromModal()">Save Token</button>
+      <button class="token-modal-skip" onclick="closeTokenModal()">Skip for now</button>
+    </div>
+  </div>
+</div>
+
 <div id="print-area"></div>
 
 <!-- LOGIN -->
@@ -321,6 +383,15 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div class="login-err" id="login-err"></div>
     <div class="lockout-bar" id="lockout-bar"></div>
     <div class="attempt-dots" id="attempt-dots"></div>
+
+    <!-- Token entry right on login screen so staff can set it before booting -->
+    <div class="token-divider"><span>GitHub Token</span></div>
+    <p class="token-note">Needed to save orders &amp; update inbox. <a href="https://github.com/settings/tokens" target="_blank">Create one here</a> → Fine-grained → Contents: read &amp; write.</p>
+    <div class="token-row">
+      <input type="password" id="token-login-inp" class="token-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <button class="token-save-btn" onclick="saveTokenFromLogin()">Save</button>
+    </div>
+    <div class="token-status missing" id="token-login-status">✗ No token saved</div>
   </div>
 </div>
 
@@ -332,6 +403,7 @@ input,textarea,select{font-family:var(--font);outline:none}
       <span class="session-badge" id="session-badge"></span>
     </div>
     <div class="pos-topbar-right">
+      <span class="token-topbar-badge missing" id="token-topbar-badge" onclick="openTokenModal()" title="Click to update token">🔑 No Token</span>
       <button class="topbar-btn tb-inbox" id="inbox-tab-btn" onclick="toggleInboxView()" style="position:relative">
         📥 Incoming
         <span class="inbox-badge" id="inbox-badge">0</span>
@@ -359,7 +431,7 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div id="inbox-view">
       <div class="inbox-toolbar">
         <h2>📥 Incoming Orders</h2>
-        <button class="topbar-btn" onclick="pollInbox()" style="background:var(--a100);color:var(--a950)">🔄 Refresh</button>
+        <button class="topbar-btn" onclick="pollInbox(true)" style="background:var(--a100);color:var(--a950)">🔄 Refresh</button>
       </div>
       <div class="inbox-list" id="inbox-list">
         <div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders yet</div></div>
@@ -403,7 +475,7 @@ input,textarea,select{font-family:var(--font);outline:none}
           <div class="total-amount" id="total-display">$0.00</div>
         </div>
         <div class="action-btns">
-          <button class="act-btn btn-charge" onclick="chargeOrder()">✅ Charge & Save</button>
+          <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
           <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
           <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
           <button class="act-btn btn-whatsapp" onclick="sendWhatsApp()">💬 WhatsApp</button>
@@ -424,7 +496,6 @@ const MENU_PATH    = 'menu.json';
 const ORDERS_PATH  = 'orders.json';
 const INBOX_PATH   = 'inbox.json';
 const API          = 'https://api.github.com';
-const RAW_BASE     = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/`;
 const MAX_ORDERS   = 200;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS   = 2 * 60 * 1000;
@@ -435,6 +506,7 @@ const CAT_ICONS    = {
   appetizers:'🍟', sandwiches:'🥪', burgers:'🍔', sajj:'🫓',
   desserts:'🍨', shisha:'💨', beverages:'🥤', sweet:'🍫', savory:'🧀'
 };
+const XOR_KEY = 'pos_k3y_!2024';
 
 // ═══════════════════════════════════════════════════
 // STATE
@@ -444,16 +516,79 @@ let ordersData=[],ordersSha=null,inboxData=[],inboxSha=null;
 let ordersFilter='all',showingOrders=false,showingInbox=false;
 let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=false;
 let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
-let lastInboxCount = 0; // FIX: track badge count to detect new arrivals
+let lastInboxCount=0;
+// FIX: track in-flight inbox writes so poll doesn't clobber them
+let inboxWritePending=false;
 
 // ═══════════════════════════════════════════════════
-// HASH & LOGIN
+// TOKEN — XOR-obfuscated in sessionStorage
+// (clears when browser tab closes)
+// ═══════════════════════════════════════════════════
+function xorStr(str, key=XOR_KEY){
+  return Array.from(str).map((c,i)=>
+    String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length))
+  ).join('');
+}
+function storeToken(raw){ sessionStorage.setItem('pos_tok', btoa(xorStr(raw))); }
+function loadToken(){
+  const s=sessionStorage.getItem('pos_tok');
+  if(!s) return '';
+  try{ return xorStr(atob(s)); } catch(_){ return ''; }
+}
+function clearStoredToken(){ sessionStorage.removeItem('pos_tok'); }
+function getToken(){ return loadToken(); }
+function hasToken(){ return !!getToken(); }
+
+function updateTokenBadge(){
+  const ok=hasToken();
+  const badge=document.getElementById('token-topbar-badge');
+  if(!badge) return;
+  badge.textContent=ok?'🔑 Token OK':'🔑 No Token';
+  badge.className='token-topbar-badge '+(ok?'ok':'missing');
+  const chargeBtn=document.getElementById('charge-btn');
+  if(chargeBtn) chargeBtn.disabled=!ok;
+}
+function updateLoginTokenStatus(){
+  const ok=hasToken();
+  const el=document.getElementById('token-login-status');
+  if(el){ el.textContent=ok?'✓ Token saved (this session)':'✗ No token saved'; el.className='token-status '+(ok?'ok':'missing'); }
+}
+function saveTokenFromLogin(){
+  const t=document.getElementById('token-login-inp').value.trim();
+  if(!t){ showToast('Enter a token first','error'); return; }
+  storeToken(t);
+  document.getElementById('token-login-inp').value='';
+  updateLoginTokenStatus();
+  showToast('Token saved ✓','success');
+}
+function saveTokenFromModal(){
+  const t=document.getElementById('token-modal-inp').value.trim();
+  if(!t){ showToast('Enter a token first','error'); return; }
+  storeToken(t);
+  document.getElementById('token-modal-inp').value='';
+  closeTokenModal();
+  updateTokenBadge();
+  showToast('Token saved ✓','success');
+}
+function openTokenModal(){
+  document.getElementById('token-modal').classList.add('show');
+}
+function closeTokenModal(){
+  document.getElementById('token-modal').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════
+// CRYPTO / HASH
 // ═══════════════════════════════════════════════════
 async function sha256(str){
   if(!window.crypto?.subtle) throw new Error('HTTPS required');
   const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
   return[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
+
+// ═══════════════════════════════════════════════════
+// LOGIN / LOCKOUT
+// ═══════════════════════════════════════════════════
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('pos_lock')||'{"a":0,"u":0}');}catch{return{a:0,u:0};}}
 function setLockout(d){sessionStorage.setItem('pos_lock',JSON.stringify(d));}
 function resetLockout(){sessionStorage.removeItem('pos_lock');}
@@ -462,7 +597,11 @@ function enableLogin(v){document.getElementById('pw').disabled=!v;document.getEl
 let lockCountdown=null;
 function startLockCountdown(){
   clearInterval(lockCountdown);
-  lockCountdown=setInterval(()=>{const l=getLockout();if(l.u<=Date.now()){clearInterval(lockCountdown);hideLockBar();enableLogin(true);renderDots(0);}else showLockBar(`Too many attempts. Retry in ${Math.ceil((l.u-Date.now())/1000)}s.`);},1000);
+  lockCountdown=setInterval(()=>{
+    const l=getLockout();
+    if(l.u<=Date.now()){clearInterval(lockCountdown);hideLockBar();enableLogin(true);renderDots(0);}
+    else showLockBar(`Too many attempts. Retry in ${Math.ceil((l.u-Date.now())/1000)}s.`);
+  },1000);
 }
 function showLockBar(m){const b=document.getElementById('lockout-bar');b.textContent=m;b.classList.add('show');}
 function hideLockBar(){document.getElementById('lockout-bar').classList.remove('show');}
@@ -470,11 +609,15 @@ async function tryLogin(){
   const l=getLockout();
   if(l.u>Date.now()){enableLogin(false);startLockCountdown();return;}
   const pw=document.getElementById('pw').value;if(!pw) return;
-  let hash;try{hash=await sha256(pw);}catch(e){showLoginErr(e.message==='HTTPS required'?'Open POS over HTTPS.':e.message);return;}
+  let hash;
+  try{hash=await sha256(pw);}
+  catch(e){showLoginErr(e.message==='HTTPS required'?'Open POS over HTTPS.':e.message);return;}
   if(hash===ADMIN_HASH){
     resetLockout();hideLockBar();
     document.getElementById('login-screen').style.display='none';
     document.getElementById('pos-screen').classList.add('show');
+    updateTokenBadge();
+    if(!hasToken()) openTokenModal();
     startSession();bootPOS();
   } else {
     const na=(l.a||0)+1,nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
@@ -487,7 +630,11 @@ async function tryLogin(){
 function showLoginErr(m){const e=document.getElementById('login-err');e.textContent=m;e.classList.add('show');}
 function hideLoginErr(){document.getElementById('login-err').classList.remove('show');}
 document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
-(function(){const l=getLockout();renderDots(l.a||0);if(l.u>Date.now()){enableLogin(false);startLockCountdown();}})();
+(function(){
+  const l=getLockout();renderDots(l.a||0);
+  if(l.u>Date.now()){enableLogin(false);startLockCountdown();}
+  updateLoginTokenStatus();
+})();
 
 // ═══════════════════════════════════════════════════
 // SESSION
@@ -495,8 +642,14 @@ document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')
 function startSession(){resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,60000);if(!sessionListenersAttached){['mousemove','keydown','click','touchstart'].forEach(ev=>document.addEventListener(ev,resetSession,{passive:true}));sessionListenersAttached=true;}}
 function resetSession(){if(!document.getElementById('pos-screen').classList.contains('show'))return;clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout();},SESSION_MS);}
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),hrs=Math.floor(rem/3600000),mins=Math.floor((rem%3600000)/60000);document.getElementById('session-badge').textContent=hrs>0?`⏱ ${hrs}h ${mins}m`:`⏱ ${mins}m`;}
-function logout(){clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockCountdown);clearInterval(inboxPollInterval);sessionStorage.removeItem('pos_gh_token');document.getElementById('pos-screen').classList.remove('show');document.getElementById('login-screen').style.display='flex';document.getElementById('pw').value='';document.getElementById('pw').focus();}
-function getToken(){return sessionStorage.getItem('lk_gh_token')||sessionStorage.getItem('pos_gh_token')||'';}
+function logout(){
+  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockCountdown);clearInterval(inboxPollInterval);
+  clearStoredToken();
+  document.getElementById('pos-screen').classList.remove('show');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pw').value='';document.getElementById('pw').focus();
+  updateLoginTokenStatus();
+}
 
 // ═══════════════════════════════════════════════════
 // BOOT
@@ -507,12 +660,68 @@ async function bootPOS(){
   catch(e){showToast('Menu load failed: '+e.message,'error');}
   renderOrderPanel();
   loadOrders(false).catch(()=>{});
-  await pollInbox(); // FIX: await first poll so badge is accurate immediately
+  await pollInbox(false);
   hideLoading();
-  if(!getToken()) promptToken();
-  inboxPollInterval=setInterval(pollInbox,20000); // FIX: poll every 20s instead of 30s
+  // Poll every 15s using Contents API (no CDN cache)
+  inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
-function promptToken(){const t=prompt('Enter GitHub token (needed to save orders):\n(Leave blank to skip)');if(t&&t.trim()){sessionStorage.setItem('pos_gh_token',t.trim());showToast('Token saved ✓','success');}}
+
+// ═══════════════════════════════════════════════════
+// GITHUB HELPERS
+// All reads/writes go through the Contents API — no raw.githubusercontent.com
+// raw has a 5-min CDN cache; Contents API always returns live data.
+// ═══════════════════════════════════════════════════
+function ghHeaders(){
+  const h={'Accept':'application/vnd.github.v3+json','User-Agent':'LeKiosk-POS/1.0'};
+  const tok=getToken();
+  if(tok) h['Authorization']='Bearer '+tok;
+  return h;
+}
+function fromB64(b64){
+  const bin=atob(b64.replace(/\n/g,''));
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+function toB64(str){
+  const bytes=new TextEncoder().encode(str);
+  let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
+  return btoa(bin);
+}
+
+// Read a file — returns {data, sha}
+// FIX: always uses Contents API, never raw CDN
+async function ghRead(path){
+  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
+  if(res.status===404) return {data:null,sha:null};
+  if(!res.ok) throw new Error('GitHub read '+res.status);
+  const d=await res.json();
+  return{data:JSON.parse(fromB64(d.content)), sha:d.sha};
+}
+
+// Write a file — fetches fresh SHA right before writing to avoid conflicts
+async function ghWrite(path, data, message){
+  if(!hasToken()) throw new Error('No GitHub token — click the 🔑 button in the top bar');
+  // Always fetch fresh SHA immediately before write (avoids stale SHA conflicts)
+  let sha=null;
+  try{
+    const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
+    if(res.ok){const d=await res.json();sha=d.sha;}
+  }catch(_){}
+  const content=toB64(JSON.stringify(data,null,2));
+  const body={message,content};if(sha) body.sha=sha;
+  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{
+    method:'PUT',
+    headers:{...ghHeaders(),'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    throw new Error(e.message||'GitHub write '+res.status);
+  }
+  const saved=await res.json();
+  return saved.content.sha;
+}
 
 // ═══════════════════════════════════════════════════
 // MENU LOAD
@@ -571,11 +780,11 @@ function setupScrollSpy(){
 // ═══════════════════════════════════════════════════
 // ORDER MANAGEMENT
 // ═══════════════════════════════════════════════════
-function priceNum(p){return parseFloat((p||'0').replace('$',''))||0;}
+function priceNum(p){return parseFloat((p||'0').replace(/[^0-9.]/g,''))||0;}
 function getQtyForItem(catKey,itemIdx){
   const cat=menuData.find(c=>c.key===catKey);if(!cat||!cat.items||!cat.items[itemIdx]) return 0;
-  const item=cat.items[itemIdx],pn=priceNum(item.price);
-  const line=orderLines.find(l=>l.name===item.name&&l.price===pn&&l.catKey===catKey&&l.itemIdx===itemIdx);
+  const item=cat.items[itemIdx];
+  const line=orderLines.find(l=>l.catKey===catKey&&l.itemIdx===itemIdx);
   return line?line.qty:0;
 }
 function addToOrder(catKey,itemIdx){
@@ -602,7 +811,11 @@ function changeQty(id,delta){
 }
 function removeLine(id){
   const line=orderLines.find(l=>l.id===id);
-  if(line){const wrap=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`),badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}if(badge)badge.textContent='';}
+  if(line){
+    const wrap=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`),badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
+    if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}
+    if(badge)badge.textContent='';
+  }
   orderLines=orderLines.filter(l=>l.id!==id);renderOrderPanel();
 }
 function toggleAddon(lineId,addonLabel,addonPrice){
@@ -643,7 +856,10 @@ function selType(t){
 function selZone(z){
   deliveryZone=z;
   document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
-  document.querySelectorAll('.zone-btn').forEach(b=>{if((b.classList.contains('za')&&z==='A')||(b.classList.contains('zb')&&z==='B')||(b.classList.contains('zc')&&z==='C'))b.classList.add('sel');});
+  document.querySelectorAll('.zone-btn').forEach(b=>{
+    if((b.classList.contains('za')&&z==='A')||(b.classList.contains('zb')&&z==='B')||(b.classList.contains('zc')&&z==='C'))
+      b.classList.add('sel');
+  });
   document.getElementById('err-zone').classList.remove('show');
   updateTotal();
 }
@@ -664,17 +880,12 @@ function renderOrderPanel(){
   const savedScroll=scroll.scrollTop;let html='';
   orderLines.forEach(line=>{
     const lineTotal=line.price*line.qty+line.addons.reduce((a,x)=>a+x.price,0),lineId=line.id;
-    html+=`<div class="order-line"><div class="order-line-main"><div style="flex:1"><div class="order-line-name">${line.name}</div><div class="qty-row"><button class="q-btn q-minus" onclick="changeQtyById(${lineId},-1)">−</button><div class="q-num">${line.qty}</div><button class="q-btn q-plus" onclick="changeQtyById(${lineId},1)">+</button><button class="q-del" onclick="removeLineById(${lineId})">✕</button></div></div><div class="order-line-price">$${lineTotal.toFixed(2)}</div></div>`;
-    if(line.meta?.flavors?.length){html+=`<div class="order-addons"><div class="oa-label">💨 Flavor</div><div class="oa-chips">`;line.meta.flavors.forEach(f=>{const safe=f.replace(/'/g,"\\'");html+=`<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavorById(${lineId},'${safe}')">${f}</button>`;});html+=`</div></div>`;}
-    if(line.meta?.addons?.length){html+=`<div class="order-addons"><div class="oa-label">➕ Extras</div><div class="oa-chips">`;line.meta.addons.forEach(a=>{const pn=priceNum(a.price),sel=line.addons.some(x=>x.label===a.label),safe=a.label.replace(/'/g,"\\'");html+=`<button class="oa-chip${sel?' selected':''}" onclick="toggleAddonById(${lineId},'${safe}',${pn})">${a.label} <span style="opacity:.7">${a.price}</span></button>`;});html+=`</div></div>`;}
+    html+=`<div class="order-line"><div class="order-line-main"><div style="flex:1"><div class="order-line-name">${line.name}</div><div class="qty-row"><button class="q-btn q-minus" onclick="changeQty(${lineId},-1)">−</button><div class="q-num">${line.qty}</div><button class="q-btn q-plus" onclick="changeQty(${lineId},1)">+</button><button class="q-del" onclick="removeLine(${lineId})">✕</button></div></div><div class="order-line-price">$${lineTotal.toFixed(2)}</div></div>`;
+    if(line.meta?.flavors?.length){html+=`<div class="order-addons"><div class="oa-label">💨 Flavor</div><div class="oa-chips">`;line.meta.flavors.forEach(f=>{const safe=f.replace(/'/g,"\\'");html+=`<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavor(${lineId},'${safe}')">${f}</button>`;});html+=`</div></div>`;}
     html+=`</div>`;
   });
   scroll.innerHTML=html;scroll.scrollTop=savedScroll;
 }
-function changeQtyById(id,delta){changeQty(id,delta);}
-function removeLineById(id){removeLine(id);}
-function toggleAddonById(id,label,price){toggleAddon(id,label,price);}
-function toggleFlavorById(id,flavor){toggleFlavor(id,flavor);}
 
 // ═══════════════════════════════════════════════════
 // VALIDATION & BUILD ORDER
@@ -689,6 +900,7 @@ function validateOrder(){
   if(orderType==='delivery'&&!deliveryZone){document.getElementById('err-zone').classList.add('show');ok=false;}
   else document.getElementById('err-zone').classList.remove('show');
   if(!orderLines.length){showToast('Add items to the order first','error');ok=false;}
+  if(!hasToken()){showToast('No GitHub token — click 🔑 in the top bar','error');openTokenModal();ok=false;}
   return ok;
 }
 function buildOrderObj(status='pending'){
@@ -699,203 +911,180 @@ function buildOrderObj(status='pending'){
 
 // ═══════════════════════════════════════════════════
 // LOAD INBOX ORDER → CURRENT ORDER
-// FIX: normalize deliveryZone label ("Zone A" → "A")
 // ═══════════════════════════════════════════════════
-function normalizeZone(zoneVal) {
-  if (!zoneVal) return null;
-  // Handle "Zone A", "Zone B", "Zone C" → "A", "B", "C"
-  const match = String(zoneVal).match(/\b([ABC])\b/i);
-  return match ? match[1].toUpperCase() : null;
+function normalizeZone(zoneVal){
+  if(!zoneVal) return null;
+  const match=String(zoneVal).match(/\b([ABC])\b/i);
+  return match?match[1].toUpperCase():null;
 }
-
 function loadOrderIntoCurrent(order){
   clearOrder();
   document.getElementById('cust-name').value=order.name||'';
-  if(order.note){document.getElementById('order-note').value=order.note;document.getElementById('note-label').style.display='block';document.getElementById('order-note').style.display='block';}
-  if(order.orderType) selType(order.orderType);
-
-  // FIX: normalize zone before calling selZone
-  const zone = normalizeZone(order.deliveryZone);
-  if(zone) selZone(zone);
-
-  // FIX: show note field and address info if delivery
-  if(order.orderType === 'delivery') {
+  if(order.note||order.address){
+    const noteVal=order.note||(order.address?`Address: ${order.address}`:'');
+    document.getElementById('order-note').value=noteVal;
     document.getElementById('note-label').style.display='block';
     document.getElementById('order-note').style.display='block';
-    // Pre-fill address as note if present and note is empty
-    if(order.address && !order.note) {
-      document.getElementById('order-note').value = order.address;
-    }
   }
-
+  if(order.orderType) selType(order.orderType);
+  const zone=normalizeZone(order.deliveryZone);
+  if(zone) selZone(zone);
   order.items.forEach(it=>{
     let foundCatKey=null,foundIdx=null,foundMeta=null;
     menuData.forEach(cat=>{(cat.items||[]).forEach((mitem,idx)=>{if(mitem.name===it.name){foundCatKey=cat.key;foundIdx=idx;foundMeta=mitem;}});});
     const line={id:Date.now()+Math.random(),catKey:foundCatKey,itemIdx:foundIdx,name:it.name,price:it.price,priceStr:it.priceStr||('$'+it.price),qty:it.qty,addons:(it.addons||[]).map(a=>({label:a.label,price:a.price})),flavor:it.flavor||null,meta:foundMeta||{}};
     orderLines.push(line);
-    if(foundCatKey!==null&&foundIdx!==null)updateItemBadge(foundCatKey,foundIdx);
+    if(foundCatKey!==null&&foundIdx!==null) updateItemBadge(foundCatKey,foundIdx);
   });
   renderOrderPanel();
-  showToast('Order loaded into current order ✓','success');
-  if(showingInbox)toggleInboxView();
-  if(showingOrders)toggleOrdersView();
+  showToast('Order loaded ✓','success');
+  if(showingInbox) toggleInboxView();
+  if(showingOrders) toggleOrdersView();
 }
 
 // ═══════════════════════════════════════════════════
 // CHARGE & SAVE
+// FIX: fetch fresh orders, prepend, trim to 200, write back
 // ═══════════════════════════════════════════════════
 async function chargeOrder(){
   if(!validateOrder()) return;
   const order=buildOrderObj('pending');
+  const chargeBtn=document.getElementById('charge-btn');
+  chargeBtn.disabled=true;chargeBtn.textContent='Saving…';
   showLoading('Saving order…');
-  try{await saveOrderToGitHub(order);showToast(`Order ${order.id} saved ✓`,'success');clearOrder();loadOrders(false).catch(()=>{});}
-  catch(e){showToast('Save failed: '+e.message,'error');}
+  try{
+    // Read current orders (fresh, not cached)
+    let orders=[];
+    try{ const r=await ghRead(ORDERS_PATH); orders=r.data||[]; }catch(_){ orders=[]; }
+    // Prepend new order, cap at MAX_ORDERS
+    orders.unshift(order);
+    if(orders.length>MAX_ORDERS) orders=orders.slice(0,MAX_ORDERS);
+    ordersData=orders;
+    // Write back — ghWrite always fetches fresh SHA
+    await ghWrite(ORDERS_PATH,orders,`Order ${order.id} — ${order.name}`);
+    showToast(`Order ${order.id} saved ✓`,'success');
+    clearOrder();
+    loadOrders(false).catch(()=>{});
+  }catch(e){
+    showToast('Save failed: '+e.message,'error');
+  }
+  chargeBtn.disabled=!hasToken();
+  chargeBtn.textContent='✅ Charge & Save';
   hideLoading();
 }
 
 // ═══════════════════════════════════════════════════
-// GITHUB FILE HELPERS
+// ORDERS LOG
 // ═══════════════════════════════════════════════════
-function fromB64(b64){const bin=atob(b64);const b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return new TextDecoder().decode(b);}
-function toB64(str){const b=new TextEncoder().encode(str);let s='';b.forEach(x=>s+=String.fromCharCode(x));return btoa(s);}
-
-// FIX: use raw.githubusercontent.com for reading (no cache, no auth needed)
-// Only use the contents API (with SHA) for writing
-async function fetchRawFile(path) {
-  const url = RAW_BASE + path + '?v=' + Date.now();
-  const res = await fetch(url);
-  if (res.status === 404) return { data: null, sha: null };
-  if (!res.ok) throw new Error('Raw fetch ' + res.status);
-  const data = await res.json();
-  return { data, sha: null }; // sha not available from raw, fetch separately when needed
-}
-
-async function fetchGitHubFileSHA(path) {
-  // Only used to get SHA before a write
-  const h={'Accept':'application/vnd.github.v3+json'};
-  if(getToken()) h['Authorization']='Bearer '+getToken();
-  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:h});
-  if(res.status===404) return null;
-  if(!res.ok) throw new Error('GitHub '+res.status);
-  const d=await res.json();
-  return d.sha;
-}
-
-async function putGitHubFile(path,data,sha,message){
-  if(!getToken()) throw new Error('No GitHub token');
-  const content=toB64(JSON.stringify(data,null,2));
-  const body={message,content};if(sha)body.sha=sha;
-  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(body)});
-  if(!res.ok){const e=await res.json();throw new Error(e.message||res.status);}
-  const saved=await res.json();return saved.content.sha;
-}
-
-async function fetchOrdersFile(){
-  const{data}=await fetchRawFile(ORDERS_PATH);
-  // Still need SHA for writing — fetch it separately
-  ordersSha=await fetchGitHubFileSHA(ORDERS_PATH).catch(()=>null);
-  return data||[];
-}
-async function saveOrdersFile(orders){
-  if(!ordersSha) ordersSha=await fetchGitHubFileSHA(ORDERS_PATH).catch(()=>null);
-  ordersSha=await putGitHubFile(ORDERS_PATH,orders,ordersSha,'Update orders');
-}
-async function saveOrderToGitHub(order){
-  let orders=[];try{orders=await fetchOrdersFile();}catch(e){}
-  orders.unshift(order);if(orders.length>MAX_ORDERS)orders=orders.slice(0,MAX_ORDERS);
-  ordersData=orders;await saveOrdersFile(orders);
-}
 async function loadOrders(showUI){
-  if(showUI)showLoading('Loading orders…');
-  try{ordersData=await fetchOrdersFile();renderOrdersList();}
-  catch(e){if(showUI)showToast('Load failed: '+e.message,'error');}
-  if(showUI)hideLoading();
+  if(showUI) showLoading('Loading orders…');
+  try{
+    const{data}=await ghRead(ORDERS_PATH);
+    ordersData=data||[];
+    renderOrdersList();
+  }catch(e){if(showUI) showToast('Load failed: '+e.message,'error');}
+  if(showUI) hideLoading();
 }
 async function updateOrderStatus(id,status){
   const order=ordersData.find(o=>o.id===id);if(!order) return;
   order.status=status;showLoading('Updating…');
-  try{await saveOrdersFile(ordersData);showToast('Status updated ✓','success');renderOrdersList();}
-  catch(e){showToast('Update failed: '+e.message,'error');}
+  try{
+    await ghWrite(ORDERS_PATH,ordersData,`Update order ${id} → ${status}`);
+    showToast('Status updated ✓','success');renderOrdersList();
+  }catch(e){showToast('Update failed: '+e.message,'error');}
   hideLoading();
 }
 
 // ═══════════════════════════════════════════════════
-// INBOX — FIX: use raw fetch (no GitHub API cache)
+// INBOX POLL
+// FIX 1: uses Contents API (live data, no CDN cache)
+// FIX 2: skips read while a write is in-flight (inboxWritePending)
+//        so a confirmed order can't reappear from a stale read
 // ═══════════════════════════════════════════════════
-async function pollInbox(){
+async function pollInbox(force=false){
+  if(inboxWritePending && !force) return; // don't clobber an in-flight write
   try{
-    const{data}=await fetchRawFile(INBOX_PATH);
-    // FIX: get SHA only if we need to write (lazy)
-    const pending=(data||[]).filter(o=>o.status==='pending');
+    const{data,sha}=await ghRead(INBOX_PATH);
     inboxData=data||[];
-
+    // Only update sha if we're NOT mid-write
+    if(!inboxWritePending) inboxSha=sha;
+    const pending=inboxData.filter(o=>o.status==='pending');
     const newCount=pending.length;
     updateInboxBadge(newCount);
-
-    // FIX: if inbox is open, always re-render so new orders appear immediately
     if(showingInbox) renderInboxList();
-
-    // FIX: if new orders appeared since last poll and inbox is closed → pulse the button
-    if(newCount > lastInboxCount && !showingInbox){
+    if(newCount>lastInboxCount&&!showingInbox){
       document.getElementById('inbox-tab-btn').classList.add('has-new');
-      showToast(`📥 ${newCount - lastInboxCount} new order${newCount-lastInboxCount>1?'s':''} incoming!`,'success');
+      showToast(`📥 ${newCount-lastInboxCount} new order${newCount-lastInboxCount>1?'s':''} incoming!`,'success');
     }
-    if(newCount === 0){
-      document.getElementById('inbox-tab-btn').classList.remove('has-new');
-    }
+    if(newCount===0) document.getElementById('inbox-tab-btn').classList.remove('has-new');
     lastInboxCount=newCount;
-
-  }catch(e){
-    // silently fail
-  }
+  }catch(_){}
 }
-
 function updateInboxBadge(count){
   const badge=document.getElementById('inbox-badge');
   badge.textContent=count;badge.classList.toggle('show',count>0);
 }
 
+// FIX: confirm writes status BEFORE loading into current order
+// and sets inboxWritePending to block poll from overwriting
 async function confirmInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
-  loadOrderIntoCurrent(order);
+  // Disable buttons immediately to prevent double-tap
+  document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
+  // Optimistically mark as confirmed in local state
   order.status='confirmed';
-  try{
-    // FIX: fetch fresh SHA right before write
-    inboxSha=await fetchGitHubFileSHA(INBOX_PATH).catch(()=>null);
-    inboxSha=await putGitHubFile(INBOX_PATH,inboxData,inboxSha,'Confirm order '+id);
-  }catch(e){}
-  renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
+  renderInboxList();
+  // Write to GitHub with write-lock so poll doesn't clobber
+  inboxWritePending=true;
+  try{
+    await ghWrite(INBOX_PATH,inboxData,`Confirm order ${id}`);
+  }catch(e){
+    // Write failed — revert local state so it doesn't disappear wrongly
+    order.status='pending';
+    renderInboxList();
+    updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
+    showToast('Could not confirm: '+e.message,'error');
+  }finally{
+    inboxWritePending=false;
+  }
+  // Load into current order AFTER write succeeds
+  loadOrderIntoCurrent(order);
   document.getElementById('inbox-tab-btn').classList.remove('has-new');
 }
 
 async function declineInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
-  order.status='declined';showLoading('Declining…');
+  document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
+  order.status='declined';
+  inboxWritePending=true;
+  showLoading('Declining…');
   try{
-    inboxSha=await fetchGitHubFileSHA(INBOX_PATH).catch(()=>null);
-    inboxSha=await putGitHubFile(INBOX_PATH,inboxData,inboxSha,'Decline order '+id);
+    await ghWrite(INBOX_PATH,inboxData,`Decline order ${id}`);
     showToast('Order declined','');
-  }catch(e){showToast('Error: '+e.message,'error');}
-  hideLoading();renderInboxList();
+  }catch(e){
+    order.status='pending';
+    showToast('Error: '+e.message,'error');
+  }finally{
+    inboxWritePending=false;
+  }
+  hideLoading();
+  renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
 }
 
 function renderInboxList(){
   const list=document.getElementById('inbox-list');
   const pending=inboxData.filter(o=>o.status==='pending');
-  if(!pending.length){list.innerHTML=`<div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders right now</div><div style="font-size:12px;margin-top:8px;color:var(--g400)">Orders from customers on the menu page will appear here</div></div>`;return;}
+  if(!pending.length){list.innerHTML=`<div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders right now</div><div style="font-size:12px;margin-top:8px;color:var(--g400)">Orders placed on the menu website appear here</div></div>`;return;}
   const typeEmoji={dinein:'🪑',takeaway:'🥡',delivery:'🛵'};
   list.innerHTML=pending.map(o=>{
     const dt=new Date(o.timestamp),ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-    // FIX: handle both "Zone A" and "A" format for display
-    const zoneDisplay = o.deliveryZone ? ` · ${o.deliveryZone}` : '';
-    let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType||''}${zoneDisplay}`;
+    const zoneDisplay=o.deliveryZone?` · ${o.deliveryZone}`:'';
+    const metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType||''}${zoneDisplay}`;
     const itemsHtml=(o.items||[]).map(it=>`<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`).join('');
-    // FIX: show GPS link if available
-    const gpsHtml = o.gps ? `<div class="inbox-gps-row">📍 <a href="https://maps.google.com/?q=${o.gps.lat},${o.gps.lng}" target="_blank" style="color:var(--green-d);text-decoration:underline">View customer location on Maps</a></div>` : '';
-    // FIX: show address if present
-    const addrHtml = o.address ? `<div style="font-size:11px;color:var(--g600);padding:0 14px 8px">🏠 ${o.address}</div>` : '';
+    const gpsHtml=o.gps?`<div class="inbox-gps-row">📍 <a href="https://maps.google.com/?q=${o.gps.lat},${o.gps.lng}" target="_blank" style="color:var(--green-d);text-decoration:underline">View on Maps</a></div>`:'';
+    const addrHtml=o.address?`<div style="font-size:11px;color:var(--g600);padding:0 14px 8px">🏠 ${o.address}</div>`:'';
     return`<div class="inbox-card">
       <div class="inbox-card-header">
         <div><div class="inbox-oc-name">${o.name}</div><div class="inbox-oc-meta">${metaStr}</div><div class="inbox-oc-time">🕐 ${ts}</div></div>
@@ -905,7 +1094,7 @@ function renderInboxList(){
       ${gpsHtml}${addrHtml}
       <div class="oc-total"><span>Total</span><span>$${(o.total||0).toFixed(2)}</span></div>
       <div class="inbox-actions">
-        <button class="inbox-confirm-btn" onclick="confirmInboxOrder('${o.id}')">✅ Confirm & Load</button>
+        <button class="inbox-confirm-btn" onclick="confirmInboxOrder('${o.id}')">✅ Confirm &amp; Load</button>
         <button class="inbox-decline-btn" onclick="declineInboxOrder('${o.id}')">✕ Decline</button>
       </div>
     </div>`;
@@ -913,51 +1102,55 @@ function renderInboxList(){
 }
 
 // ═══════════════════════════════════════════════════
-// ORDERS LOG
+// ORDERS LOG VIEW
 // ═══════════════════════════════════════════════════
 function toggleOrdersView(){
-  if(showingInbox)toggleInboxView();
+  if(showingInbox) toggleInboxView();
   showingOrders=!showingOrders;
   document.getElementById('cat-sidebar').style.display=showingOrders?'none':'flex';
   document.getElementById('menu-panel').style.display=showingOrders?'none':'block';
   document.getElementById('orders-view').classList.toggle('show',showingOrders);
   document.getElementById('orders-tab-btn').classList.toggle('active',showingOrders);
-  if(showingOrders)loadOrders(true);
+  if(showingOrders) loadOrders(true);
 }
 function toggleInboxView(){
-  if(showingOrders)toggleOrdersView();
+  if(showingOrders) toggleOrdersView();
   showingInbox=!showingInbox;
   document.getElementById('cat-sidebar').style.display=showingInbox?'none':'flex';
   document.getElementById('menu-panel').style.display=showingInbox?'none':'block';
   document.getElementById('inbox-view').classList.toggle('show',showingInbox);
   document.getElementById('inbox-tab-btn').classList.toggle('active',showingInbox);
-  // FIX: remove pulse once user opens inbox
   if(showingInbox){
     document.getElementById('inbox-tab-btn').classList.remove('has-new');
-    renderInboxList(); // always re-render with latest data when opening
+    renderInboxList();
   }
 }
-function setFilter(btn,filter){ordersFilter=filter;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderOrdersList();}
+function setFilter(btn,filter){
+  ordersFilter=filter;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');renderOrdersList();
+}
 function renderOrdersList(){
   const list=document.getElementById('orders-list');
   let filtered=ordersData;
-  if(ordersFilter!=='all')filtered=ordersData.filter(o=>o.status===ordersFilter);
+  if(ordersFilter!=='all') filtered=ordersData.filter(o=>o.status===ordersFilter);
   if(!filtered.length){list.innerHTML=`<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No ${ordersFilter==='all'?'':ordersFilter} orders found.</div>`;return;}
   const typeEmoji={dinein:'🪑',takeaway:'🥡',delivery:'🛵'};
   list.innerHTML=filtered.map(o=>{
     const dt=new Date(o.timestamp),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
     const sbCls=o.status==='done'?'sb-done':o.status==='cancelled'?'sb-cancelled':'sb-pending';
     let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType}`;
-    if(o.deliveryZone)metaStr+=` · ${o.deliveryZone} ($${o.deliveryFee?.toFixed(2)||'0.00'})`;
-    if(o.note)metaStr+=` · "${o.note}"`;
+    if(o.deliveryZone) metaStr+=` · ${o.deliveryZone} ($${o.deliveryFee?.toFixed(2)||'0.00'})`;
+    if(o.note) metaStr+=` · "${o.note}"`;
     let itemRows='';
     o.items.forEach(it=>{
       itemRows+=`<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;
-      if(it.flavor)itemRows+=`<div class="oc-item-row addon-row"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
+      if(it.flavor) itemRows+=`<div class="oc-item-row addon-row"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
       (it.addons||[]).forEach(a=>{itemRows+=`<div class="oc-item-row addon-row"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;});
     });
-    if(o.deliveryFee>0)itemRows+=`<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+    if(o.deliveryFee>0) itemRows+=`<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
     const canDone=o.status!=='done',canCancel=o.status!=='cancelled';
+    const oe=encodeURIComponent(JSON.stringify(o));
     return`<div class="order-card status-${o.status}">
       <div class="oc-header"><div><div class="oc-num">${o.id} · ${ts}</div><div class="oc-name">${o.name}</div><div class="oc-meta">${metaStr}</div></div><span class="status-badge ${sbCls}">${o.status}</span></div>
       <div class="oc-items">${itemRows}</div>
@@ -965,10 +1158,10 @@ function renderOrdersList(){
       <div class="oc-actions">
         ${canDone?`<button class="oc-btn oc-done" onclick="confirmStatus('${o.id}','done')">✅ Done</button>`:''}
         ${canCancel?`<button class="oc-btn oc-cancel" onclick="confirmStatus('${o.id}','cancelled')">✕ Cancel</button>`:''}
-        <button class="oc-btn oc-load" onclick="loadOrderIntoCurrent(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" title="Load into current order">📋 Load</button>
-        <button class="oc-btn oc-print-t" onclick="printFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')),'thermal')">🖨 Thermal</button>
-        <button class="oc-btn oc-print-c" onclick="printFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')),'card')">🖨 Card</button>
-        <button class="oc-btn oc-wa" onclick="sendWhatsAppFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" >💬 WA</button>
+        <button class="oc-btn oc-load" onclick="loadOrderIntoCurrent(JSON.parse(decodeURIComponent('${oe}')))">📋 Load</button>
+        <button class="oc-btn oc-print-t" onclick="printFromOrder(JSON.parse(decodeURIComponent('${oe}')),'thermal')">🖨 Thermal</button>
+        <button class="oc-btn oc-print-c" onclick="printFromOrder(JSON.parse(decodeURIComponent('${oe}')),'card')">🖨 Card</button>
+        <button class="oc-btn oc-wa" onclick="sendWhatsAppFromOrder(JSON.parse(decodeURIComponent('${oe}')))">💬 WA</button>
       </div>
     </div>`;
   }).join('');
@@ -991,7 +1184,7 @@ function buildThermal(o){
   const typeLabels={dinein:'Dine In',takeaway:'Takeaway',delivery:'Delivery'};
   let lines='';
   o.items.forEach(it=>{lines+=`<div class="th-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;if(it.flavor)lines+=`<div class="th-addon">↳ Flavor: ${it.flavor}</div>`;(it.addons||[]).forEach(a=>{lines+=`<div class="th-addon">↳ ${a.label}: +$${a.price.toFixed(2)}</div>`;});});
-  if(o.deliveryFee>0)lines+=`<div class="th-row"><span>Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+  if(o.deliveryFee>0) lines+=`<div class="th-row"><span>Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
   return`<div class="thermal-receipt"><div class="th-center"><div class="th-logo">LE KIOSK</div><div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div><div class="th-divider"></div><div class="th-row"><span>Order:</span><span>${o.id||'POS'}</span></div><div class="th-row"><span>Name:</span><span>${o.name}</span></div><div class="th-row"><span>Type:</span><span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div class="th-row"><span>Zone:</span><span>${o.deliveryZone}</span></div>`:''} ${o.note?`<div class="th-row"><span>Note:</span><span>${o.note}</span></div>`:''}<div class="th-row"><span>Time:</span><span>${ts}</span></div><div class="th-divider"></div>${lines}<div class="th-divider"></div><div class="th-row th-total bold"><span>TOTAL</span><span>$${o.total.toFixed(2)}</span></div><div class="th-divider"></div><div class="th-footer">Thank you for visiting!<br>⭐ Leave us a Google review</div></div>`;
 }
 function buildCard(o){
@@ -999,7 +1192,7 @@ function buildCard(o){
   const typeLabels={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
   let rows='';
   o.items.forEach(it=>{rows+=`<div class="cr-row"><span style="font-weight:700">${it.name} <span style="color:#9ca3af;font-weight:500">x${it.qty}</span></span><span style="font-weight:700">$${(it.price*it.qty).toFixed(2)}</span></div>`;if(it.flavor)rows+=`<div class="cr-addon"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;(it.addons||[]).forEach(a=>{rows+=`<div class="cr-addon"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;});});
-  if(o.deliveryFee>0)rows+=`<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+  if(o.deliveryFee>0) rows+=`<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
   return`<div class="card-receipt"><div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div><div class="cr-meta"><div>Customer: <span>${o.name}</span></div><div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div>Zone: <span>${o.deliveryZone} (+$${o.deliveryFee?.toFixed(2)||'0.00'})</span></div>`:''} ${o.note?`<div>Note: <span>${o.note}</span></div>`:''}<div>Time: <span>${ts}</span></div></div><div class="cr-section">${rows}</div><div class="cr-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div><div class="cr-footer">Thank you for visiting Le Kiosk! ⭐<br>Leave us a Google review — it means the world to us.</div></div>`;
 }
 
@@ -1012,11 +1205,11 @@ function doWhatsApp(o){
   const typeLabels={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
   const dt=new Date(o.timestamp||new Date()),ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
   let msg=`🛒 *Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n👤 *Name:* ${o.name}\n📦 *Type:* ${typeLabels[o.orderType]||o.orderType}\n`;
-  if(o.deliveryZone)msg+=`📍 *Zone:* ${o.deliveryZone} (fee: $${o.deliveryFee?.toFixed(2)||'0.00'})\n`;
-  if(o.note)msg+=`📝 *Note:* ${o.note}\n`;
+  if(o.deliveryZone) msg+=`📍 *Zone:* ${o.deliveryZone} (fee: $${o.deliveryFee?.toFixed(2)||'0.00'})\n`;
+  if(o.note) msg+=`📝 *Note:* ${o.note}\n`;
   msg+=`🕐 *Time:* ${ts}\n━━━━━━━━━━━━━━━━━━\n`;
   o.items.forEach(it=>{msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;if(it.flavor)msg+=`  ↳ Flavor: ${it.flavor}\n`;(it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;});});
-  if(o.deliveryFee>0)msg+=`• 🛵 Delivery — $${o.deliveryFee.toFixed(2)}\n`;
+  if(o.deliveryFee>0) msg+=`• 🛵 Delivery — $${o.deliveryFee.toFixed(2)}\n`;
   msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${o.total.toFixed(2)}*`;
   window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
 }
