@@ -17,8 +17,8 @@
         #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
 
-        /* ORDER MODE */
-        .qty-control { display: none; align-items: center; gap: 0; margin-top: 8px; }
+        /* ── ORDER MODE: +/- controls ── */
+        .qty-control { display: none; align-items: center; margin-top: 8px; }
         .order-mode .qty-control { display: flex; }
         .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
         .qty-minus { background: #fef3c7; color: #92400e; }
@@ -26,70 +26,127 @@
         .qty-plus { background: #f59e0b; color: #fff; }
         .qty-plus:hover { background: #d97706; }
         .qty-num { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: #451a03; background: #fff; border-top: 1.5px solid #fde68a; border-bottom: 1.5px solid #fde68a; height: 28px; line-height: 28px; }
-        .item-card-wrap { transition: box-shadow 0.2s; }
-        .order-mode .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
+        .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
 
-        /* CART PANEL — max-height capped so it never blocks the menu */
-        #cart-panel { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(calc(100% + 88px)); width: 100%; max-width: 28rem; z-index: 60; transition: transform 0.35s cubic-bezier(.4,0,.2,1); padding: 0 16px 0; }
-        #cart-panel.open { transform: translateX(-50%) translateY(0); }
-        .cart-inner { background: #1c0f00; border-radius: 20px; padding: 16px; box-shadow: 0 -4px 30px rgba(0,0,0,0.25); border: 1px solid #3d1f00; max-height: 35vh; display: flex; flex-direction: column; }
-        #cart-items { overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: thin; scrollbar-color: #3d1f00 transparent; }
-        #cart-items::-webkit-scrollbar { width: 4px; }
-        #cart-items::-webkit-scrollbar-track { background: transparent; }
-        #cart-items::-webkit-scrollbar-thumb { background: #3d1f00; border-radius: 4px; }
-        .cart-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .cart-row:last-child { border-bottom: none; }
-        .cart-item-name { font-size: 13px; font-weight: 600; color: #fef3c7; }
-        .cart-item-qty { font-size: 11px; color: #fbbf24; font-weight: 700; }
-        .cart-item-price { font-size: 13px; font-weight: 700; color: #fbbf24; }
-        .cart-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
-        .cart-footer { flex-shrink: 0; }
+        /* ── FLOATING CHECKOUT PILL ── */
+        #checkout-pill {
+            position: fixed;
+            bottom: 88px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(.4,0,.2,1);
+            z-index: 55;
+            white-space: nowrap;
+        }
+        #checkout-pill.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+        .pill-inner {
+            background: #1c0f00;
+            border: 1px solid #f59e0b;
+            border-radius: 100px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .pill-inner:hover { transform: scale(1.03); }
+        .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
+        .pill-total { color: #fef3c7; font-size: 13px; font-weight: 700; }
+        .pill-cta { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 5px 12px; border-radius: 100px; }
 
+        /* ── CHECKOUT BOTTOM SHEET ── */
+        #checkout-sheet {
+            position: fixed;
+            inset: 0;
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            pointer-events: none;
+        }
+        #checkout-sheet.open { pointer-events: all; }
+        #sheet-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0);
+            transition: background 0.35s ease;
+        }
+        #checkout-sheet.open #sheet-backdrop { background: rgba(0,0,0,0.55); }
+        #sheet-body {
+            position: relative;
+            background: #fff;
+            border-radius: 24px 24px 0 0;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+            max-width: 28rem;
+            margin: 0 auto;
+            width: 100%;
+        }
+        #checkout-sheet.open #sheet-body { transform: translateY(0); }
 
-        /* CART ADDON PICKER */
-        .cart-addon-row { padding: 4px 0 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-        .cart-addon-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #a16207; margin-bottom: 5px; }
-        .cart-addon-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-        .cart-addon-chip { padding: 3px 9px; border-radius: 20px; border: 1.5px solid #3d1f00; background: #2a1400; color: #fcd34d; font-size: 10px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; }
-        .cart-addon-chip:hover { background: #3d1f00; border-color: #a16207; }
-        .cart-addon-chip.selected { background: #f59e0b; border-color: #f59e0b; color: #1c0f00; }
-        /* ORDER MODE BUTTON */
-        #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
+        .sheet-handle { width: 40px; height: 4px; background: #e5e7eb; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; }
+        .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
+        .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 20px; }
 
-        /* CART BADGE */
-        #cart-badge { display: none; position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; align-items: center; justify-content: center; }
-        #cart-badge.show { display: flex; }
+        /* ── ORDER ITEMS IN SHEET ── */
+        .sheet-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #fef3c7; }
+        .sheet-item:last-child { border-bottom: none; }
+        .sheet-item-left { flex: 1; min-width: 0; }
+        .sheet-item-name { font-size: 13px; font-weight: 700; color: #451a03; }
+        .sheet-item-qty { font-size: 11px; color: #f59e0b; font-weight: 700; margin-top: 1px; }
+        .sheet-item-price { font-size: 13px; font-weight: 700; color: #d97706; flex-shrink: 0; margin-left: 12px; }
 
-        /* MODAL OVERLAY */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: flex-end; justify-content: center; padding: 16px; padding-bottom: 32px; }
-        .modal-overlay.show { display: flex; }
-        .modal-box { background: #fff; border-radius: 24px; padding: 24px; width: 100%; max-width: 28rem; box-shadow: 0 -4px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* ── ADDON CHIPS IN SHEET ── */
+        .addon-section { padding: 6px 0 10px; border-bottom: 1px solid #fef3c7; }
+        .addon-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #b45309; margin-bottom: 6px; }
+        .addon-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .addon-chip { padding: 5px 12px; border-radius: 100px; border: 1.5px solid #fde68a; background: #fffbeb; color: #92400e; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s; }
+        .addon-chip:hover { border-color: #f59e0b; background: #fef3c7; }
+        .addon-chip.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
 
-        /* NAME INPUT */
-        .name-input { width: 100%; padding: 12px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; margin-top: 8px; }
-        .name-input:focus { border-color: #f59e0b; }
-        .name-input.error { border-color: #ef4444; background: #fef2f2; }
-
-        /* ORDER TYPE SELECTOR */
+        /* ── NAME / TYPE FORM IN SHEET ── */
+        .sheet-divider { height: 1px; background: #fde68a; margin: 16px 0; }
+        .sheet-section-title { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 700; color: #451a03; margin-bottom: 10px; }
+        .sheet-input { width: 100%; padding: 11px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; }
+        .sheet-input:focus { border-color: #f59e0b; }
+        .sheet-input.error { border-color: #ef4444; background: #fef2f2; }
         .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
-        .order-type-btn { padding: 10px 6px; border-radius: 12px; border: 2px solid #fde68a; background: #fffbeb; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
+        .order-type-btn { padding: 10px 4px; border-radius: 12px; border: 2px solid #fde68a; background: #fffbeb; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
         .order-type-btn:hover { background: #fef3c7; border-color: #fcd34d; }
         .order-type-btn.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
         .order-type-btn .type-icon { font-size: 20px; display: block; margin-bottom: 3px; }
-
-        /* DELIVERY SUB-OPTIONS */
-        .delivery-sub { margin-top: 10px; display: none; }
+        .delivery-sub { margin-top: 12px; display: none; }
         .delivery-sub.show { display: block; }
-        .delivery-zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-        .delivery-zone-btn { padding: 10px 8px; border-radius: 12px; border: 2px solid #fde68a; background: #fffbeb; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
-        .delivery-zone-btn:hover { background: #fef3c7; border-color: #fcd34d; }
-        .delivery-zone-btn.selected { background: #451a03; border-color: #451a03; color: #fef3c7; }
-        .delivery-zone-btn .zone-fee { font-size: 12px; color: #f59e0b; font-weight: 800; display: block; margin-top: 2px; }
-        .delivery-zone-btn.selected .zone-fee { color: #fcd34d; }
+        .zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+        .zone-btn { padding: 10px 8px; border-radius: 12px; border: 2px solid #fde68a; background: #fffbeb; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
+        .zone-btn:hover { background: #fef3c7; }
+        .zone-btn.selected { background: #451a03; border-color: #451a03; color: #fef3c7; }
+        .zone-fee { font-size: 12px; color: #f59e0b; font-weight: 800; display: block; margin-top: 2px; }
+        .zone-btn.selected .zone-fee { color: #fcd34d; }
+
+        /* ── TOTAL ROW ── */
+        .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
+
+        /* ── ORDER MODE BUTTON ── */
+        #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
+
+        /* ── ERROR TEXT ── */
+        .err-text { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
+        .err-text.show { display: block; }
     </style>
 </head>
-<body class="pb-40">
+<body class="pb-32">
 
     <header class="text-center pt-8 pb-6 px-4 max-w-md mx-auto">
         <div class="w-28 h-28 mx-auto bg-white border-4 border-amber-900 rounded-full shadow-md mb-4 overflow-hidden relative">
@@ -134,102 +191,28 @@
         </div>
     </section>
 
-    <!-- ── CART PANEL ── -->
-    <div id="cart-panel">
-        <div class="cart-inner">
-            <div class="flex items-center justify-between mb-3 flex-shrink-0">
-                <span class="brand-heading text-base font-bold text-amber-100 uppercase tracking-wide">&#x1F6D2; Your Order</span>
-                <div class="flex items-center gap-2">
-                    <button onclick="toggleOrderMode()" class="text-red-400 text-xs font-bold uppercase tracking-wider hover:text-red-300 transition border border-red-900/50 rounded-lg px-2 py-1">&#x2715; Cancel</button>
-                    <button onclick="toggleCart()" class="text-amber-500 text-xs font-bold hover:text-amber-300 transition px-1" title="Collapse">&#x25BE;</button>
-                </div>
-            </div>
-            <div id="cart-items"></div>
-            <div class="cart-footer">
-                <div class="cart-total-row">
-                    <span class="text-amber-300 text-xs font-bold uppercase tracking-wider">Estimated Total</span>
-                    <span class="text-amber-400 font-bold text-base" id="cart-total">$0.00</span>
-                </div>
-                <button onclick="openCheckoutModal()" class="mt-3 w-full bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    Review & Send Order
-                </button>
-            </div>
+    <!-- ── FLOATING CHECKOUT PILL ── -->
+    <div id="checkout-pill">
+        <div class="pill-inner" onclick="openSheet()">
+            <span class="pill-count" id="pill-count">0 items</span>
+            <span class="pill-total" id="pill-total">$0.00</span>
+            <span class="pill-cta">Checkout →</span>
         </div>
     </div>
 
-    <!-- ── STEP 1: NAME + ORDER TYPE MODAL ── -->
-    <div class="modal-overlay" id="name-modal">
-        <div class="modal-box">
-            <div class="text-2xl mb-1">👤</div>
-            <h3 class="brand-heading text-xl font-bold text-amber-950 mb-1">Who's ordering?</h3>
-            <p class="text-gray-400 text-xs mb-3">Tell us your name and how you'd like your order.</p>
-
-            <div>
-                <label class="text-xs font-bold uppercase tracking-wider text-amber-800">Your Name *</label>
-                <input id="customer-name" type="text" class="name-input" placeholder="e.g. Elio" autocomplete="off">
-            </div>
-            <p id="name-error" class="text-red-500 text-xs font-semibold mt-2 hidden">Please enter your name to continue.</p>
-
-            <div class="mt-4">
-                <label class="text-xs font-bold uppercase tracking-wider text-amber-800">Order Type *</label>
-                <div class="order-type-grid">
-                    <button type="button" class="order-type-btn" id="type-dinein" onclick="selectOrderType('dinein')">
-                        <span class="type-icon">🪑</span>Dine In
-                    </button>
-                    <button type="button" class="order-type-btn" id="type-takeaway" onclick="selectOrderType('takeaway')">
-                        <span class="type-icon">🥡</span>Takeaway
-                    </button>
-                    <button type="button" class="order-type-btn" id="type-delivery" onclick="selectOrderType('delivery')">
-                        <span class="type-icon">🛵</span>Delivery
-                    </button>
+    <!-- ── CHECKOUT BOTTOM SHEET ── -->
+    <div id="checkout-sheet">
+        <div id="sheet-backdrop" onclick="closeSheet()"></div>
+        <div id="sheet-body">
+            <div class="sheet-handle"></div>
+            <div class="sheet-header">
+                <div class="flex items-center justify-between">
+                    <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
+                    <button onclick="closeSheet()" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
                 </div>
-                <p id="type-error" class="text-red-500 text-xs font-semibold mt-2 hidden">Please select an order type.</p>
             </div>
-
-            <!-- Delivery sub-options -->
-            <div class="delivery-sub" id="delivery-sub">
-                <label class="text-xs font-bold uppercase tracking-wider text-amber-800">Delivery Zone</label>
-                <div class="delivery-zone-grid">
-                    <button type="button" class="delivery-zone-btn" id="zone-inside" onclick="selectDeliveryZone('inside')">
-                        <span style="font-size:18px;display:block;margin-bottom:3px">📍</span>
-                        Inside Wadi Chahrour
-                        <span class="zone-fee">+$0.50</span>
-                    </button>
-                    <button type="button" class="delivery-zone-btn" id="zone-outside" onclick="selectDeliveryZone('outside')">
-                        <span style="font-size:18px;display:block;margin-bottom:3px">🗺️</span>
-                        Outside Wadi Chahrour
-                        <span class="zone-fee">+$1.50</span>
-                    </button>
-                </div>
-                <p id="zone-error" class="text-red-500 text-xs font-semibold mt-2 hidden">Please select a delivery zone.</p>
-            </div>
-
-            <div class="flex gap-3 mt-4">
-                <button onclick="closeNameModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm py-3 rounded-xl transition">Cancel</button>
-                <button onclick="proceedToConfirm()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition">Continue →</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── STEP 2: CONFIRM ORDER MODAL ── -->
-    <div class="modal-overlay" id="confirm-modal">
-        <div class="modal-box">
-            <div class="text-2xl mb-1">✅</div>
-            <h3 class="brand-heading text-xl font-bold text-amber-950 mb-1">Confirm your order</h3>
-            <p class="text-gray-400 text-xs mb-3" id="confirm-for-text"></p>
-            <div id="confirm-order-list" class="bg-amber-50 rounded-xl p-3 mb-3 max-h-48 overflow-y-auto"></div>
-            <div class="flex justify-between items-center bg-amber-100 rounded-xl px-4 py-2 mb-4">
-                <span class="text-amber-900 text-xs font-bold uppercase tracking-wider">Estimated Total</span>
-                <span class="text-amber-700 font-bold text-base" id="confirm-total"></span>
-            </div>
-            <p class="text-gray-400 text-[11px] text-center mb-3">By confirming, this order will be sent to us on WhatsApp. We'll confirm it shortly.</p>
-            <div class="flex gap-3">
-                <button onclick="closeConfirmModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm py-3 rounded-xl transition">← Edit</button>
-                <button onclick="sendWhatsAppOrder()" class="flex-1 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    Send Order
-                </button>
+            <div class="sheet-scroll" id="sheet-scroll">
+                <!-- filled dynamically -->
             </div>
         </div>
     </div>
@@ -249,12 +232,9 @@
                 <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="relative">
-                    <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
-                        🛒 Order
-                    </button>
-                    <span id="cart-badge">0</span>
-                </div>
+                <button id="order-mode-btn" onclick="toggleOrderMode()" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
+                    🛒 Order
+                </button>
                 <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">
                     <span>📞</span> Contact
                 </button>
@@ -263,10 +243,8 @@
     </div>
 
     <script>
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // TESTING MODE — set to false to re-enable the time lock
+        // ── TESTING MODE (set false to enable time lock) ──────────────
         const TESTING_MODE = true;
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         const PILL_COLORS = {
             amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
@@ -281,373 +259,310 @@
 
         const DELIVERY_FEES = { inside: 0.50, outside: 1.50 };
 
-        // addonSelections: itemKey -> { label, price (num) }  (one per item)
-        let addonSelections = {};
-        // shishaSelections: itemKey -> flavor string
-        let shishaSelections = {};
-
-        // itemMeta: itemKey -> item object from menu.json (addons[], flavors[])
-        let itemMeta = {};
-
-        // selectCartAddon handled via event delegation
-
-
         function isOpen() {
             if (TESTING_MODE) return true;
             const now = new Date();
-            const lbMinutes = (now.getUTCHours() * 60 + now.getUTCMinutes() + 180) % (24 * 60);
-            return Math.floor(lbMinutes / 60) >= 18;
+            const lbMin = (now.getUTCHours() * 60 + now.getUTCMinutes() + 180) % 1440;
+            return Math.floor(lbMin / 60) >= 18;
         }
 
-        // ── ORDER STATE ──────────────────────────────────────────────
-        let orderMode = false;
-        let cart = {};
-        let selectedOrderType = null;   // 'dinein' | 'takeaway' | 'delivery'
-        let selectedDeliveryZone = null; // 'inside' | 'outside'
+        // ── STATE ─────────────────────────────────────────────────────
+        let orderMode       = false;
+        let cart            = {};       // itemKey -> qty
+        let addonSel        = {};       // itemKey -> [{label, price}]
+        let shishaSel       = {};       // itemKey -> flavor string
+        let itemMeta        = {};       // itemKey -> item object
+        let selectedType    = null;
+        let selectedZone    = null;
 
+        // ── ORDER MODE TOGGLE ─────────────────────────────────────────
         function toggleOrderMode() {
-            if (!isOpen()) {
-                alert('⏰ Orders are only available between 6 PM and 12 AM.\n\nCome back later!');
-                return;
-            }
-            if (orderMode) {
-                // Turning off — always cancel regardless of cart contents
-                orderMode = false;
-                document.body.classList.remove('order-mode');
-                const btn = document.getElementById('order-mode-btn');
-                btn.classList.remove('active');
-                btn.innerHTML = '🛒 Order';
-                cart = {};
-                addonSelections = {};
-                shishaSelections = {};
+            if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
+            orderMode = !orderMode;
+            document.body.classList.toggle('order-mode', orderMode);
+            const btn = document.getElementById('order-mode-btn');
+            btn.classList.toggle('active', orderMode);
+            btn.innerHTML = orderMode ? '✕ Cancel' : '🛒 Order';
+            if (!orderMode) {
+                cart = {}; addonSel = {}; shishaSel = {};
                 document.querySelectorAll('.qty-num').forEach(el => el.textContent = '0');
                 document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
-                updateCartBadge();
-                closeCart();
-            } else {
-                // Turning on
-                orderMode = true;
-                document.body.classList.add('order-mode');
-                const btn = document.getElementById('order-mode-btn');
-                btn.classList.add('active');
-                btn.innerHTML = '✕ Cancel';
+                updatePill();
+                closeSheet();
             }
         }
 
+        // ── QTY CHANGE ────────────────────────────────────────────────
         function changeQty(itemKey, delta, elId) {
             if (!orderMode) return;
-            const current = cart[itemKey] || 0;
-            const newQty = Math.max(0, current + delta);
-            cart[itemKey] = newQty;
+            cart[itemKey] = Math.max(0, (cart[itemKey] || 0) + delta);
             const el = document.getElementById(elId);
-            if (el) el.textContent = newQty;
+            if (el) el.textContent = cart[itemKey];
             const card = document.getElementById('card-' + elId);
-            if (card) card.classList.toggle('has-qty', newQty > 0);
-            updateCartBadge();
-            if (Object.values(cart).some(v => v > 0)) { renderCartPanel(); openCart(); }
-            else closeCart();
+            if (card) card.classList.toggle('has-qty', cart[itemKey] > 0);
+            updatePill();
         }
 
-        function updateCartBadge() {
-            const total = Object.values(cart).reduce((a, b) => a + b, 0);
-            const badge = document.getElementById('cart-badge');
-            badge.textContent = total;
-            badge.classList.toggle('show', total > 0);
-        }
-
-        function openCart()  { document.getElementById('cart-panel').classList.add('open'); }
-        function closeCart() { document.getElementById('cart-panel').classList.remove('open'); }
-        function toggleCart() { document.getElementById('cart-panel').classList.toggle('open'); }
+        function getTotalItems() { return Object.values(cart).reduce((a,b) => a+b, 0); }
 
         function getItemsTotal() {
-            return Object.entries(cart)
-                .filter(([,v]) => v > 0)
-                .reduce((sum, [key, qty]) => {
-                    const [, , price] = key.split('|');
-                    return sum + (parseFloat(price.replace('$','')) || 0) * qty;
-                }, 0);
+            return Object.entries(cart).filter(([,v]) => v > 0).reduce((sum, [key, qty]) => {
+                const price = parseFloat(key.split('|')[2].replace('$','')) || 0;
+                const addons = (addonSel[key] || []).reduce((a,s) => a + s.price, 0);
+                return sum + price * qty + addons;
+            }, 0);
         }
 
-        function getDeliveryFee() {
-            if (selectedOrderType !== 'delivery' || !selectedDeliveryZone) return 0;
-            return DELIVERY_FEES[selectedDeliveryZone] || 0;
+        function getGrandTotal() { return getItemsTotal() + (selectedType === 'delivery' && selectedZone ? DELIVERY_FEES[selectedZone] || 0 : 0); }
+
+        // ── FLOATING PILL ─────────────────────────────────────────────
+        function updatePill() {
+            const count = getTotalItems();
+            const pill  = document.getElementById('checkout-pill');
+            pill.classList.toggle('show', count > 0 && orderMode);
+            if (count > 0) {
+                document.getElementById('pill-count').textContent = count + ' item' + (count !== 1 ? 's' : '');
+                document.getElementById('pill-total').textContent = '$' + getItemsTotal().toFixed(2);
+            }
         }
 
-        // _addonKeyMap: maps index -> itemKey for event delegation (rebuilt each render)
-        let _addonKeyMap = [];
+        // ── SHEET ─────────────────────────────────────────────────────
+        function openSheet() {
+            renderSheet();
+            document.getElementById('checkout-sheet').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSheet() {
+            document.getElementById('checkout-sheet').classList.remove('open');
+            document.body.style.overflow = '';
+        }
 
-        function renderCartPanel() {
-            _addonKeyMap = [];
-            const container = document.getElementById('cart-items');
+        // Addon chip delegation map
+        let _addonMap = [];
+
+        function renderSheet() {
+            _addonMap = [];
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
-            if (!entries.length) { closeCart(); return; }
-            let totalNum = 0, html = '';
+            if (!entries.length) return;
+
+            let html = '';
+
+            // ── Items + per-item addons ──
+            html += `<div style="padding-top:12px">`;
             entries.forEach(([key, qty]) => {
-                const parts   = key.split('|');
-                const catKey  = parts[0];
-                const name    = parts[1];
-                const price   = parts[2];
-                const priceNum  = parseFloat(price.replace('$','')) || 0;
+                const [, name, price] = key.split('|');
+                const priceNum = parseFloat(price.replace('$','')) || 0;
                 const lineTotal = priceNum * qty;
-                totalNum += lineTotal;
-                html += `<div class="cart-row">
-                    <div><div class="cart-item-name">${name}</div><div class="cart-item-qty">x${qty} @ ${price}</div></div>
-                    <div class="cart-item-price">$${lineTotal.toFixed(2)}</div>
+                html += `<div class="sheet-item">
+                    <div class="sheet-item-left">
+                        <div class="sheet-item-name">${name}</div>
+                        <div class="sheet-item-qty">x${qty} @ ${price}</div>
+                    </div>
+                    <div class="sheet-item-price">$${lineTotal.toFixed(2)}</div>
                 </div>`;
 
-                // ── Per-item addon picker (multi-select) ──
                 const meta = itemMeta[key];
-                if (meta && meta.addons && meta.addons.length) {
-                    const selArr = addonSelections[key] || [];
-                    selArr.forEach(s => { totalNum += s.price; });
-                    const ki = _addonKeyMap.length;
-                    _addonKeyMap.push(key);
-                    html += `<div class="cart-addon-row"><div class="cart-addon-label">➕ Add extras</div><div class="cart-addon-chips">`;
-                    meta.addons.forEach((addon, ai) => {
-                        const pn = parseFloat((addon.price||'0').replace('$','')) || 0;
-                        const on = selArr.some(s => s.label === addon.label);
-                        html += `<button class="cart-addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.7">${addon.price}</span></button>`;
+
+                // Flavors (shisha / soft drinks)
+                if (meta && meta.flavors && meta.flavors.length) {
+                    const shSel = shishaSel[key];
+                    const ki = _addonMap.length; _addonMap.push({ key, type: 'shisha' });
+                    html += `<div class="addon-section"><div class="addon-section-title">💨 Choose flavor</div><div class="addon-chips">`;
+                    meta.flavors.forEach((f, fi) => {
+                        html += `<button class="addon-chip${shSel === f ? ' selected' : ''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`;
                     });
                     html += `</div></div>`;
                 }
 
-                // ── Shisha / item flavor picker (from item.flavors array) ──
-                if (meta && meta.flavors && meta.flavors.length) {
-                    const shSel = shishaSelections[key];
-                    const ki = _addonKeyMap.length;
-                    _addonKeyMap.push(key);
-                    html += `<div class="cart-addon-row"><div class="cart-addon-label">💨 Choose flavor</div><div class="cart-addon-chips">`;
-                    meta.flavors.forEach((flv, fi) => {
-                        const on = shSel === flv;
-                        html += `<button class="cart-addon-chip${on?' selected':''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${flv}</button>`;
+                // Item-level addons
+                if (meta && meta.addons && meta.addons.length) {
+                    const selArr = addonSel[key] || [];
+                    const ki = _addonMap.length; _addonMap.push({ key, type: 'addon' });
+                    html += `<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
+                    meta.addons.forEach((addon, ai) => {
+                        const on = selArr.some(s => s.label === addon.label);
+                        html += `<button class="addon-chip${on ? ' selected' : ''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`;
                     });
                     html += `</div></div>`;
                 }
             });
-            container.innerHTML = html;
-            document.getElementById('cart-total').textContent = '$' + totalNum.toFixed(2);
+            html += `</div>`;
+
+            // ── Details form ──
+            html += `<div class="sheet-divider"></div>
+            <div class="sheet-section-title">👤 Your Details</div>
+            <div style="margin-bottom:10px">
+                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
+                <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${document.getElementById('sheet-name') ? document.getElementById('sheet-name').value : ''}" autocomplete="off">
+                <div class="err-text" id="err-name">Please enter your name.</div>
+            </div>
+
+            <div style="margin-bottom:10px">
+                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
+                <div class="order-type-grid">
+                    <button type="button" class="order-type-btn${selectedType==='dinein'?' selected':''}" id="stype-dinein" onclick="selectType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
+                    <button type="button" class="order-type-btn${selectedType==='takeaway'?' selected':''}" id="stype-takeaway" onclick="selectType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
+                    <button type="button" class="order-type-btn${selectedType==='delivery'?' selected':''}" id="stype-delivery" onclick="selectType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
+                </div>
+                <div class="err-text" id="err-type">Please select an order type.</div>
+            </div>
+
+            <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
+                <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Delivery Zone</label>
+                <div class="zone-grid">
+                    <button type="button" class="zone-btn${selectedZone==='inside'?' selected':''}" id="szone-inside" onclick="selectZone('inside')">
+                        <span style="font-size:18px">📍</span><br>Inside Wadi Chahrour<span class="zone-fee">+$0.50</span>
+                    </button>
+                    <button type="button" class="zone-btn${selectedZone==='outside'?' selected':''}" id="szone-outside" onclick="selectZone('outside')">
+                        <span style="font-size:18px">🗺️</span><br>Outside Wadi Chahrour<span class="zone-fee">+$1.50</span>
+                    </button>
+                </div>
+                <div class="err-text" id="err-zone">Please select a delivery zone.</div>
+            </div>`;
+
+            // ── Total + send ──
+            const fee = selectedType === 'delivery' && selectedZone ? DELIVERY_FEES[selectedZone] || 0 : 0;
+            const total = getItemsTotal() + fee;
+            html += `<div class="total-row">
+                <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Estimated Total</span>
+                <span style="font-size:16px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span>
+            </div>
+
+            <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                Send Order on WhatsApp
+            </button>`;
+
+            document.getElementById('sheet-scroll').innerHTML = html;
         }
 
-        // Single delegated click listener on cart-items for all addon + shisha chips
+        // ── ADDON / SHISHA CHIP CLICKS (delegated) ────────────────────
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('[data-type]');
             if (!btn) return;
-            const type    = btn.dataset.type;
-            const ki      = parseInt(btn.dataset.ki);
-            const itemKey = _addonKeyMap[ki];
-            if (!itemKey) return;
+            const type = btn.dataset.type;
+            const ki   = parseInt(btn.dataset.ki);
+            const entry = _addonMap[ki];
+            if (!entry) return;
+            const { key } = entry;
 
-            if (type === 'addon') {
+            if (type === 'shisha') {
+                const fi  = parseInt(btn.dataset.fi);
+                const meta = itemMeta[key];
+                if (!meta || !meta.flavors) return;
+                const flv = meta.flavors[fi];
+                shishaSel[key] = shishaSel[key] === flv ? null : flv;
+                renderSheet();
+                document.getElementById('sheet-scroll').scrollTop = 0;
+            } else if (type === 'addon') {
                 const ai   = parseInt(btn.dataset.ai);
-                const meta = itemMeta[itemKey];
-                if (!meta || !meta.addons || !meta.addons[ai]) return;
+                const meta = itemMeta[key];
+                if (!meta || !meta.addons) return;
                 const addon = meta.addons[ai];
-                const pn    = parseFloat((addon.price||'0').replace('$','')) || 0;
-                if (!addonSelections[itemKey]) addonSelections[itemKey] = [];
-                const idx = addonSelections[itemKey].findIndex(s => s.label === addon.label);
-                if (idx > -1) addonSelections[itemKey].splice(idx, 1);
-                else addonSelections[itemKey].push({ label: addon.label, price: pn });
-                renderCartPanel();
-            } else if (type === 'shisha') {
-                const fi   = parseInt(btn.dataset.fi);
-                const meta = itemMeta[itemKey];
-                if (!meta || !meta.flavors || !meta.flavors[fi]) return;
-                const flv  = meta.flavors[fi];
-                if (shishaSelections[itemKey] === flv) delete shishaSelections[itemKey];
-                else shishaSelections[itemKey] = flv;
-                renderCartPanel();
+                const pn    = parseFloat((addon.price || '0').replace('$','')) || 0;
+                if (!addonSel[key]) addonSel[key] = [];
+                const idx = addonSel[key].findIndex(s => s.label === addon.label);
+                if (idx > -1) addonSel[key].splice(idx, 1);
+                else addonSel[key].push({ label: addon.label, price: pn });
+                renderSheet();
             }
         });
 
-        // ── ORDER TYPE SELECTION ─────────────────────────────────────
-        function selectOrderType(type) {
-            selectedOrderType = type;
+        // ── ORDER TYPE / ZONE SELECTION ───────────────────────────────
+        function selectType(type) {
+            selectedType = type;
             ['dinein','takeaway','delivery'].forEach(t => {
-                document.getElementById('type-' + t).classList.toggle('selected', t === type);
+                const el = document.getElementById('stype-' + t);
+                if (el) el.classList.toggle('selected', t === type);
             });
-            const deliverySub = document.getElementById('delivery-sub');
-            deliverySub.classList.toggle('show', type === 'delivery');
-            if (type !== 'delivery') selectedDeliveryZone = null;
-            document.getElementById('type-error').classList.add('hidden');
+            const sub = document.getElementById('sheet-delivery-sub');
+            if (sub) sub.classList.toggle('show', type === 'delivery');
+            if (type !== 'delivery') selectedZone = null;
+            const errType = document.getElementById('err-type');
+            if (errType) errType.classList.remove('show');
+            updatePill();
         }
 
-        function selectDeliveryZone(zone) {
-            selectedDeliveryZone = zone;
+        function selectZone(zone) {
+            selectedZone = zone;
             ['inside','outside'].forEach(z => {
-                document.getElementById('zone-' + z).classList.toggle('selected', z === zone);
+                const el = document.getElementById('szone-' + z);
+                if (el) el.classList.toggle('selected', z === zone);
             });
-            document.getElementById('zone-error').classList.add('hidden');
+            const errZone = document.getElementById('err-zone');
+            if (errZone) errZone.classList.remove('show');
+            // Re-render total
+            const fee = DELIVERY_FEES[zone] || 0;
+            const total = getItemsTotal() + fee;
+            const totalEl = document.querySelector('.total-row span:last-child');
+            if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
         }
 
-        // ── NAME MODAL ───────────────────────────────────────────────
-        function openCheckoutModal() {
-            // Reset selections when reopening
-            selectedOrderType = null;
-            selectedDeliveryZone = null;
-            ['dinein','takeaway','delivery'].forEach(t => document.getElementById('type-' + t).classList.remove('selected'));
-            ['inside','outside'].forEach(z => document.getElementById('zone-' + z).classList.remove('selected'));
-            document.getElementById('delivery-sub').classList.remove('show');
-            document.getElementById('name-modal').classList.add('show');
-            document.getElementById('customer-name').focus();
-        }
-        function closeNameModal() {
-            document.getElementById('name-modal').classList.remove('show');
-            document.getElementById('name-error').classList.add('hidden');
-            document.getElementById('type-error').classList.add('hidden');
-            document.getElementById('zone-error').classList.add('hidden');
-            document.getElementById('customer-name').classList.remove('error');
-        }
-        function proceedToConfirm() {
-            const name = document.getElementById('customer-name').value.trim();
+        // ── SEND ORDER ────────────────────────────────────────────────
+        function sendOrder() {
+            const nameEl = document.getElementById('sheet-name');
+            const name   = nameEl ? nameEl.value.trim() : '';
             let valid = true;
 
             if (!name) {
-                document.getElementById('name-error').classList.remove('hidden');
-                document.getElementById('customer-name').classList.add('error');
-                document.getElementById('customer-name').focus();
+                document.getElementById('err-name').classList.add('show');
+                nameEl.classList.add('error');
                 valid = false;
             } else {
-                document.getElementById('name-error').classList.add('hidden');
-                document.getElementById('customer-name').classList.remove('error');
+                document.getElementById('err-name').classList.remove('show');
+                nameEl.classList.remove('error');
             }
-
-            if (!selectedOrderType) {
-                document.getElementById('type-error').classList.remove('hidden');
-                valid = false;
-            }
-
-            if (selectedOrderType === 'delivery' && !selectedDeliveryZone) {
-                document.getElementById('zone-error').classList.remove('hidden');
-                valid = false;
-            }
-
+            if (!selectedType) { document.getElementById('err-type').classList.add('show'); valid = false; }
+            if (selectedType === 'delivery' && !selectedZone) { document.getElementById('err-zone').classList.add('show'); valid = false; }
             if (!valid) return;
-            closeNameModal();
-            openConfirmModal(name);
-        }
-        document.getElementById('customer-name').addEventListener('keydown', e => { if (e.key === 'Enter') proceedToConfirm(); });
 
-        // ── CONFIRM MODAL ────────────────────────────────────────────
-        function openConfirmModal(name) {
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
-            let itemsTotal = 0, listHtml = '';
-            entries.forEach(([key, qty]) => {
-                const [, itemName, price] = key.split('|');
-                const priceNum = parseFloat(price.replace('$','')) || 0;
-                const lineTotal = priceNum * qty;
-                itemsTotal += lineTotal;
-                listHtml += `<div class="flex justify-between items-center py-1.5 border-b border-amber-200 last:border-0">
-                    <div><span class="text-amber-950 text-sm font-semibold">${itemName}</span><span class="text-amber-600 text-xs font-bold ml-2">x${qty}</span></div>
-                    <span class="text-amber-700 text-sm font-bold">$${lineTotal.toFixed(2)}</span>
-                </div>`;
-                const addonSelArr = addonSelections[key] || [];
-                addonSelArr.forEach(addonSel => {
-                    itemsTotal += addonSel.price;
-                    listHtml += `<div class="flex justify-between items-center py-1 pl-3 border-b border-amber-100">
-                        <span class="text-amber-700 text-xs font-semibold">↳ ${addonSel.label}</span>
-                        <span class="text-amber-600 text-xs font-bold">+$${addonSel.price.toFixed(2)}</span>
-                    </div>`;
-                });
-                const shishaSel = shishaSelections[key];
-                if (shishaSel) {
-                    listHtml += `<div class="flex justify-between items-center py-1 pl-3 border-b border-amber-100">
-                        <span class="text-amber-700 text-xs font-semibold">↳ Flavor: ${shishaSel}</span>
-                        <span class="text-amber-600 text-xs font-bold">—</span>
-                    </div>`;
-                }
-            });
-
-            const deliveryFee = getDeliveryFee();
-            const grandTotal = itemsTotal + deliveryFee;
-
-            // Add delivery fee row if applicable
-            if (deliveryFee > 0) {
-                const zoneName = selectedDeliveryZone === 'inside' ? 'Inside Wadi Chahrour' : 'Outside Wadi Chahrour';
-                listHtml += `<div class="flex justify-between items-center py-1.5 border-b border-amber-200">
-                    <span class="text-amber-800 text-sm font-semibold">🛵 Delivery (${zoneName})</span>
-                    <span class="text-amber-700 text-sm font-bold">+$${deliveryFee.toFixed(2)}</span>
-                </div>`;
-            }
-
-            const typeLabels = { dinein: '🪑 Dine In', takeaway: '🥡 Takeaway', delivery: '🛵 Delivery' };
-            const typeLabel = typeLabels[selectedOrderType] || '';
-            const label = `${name} · ${typeLabel}`;
-            document.getElementById('confirm-for-text').textContent = `Order for: ${label}`;
-            document.getElementById('confirm-order-list').innerHTML = listHtml;
-            document.getElementById('confirm-total').textContent = '$' + grandTotal.toFixed(2);
-            document.getElementById('confirm-modal').classList.add('show');
-        }
-        function closeConfirmModal() {
-            document.getElementById('confirm-modal').classList.remove('show');
-            document.getElementById('name-modal').classList.add('show');
-        }
-
-        // ── SEND TO WHATSAPP ─────────────────────────────────────────
-        function sendWhatsAppOrder() {
-            const name  = document.getElementById('customer-name').value.trim();
-            const entries = Object.entries(cart).filter(([,v]) => v > 0);
-            if (!entries.length) return;
             const timeStr = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+            const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
+
             let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
             msg += `👤 *Name:* ${name}\n`;
-
-            const typeEmojis = { dinein: '🪑', takeaway: '🥡', delivery: '🛵' };
-            const typeNames  = { dinein: 'Dine In', takeaway: 'Takeaway', delivery: 'Delivery' };
-            msg += `📦 *Order Type:* ${typeEmojis[selectedOrderType] || ''} ${typeNames[selectedOrderType] || ''}\n`;
-
-            if (selectedOrderType === 'delivery' && selectedDeliveryZone) {
-                const zoneName = selectedDeliveryZone === 'inside' ? 'Inside Wadi Chahrour (+$0.50)' : 'Outside Wadi Chahrour (+$1.50)';
-                msg += `📍 *Delivery Zone:* ${zoneName}\n`;
+            msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
+            if (selectedType === 'delivery' && selectedZone) {
+                msg += `📍 *Zone:* ${selectedZone === 'inside' ? 'Inside Wadi Chahrour (+$0.50)' : 'Outside Wadi Chahrour (+$1.50)'}\n`;
             }
             msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
 
             let itemsTotal = 0;
             entries.forEach(([key, qty]) => {
                 const [, itemName, price] = key.split('|');
-                const priceNum = parseFloat(price.replace('$','')) || 0;
-                const lineTotal = priceNum * qty;
-                itemsTotal += lineTotal;
-                msg += `• ${itemName} x${qty} — $${lineTotal.toFixed(2)}\n`;
-                (addonSelections[key] || []).forEach(addonSel => {
-                    itemsTotal += addonSel.price;
-                    msg += `  ↳ + ${addonSel.label} — $${addonSel.price.toFixed(2)}\n`;
-                });
-                const shishaSel = shishaSelections[key];
-                if (shishaSel) {
-                    msg += `  ↳ Flavor: ${shishaSel}\n`;
-                }
+                const pn = parseFloat(price.replace('$','')) || 0;
+                const lt = pn * qty;
+                itemsTotal += lt;
+                msg += `• ${itemName} x${qty} — $${lt.toFixed(2)}\n`;
+                (addonSel[key] || []).forEach(a => { itemsTotal += a.price; msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
+                const sf = shishaSel[key];
+                if (sf) msg += `  ↳ Flavor: ${sf}\n`;
             });
 
-            const deliveryFee = getDeliveryFee();
-            const grandTotal = itemsTotal + deliveryFee;
-
-            if (deliveryFee > 0) {
-                msg += `• 🛵 Delivery fee — $${deliveryFee.toFixed(2)}\n`;
-            }
-            msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${grandTotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
+            const fee = selectedType === 'delivery' && selectedZone ? DELIVERY_FEES[selectedZone] || 0 : 0;
+            if (fee > 0) { itemsTotal += fee; msg += `• 🛵 Delivery fee — $${fee.toFixed(2)}\n`; }
+            msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${itemsTotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
             window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
-            document.getElementById('confirm-modal').classList.remove('show');
+            closeSheet();
         }
 
-        // ── RENDER PILLS ─────────────────────────────────────────────
+        // ── RENDER PILLS ──────────────────────────────────────────────
         function renderPills(item) {
             if (!item.flavors || !item.flavors.length) return '';
             const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
             return '<div class="flex flex-wrap gap-1 mt-2">' +
-                item.flavors.map(f =>
-                    `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`
-                ).join('') + '</div>';
+                item.flavors.map(f => `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
         }
 
-        // ── FETCH MENU ───────────────────────────────────────────────
+        // ── FETCH MENU ────────────────────────────────────────────────
         async function loadMenu() {
             try {
                 const res = await fetch('menu.json?v=' + Date.now());
                 if (!res.ok) throw new Error();
                 return await res.json();
             } catch(e) {
-                document.getElementById('menu-container').innerHTML =
-                    '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
+                document.getElementById('menu-container').innerHTML = '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
                 return null;
             }
         }
@@ -676,6 +591,7 @@
             nav.innerHTML = menuData.map((c, i) =>
                 `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
             ).join('');
+
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
             menuData.forEach(category => {
@@ -735,31 +651,26 @@
         }
 
         // Contact bubble
-        const bubble = document.getElementById('contact-bubble');
+        const bubble  = document.getElementById('contact-bubble');
         const ctoggle = document.getElementById('contact-toggle');
         let bubbleOpen = false;
         ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
         document.addEventListener('click', e => {
-            if (bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) {
-                bubbleOpen = false; bubble.classList.remove('open');
-            }
+            if (bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); }
         });
 
         // Boot
         loadMenu().then(data => {
-            if (data) {
-                initMenu(data);
-                initScrollSpy(data);
-                // Build itemMeta lookup: itemKey -> item data
-                itemMeta = {};
-                data.forEach(cat => {
-                    if (cat.type === 'addons') return;
-                    (cat.items || []).forEach(item => {
-                        const key = cat.key + '|' + item.name + '|' + item.price;
-                        itemMeta[key] = item;
-                    });
+            if (!data) return;
+            initMenu(data);
+            initScrollSpy(data);
+            itemMeta = {};
+            data.forEach(cat => {
+                if (cat.type === 'addons') return;
+                (cat.items || []).forEach(item => {
+                    itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
                 });
-            }
+            });
         });
     </script>
 </body>
