@@ -52,8 +52,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .attempt-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--a200)}
 .dot.used{background:var(--red)}
-
-/* Token section in login box */
 .token-divider{border-top:1px solid var(--a200);margin:20px 0 16px;text-align:center;position:relative}
 .token-divider span{background:var(--white);padding:0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);position:relative;top:-9px}
 .token-note{font-size:11px;color:var(--g500);margin-bottom:10px;line-height:1.5}
@@ -115,50 +113,85 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-sidebar-btn:hover{background:rgba(255,255,255,.14);color:var(--white)}
 .cat-sidebar-btn.active{color:var(--white);border-color:currentColor}
 .cat-sidebar-btn .cat-icon{font-size:18px;display:block;margin-bottom:4px}
-.menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
-.menu-cat-section{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--g200)}
-.menu-cat-header{padding:10px 14px;display:flex;align-items:center;gap:8px;font-family:var(--brand);font-size:15px;font-weight:700;letter-spacing:.04em}
-.menu-cat-header .cat-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.25);color:inherit;margin-left:auto}
-.menu-cat-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:10px;background:var(--white)}
+.menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px}
+
+/* ── MENU CATEGORIES — no more big colored bars ── */
+.menu-cat-section{margin-bottom:24px}
+.menu-cat-label{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:0 2px}
+.menu-cat-label .cat-name{font-family:var(--brand);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 14px;border-radius:20px;border:2px solid currentColor}
+.menu-cat-label .cat-count{font-size:11px;font-weight:600;color:var(--g400)}
+
+/* ── ITEM CARDS — bigger, tinted by category ── */
+.menu-cat-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .item-card-wrap{position:relative}
-.item-card{background:var(--white);border-radius:10px;border:2px solid var(--g200);overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation}
-.item-card:hover{border-color:var(--a300);box-shadow:0 2px 12px rgba(245,158,11,.15)}
+.item-card{border-radius:12px;border:2px solid transparent;overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.item-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.12)}
 .item-card:active{transform:scale(.97)}
-.item-card.in-cart{border-color:var(--a400)!important}
-.item-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--g100)}
-.item-info{padding:6px 8px 8px}
-.item-name{font-size:11px;font-weight:700;color:var(--a950);line-height:1.3;margin-bottom:2px}
-.item-price{font-size:12px;font-weight:800;color:var(--a600)}
-.item-qty-badge{display:none;position:absolute;top:5px;right:5px;background:var(--a500);color:var(--white);font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:10px;align-items:center;justify-content:center;padding:0 4px}
+.item-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.item-info{padding:10px 12px 12px}
+.item-name{font-size:13px;font-weight:700;line-height:1.3;margin-bottom:4px}
+.item-price{font-size:14px;font-weight:800}
+.item-qty-badge{display:none;position:absolute;top:6px;right:6px;font-size:11px;font-weight:800;min-width:22px;height:22px;border-radius:11px;align-items:center;justify-content:center;padding:0 5px;background:var(--a500);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .item-card-wrap.has-qty .item-qty-badge{display:flex}
-.item-card-wrap.has-qty .item-card{background:var(--a50)}
-.cat-color-0 .menu-cat-header{background:var(--cat0-head);color:var(--cat0-headtext)}
-.cat-color-0 .menu-cat-section{border-color:var(--cat0-border)}
-.cat-color-0 .item-card-wrap.has-qty .item-card{border-color:var(--cat0-border)!important}
-.cat-color-1 .menu-cat-header{background:var(--cat1-head);color:var(--cat1-headtext)}
-.cat-color-1 .menu-cat-section{border-color:var(--cat1-border)}
-.cat-color-1 .item-card-wrap.has-qty .item-card{border-color:var(--cat1-border)!important}
-.cat-color-2 .menu-cat-header{background:var(--cat2-head);color:var(--cat2-headtext)}
-.cat-color-2 .menu-cat-section{border-color:var(--cat2-border)}
-.cat-color-2 .item-card-wrap.has-qty .item-card{border-color:var(--cat2-border)!important}
-.cat-color-3 .menu-cat-header{background:var(--cat3-head);color:var(--cat3-headtext)}
-.cat-color-3 .menu-cat-section{border-color:var(--cat3-border)}
-.cat-color-3 .item-card-wrap.has-qty .item-card{border-color:var(--cat3-border)!important}
-.cat-color-4 .menu-cat-header{background:var(--cat4-head);color:var(--cat4-headtext)}
-.cat-color-4 .menu-cat-section{border-color:var(--cat4-border)}
-.cat-color-4 .item-card-wrap.has-qty .item-card{border-color:var(--cat4-border)!important}
-.cat-color-5 .menu-cat-header{background:var(--cat5-head);color:var(--cat5-headtext)}
-.cat-color-5 .menu-cat-section{border-color:var(--cat5-border)}
-.cat-color-5 .item-card-wrap.has-qty .item-card{border-color:var(--cat5-border)!important}
-.cat-color-6 .menu-cat-header{background:var(--cat6-head);color:var(--cat6-headtext)}
-.cat-color-6 .menu-cat-section{border-color:var(--cat6-border)}
-.cat-color-6 .item-card-wrap.has-qty .item-card{border-color:var(--cat6-border)!important}
-.cat-color-7 .menu-cat-header{background:var(--cat7-head);color:var(--cat7-headtext)}
-.cat-color-7 .menu-cat-section{border-color:var(--cat7-border)}
-.cat-color-7 .item-card-wrap.has-qty .item-card{border-color:var(--cat7-border)!important}
-.cat-color-8 .menu-cat-header{background:var(--cat8-head);color:var(--cat8-headtext)}
-.cat-color-8 .menu-cat-section{border-color:var(--cat8-border)}
-.cat-color-8 .item-card-wrap.has-qty .item-card{border-color:var(--cat8-border)!important}
+
+/* ── Per-category item card colors ── */
+.cat-color-0 .item-card{background:var(--cat0-bg);border-color:var(--cat0-border)}
+.cat-color-0 .item-name{color:var(--cat0-text)}
+.cat-color-0 .item-price{color:var(--cat0-text)}
+.cat-color-0 .cat-name{color:var(--cat0-head)}
+
+.cat-color-1 .item-card{background:var(--cat1-bg);border-color:var(--cat1-border)}
+.cat-color-1 .item-name{color:var(--cat1-text)}
+.cat-color-1 .item-price{color:var(--cat1-text)}
+.cat-color-1 .cat-name{color:var(--cat1-head)}
+
+.cat-color-2 .item-card{background:var(--cat2-bg);border-color:var(--cat2-border)}
+.cat-color-2 .item-name{color:var(--cat2-text)}
+.cat-color-2 .item-price{color:var(--cat2-text)}
+.cat-color-2 .cat-name{color:var(--cat2-head)}
+
+.cat-color-3 .item-card{background:var(--cat3-bg);border-color:var(--cat3-border)}
+.cat-color-3 .item-name{color:var(--cat3-text)}
+.cat-color-3 .item-price{color:var(--cat3-text)}
+.cat-color-3 .cat-name{color:var(--cat3-head)}
+
+.cat-color-4 .item-card{background:var(--cat4-bg);border-color:var(--cat4-border)}
+.cat-color-4 .item-name{color:var(--cat4-text)}
+.cat-color-4 .item-price{color:var(--cat4-text)}
+.cat-color-4 .cat-name{color:var(--cat4-head)}
+
+.cat-color-5 .item-card{background:var(--cat5-bg);border-color:var(--cat5-border)}
+.cat-color-5 .item-name{color:var(--cat5-text)}
+.cat-color-5 .item-price{color:var(--cat5-text)}
+.cat-color-5 .cat-name{color:var(--cat5-head)}
+
+.cat-color-6 .item-card{background:var(--cat6-bg);border-color:var(--cat6-border)}
+.cat-color-6 .item-name{color:var(--cat6-text)}
+.cat-color-6 .item-price{color:var(--cat6-text)}
+.cat-color-6 .cat-name{color:var(--cat6-head)}
+
+.cat-color-7 .item-card{background:var(--cat7-bg);border-color:var(--cat7-border)}
+.cat-color-7 .item-name{color:var(--cat7-text)}
+.cat-color-7 .item-price{color:var(--cat7-text)}
+.cat-color-7 .cat-name{color:var(--cat7-head)}
+
+.cat-color-8 .item-card{background:var(--cat8-bg);border-color:var(--cat8-border)}
+.cat-color-8 .item-name{color:var(--cat8-text)}
+.cat-color-8 .item-price{color:var(--cat8-text)}
+.cat-color-8 .cat-name{color:var(--cat8-head)}
+
+/* Selected state — stronger border + slight scale */
+.cat-color-0 .item-card-wrap.has-qty .item-card{border-color:var(--cat0-head);border-width:2.5px}
+.cat-color-1 .item-card-wrap.has-qty .item-card{border-color:var(--cat1-head);border-width:2.5px}
+.cat-color-2 .item-card-wrap.has-qty .item-card{border-color:var(--cat2-head);border-width:2.5px}
+.cat-color-3 .item-card-wrap.has-qty .item-card{border-color:var(--cat3-head);border-width:2.5px}
+.cat-color-4 .item-card-wrap.has-qty .item-card{border-color:var(--cat4-head);border-width:2.5px}
+.cat-color-5 .item-card-wrap.has-qty .item-card{border-color:var(--cat5-head);border-width:2.5px}
+.cat-color-6 .item-card-wrap.has-qty .item-card{border-color:var(--cat6-head);border-width:2.5px}
+.cat-color-7 .item-card-wrap.has-qty .item-card{border-color:var(--cat7-head);border-width:2.5px}
+.cat-color-8 .item-card-wrap.has-qty .item-card{border-color:var(--cat8-head);border-width:2.5px}
+
+/* Sidebar active colors */
 .cat-sidebar-btn[data-ci="0"].active{background:var(--cat0-head);border-color:var(--cat0-head);color:#fff}
 .cat-sidebar-btn[data-ci="1"].active{background:var(--cat1-head);border-color:var(--cat1-head);color:#fff}
 .cat-sidebar-btn[data-ci="2"].active{background:var(--cat2-head);border-color:var(--cat2-head);color:#fff}
@@ -255,12 +288,17 @@ input,textarea,select{font-family:var(--font);outline:none}
 .q-num{width:30px;text-align:center;font-size:13px;font-weight:800;color:var(--a950);background:var(--white);border-top:1.5px solid var(--a200);border-bottom:1.5px solid var(--a200);height:28px;line-height:28px}
 .q-del{margin-left:5px;width:26px;height:26px;border-radius:6px;background:#fef2f2;color:var(--red-d);font-size:13px;display:flex;align-items:center;justify-content:center}
 .q-del:hover{background:#fee2e2}
+
+/* ── ORDER ADD-ONS (in order panel) ── */
 .order-addons{padding:0 10px 10px}
+.oa-section{margin-bottom:6px}
 .oa-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px}
 .oa-chips{display:flex;flex-wrap:wrap;gap:4px}
-.oa-chip{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--a200);background:var(--a50);color:var(--a800);cursor:pointer;transition:all .12s;touch-action:manipulation}
+.oa-chip{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--a200);background:var(--a50);color:var(--a800);cursor:pointer;transition:all .12s;touch-action:manipulation;line-height:1.3}
 .oa-chip:hover{border-color:var(--a400);background:var(--a100)}
 .oa-chip.selected{background:var(--a500);border-color:var(--a500);color:var(--white)}
+.oa-chip .oa-chip-price{font-size:9px;opacity:.8;margin-left:2px}
+
 .order-form{padding:10px 14px 0;border-top:1px solid var(--g200);flex-shrink:0}
 .form-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px;display:block}
 .form-input{width:100%;padding:9px 11px;border:2px solid var(--a200);border-radius:10px;font-size:12px;font-weight:600;color:var(--a950);background:var(--a50);transition:border-color .2s;margin-bottom:8px}
@@ -356,7 +394,6 @@ input,textarea,select{font-family:var(--font);outline:none}
   </div>
 </div>
 
-<!-- TOKEN MODAL (shown when token is missing after login) -->
 <div id="token-modal">
   <div class="token-modal-box">
     <h3>GitHub Token Required</h3>
@@ -383,8 +420,6 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div class="login-err" id="login-err"></div>
     <div class="lockout-bar" id="lockout-bar"></div>
     <div class="attempt-dots" id="attempt-dots"></div>
-
-    <!-- Token entry right on login screen so staff can set it before booting -->
     <div class="token-divider"><span>GitHub Token</span></div>
     <p class="token-note">Needed to save orders &amp; update inbox. <a href="https://github.com/settings/tokens" target="_blank">Create one here</a> → Fine-grained → Contents: read &amp; write.</p>
     <div class="token-row">
@@ -517,12 +552,10 @@ let ordersFilter='all',showingOrders=false,showingInbox=false;
 let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=false;
 let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0;
-// FIX: track in-flight inbox writes so poll doesn't clobber them
 let inboxWritePending=false;
 
 // ═══════════════════════════════════════════════════
-// TOKEN — XOR-obfuscated in sessionStorage
-// (clears when browser tab closes)
+// TOKEN
 // ═══════════════════════════════════════════════════
 function xorStr(str, key=XOR_KEY){
   return Array.from(str).map((c,i)=>
@@ -662,14 +695,11 @@ async function bootPOS(){
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
   hideLoading();
-  // Poll every 15s using Contents API (no CDN cache)
   inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
 
 // ═══════════════════════════════════════════════════
 // GITHUB HELPERS
-// All reads/writes go through the Contents API — no raw.githubusercontent.com
-// raw has a 5-min CDN cache; Contents API always returns live data.
 // ═══════════════════════════════════════════════════
 function ghHeaders(){
   const h={'Accept':'application/vnd.github.v3+json','User-Agent':'LeKiosk-POS/1.0'};
@@ -688,9 +718,6 @@ function toB64(str){
   let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
   return btoa(bin);
 }
-
-// Read a file — returns {data, sha}
-// FIX: always uses Contents API, never raw CDN
 async function ghRead(path){
   const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
   if(res.status===404) return {data:null,sha:null};
@@ -698,11 +725,8 @@ async function ghRead(path){
   const d=await res.json();
   return{data:JSON.parse(fromB64(d.content)), sha:d.sha};
 }
-
-// Write a file — fetches fresh SHA right before writing to avoid conflicts
 async function ghWrite(path, data, message){
   if(!hasToken()) throw new Error('No GitHub token — click the 🔑 button in the top bar');
-  // Always fetch fresh SHA immediately before write (avoids stale SHA conflicts)
   let sha=null;
   try{
     const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
@@ -753,7 +777,7 @@ function scrollToCategory(key,idx,btn){
 }
 
 // ═══════════════════════════════════════════════════
-// MENU PANEL
+// MENU PANEL — no colored headers, tinted cards
 // ═══════════════════════════════════════════════════
 function renderMenuPanel(){
   const panel=document.getElementById('menu-panel');
@@ -763,7 +787,13 @@ function renderMenuPanel(){
       const wrapId=`wrap-${cat.key}-${idx}`,qty=getQtyForItem(cat.key,idx);
       return`<div class="item-card-wrap${qty>0?' has-qty':''}" id="${wrapId}"><div class="item-card${qty>0?' in-cart':''}" onclick="addToOrder('${cat.key}',${idx})"><img class="item-img" src="${item.image||''}" alt="${item.name}" onerror="this.style.display='none'"><div class="item-info"><div class="item-name">${item.name}</div><div class="item-price">${item.price}</div></div></div><div class="item-qty-badge" id="badge-${cat.key}-${idx}">${qty>0?qty:''}</div></div>`;
     }).join('');
-    return`<div class="menu-cat-section cat-color-${ci%9}" id="cat-section-${cat.key}"><div class="menu-cat-header">${icon} ${cat.title}<span class="cat-badge">${(cat.items||[]).length} items</span></div><div class="menu-cat-items">${itemsHtml}</div></div>`;
+    return`<div class="menu-cat-section cat-color-${ci%9}" id="cat-section-${cat.key}">
+      <div class="menu-cat-label">
+        <span class="cat-name">${icon} ${cat.title}</span>
+        <span class="cat-count">${(cat.items||[]).length} items</span>
+      </div>
+      <div class="menu-cat-items">${itemsHtml}</div>
+    </div>`;
   }).join('');
   setupScrollSpy();
 }
@@ -873,18 +903,69 @@ function updateTotal(){
   if(fee>0){fl.style.display='block';fl.textContent=`Items $${getItemsTotal().toFixed(2)} + delivery $${fee.toFixed(2)}`;}
   else fl.style.display='none';
 }
+
+// ═══════════════════════════════════════════════════
+// RENDER ORDER PANEL — with add-ons & flavors from menu meta
+// ═══════════════════════════════════════════════════
 function renderOrderPanel(){
   updateTotal();
   const scroll=document.getElementById('order-scroll');
-  if(!orderLines.length){scroll.innerHTML=`<div class="order-empty"><div class="order-empty-icon">🛒</div><div>Tap items to add them</div></div>`;return;}
-  const savedScroll=scroll.scrollTop;let html='';
+  if(!orderLines.length){
+    scroll.innerHTML=`<div class="order-empty"><div class="order-empty-icon">🛒</div><div>Tap items to add them</div></div>`;
+    return;
+  }
+  const savedScroll=scroll.scrollTop;
+  let html='';
   orderLines.forEach(line=>{
-    const lineTotal=line.price*line.qty+line.addons.reduce((a,x)=>a+x.price,0),lineId=line.id;
-    html+=`<div class="order-line"><div class="order-line-main"><div style="flex:1"><div class="order-line-name">${line.name}</div><div class="qty-row"><button class="q-btn q-minus" onclick="changeQty(${lineId},-1)">−</button><div class="q-num">${line.qty}</div><button class="q-btn q-plus" onclick="changeQty(${lineId},1)">+</button><button class="q-del" onclick="removeLine(${lineId})">✕</button></div></div><div class="order-line-price">$${lineTotal.toFixed(2)}</div></div>`;
-    if(line.meta?.flavors?.length){html+=`<div class="order-addons"><div class="oa-label">💨 Flavor</div><div class="oa-chips">`;line.meta.flavors.forEach(f=>{const safe=f.replace(/'/g,"\\'");html+=`<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavor(${lineId},'${safe}')">${f}</button>`;});html+=`</div></div>`;}
+    const lineTotal=line.price*line.qty+line.addons.reduce((a,x)=>a+x.price,0);
+    const lineId=line.id;
+    html+=`<div class="order-line">
+      <div class="order-line-main">
+        <div style="flex:1">
+          <div class="order-line-name">${line.name}</div>
+          <div class="qty-row">
+            <button class="q-btn q-minus" onclick="changeQty(${lineId},-1)">−</button>
+            <div class="q-num">${line.qty}</div>
+            <button class="q-btn q-plus" onclick="changeQty(${lineId},1)">+</button>
+            <button class="q-del" onclick="removeLine(${lineId})">✕</button>
+          </div>
+        </div>
+        <div class="order-line-price">$${lineTotal.toFixed(2)}</div>
+      </div>`;
+
+    // ── Flavors (shisha etc.) ──
+    if(line.meta?.flavors?.length){
+      html+=`<div class="order-addons"><div class="oa-section">
+        <div class="oa-label">💨 Flavor</div>
+        <div class="oa-chips">`;
+      line.meta.flavors.forEach(f=>{
+        const safe=f.replace(/'/g,"\\'");
+        html+=`<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavor(${lineId},'${safe}')">${f}</button>`;
+      });
+      html+=`</div></div></div>`;
+    }
+
+    // ── Add-ons from menu meta (e.g. extra cheese, sauce, etc.) ──
+    if(line.meta?.addons?.length){
+      html+=`<div class="order-addons"><div class="oa-section">
+        <div class="oa-label">➕ Add-ons</div>
+        <div class="oa-chips">`;
+      line.meta.addons.forEach(addon=>{
+        const label=addon.label||addon.name||addon;
+        const price=typeof addon.price==='number'?addon.price:(parseFloat(String(addon.price||0).replace(/[^0-9.]/g,''))||0);
+        const isSelected=line.addons.some(a=>a.label===label);
+        const safeLabel=label.replace(/'/g,"\\'");
+        const priceStr=price>0?` +$${price.toFixed(2)}`:'';
+        html+=`<button class="oa-chip${isSelected?' selected':''}" onclick="toggleAddon(${lineId},'${safeLabel}',${price})">${label}${priceStr?`<span class="oa-chip-price">${priceStr}</span>`:''}`;
+        html+=`</button>`;
+      });
+      html+=`</div></div></div>`;
+    }
+
     html+=`</div>`;
   });
-  scroll.innerHTML=html;scroll.scrollTop=savedScroll;
+  scroll.innerHTML=html;
+  scroll.scrollTop=savedScroll;
 }
 
 // ═══════════════════════════════════════════════════
@@ -944,7 +1025,6 @@ function loadOrderIntoCurrent(order){
 
 // ═══════════════════════════════════════════════════
 // CHARGE & SAVE
-// FIX: fetch fresh orders, prepend, trim to 200, write back
 // ═══════════════════════════════════════════════════
 async function chargeOrder(){
   if(!validateOrder()) return;
@@ -953,14 +1033,11 @@ async function chargeOrder(){
   chargeBtn.disabled=true;chargeBtn.textContent='Saving…';
   showLoading('Saving order…');
   try{
-    // Read current orders (fresh, not cached)
     let orders=[];
     try{ const r=await ghRead(ORDERS_PATH); orders=r.data||[]; }catch(_){ orders=[]; }
-    // Prepend new order, cap at MAX_ORDERS
     orders.unshift(order);
     if(orders.length>MAX_ORDERS) orders=orders.slice(0,MAX_ORDERS);
     ordersData=orders;
-    // Write back — ghWrite always fetches fresh SHA
     await ghWrite(ORDERS_PATH,orders,`Order ${order.id} — ${order.name}`);
     showToast(`Order ${order.id} saved ✓`,'success');
     clearOrder();
@@ -997,16 +1074,12 @@ async function updateOrderStatus(id,status){
 
 // ═══════════════════════════════════════════════════
 // INBOX POLL
-// FIX 1: uses Contents API (live data, no CDN cache)
-// FIX 2: skips read while a write is in-flight (inboxWritePending)
-//        so a confirmed order can't reappear from a stale read
 // ═══════════════════════════════════════════════════
 async function pollInbox(force=false){
-  if(inboxWritePending && !force) return; // don't clobber an in-flight write
+  if(inboxWritePending && !force) return;
   try{
     const{data,sha}=await ghRead(INBOX_PATH);
     inboxData=data||[];
-    // Only update sha if we're NOT mid-write
     if(!inboxWritePending) inboxSha=sha;
     const pending=inboxData.filter(o=>o.status==='pending');
     const newCount=pending.length;
@@ -1024,23 +1097,16 @@ function updateInboxBadge(count){
   const badge=document.getElementById('inbox-badge');
   badge.textContent=count;badge.classList.toggle('show',count>0);
 }
-
-// FIX: confirm writes status BEFORE loading into current order
-// and sets inboxWritePending to block poll from overwriting
 async function confirmInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
-  // Disable buttons immediately to prevent double-tap
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
-  // Optimistically mark as confirmed in local state
   order.status='confirmed';
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
   renderInboxList();
-  // Write to GitHub with write-lock so poll doesn't clobber
   inboxWritePending=true;
   try{
     await ghWrite(INBOX_PATH,inboxData,`Confirm order ${id}`);
   }catch(e){
-    // Write failed — revert local state so it doesn't disappear wrongly
     order.status='pending';
     renderInboxList();
     updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
@@ -1048,11 +1114,9 @@ async function confirmInboxOrder(id){
   }finally{
     inboxWritePending=false;
   }
-  // Load into current order AFTER write succeeds
   loadOrderIntoCurrent(order);
   document.getElementById('inbox-tab-btn').classList.remove('has-new');
 }
-
 async function declineInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
@@ -1072,7 +1136,6 @@ async function declineInboxOrder(id){
   renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
 }
-
 function renderInboxList(){
   const list=document.getElementById('inbox-list');
   const pending=inboxData.filter(o=>o.status==='pending');
