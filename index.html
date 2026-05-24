@@ -78,18 +78,17 @@
         .delivery-sub.show { display: block; }
         .location-detect-box { border: 2px dashed #fde68a; border-radius: 14px; padding: 16px; text-align: center; background: #fffbeb; }
         .location-detect-box.detected { border-style: solid; border-color: #f59e0b; background: #fef3c7; }
-        .location-detect-box.no-delivery { border-style: solid; border-color: #ef4444; background: #fef2f2; }
         .locate-main-btn { background: #f59e0b; color: #1c0f00; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; margin-top: 8px; }
         .locate-main-btn:hover { background: #d97706; }
         .locate-main-btn:disabled { opacity: .5; cursor: not-allowed; }
         .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; margin-top: 10px; }
-        .zone-badge.zone-a  { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
-        .zone-badge.zone-b  { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
-        .zone-badge.zone-c  { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
-        .zone-badge.no-del  { background: #f3f4f6; color: #374151; border: 1.5px solid #e5e7eb; }
+        .zone-badge.free { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
+        .zone-badge.cheap { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .zone-badge.far { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
         .manual-addr { margin-top: 10px; }
-        .manual-addr textarea, .manual-addr-ta { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
-        .manual-addr textarea:focus, .manual-addr-ta:focus { border-color: #f59e0b; }
+        .manual-addr textarea { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
+        .manual-addr textarea:focus { border-color: #f59e0b; }
+        .manual-addr textarea.error { border-color: #ef4444; background: #fef2f2; }
 
         /* ── TOTAL ── */
         .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
@@ -191,10 +190,10 @@
     </div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// TESTING MODE — set false to re-enable time lock
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TESTING MODE — set false to enable the 6PM-12AM time lock
 const TESTING_MODE = true;
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const PILL_COLORS = {
     amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
@@ -207,70 +206,41 @@ const PILL_COLORS = {
     dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DELIVERY ZONES
-//
-// Le Kiosk GPS pin
-const CENTER_LAT = 33.821091538427524;
-const CENTER_LNG = 35.56496110422372;
-//
-// Zone A — small circle around Haret El Sett (~600 m radius) → $0.50
-const ZONE_A_RADIUS_KM = 0.60;
-//
-// Zone B — medium oval covering Wadi Chahrour / nearby villages → $1.00
-//   N-S semi-axis ~1.1 km  → lat semi ≈ 0.010°
-//   E-W semi-axis ~2.0 km  → lng semi ≈ 0.022°
-const ZONE_B_LAT_SEMI   = 0.010;
-const ZONE_B_LNG_SEMI   = 0.022;
-const ZONE_B_CENTER_LAT = 33.821091538427524;
-const ZONE_B_CENTER_LNG = 35.56496110422372;
-//
-// Zone C — irregular polygon traced from hand-drawn boundary → $1.50
-// Covers: Baabda, Yarzeh, Bsous, Bdadoun, Bsaba, Kfarshima, Lebanese University area
-// Outside this polygon → no delivery
-const ZONE_C_POLYGON = [
-    [33.870, 35.535],
-    [33.867, 35.558],
-    [33.862, 35.590],
-    [33.848, 35.608],
-    [33.825, 35.622],
-    [33.808, 35.610],
-    [33.792, 35.590],
-    [33.785, 35.555],
-    [33.787, 35.520],
-    [33.797, 35.502],
-    [33.816, 35.490],
-    [33.835, 35.492],
-    [33.843, 35.542],
-    [33.858, 35.542],
-    [33.864, 35.538],
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DELIVERY ZONES — polygons traced from your maps
+// Zone 1: Haret El Sett  → FREE delivery
+// Zone 2: Wadi Chahrour  → $0.50
+// Outside both           → $1.00
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const ZONE_HARET = [
+    [33.8085, 35.6195],[33.8092, 35.6215],[33.8105, 35.6230],
+    [33.8118, 35.6242],[33.8130, 35.6255],[33.8140, 35.6248],
+    [33.8148, 35.6235],[33.8155, 35.6220],[33.8158, 35.6205],
+    [33.8155, 35.6190],[33.8148, 35.6178],[33.8138, 35.6168],
+    [33.8125, 35.6162],[33.8112, 35.6160],[33.8100, 35.6165],
+    [33.8090, 35.6175],[33.8085, 35.6195]
 ];
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Haversine distance in km
-function distKm(lat1, lng1, lat2, lng2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
+const ZONE_WADI = [
+    [33.8050, 35.6140],[33.8065, 35.6165],[33.8075, 35.6185],
+    [33.8085, 35.6195],[33.8090, 35.6175],[33.8100, 35.6165],
+    [33.8112, 35.6160],[33.8125, 35.6162],[33.8138, 35.6168],
+    [33.8148, 35.6178],[33.8155, 35.6190],[33.8158, 35.6205],
+    [33.8155, 35.6220],[33.8148, 35.6235],[33.8140, 35.6248],
+    [33.8148, 35.6262],[33.8155, 35.6278],[33.8160, 35.6295],
+    [33.8158, 35.6312],[33.8150, 35.6325],[33.8138, 35.6332],
+    [33.8125, 35.6335],[33.8110, 35.6330],[33.8095, 35.6320],
+    [33.8082, 35.6305],[33.8070, 35.6285],[33.8060, 35.6265],
+    [33.8052, 35.6245],[33.8045, 35.6225],[33.8040, 35.6205],
+    [33.8038, 35.6185],[33.8040, 35.6165],[33.8050, 35.6140]
+];
 
-// Point-in-ellipse (normalised distance ≤ 1 means inside)
-function inEllipse(lat, lng, cLat, cLng, latSemi, lngSemi) {
-    const dLat = (lat - cLat) / latSemi;
-    const dLng = (lng - cLng) / lngSemi;
-    return (dLat * dLat + dLng * dLng) <= 1;
-}
-
-// Point-in-polygon ray casting
-function pointInPolygon(lat, lng, poly) {
+// Ray-casting point-in-polygon algorithm
+function pointInPolygon(lat, lng, polygon) {
     let inside = false;
-    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-        const xi = poly[i][0], yi = poly[i][1];
-        const xj = poly[j][0], yj = poly[j][1];
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i][0], yi = polygon[i][1];
+        const xj = polygon[j][0], yj = polygon[j][1];
         const intersect = ((yi > lng) !== (yj > lng)) &&
             (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
@@ -279,29 +249,66 @@ function pointInPolygon(lat, lng, poly) {
 }
 
 function getDeliveryZone(lat, lng) {
-    const d = distKm(lat, lng, CENTER_LAT, CENTER_LNG);
-
-    if (d <= ZONE_A_RADIUS_KM) {
-        return { zone: 'zone-a', fee: 0.50, label: 'Zone A', feeLabel: '$0.50', cls: 'zone-a', emoji: '📍', canDeliver: true };
-    }
-    if (inEllipse(lat, lng, ZONE_B_CENTER_LAT, ZONE_B_CENTER_LNG, ZONE_B_LAT_SEMI, ZONE_B_LNG_SEMI)) {
-        return { zone: 'zone-b', fee: 1.00, label: 'Zone B', feeLabel: '$1.00', cls: 'zone-b', emoji: '🛵', canDeliver: true };
-    }
-    if (pointInPolygon(lat, lng, ZONE_C_POLYGON)) {
-        return { zone: 'zone-c', fee: 1.50, label: 'Zone C', feeLabel: '$1.50', cls: 'zone-c', emoji: '🗺️', canDeliver: true };
-    }
-    return { zone: 'none', fee: 0, label: 'Outside delivery area', feeLabel: '$0.00', cls: 'no-del', emoji: '🚫', canDeliver: false };
+    if (pointInPolygon(lat, lng, ZONE_HARET)) return { zone: 'haret', fee: 0,    label: 'Haret El Sett',  feeLabel: 'Free',   cls: 'free' };
+    if (pointInPolygon(lat, lng, ZONE_WADI))  return { zone: 'wadi',  fee: 0.50, label: 'Wadi Chahrour',  feeLabel: '+$0.50', cls: 'cheap' };
+    return                                           { zone: 'far',   fee: 1.00, label: 'Outside area',   feeLabel: '+$1.00', cls: 'far' };
 }
 
-// ── STATE ──────────────────────────────────────────────────────
+
+// ── GITHUB INBOX CONFIG ──────────────────────────────────────────────
+const GH_OWNER = 'joetheproz5';
+const GH_REPO  = 'le-kiosk-menu';
+const GH_INBOX = 'inbox.json';
+const GH_API   = 'https://api.github.com';
+const GH_TOKEN = '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';
+
+let _inboxSha = null;
+
+async function fetchInboxSha() {
+    const h = { 'Accept': 'application/vnd.github.v3+json' };
+    if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
+    const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, { headers: h });
+    if (res.status === 404) { _inboxSha = null; return []; }
+    if (!res.ok) throw new Error('GitHub ' + res.status);
+    const d = await res.json();
+    _inboxSha = d.sha;
+    const bin = atob(d.content.replace(/\n/g, ''));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+async function writeToInbox(order) {
+    let inbox = [];
+    try { inbox = await fetchInboxSha(); } catch(e) {}
+    inbox.unshift(order);
+    if (inbox.length > 100) inbox = inbox.slice(0, 100);
+    const json  = JSON.stringify(inbox, null, 2);
+    const bytes = new TextEncoder().encode(json);
+    let binary  = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    const content = btoa(binary);
+    const body = { message: 'New customer order', content };
+    if (_inboxSha) body.sha = _inboxSha;
+    const h = { 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' };
+    if (GH_TOKEN) h['Authorization'] = 'Bearer ' + GH_TOKEN;
+    const res = await fetch(`${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_INBOX}`, {
+        method: 'PUT', headers: h, body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('Could not save to inbox');
+    const saved = await res.json();
+    _inboxSha = saved.content.sha;
+}
+
+// ── STATE ─────────────────────────────────────────────────────
 let orderMode    = false;
 let cart         = {};
 let addonSel     = {};
 let shishaSel    = {};
 let itemMeta     = {};
 let selectedType = null;
-let detectedZone = null;
-let userGPS      = null;
+let detectedZone = null;   // result from getDeliveryZone()
+let userGPS      = null;   // { lat, lng }
 let deliveryAddress = '';
 let _addonMap    = [];
 
@@ -312,7 +319,7 @@ function isOpen() {
     return Math.floor(lbMin / 60) >= 18;
 }
 
-// ── ORDER MODE ─────────────────────────────────────────────────
+// ── ORDER MODE ────────────────────────────────────────────────
 function toggleOrderMode() {
     if (!isOpen()) { alert('⏰ Orders open 6 PM – 12 AM only.'); return; }
     orderMode = !orderMode;
@@ -343,19 +350,19 @@ function getTotalItems() { return Object.values(cart).reduce((a, b) => a + b, 0)
 
 function getItemsSubtotal() {
     return Object.entries(cart).filter(([,v]) => v > 0).reduce((sum, [key, qty]) => {
-        const price  = parseFloat(key.split('|')[2].replace('$','')) || 0;
+        const price = parseFloat(key.split('|')[2].replace('$','')) || 0;
         const addons = (addonSel[key] || []).reduce((a, s) => a + s.price, 0);
         return sum + price * qty + addons;
     }, 0);
 }
 
 function getDeliveryFee() {
-    return selectedType === 'delivery' && detectedZone && detectedZone.canDeliver ? detectedZone.fee : 0;
+    return selectedType === 'delivery' && detectedZone ? detectedZone.fee : 0;
 }
 
 function getGrandTotal() { return getItemsSubtotal() + getDeliveryFee(); }
 
-// ── FLOATING PILL ──────────────────────────────────────────────
+// ── FLOATING PILL ─────────────────────────────────────────────
 function updatePill() {
     const count = getTotalItems();
     const pill  = document.getElementById('checkout-pill');
@@ -366,7 +373,7 @@ function updatePill() {
     }
 }
 
-// ── SHEET ──────────────────────────────────────────────────────
+// ── SHEET ─────────────────────────────────────────────────────
 function openSheet()  { renderSheet(); document.getElementById('checkout-sheet').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeSheet() { document.getElementById('checkout-sheet').classList.remove('open'); document.body.style.overflow = ''; }
 
@@ -381,16 +388,21 @@ function renderSheet() {
 
     let html = '<div style="padding-top:12px">';
 
+    // Items
     entries.forEach(([key, qty]) => {
         const [, name, price] = key.split('|');
         const pn = parseFloat(price.replace('$','')) || 0;
         html += `<div class="sheet-item">
-            <div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div>
+            <div class="sheet-item-left">
+                <div class="sheet-item-name">${name}</div>
+                <div class="sheet-item-qty">x${qty} @ ${price}</div>
+            </div>
             <div class="sheet-item-price">$${(pn * qty).toFixed(2)}</div>
         </div>`;
 
         const meta = itemMeta[key];
 
+        // Flavor chips
         if (meta && meta.flavors && meta.flavors.length) {
             const shSel = shishaSel[key];
             const ki = _addonMap.length; _addonMap.push({ key, type: 'shisha' });
@@ -401,6 +413,7 @@ function renderSheet() {
             html += `</div></div>`;
         }
 
+        // Item addons
         if (meta && meta.addons && meta.addons.length) {
             const selArr = addonSel[key] || [];
             const ki = _addonMap.length; _addonMap.push({ key, type: 'addon' });
@@ -419,9 +432,10 @@ function renderSheet() {
     <div class="sheet-section-title">👤 Your Details</div>
     <div style="margin-bottom:12px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
-        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Elie" value="${existingName}" autocomplete="off">
+        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${existingName}" autocomplete="off">
         <div class="err-text" id="err-name">Please enter your name.</div>
     </div>
+
     <div style="margin-bottom:4px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
         <div class="order-type-grid">
@@ -431,76 +445,59 @@ function renderSheet() {
         </div>
         <div class="err-text" id="err-type">Please select an order type.</div>
     </div>
+
     <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-top:8px;margin-bottom:8px">Your Location</label>
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-bottom:8px">Your Location</label>
         ${renderLocationBox()}
     </div>`;
 
-    // Total row — hide if outside delivery area
-    const canProceed = selectedType !== 'delivery' || (detectedZone && detectedZone.canDeliver);
+    // Total + Send
     const fee   = getDeliveryFee();
-    const sub   = getItemsSubtotal();
-    const total = sub + fee;
-
-    const feeBreakdown = (selectedType === 'delivery' && detectedZone && detectedZone.canDeliver)
-        ? `<div style="font-size:11px;color:#b45309;margin-top:2px">Items $${sub.toFixed(2)} + delivery ${detectedZone.feeLabel}</div>`
-        : '';
-
-    if (canProceed) {
-        html += `<div class="total-row">
-            <div>
-                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
-                ${feeBreakdown}
-            </div>
-            <span style="font-size:18px;font-weight:800;color:#d97706" id="grand-total-display">$${total.toFixed(2)}</span>
+    const total = getItemsSubtotal() + fee;
+    html += `<div class="total-row">
+        <div>
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>
+            ${fee > 0 ? `<div style="font-size:10px;color:#b45309;margin-top:1px">Includes $${fee.toFixed(2)} delivery</div>` : ''}
         </div>
-        <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-            Send Order on WhatsApp
-        </button>`;
-    }
+        <span style="font-size:16px;font-weight:800;color:#d97706" id="grand-total-display">$${total.toFixed(2)}</span>
+    </div>
+    <button onclick="sendOrder()" style="margin-top:14px;margin-bottom:8px;width:100%;background:#22c55e;color:#fff;border:none;border-radius:14px;padding:15px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+        Send Order on WhatsApp
+    </button>`;
 
     document.getElementById('sheet-scroll').innerHTML = html;
 }
 
 function renderLocationBox() {
-    // ── NOT YET DETECTED ──────────────────────────────────────
     if (!detectedZone) {
         return `<div class="location-detect-box">
             <div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div>
-            <div style="font-size:11px;color:#b45309">Tap below so we can calculate your exact delivery fee.</div>
-            <button class="locate-main-btn" id="locate-btn" onclick="detectLocation()">📍 Detect My Location</button>
-            <div class="err-text" id="err-location" style="margin-top:8px">Please detect your location to continue.</div>
-        </div>`;
-    }
-
-    // ── OUTSIDE DELIVERY AREA ─────────────────────────────────
-    if (!detectedZone.canDeliver) {
-        const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
-        return `<div class="location-detect-box no-delivery">
-            <div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div>
-            <div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">
-                Sorry, we don't deliver to your location yet.<br>
-                You're welcome to <strong>dine in</strong> or <strong>take away</strong> instead!
+            <div style="font-size:11px;color:#b45309">So we can calculate your delivery fee automatically.</div>
+            <button class="locate-main-btn" id="locate-btn" onclick="detectLocation()">
+                📍 Detect My Location
+            </button>
+            <div class="err-text" id="err-location" style="margin-top:8px">Please share your location or add your address manually.</div>
+            <div class="manual-addr" style="margin-top:12px;text-align:left">
+                <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Or type your address</label>
+                <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
             </div>
-            <div class="zone-badge no-del" style="margin-top:8px">🚫 No delivery available</div>
-            ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
-            <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" onclick="resetLocation()">↺ Try a different location</button>
         </div>`;
     }
 
-    // ── DETECTED & DELIVERABLE ────────────────────────────────
+    const zoneEmoji = detectedZone.zone === 'haret' ? '🎉' : detectedZone.zone === 'wadi' ? '📍' : '🗺️';
     const mapsUrl = userGPS ? `https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}` : '';
+
     return `<div class="location-detect-box detected">
         <div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div>
         <div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">
-            ${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong>
+            ${zoneEmoji} ${detectedZone.label} — <strong>${detectedZone.fee === 0 ? 'Free delivery!' : detectedZone.feeLabel + ' delivery'}</strong>
         </div>
-        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>` : ''}
+        ${mapsUrl ? `<div style="margin-top:8px"><a href="${mapsUrl}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on maps ↗</a></div>` : ''}
         <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" onclick="resetLocation()">↺ Change location</button>
         <div class="manual-addr" style="margin-top:10px;text-align:left">
             <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label>
-            <textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
+            <textarea id="delivery-address-ta" class="sheet-input" style="margin-top:6px;resize:none;min-height:60px;font-size:13px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea>
         </div>
     </div>`;
 }
@@ -513,15 +510,19 @@ function detectLocation() {
         (pos) => {
             userGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             detectedZone = getDeliveryZone(userGPS.lat, userGPS.lng);
+            // Save typed address before re-render
             const ta = document.getElementById('delivery-address-ta');
             if (ta) deliveryAddress = ta.value;
             renderSheet();
+            // Update total display
+            const totalEl = document.getElementById('grand-total-display');
+            if (totalEl) totalEl.textContent = '$' + getGrandTotal().toFixed(2);
         },
         (err) => {
             if (btn) { btn.disabled = false; btn.innerHTML = '📍 Detect My Location'; }
-            let msg = 'Could not get location. Please try again.';
-            if (err.code === 1) msg = 'Location access denied. Please allow location access and try again.';
-            if (err.code === 3) msg = 'Location timed out. Please try again.';
+            let msg = 'Could not get location.';
+            if (err.code === 1) msg = 'Location access denied. Please type your address below.';
+            if (err.code === 3) msg = 'Location timed out. Please type your address below.';
             const errEl = document.getElementById('err-location');
             if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
         },
@@ -537,12 +538,14 @@ function resetLocation() {
     renderSheet();
 }
 
+// ── ORDER TYPE ────────────────────────────────────────────────
 function selectType(type) {
     selectedType = type;
     renderSheet();
+    // Restore name
 }
 
-// ── CHIP CLICKS ────────────────────────────────────────────────
+// ── CHIP CLICKS (delegated) ───────────────────────────────────
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('[data-type]');
     if (!btn) return;
@@ -550,14 +553,15 @@ document.addEventListener('click', function(e) {
     const entry = _addonMap[ki];
     if (!entry) return;
     const { key } = entry;
-    const scrollTop = document.getElementById('sheet-scroll').scrollTop;
     if (type === 'shisha') {
         const fi  = parseInt(btn.dataset.fi);
         const meta = itemMeta[key];
         if (!meta || !meta.flavors) return;
         const flv = meta.flavors[fi];
         shishaSel[key] = shishaSel[key] === flv ? null : flv;
-        renderSheet(); document.getElementById('sheet-scroll').scrollTop = scrollTop;
+        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
+        renderSheet();
+        document.getElementById('sheet-scroll').scrollTop = scrollTop;
     } else if (type === 'addon') {
         const ai  = parseInt(btn.dataset.ai);
         const meta = itemMeta[key];
@@ -568,12 +572,14 @@ document.addEventListener('click', function(e) {
         const idx = addonSel[key].findIndex(s => s.label === addon.label);
         if (idx > -1) addonSel[key].splice(idx, 1);
         else addonSel[key].push({ label: addon.label, price: pn });
-        renderSheet(); document.getElementById('sheet-scroll').scrollTop = scrollTop;
+        const scrollTop = document.getElementById('sheet-scroll').scrollTop;
+        renderSheet();
+        document.getElementById('sheet-scroll').scrollTop = scrollTop;
     }
 });
 
-// ── SEND ORDER ─────────────────────────────────────────────────
-function sendOrder() {
+// ── SEND ORDER ────────────────────────────────────────────────
+async function sendOrder() {
     const nameEl = document.getElementById('sheet-name');
     const name   = nameEl ? nameEl.value.trim() : '';
     let valid = true;
@@ -592,60 +598,88 @@ function sendOrder() {
     } else {
         document.getElementById('err-type').classList.remove('show');
     }
-    if (selectedType === 'delivery') {
-        if (detectedZone && !detectedZone.canDeliver) {
-            // outside delivery area — block
-            valid = false;
-        } else if (!detectedZone) {
-            // GPS not yet detected — mandatory
+    if (selectedType === 'delivery' && !detectedZone) {
+        const ta = document.getElementById('delivery-address-ta');
+        const addr = ta ? ta.value.trim() : '';
+        if (!addr) {
             const errEl = document.getElementById('err-location');
-            if (errEl) { errEl.textContent = 'Please detect your location to continue.'; errEl.classList.add('show'); }
+            if (errEl) { errEl.textContent = 'Please detect your location or type your address.'; errEl.classList.add('show'); }
             valid = false;
         }
     }
     if (!valid) return;
 
-    const entries  = Object.entries(cart).filter(([,v]) => v > 0);
-    const timeStr  = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+    const entries   = Object.entries(cart).filter(([,v]) => v > 0);
+    const timeStr   = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
     const typeNames = { dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery' };
 
-    let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
-    msg += `👤 *Name:* ${name}\n`;
-    msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
-
-    if (selectedType === 'delivery') {
-        if (detectedZone && detectedZone.canDeliver) {
-            msg += `📍 *Zone:* ${detectedZone.label} (Fee: ${detectedZone.feeLabel})\n`;
-            if (userGPS) msg += `🗺️ *GPS:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
-        }
-        const ta   = document.getElementById('delivery-address-ta');
-        const addr = ta ? ta.value.trim() : deliveryAddress;
-        if (addr) msg += `🏠 *Address:* ${addr}\n`;
-    }
-
-    msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
-
+    // Build structured order object
     let subtotal = 0;
-    entries.forEach(([key, qty]) => {
+    const orderItems = entries.map(([key, qty]) => {
         const [, itemName, price] = key.split('|');
         const pn = parseFloat(price.replace('$','')) || 0;
         const lt = pn * qty;
         subtotal += lt;
-        msg += `• ${itemName} x${qty} — $${lt.toFixed(2)}\n`;
-        (addonSel[key] || []).forEach(a => { subtotal += a.price; msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
-        const sf = shishaSel[key];
-        if (sf) msg += `  ↳ Flavor: ${sf}\n`;
+        const addonsForItem = (addonSel[key] || []).map(a => { subtotal += a.price; return { label: a.label, price: a.price }; });
+        return { name: itemName, price: pn, priceStr: price, qty, flavor: shishaSel[key] || null, addons: addonsForItem };
     });
 
     const fee = getDeliveryFee();
-    if (fee > 0) { subtotal += fee; msg += `• 🛵 Delivery — $${fee.toFixed(2)}\n`; }
+    if (fee > 0) subtotal += fee;
+
+    const ta   = document.getElementById('delivery-address-ta');
+    const addr = ta ? ta.value.trim() : deliveryAddress;
+
+    const order = {
+        id: 'MENU-' + Date.now(),
+        status: 'pending',
+        timestamp: new Date().toISOString(),
+        source: 'menu',
+        name,
+        orderType: selectedType,
+        deliveryZone: (selectedType === 'delivery' && detectedZone) ? detectedZone.label : null,
+        deliveryFee: fee,
+        gps: userGPS || null,
+        address: addr || null,
+        items: orderItems,
+        total: subtotal
+    };
+
+    // Disable send button while processing
+    const sendBtn = document.querySelector('[onclick="sendOrder()"]');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
+
+    // Write to GitHub inbox (best effort — WhatsApp is always the backup)
+    try {
+        await writeToInbox(order);
+    } catch(e) {
+        console.warn('Inbox write failed (order still sent via WhatsApp):', e.message);
+    }
+
+    // Always send WhatsApp message
+    let msg = '🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
+    msg += `👤 *Name:* ${name}\n`;
+    msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
+    if (selectedType === 'delivery' && detectedZone) {
+        const feeStr = detectedZone.fee === 0 ? 'Free' : `$${detectedZone.fee.toFixed(2)}`;
+        msg += `📍 *Zone:* ${detectedZone.label} (Delivery: ${feeStr})\n`;
+        if (userGPS) msg += `🗺️ *GPS:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
+    }
+    if (addr) msg += `🏠 *Address:* ${addr}\n`;
+    msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
+    orderItems.forEach(it => {
+        msg += `• ${it.name} x${it.qty} — $${(it.price * it.qty).toFixed(2)}\n`;
+        if (it.flavor) msg += `  ↳ Flavor: ${it.flavor}\n`;
+        (it.addons||[]).forEach(a => { msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
+    });
+    if (fee > 0) msg += `• 🛵 Delivery — $${fee.toFixed(2)}\n`;
     msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n\nPlease confirm my order 🙏`;
 
     window.open('https://wa.me/76840244?text=' + encodeURIComponent(msg), '_blank');
     closeSheet();
 }
 
-// ── PILLS ──────────────────────────────────────────────────────
+// ── PILLS ─────────────────────────────────────────────────────
 function renderPills(item) {
     if (!item.flavors || !item.flavors.length) return '';
     const pc = PILL_COLORS[item.flavorColor] || PILL_COLORS.amber;
@@ -653,7 +687,7 @@ function renderPills(item) {
         item.flavors.map(f => `<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('') + '</div>';
 }
 
-// ── FETCH & RENDER MENU ────────────────────────────────────────
+// ── FETCH & RENDER MENU ───────────────────────────────────────
 async function loadMenu() {
     try {
         const res = await fetch('menu.json?v=' + Date.now());
@@ -689,6 +723,7 @@ function initMenu(menuData) {
     nav.innerHTML = menuData.map((c, i) =>
         `<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`
     ).join('');
+
     const container = document.getElementById('menu-container');
     container.innerHTML = '';
     menuData.forEach(category => {
