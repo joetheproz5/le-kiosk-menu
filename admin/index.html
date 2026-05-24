@@ -333,7 +333,8 @@ function collectAll(){
   }else{
     if(sec.bottomBanner!==undefined)sec.bottomBanner=v('banner-'+si)||'';
     sec.items=(sec.items||[]).map((item,ii)=>{
-      const updated={...item,name:v('i-name-'+si+'-'+ii),price:v('i-price-'+si+'-'+ii),desc:v('i-desc-'+si+'-'+ii)};
+      const activeEl=document.getElementById('i-active-'+si+'-'+ii);
+      const updated={...item,name:v('i-name-'+si+'-'+ii),price:v('i-price-'+si+'-'+ii),desc:v('i-desc-'+si+'-'+ii),active:activeEl?activeEl.checked:true};     
       const _pills=(v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
       if(_pills.length>0)updated.flavors=_pills;else delete updated.flavors;
       if(item._pillColor)updated.flavorColor=item._pillColor;
@@ -438,7 +439,13 @@ function renderItem(item,si,ii){
       ${flavorsField}
       ${addonsEditor}
     </div>
-    <button class="btn btn-danger" onclick="confirmDeleteItem(${si},${ii})" title="Delete item">🗑</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+  <button class="btn btn-danger" onclick="confirmDeleteItem(${si},${ii})" title="Delete item">🗑</button>
+  <label style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+    <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)">Active</span>
+    <input type="checkbox" id="i-active-${si}-${ii}" ${item.active===false?'':'checked'} onchange="markUnsaved()" style="width:18px;height:18px;cursor:pointer;accent-color:var(--a500)">
+  </label>
+</div>
   </div>`;
 }
 
