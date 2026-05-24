@@ -395,17 +395,17 @@
                     <div class="cart-item-price">$${lineTotal.toFixed(2)}</div>
                 </div>`;
 
-                // ── Per-item addon picker ──
+                // ── Per-item addon picker (multi-select) ──
                 const meta = itemMeta[key];
                 if (meta && meta.addons && meta.addons.length) {
-                    const sel = addonSelections[key];
-                    if (sel) totalNum += sel.price;
+                    const selArr = addonSelections[key] || [];
+                    selArr.forEach(s => { totalNum += s.price; });
                     const ki = _addonKeyMap.length;
                     _addonKeyMap.push(key);
-                    html += `<div class="cart-addon-row"><div class="cart-addon-label">➕ Add extra</div><div class="cart-addon-chips">`;
+                    html += `<div class="cart-addon-row"><div class="cart-addon-label">➕ Add extras</div><div class="cart-addon-chips">`;
                     meta.addons.forEach((addon, ai) => {
                         const pn = parseFloat((addon.price||'0').replace('$','')) || 0;
-                        const on = sel && sel.label === addon.label;
+                        const on = selArr.some(s => s.label === addon.label);
                         html += `<button class="cart-addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.7">${addon.price}</span></button>`;
                     });
                     html += `</div></div>`;
@@ -443,10 +443,10 @@
                 if (!meta || !meta.addons || !meta.addons[ai]) return;
                 const addon = meta.addons[ai];
                 const pn    = parseFloat((addon.price||'0').replace('$','')) || 0;
-                if (addonSelections[itemKey] && addonSelections[itemKey].label === addon.label)
-                    delete addonSelections[itemKey];
-                else
-                    addonSelections[itemKey] = { label: addon.label, price: pn };
+                if (!addonSelections[itemKey]) addonSelections[itemKey] = [];
+                const idx = addonSelections[itemKey].findIndex(s => s.label === addon.label);
+                if (idx > -1) addonSelections[itemKey].splice(idx, 1);
+                else addonSelections[itemKey].push({ label: addon.label, price: pn });
                 renderCartPanel();
             } else if (type === 'shisha') {
                 const fi   = parseInt(btn.dataset.fi);
@@ -540,14 +540,14 @@
                     <div><span class="text-amber-950 text-sm font-semibold">${itemName}</span><span class="text-amber-600 text-xs font-bold ml-2">x${qty}</span></div>
                     <span class="text-amber-700 text-sm font-bold">$${lineTotal.toFixed(2)}</span>
                 </div>`;
-                const addonSel = addonSelections[key];
-                if (addonSel) {
+                const addonSelArr = addonSelections[key] || [];
+                addonSelArr.forEach(addonSel => {
                     itemsTotal += addonSel.price;
                     listHtml += `<div class="flex justify-between items-center py-1 pl-3 border-b border-amber-100">
                         <span class="text-amber-700 text-xs font-semibold">↳ ${addonSel.label}</span>
                         <span class="text-amber-600 text-xs font-bold">+$${addonSel.price.toFixed(2)}</span>
                     </div>`;
-                }
+                });
                 const shishaSel = shishaSelections[key];
                 if (shishaSel) {
                     listHtml += `<div class="flex justify-between items-center py-1 pl-3 border-b border-amber-100">
@@ -608,11 +608,10 @@
                 const lineTotal = priceNum * qty;
                 itemsTotal += lineTotal;
                 msg += `• ${itemName} x${qty} — $${lineTotal.toFixed(2)}\n`;
-                const addonSel = addonSelections[key];
-                if (addonSel) {
+                (addonSelections[key] || []).forEach(addonSel => {
                     itemsTotal += addonSel.price;
                     msg += `  ↳ + ${addonSel.label} — $${addonSel.price.toFixed(2)}\n`;
-                }
+                });
                 const shishaSel = shishaSelections[key];
                 if (shishaSel) {
                     msg += `  ↳ Flavor: ${shishaSel}\n`;
