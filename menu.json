@@ -226,7 +226,7 @@
       },
       {
         "name": "Labneh",
-        "price": "$2",
+        "price": "$3",
         "desc": "Creamy strained yogurt with a drizzle of olive oil, wrapped in thin sajj",
         "image": "menupictures/sajj-labne.jpg",
         "addons": [
@@ -269,24 +269,6 @@
           {
             "label": "Sahen Khodra",
             "price": "$3"
-          }
-        ]
-      },
-      {
-        "name": "mix",
-        "price": "$0",
-        "desc": "test test",
-        "image": "menupictures/screenshot_2026-05-24_at_9.56.10_pm.png",
-        "_pillColor": "green",
-        "flavorColor": "green",
-        "flavors": [
-          "zaatar",
-          "jebne"
-        ],
-        "addons": [
-          {
-            "label": "khodra",
-            "price": "$0"
           }
         ]
       }
