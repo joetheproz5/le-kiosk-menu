@@ -57,17 +57,6 @@ body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.success{background:var(--green-d)}
 #toast.error{background:var(--red-d)}
-#setup-banner{background:var(--a100);border-bottom:1px solid var(--a200);padding:12px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-#setup-banner p{font-size:13px;color:var(--a900);flex:1;min-width:200px}
-#setup-banner p strong{font-weight:700}
-.token-input-wrap{display:flex;gap:8px;align-items:center}
-#token-input{padding:8px 12px;border:1.5px solid var(--a300);border-radius:8px;font-family:var(--font);font-size:13px;background:var(--white);color:var(--a950);outline:none;width:240px}
-#token-input:focus{border-color:var(--a500)}
-.btn-token{background:var(--a900);color:var(--a100);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:none;cursor:pointer}
-.btn-token:hover{background:var(--a800)}
-.token-status{font-size:12px;font-weight:600}
-.token-status.ok{color:var(--green-d)}
-.token-status.missing{color:var(--red)}
 .session-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.25);color:var(--a300);padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
 .tabs-bar{background:var(--white);border-bottom:1px solid var(--a200);padding:0 24px;display:flex;gap:0;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
 .tabs-bar::-webkit-scrollbar{display:none}
@@ -117,7 +106,6 @@ body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient
 .field-input{width:100%;padding:8px 10px;border:1.5px solid var(--a100);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--a950);background:var(--a50);outline:none;transition:border-color .15s,background .15s}
 .field-input:focus{border-color:var(--a400);background:var(--white)}
 textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
-/* ── ADDONS EDITOR ── */
 .addons-editor{margin-top:6px;background:var(--a50);border:1.5px solid var(--a100);border-radius:10px;padding:10px 12px}
 .addons-editor-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--a700);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
 .addon-entry{display:flex;gap:6px;align-items:center;margin-bottom:6px}
@@ -130,7 +118,6 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 .addon-del-btn:hover{background:#fee2e2}
 .btn-add-addon{background:var(--a200);color:var(--a900);border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;font-family:var(--font)}
 .btn-add-addon:hover{background:var(--a300)}
-/* ── rest ── */
 .addon-card{border-bottom:1px solid var(--a100);padding:16px 20px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}
 .addon-card:last-child{border-bottom:none}
 .addon-emoji-input{font-size:26px;width:44px;height:44px;border:1.5px solid var(--a100);border-radius:10px;background:var(--a50);text-align:center;outline:none;cursor:pointer;font-family:var(--font)}
@@ -207,18 +194,10 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
     <div class="header-actions">
       <span class="session-badge" id="session-timer"></span>
       <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
-      <button class="btn btn-save" id="save-btn" onclick="saveMenu()" disabled>💾 Save to GitHub</button>
+      <button class="btn btn-save" id="save-btn" onclick="saveMenu()">💾 Save</button>
       <button class="btn btn-logout" onclick="logout()">Logout</button>
     </div>
   </header>
-  <div id="setup-banner">
-    <p><strong>GitHub Token</strong> — needed to save. Create at github.com/settings/tokens → Fine-grained → <em>Contents: read &amp; write</em>. Token is stored for this session only.</p>
-    <div class="token-input-wrap">
-      <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
-      <button class="btn-token" onclick="saveToken()">Save</button>
-      <span class="token-status" id="token-status"></span>
-    </div>
-  </div>
   <div class="tabs-bar" id="tabs-bar"></div>
   <div class="admin-body" id="editor-root"></div>
   <div class="add-category-wrap">
@@ -235,17 +214,35 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 </div>
 
 <script>
-const ADMIN_HASH = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
-const PILL_PRESETS = [{"id":"amber","bg":"#fef3c7","border":"#fde68a","text":"#92400e","label":"Amber"},{"id":"red","bg":"#fee2e2","border":"#fecaca","text":"#991b1b","label":"Red"},{"id":"green","bg":"#dcfce7","border":"#bbf7d0","text":"#166534","label":"Green"},{"id":"blue","bg":"#dbeafe","border":"#bfdbfe","text":"#1e40af","label":"Blue"},{"id":"purple","bg":"#ede9fe","border":"#ddd6fe","text":"#5b21b6","label":"Purple"},{"id":"pink","bg":"#fce7f3","border":"#fbcfe8","text":"#9d174d","label":"Pink"},{"id":"gray","bg":"#f3f4f6","border":"#e5e7eb","text":"#374151","label":"Gray"},{"id":"dark","bg":"#1f2937","border":"#374151","text":"#f9fafb","label":"Dark"}];
-const REPO_OWNER='joetheproz5', REPO_NAME='le-kiosk-menu', MENU_PATH='menu.json', IMG_FOLDER='menupictures', API='https://api.github.com';
+// ── CONFIG ────────────────────────────────────────────────────────────
+const ADMIN_HASH  = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
+const WORKER_URL  = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
+const IMG_FOLDER  = 'menupictures';
+const GH_RAW      = 'https://raw.githubusercontent.com/joetheproz5/le-kiosk-menu/main';
+const PILL_PRESETS = [
+  {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
+  {id:'red',  bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
+  {id:'green',bg:'#dcfce7',border:'#bbf7d0',text:'#166534',label:'Green'},
+  {id:'blue', bg:'#dbeafe',border:'#bfdbfe',text:'#1e40af',label:'Blue'},
+  {id:'purple',bg:'#ede9fe',border:'#ddd6fe',text:'#5b21b6',label:'Purple'},
+  {id:'pink', bg:'#fce7f3',border:'#fbcfe8',text:'#9d174d',label:'Pink'},
+  {id:'gray', bg:'#f3f4f6',border:'#e5e7eb',text:'#374151',label:'Gray'},
+  {id:'dark', bg:'#1f2937',border:'#374151',text:'#f9fafb',label:'Dark'}
+];
 const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=20*60*1000;
-let menuData=[], fileSha=null, hasUnsaved=false, activeTab=0, sessionTimer=null, sessionExpiry=0, sessionTick=null;
 
+// ── STATE ─────────────────────────────────────────────────────────────
+let menuData=[], fileSha=null, hasUnsaved=false, activeTab=0;
+let sessionTimer=null, sessionExpiry=0, sessionTick=null, sessionListenersAttached=false;
+
+// ── CRYPTO ────────────────────────────────────────────────────────────
 async function hashPassword(pw){
   if(!window.crypto||!window.crypto.subtle) throw new Error('HTTPS_REQUIRED');
   const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
   return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
+
+// ── LOCKOUT ───────────────────────────────────────────────────────────
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('lk_lockout')||'{"attempts":0,"until":0}');}catch(_){return{attempts:0,until:0};}}
 function setLockout(d){sessionStorage.setItem('lk_lockout',JSON.stringify(d));}
 function resetLockout(){sessionStorage.removeItem('lk_lockout');}
@@ -254,91 +251,185 @@ function checkLockout(){const l=getLockout();if(l.until>Date.now()){showLockoutB
 function showLockoutBar(m){const b=document.getElementById('lockout-bar');b.textContent=m;b.classList.add('show');}
 function hideLockoutBar(){document.getElementById('lockout-bar').classList.remove('show');}
 let lockoutCountdown=null;
-function startLockoutCountdown(){clearInterval(lockoutCountdown);lockoutCountdown=setInterval(()=>{const l=getLockout();if(l.until<=Date.now()){clearInterval(lockoutCountdown);hideLockoutBar();enableLoginForm(true);renderAttemptDots(0);}else{showLockoutBar(`Too many failed attempts. Try again in ${Math.ceil((l.until-Date.now())/1000)}s.`);}},1000);}
+function startLockoutCountdown(){
+  clearInterval(lockoutCountdown);
+  lockoutCountdown=setInterval(()=>{
+    const l=getLockout();
+    if(l.until<=Date.now()){clearInterval(lockoutCountdown);hideLockoutBar();enableLoginForm(true);renderAttemptDots(0);}
+    else showLockoutBar(`Too many failed attempts. Try again in ${Math.ceil((l.until-Date.now())/1000)}s.`);
+  },1000);
+}
 function enableLoginForm(e){document.getElementById('pw-input').disabled=!e;document.getElementById('login-btn').disabled=!e;}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────
 async function tryLogin(){
   if(checkLockout()){enableLoginForm(false);startLockoutCountdown();return;}
   const pw=document.getElementById('pw-input').value;if(!pw)return;
-  let hash;try{hash=await hashPassword(pw);}catch(e){document.getElementById('login-error').textContent=e.message==='HTTPS_REQUIRED'?'Admin must be opened over HTTPS.':'Login error: '+e.message;document.getElementById('login-error').classList.add('show');return;}
+  let hash;
+  try{hash=await hashPassword(pw);}
+  catch(e){
+    document.getElementById('login-error').textContent=e.message==='HTTPS_REQUIRED'?'Admin must be opened over HTTPS.':'Login error: '+e.message;
+    document.getElementById('login-error').classList.add('show');
+    return;
+  }
   const lock=getLockout();
-  if(hash===ADMIN_HASH){resetLockout();hideLockoutBar();document.getElementById('login-error').classList.remove('show');document.getElementById('login-screen').style.display='none';document.getElementById('admin-screen').style.display='block';startSession();initAdmin();}
-  else{const na=(lock.attempts||0)+1;const nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;setLockout({attempts:na,until:nu});renderAttemptDots(na);if(na>=MAX_ATTEMPTS){enableLoginForm(false);startLockoutCountdown();document.getElementById('login-error').classList.remove('show');}else{const r=MAX_ATTEMPTS-na;document.getElementById('login-error').textContent=`Wrong password. ${r} attempt${r===1?'':'s'} remaining before lockout.`;document.getElementById('login-error').classList.add('show');}document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}
+  if(hash===ADMIN_HASH){
+    resetLockout();hideLockoutBar();
+    document.getElementById('login-error').classList.remove('show');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    startSession();initAdmin();
+  } else {
+    const na=(lock.attempts||0)+1;
+    const nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
+    setLockout({attempts:na,until:nu});renderAttemptDots(na);
+    if(na>=MAX_ATTEMPTS){enableLoginForm(false);startLockoutCountdown();document.getElementById('login-error').classList.remove('show');}
+    else{
+      const r=MAX_ATTEMPTS-na;
+      document.getElementById('login-error').textContent=`Wrong password. ${r} attempt${r===1?'':'s'} remaining before lockout.`;
+      document.getElementById('login-error').classList.add('show');
+    }
+    document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
+  }
 }
 document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
 (function initDots(){const l=getLockout();renderAttemptDots(l.attempts||0);if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}})();
 
-let sessionListenersAttached=false;
-function startSession(){resetSessionTimer();clearInterval(sessionTick);sessionTick=setInterval(tickSession,30000);if(!sessionListenersAttached){document.addEventListener('mousemove',resetSessionTimer,{passive:true});document.addEventListener('keydown',resetSessionTimer,{passive:true});document.addEventListener('click',resetSessionTimer,{passive:true});sessionListenersAttached=true;}}
-function resetSessionTimer(){if(document.getElementById('admin-screen').style.display==='none')return;clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired — logged out','error');logout();},SESSION_MS);}
-function tickSession(){if(document.getElementById('admin-screen').style.display!=='none')updateSessionBadge();}
-function updateSessionBadge(){const el=document.getElementById('session-timer');const rem=Math.max(0,sessionExpiry-Date.now());const mins=Math.floor(rem/60000);el.textContent=`⏱ Session: ${mins}m`;el.style.display=rem>0?'inline-block':'none';}
-function logout(){clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);document.removeEventListener('mousemove',resetSessionTimer);document.removeEventListener('keydown',resetSessionTimer);document.removeEventListener('click',resetSessionTimer);sessionStorage.removeItem('lk_gh_token');document.getElementById('token-status').textContent='';document.getElementById('save-btn').disabled=true;document.getElementById('login-screen').style.display='flex';document.getElementById('admin-screen').style.display='none';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}
-function getToken(){return sessionStorage.getItem('lk_gh_token')||'';}
-function saveToken(){const t=document.getElementById('token-input').value.trim();if(!t)return;sessionStorage.setItem('lk_gh_token',t);document.getElementById('token-input').value='';updateTokenStatus();showToast('Token saved for this session','success');}
-function updateTokenStatus(){const el=document.getElementById('token-status');const ok=!!getToken();el.textContent=ok?'✓ Token saved':'✗ No token';el.className='token-status '+(ok?'ok':'missing');document.getElementById('save-btn').disabled=!ok;}
-async function initAdmin(){updateTokenStatus();showLoading('Loading menu…');try{await fetchMenu();renderAll();}catch(e){hideLoading();document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px;border:1px solid #fde68a"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Could not load menu</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px;max-width:340px;margin-left:auto;margin-right:auto">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Retry Load</button></div>`;showToast(e.message,'error');return;}hideLoading();}
-async function retryLoad(){showLoading('Loading menu…');try{await fetchMenu();renderAll();}catch(e){hideLoading();document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Still can't load</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Try Again</button></div>`;showToast(e.message,'error');}hideLoading();}
-function fromBase64Unicode(b64){const binary=atob(b64);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
-async function fetchMenu(){
-  const url=`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`;
-  const h={'Accept':'application/vnd.github.v3+json'};
-  if(getToken())h['Authorization']='Bearer '+getToken();
-  let res;try{res=await fetch(url,{headers:h});}catch(e){throw new Error('Network error — '+e.message);}
-  if(res.status===401)throw new Error('GitHub token is invalid or expired.');
-  if(res.status===403)throw new Error('GitHub token lacks permission.');
-  if(res.status===404)throw new Error('Repo or menu.json not found.');
-  if(!res.ok)throw new Error('GitHub API error '+res.status);
-  const data=await res.json();fileSha=data.sha;menuData=JSON.parse(fromBase64Unicode(data.content.replace(/\n/g,'')));
+// ── SESSION ───────────────────────────────────────────────────────────
+function startSession(){
+  resetSessionTimer();
+  clearInterval(sessionTick);
+  sessionTick=setInterval(tickSession,30000);
+  if(!sessionListenersAttached){
+    document.addEventListener('mousemove',resetSessionTimer,{passive:true});
+    document.addEventListener('keydown',resetSessionTimer,{passive:true});
+    document.addEventListener('click',resetSessionTimer,{passive:true});
+    sessionListenersAttached=true;
+  }
 }
-function toBase64Unicode(str){const bytes=new TextEncoder().encode(str);let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));return btoa(binary);}
-async function saveMenu(){
-  if(!getToken()){showToast('No GitHub token set','error');return;}
-  collectAll();
-  const clean=menuData.map(sec=>{const s={...sec};delete s._hasFlav;return s;});
-  showLoading('Saving to GitHub…');
-  try{
-    const json=JSON.stringify(clean,null,2);const content=toBase64Unicode(json);
-    const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${MENU_PATH}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update menu via Admin CMS',content,sha:fileSha})});
-    if(!res.ok){const e=await res.json();throw new Error(e.message||res.status);}
-    const saved=await res.json();fileSha=saved.content.sha;markSaved();showToast('Saved! Live in ~30s ✓','success');
-  }catch(e){showToast('Save failed: '+e.message,'error');}
+function resetSessionTimer(){
+  if(document.getElementById('admin-screen').style.display==='none')return;
+  clearTimeout(sessionTimer);
+  sessionExpiry=Date.now()+SESSION_MS;
+  updateSessionBadge();
+  sessionTimer=setTimeout(()=>{showToast('Session expired — logged out','error');logout();},SESSION_MS);
+}
+function tickSession(){if(document.getElementById('admin-screen').style.display!=='none')updateSessionBadge();}
+function updateSessionBadge(){
+  const el=document.getElementById('session-timer');
+  const rem=Math.max(0,sessionExpiry-Date.now());
+  const mins=Math.floor(rem/60000);
+  el.textContent=`⏱ Session: ${mins}m`;
+  el.style.display=rem>0?'inline-block':'none';
+}
+function logout(){
+  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);
+  document.removeEventListener('mousemove',resetSessionTimer);
+  document.removeEventListener('keydown',resetSessionTimer);
+  document.removeEventListener('click',resetSessionTimer);
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('admin-screen').style.display='none';
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-input').focus();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+async function initAdmin(){
+  showLoading('Loading menu…');
+  try{await fetchMenu();renderAll();}
+  catch(e){
+    hideLoading();
+    document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px;border:1px solid #fde68a"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Could not load menu</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px;max-width:340px;margin-left:auto;margin-right:auto">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Retry Load</button></div>`;
+    showToast(e.message,'error');return;
+  }
   hideLoading();
 }
+async function retryLoad(){
+  showLoading('Loading menu…');
+  try{await fetchMenu();renderAll();}
+  catch(e){
+    hideLoading();
+    document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Still can't load</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Try Again</button></div>`;
+    showToast(e.message,'error');
+  }
+  hideLoading();
+}
+
+// ── WORKER API ────────────────────────────────────────────────────────
+async function fetchMenu(){
+  const res=await fetch(`${WORKER_URL}/gh?file=menu.json`);
+  if(!res.ok) throw new Error('Worker error '+res.status);
+  const {data,sha}=await res.json();
+  fileSha=sha; menuData=data;
+}
+
+async function saveMenu(){
+  collectAll();
+  const clean=menuData.map(sec=>{const s={...sec};delete s._hasFlav;return s;});
+  showLoading('Saving…');
+  try{
+    const res=await fetch(`${WORKER_URL}/gh?file=menu.json`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:clean,message:'Update menu via Admin CMS',sha:fileSha})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error||res.status);}
+    const saved=await res.json();
+    fileSha=saved.sha;
+    markSaved();
+    showToast('Saved! Live in ~30s ✓','success');
+  }catch(e){
+    showToast('Save failed: '+e.message,'error');
+  }
+  hideLoading();
+}
+
 async function uploadImage(file,onProgress){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=async(e)=>{
-      const b64=e.target.result.split(',')[1];const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase();const path=IMG_FOLDER+'/'+safe;
-      if(onProgress)onProgress(30);
-      let existingSha=null;try{const chk=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:{'Authorization':'Bearer '+getToken(),'Accept':'application/vnd.github.v3+json'}});if(chk.ok){const d=await chk.json();existingSha=d.sha;}}catch(_){}
-      if(onProgress)onProgress(60);
-      const body={message:'Upload image: '+safe,content:b64};if(existingSha)body.sha=existingSha;
-      const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(body)});
-      if(onProgress)onProgress(100);
-      if(!res.ok){const er=await res.json();reject(new Error(er.message));return;}
-      resolve(path);
+      const b64=e.target.result.split(',')[1];
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase();
+      const path=IMG_FOLDER+'/'+safe;
+      if(onProgress) onProgress(40);
+      try{
+        const res=await fetch(`${WORKER_URL}/image`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({path,b64,message:'Upload image: '+safe})
+        });
+        if(onProgress) onProgress(100);
+        if(!res.ok){const er=await res.json();reject(new Error(er.error));return;}
+        resolve(path);
+      }catch(err){reject(err);}
     };
     reader.onerror=()=>reject(new Error('File read failed'));
     reader.readAsDataURL(file);
   });
 }
 
-// ── COLLECT ──────────────────────────────────────────────────────────
+// ── COLLECT ───────────────────────────────────────────────────────────
 function collectAll(){
   const si=activeTab;const sec=menuData[si];if(!sec)return;
   const titleEl=document.getElementById('sec-title-'+si);const keyEl=document.getElementById('sec-key-'+si);
   if(titleEl)sec.title=titleEl.value;if(keyEl)sec.key=keyEl.value;
   if(sec.type==='addons'){
-    sec.addonGroups=(sec.addonGroups||[]).map((grp,gi)=>({...grp,emoji:v('ag-emoji-'+si+'-'+gi)||grp.emoji,label:v('ag-label-'+si+'-'+gi),price:v('ag-price-'+si+'-'+gi),note:v('ag-note-'+si+'-'+gi),options:(v('ag-opts-'+si+'-'+gi)||'').split(',').map(s=>s.trim()).filter(Boolean)}));
+    sec.addonGroups=(sec.addonGroups||[]).map((grp,gi)=>({
+      ...grp,
+      emoji:v('ag-emoji-'+si+'-'+gi)||grp.emoji,
+      label:v('ag-label-'+si+'-'+gi),
+      price:v('ag-price-'+si+'-'+gi),
+      note:v('ag-note-'+si+'-'+gi),
+      options:(v('ag-opts-'+si+'-'+gi)||'').split(',').map(s=>s.trim()).filter(Boolean)
+    }));
   }else{
     if(sec.bottomBanner!==undefined)sec.bottomBanner=v('banner-'+si)||'';
     sec.items=(sec.items||[]).map((item,ii)=>{
       const activeEl=document.getElementById('i-active-'+si+'-'+ii);
-      const updated={...item,name:v('i-name-'+si+'-'+ii),price:v('i-price-'+si+'-'+ii),desc:v('i-desc-'+si+'-'+ii),active:activeEl?activeEl.checked:true};     
+      const updated={...item,name:v('i-name-'+si+'-'+ii),price:v('i-price-'+si+'-'+ii),desc:v('i-desc-'+si+'-'+ii),active:activeEl?activeEl.checked:true};
       const _pills=(v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
       if(_pills.length>0)updated.flavors=_pills;else delete updated.flavors;
       if(item._pillColor)updated.flavorColor=item._pillColor;
-      // Collect addons
       const addons=[];
       const addonCount=parseInt(document.getElementById('addon-count-'+si+'-'+ii)?.value||'0');
       for(let ai=0;ai<addonCount;ai++){
@@ -352,7 +443,7 @@ function collectAll(){
 }
 function v(id){const el=document.getElementById(id);return el?el.value:'';}
 
-// ── RENDER ALL ───────────────────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────────────────
 function renderAll(){renderTabs();renderEditor();markSaved();}
 let dragSrcIdx=null;
 function renderTabs(){
@@ -363,7 +454,15 @@ function renderTabs(){
 function tabDragStart(e,idx){collectAll();dragSrcIdx=idx;e.dataTransfer.effectAllowed='move';e.currentTarget.classList.add('dragging');}
 function tabDragOver(e,idx){e.preventDefault();e.dataTransfer.dropEffect='move';if(idx!==dragSrcIdx)e.currentTarget.classList.add('drag-over');}
 function tabDragLeave(e){e.currentTarget.classList.remove('drag-over');}
-function tabDrop(e,toIdx){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dragSrcIdx===null||dragSrcIdx===toIdx)return;const moved=menuData.splice(dragSrcIdx,1)[0];menuData.splice(toIdx,0,moved);if(activeTab===dragSrcIdx)activeTab=toIdx;else if(dragSrcIdx<activeTab&&toIdx>=activeTab)activeTab--;else if(dragSrcIdx>activeTab&&toIdx<=activeTab)activeTab++;markUnsaved();renderAll();}
+function tabDrop(e,toIdx){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragSrcIdx===null||dragSrcIdx===toIdx)return;
+  const moved=menuData.splice(dragSrcIdx,1)[0];menuData.splice(toIdx,0,moved);
+  if(activeTab===dragSrcIdx)activeTab=toIdx;
+  else if(dragSrcIdx<activeTab&&toIdx>=activeTab)activeTab--;
+  else if(dragSrcIdx>activeTab&&toIdx<=activeTab)activeTab++;
+  markUnsaved();renderAll();
+}
 function tabDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('drag-over'));dragSrcIdx=null;}
 function switchTab(i){collectAll();activeTab=i;renderAll();document.getElementById('editor-root').scrollIntoView({behavior:'smooth',block:'start'});}
 function renderEditor(){
@@ -389,7 +488,7 @@ function renderSection(sec,si){
 }
 
 function renderItem(item,si,ii){
-  const imgSrc=item.image?`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}?v=${Date.now()}`:'';
+  const imgSrc=item.image?`${GH_RAW}/${item.image}?v=${Date.now()}`:'';
   const dropZone=`<div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
     ${item.image?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''"><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`:`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
     <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>
@@ -409,16 +508,14 @@ function renderItem(item,si,ii){
       ${(item.flavors||[]).map(f=>`<span style="background:${_pc.bg};border:1px solid ${_pc.border};color:${_pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('')}
     </div>
   </div>`;
-
-  // ── Addons editor ──
-  const existingAddons = item.addons || [];
-  const addonRows = existingAddons.map((a, ai) => `
+  const existingAddons=item.addons||[];
+  const addonRows=existingAddons.map((a,ai)=>`
     <div class="addon-entry" id="addon-entry-${si}-${ii}-${ai}">
       <input class="addon-label-inp" type="text" id="addon-lbl-${si}-${ii}-${ai}" value="${esc(a.label)}" placeholder="Addon name" oninput="markUnsaved()">
       <input class="addon-price-inp" type="text" id="addon-prc-${si}-${ii}-${ai}" value="${esc(a.price)}" placeholder="$0" oninput="markUnsaved()">
       <button class="addon-del-btn" onclick="removeAddonEntry(${si},${ii},${ai})">✕</button>
     </div>`).join('');
-  const addonsEditor = `
+  const addonsEditor=`
     <div class="addons-editor">
       <div class="addons-editor-title">
         <span>➕ Order Add-ons</span>
@@ -427,7 +524,6 @@ function renderItem(item,si,ii){
       <div id="addon-entries-${si}-${ii}">${addonRows}</div>
       <input type="hidden" id="addon-count-${si}-${ii}" value="${existingAddons.length}">
     </div>`;
-
   return `<div class="item-card" id="item-card-${si}-${ii}">
     <div>${dropZone}</div>
     <div class="item-fields">
@@ -440,31 +536,28 @@ function renderItem(item,si,ii){
       ${addonsEditor}
     </div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
-  <button class="btn btn-danger" onclick="confirmDeleteItem(${si},${ii})" title="Delete item">🗑</button>
-  <label style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
-    <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)">Active</span>
-    <input type="checkbox" id="i-active-${si}-${ii}" ${item.active===false?'':'checked'} onchange="markUnsaved()" style="width:18px;height:18px;cursor:pointer;accent-color:var(--a500)">
-  </label>
-</div>
+      <button class="btn btn-danger" onclick="confirmDeleteItem(${si},${ii})" title="Delete item">🗑</button>
+      <label style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+        <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)">Active</span>
+        <input type="checkbox" id="i-active-${si}-${ii}" ${item.active===false?'':'checked'} onchange="markUnsaved()" style="width:18px;height:18px;cursor:pointer;accent-color:var(--a500)">
+      </label>
+    </div>
   </div>`;
 }
 
 // ── ADDON ENTRY MANAGEMENT ────────────────────────────────────────────
-function addAddonEntry(si, ii) {
+function addAddonEntry(si,ii){
   collectAll();
-  if (!menuData[si].items[ii].addons) menuData[si].items[ii].addons = [];
-  menuData[si].items[ii].addons.push({ label: '', price: '$0' });
-  markUnsaved();
-  renderAll();
-  // Focus the new label input
-  const ai = menuData[si].items[ii].addons.length - 1;
-  setTimeout(() => { const el = document.getElementById(`addon-lbl-${si}-${ii}-${ai}`); if(el) el.focus(); }, 50);
+  if(!menuData[si].items[ii].addons)menuData[si].items[ii].addons=[];
+  menuData[si].items[ii].addons.push({label:'',price:'$0'});
+  markUnsaved();renderAll();
+  const ai=menuData[si].items[ii].addons.length-1;
+  setTimeout(()=>{const el=document.getElementById(`addon-lbl-${si}-${ii}-${ai}`);if(el)el.focus();},50);
 }
-function removeAddonEntry(si, ii, ai) {
+function removeAddonEntry(si,ii,ai){
   collectAll();
-  if (menuData[si].items[ii].addons) menuData[si].items[ii].addons.splice(ai, 1);
-  markUnsaved();
-  renderAll();
+  if(menuData[si].items[ii].addons)menuData[si].items[ii].addons.splice(ai,1);
+  markUnsaved();renderAll();
 }
 
 function renderAddon(grp,si,gi){
@@ -482,29 +575,64 @@ function renderAddon(grp,si,gi){
   </div>`;
 }
 
-function addItem(si){collectAll();menuData[si].items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',addons:[]});markUnsaved();renderAll();}
+// ── ITEM / SECTION ACTIONS ────────────────────────────────────────────
+function addItem(si){collectAll();menuData[si].items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',active:true,addons:[]});markUnsaved();renderAll();}
 function addAddonGroup(si){collectAll();if(!menuData[si].addonGroups)menuData[si].addonGroups=[];menuData[si].addonGroups.push({emoji:'🔸',label:'New Add-on',price:'$0',note:'Description',options:['Option 1']});markUnsaved();renderAll();}
 function addCategory(){collectAll();const key='category-'+(Date.now()%100000);menuData.push({key,title:'New Category',items:[]});activeTab=menuData.length-1;markUnsaved();renderAll();}
 function setSectionType(si,type){collectAll();const sec=menuData[si];if(type==='addons'){sec.type='addons';if(!sec.addonGroups)sec.addonGroups=[];delete sec.items;delete sec.bottomBanner;delete sec._hasFlav;}else{delete sec.type;if(!sec.items)sec.items=[];delete sec.addonGroups;}markUnsaved();renderAll();}
 function toggleFeature(si,feat){collectAll();const sec=menuData[si];if(feat==='banner'){if(sec.bottomBanner!==undefined)delete sec.bottomBanner;else sec.bottomBanner='';}markUnsaved();renderAll();}
 function updateTab(si,val){const tabs=document.getElementById('tabs-bar').querySelectorAll('.tab');if(tabs[si])tabs[si].textContent=val||'Untitled';}
+
+// ── IMAGE UPLOAD ──────────────────────────────────────────────────────
 function triggerUpload(si,ii){document.getElementById('file-'+si+'-'+ii).click();}
 async function handleImageUpload(si,ii,input){
-  if(!input.files||!input.files[0])return;if(!getToken()){showToast('Set your GitHub token first','error');return;}
-  const file=input.files[0];const progBar=document.getElementById('prog-'+si+'-'+ii);const dropZone=document.getElementById('drop-'+si+'-'+ii);
-  try{const path=await uploadImage(file,(pct)=>{if(progBar)progBar.style.width=pct+'%';});collectAll();menuData[si].items[ii].image=path;markUnsaved();const rawUrl=`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${path}?v=${Date.now()}`;dropZone.classList.add('has-img');dropZone.innerHTML=`<img src="${rawUrl}" alt=""><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div><div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>`;const pathEl=document.getElementById('img-path-'+si+'-'+ii);if(pathEl)pathEl.textContent=path;showToast('Image uploaded ✓','success');}catch(e){showToast('Upload failed: '+e.message,'error');if(progBar)progBar.style.width='0';}
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0];
+  const progBar=document.getElementById('prog-'+si+'-'+ii);
+  const dropZone=document.getElementById('drop-'+si+'-'+ii);
+  try{
+    const path=await uploadImage(file,(pct)=>{if(progBar)progBar.style.width=pct+'%';});
+    collectAll();menuData[si].items[ii].image=path;markUnsaved();
+    const rawUrl=`${GH_RAW}/${path}?v=${Date.now()}`;
+    dropZone.classList.add('has-img');
+    dropZone.innerHTML=`<img src="${rawUrl}" alt=""><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div><div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>`;
+    const pathEl=document.getElementById('img-path-'+si+'-'+ii);
+    if(pathEl)pathEl.textContent=path;
+    showToast('Image uploaded ✓','success');
+  }catch(e){
+    showToast('Upload failed: '+e.message,'error');
+    if(progBar)progBar.style.width='0';
+  }
 }
+
+// ── DELETE MODALS ─────────────────────────────────────────────────────
 let pendingDelete=null;
 function confirmDeleteItem(si,ii){collectAll();pendingDelete={type:'item',si,ii};openModal('Delete Item','Delete "'+menuData[si].items[ii].name+'"? This cannot be undone.');}
 function confirmDeleteAddon(si,gi){collectAll();pendingDelete={type:'addon',si,gi};openModal('Delete Add-on Group','Remove "'+menuData[si].addonGroups[gi].label+'"? This cannot be undone.');}
 function confirmDeleteSection(si){collectAll();pendingDelete={type:'section',si};openModal('Delete Category','Delete the "'+menuData[si].title+'" category and all its items? This cannot be undone.');}
-function executeDelete(){if(!pendingDelete)return;const{type,si,ii,gi}=pendingDelete;if(type==='item')menuData[si].items.splice(ii,1);else if(type==='addon')menuData[si].addonGroups.splice(gi,1);else if(type==='section'){menuData.splice(si,1);if(activeTab>=menuData.length)activeTab=Math.max(0,menuData.length-1);}pendingDelete=null;closeModal();markUnsaved();renderAll();}
-function openModal(title,body){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').textContent=body;document.getElementById('modal-confirm-btn').onclick=executeDelete;document.getElementById('modal-overlay').classList.add('show');}
+function executeDelete(){
+  if(!pendingDelete)return;
+  const{type,si,ii,gi}=pendingDelete;
+  if(type==='item')menuData[si].items.splice(ii,1);
+  else if(type==='addon')menuData[si].addonGroups.splice(gi,1);
+  else if(type==='section'){menuData.splice(si,1);if(activeTab>=menuData.length)activeTab=Math.max(0,menuData.length-1);}
+  pendingDelete=null;closeModal();markUnsaved();renderAll();
+}
+function openModal(title,body){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  document.getElementById('modal-confirm-btn').onclick=executeDelete;
+  document.getElementById('modal-overlay').classList.add('show');
+}
 function closeModal(){document.getElementById('modal-overlay').classList.remove('show');pendingDelete=null;}
 document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
-function markUnsaved(){hasUnsaved=true;document.getElementById('unsaved-indicator').style.display='inline';document.getElementById('save-btn').disabled=!getToken();}
+
+// ── UNSAVED STATE ─────────────────────────────────────────────────────
+function markUnsaved(){hasUnsaved=true;document.getElementById('unsaved-indicator').style.display='inline';}
 function markSaved(){hasUnsaved=false;document.getElementById('unsaved-indicator').style.display='none';}
 window.addEventListener('beforeunload',e=>{if(hasUnsaved){e.preventDefault();e.returnValue='';}});
+
+// ── PREVIEW ───────────────────────────────────────────────────────────
 function togglePreview(){collectAll();const panel=document.getElementById('preview-panel');const open=panel.classList.toggle('open');if(open)renderPreview();}
 function renderPreview(){
   const body=document.getElementById('preview-body');let html='';
@@ -512,21 +640,49 @@ function renderPreview(){
     if(sec.type==='addons')return;
     html+=`<div style="margin-bottom:20px"><div style="font-family:var(--brand);font-size:16px;font-weight:700;color:var(--a900);border-bottom:3px solid var(--a400);padding-bottom:4px;margin-bottom:10px">${sec.title}</div>`;
     (sec.items||[]).forEach(item=>{
-      const img=item.image?`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.image}`:'';
+      if(item.active===false)return;
+      const img=item.image?`${GH_RAW}/${item.image}`:'';
       html+=`<div class="preview-item">${img?`<img src="${img}" alt="${esc(item.name)}" onerror="this.style.background='var(--a100)'">`:`<div style="width:52px;height:52px;border-radius:8px;background:var(--a100);flex-shrink:0"></div>`}<div class="preview-item-info"><div class="preview-item-name">${esc(item.name)}</div><div class="preview-item-desc">${esc(item.desc)}</div></div><div class="preview-item-price">${esc(item.price)}</div></div>`;
     });
     html+='</div>';
   });
   body.innerHTML=html||'<div style="color:var(--g400);text-align:center;padding:40px;font-size:13px">No regular item categories to preview.</div>';
 }
+
+// ── PILLS ─────────────────────────────────────────────────────────────
+function updatePillsPreview(si,ii,inputEl){
+  const preview=document.getElementById('pills-preview-'+si+'-'+ii);if(!preview)return;
+  const item=menuData[si]&&menuData[si].items&&menuData[si].items[ii];
+  const colorId=(item&&item._pillColor)||'amber';
+  const pc=PILL_PRESETS.find(p=>p.id===colorId)||PILL_PRESETS[0];
+  const pills=inputEl.value.split(',').map(s=>s.trim()).filter(Boolean);
+  preview.innerHTML=pills.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('');
+}
+function setPillColor(si,ii,colorId){
+  if(!menuData[si]||!menuData[si].items||!menuData[si].items[ii])return;
+  menuData[si].items[ii]._pillColor=colorId;menuData[si].items[ii].flavorColor=colorId;markUnsaved();
+  PILL_PRESETS.forEach(p=>{
+    const btn=document.getElementById('pill-color-btn-'+si+'-'+ii+'-'+p.id);if(!btn)return;
+    btn.style.borderColor=p.id===colorId?p.text:p.border;
+    btn.style.transform=p.id===colorId?'scale(1.3)':'scale(1)';
+  });
+  const inputEl=document.getElementById('i-flavors-'+si+'-'+ii);
+  if(inputEl)updatePillsPreview(si,ii,inputEl);
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 let toastTimer;
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3500);}
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading…';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
-function updatePillsPreview(si,ii,inputEl){const preview=document.getElementById('pills-preview-'+si+'-'+ii);if(!preview)return;const item=menuData[si]&&menuData[si].items&&menuData[si].items[ii];const colorId=(item&&item._pillColor)||'amber';const pc=PILL_PRESETS.find(p=>p.id===colorId)||PILL_PRESETS[0];const pills=inputEl.value.split(',').map(s=>s.trim()).filter(Boolean);preview.innerHTML=pills.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('');}
-function setPillColor(si,ii,colorId){if(!menuData[si]||!menuData[si].items||!menuData[si].items[ii])return;menuData[si].items[ii]._pillColor=colorId;menuData[si].items[ii].flavorColor=colorId;markUnsaved();PILL_PRESETS.forEach(p=>{const btn=document.getElementById('pill-color-btn-'+si+'-'+ii+'-'+p.id);if(!btn)return;btn.style.borderColor=p.id===colorId?p.text:p.border;btn.style.transform=p.id===colorId?'scale(1.3)':'scale(1)';});const inputEl=document.getElementById('i-flavors-'+si+'-'+ii);if(inputEl)updatePillsPreview(si,ii,inputEl);}
-window.getNewHash=async function(pw){const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));const h=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');console.log('%cSHA-256 hash:','color:orange;font-weight:bold');console.log(h);return h;};
+
+// ── DEV HELPER ────────────────────────────────────────────────────────
+window.getNewHash=async function(pw){
+  const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
+  const h=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  console.log('%cSHA-256 hash:','color:orange;font-weight:bold');console.log(h);return h;
+};
 </script>
 </body>
 </html>
