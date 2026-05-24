@@ -1,5 +1,39 @@
 [
   {
+    "id": "MENU-1779653643610",
+    "status": "pending",
+    "timestamp": "2026-05-24T20:14:03.610Z",
+    "source": "menu",
+    "name": "Joe",
+    "orderType": "delivery",
+    "deliveryZone": "Zone A",
+    "deliveryFee": 0.5,
+    "gps": {
+      "lat": 33.8210368,
+      "lng": 35.5649022
+    },
+    "address": null,
+    "items": [
+      {
+        "name": "Loaded Fries",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "total": 12.5
+  },
+  {
     "id": "MENU-1779650927857",
     "status": "confirmed",
     "timestamp": "2026-05-24T19:28:47.857Z",
