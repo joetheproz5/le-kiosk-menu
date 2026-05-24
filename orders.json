@@ -1,5 +1,43 @@
 [
   {
+    "id": "ORD-1779650048705",
+    "status": "pending",
+    "timestamp": "2026-05-24T19:14:08.705Z",
+    "name": "tony",
+    "note": "",
+    "orderType": "dinein",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "items": [
+      {
+        "name": "Fries Sandwich",
+        "price": 4,
+        "priceStr": "$4",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Hotdog Sandwich",
+        "price": 6,
+        "priceStr": "$6",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Crispy Sandwich",
+        "price": 6,
+        "priceStr": "$6",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "subtotal": 16,
+    "total": 16
+  },
+  {
     "id": "ORD-1779648414013",
     "status": "done",
     "timestamp": "2026-05-24T18:46:54.013Z",
