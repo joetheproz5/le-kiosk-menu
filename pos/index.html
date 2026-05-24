@@ -478,7 +478,6 @@ input,textarea,select{font-family:var(--font);outline:none}
         <button class="clear-btn" onclick="clearOrder()">Clear ✕</button>
       </div>
       <div class="order-scroll" id="order-scroll"></div>
-      <div class="order-proceed-bar" id="order-proceed-bar">
         <div class="order-proceed-bar" id="order-proceed-bar" style="padding:12px 14px;border-top:1px solid var(--g200)">
   <button class="act-btn btn-charge" style="width:100%;justify-content:center" onclick="showOrderDetails()">Proceed →</button>
 </div>
@@ -526,12 +525,6 @@ input,textarea,select{font-family:var(--font);outline:none}
           </div>
         </div>
       </div>
-        <div class="action-btns">
-          <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
-          <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
-          <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
-          <button class="act-btn btn-whatsapp" onclick="sendWhatsApp()">💬 WhatsApp</button>
-        </div>
       </div>
     </div>
   </div>
@@ -890,7 +883,8 @@ function clearOrder(){
     if(badge)badge.textContent='';
   });
   renderOrderPanel();
-function showOrderDetails(){
+}
+  function showOrderDetails(){
   if(!orderLines.length){ showToast('Add items first','error'); return; }
   document.getElementById('order-proceed-bar').style.display='none';
   document.getElementById('order-details-section').style.display='flex';
@@ -899,7 +893,6 @@ function showOrderDetails(){
 function hideOrderDetails(){
   document.getElementById('order-details-section').style.display='none';
   document.getElementById('order-proceed-bar').style.display='block';
-}
 }
 function selType(t){
   orderType=t;
