@@ -1,5 +1,40 @@
 [
   {
+    "id": "ORD-1779653874961",
+    "status": "pending",
+    "timestamp": "2026-05-24T20:17:54.961Z",
+    "name": "elie",
+    "note": "bala kabis",
+    "orderType": "delivery",
+    "deliveryZone": "A",
+    "deliveryFee": 0.5,
+    "items": [
+      {
+        "name": "Loaded Fries",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Melted Cheddar",
+            "price": 1
+          }
+        ]
+      }
+    ],
+    "subtotal": 13,
+    "total": 13.5
+  },
+  {
     "id": "ORD-1779653710617",
     "status": "pending",
     "timestamp": "2026-05-24T20:15:10.617Z",
