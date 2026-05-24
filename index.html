@@ -225,16 +225,26 @@ const ZONE_B_LNG_SEMI   = 0.022;
 const ZONE_B_CENTER_LAT = 33.821091538427524;
 const ZONE_B_CENTER_LNG = 35.56496110422372;
 //
-// Zone C — large oval covering Baabda, Yarzeh, Aley, Bsaba area → $1.50
-//   N-S semi-axis ~4.5 km  → lat semi ≈ 0.040°
-//   E-W semi-axis ~5.0 km  → lng semi ≈ 0.055°
-//   Centre shifted slightly north toward Baabda
-const ZONE_C_LAT_SEMI   = 0.040;
-const ZONE_C_LNG_SEMI   = 0.055;
-const ZONE_C_CENTER_LAT = 33.826;
-const ZONE_C_CENTER_LNG = 35.56496110422372;
-//
-// Outside Zone C → no delivery
+// Zone C — irregular polygon traced from hand-drawn boundary → $1.50
+// Covers: Baabda, Yarzeh, Bsous, Bdadoun, Bsaba, Kfarshima, Lebanese University area
+// Outside this polygon → no delivery
+const ZONE_C_POLYGON = [
+    [33.870, 35.535],
+    [33.867, 35.558],
+    [33.862, 35.590],
+    [33.848, 35.608],
+    [33.825, 35.622],
+    [33.808, 35.610],
+    [33.792, 35.590],
+    [33.785, 35.555],
+    [33.787, 35.520],
+    [33.797, 35.502],
+    [33.816, 35.490],
+    [33.835, 35.492],
+    [33.843, 35.542],
+    [33.858, 35.542],
+    [33.864, 35.538],
+];
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // Haversine distance in km
@@ -255,6 +265,19 @@ function inEllipse(lat, lng, cLat, cLng, latSemi, lngSemi) {
     return (dLat * dLat + dLng * dLng) <= 1;
 }
 
+// Point-in-polygon ray casting
+function pointInPolygon(lat, lng, poly) {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i][0], yi = poly[i][1];
+        const xj = poly[j][0], yj = poly[j][1];
+        const intersect = ((yi > lng) !== (yj > lng)) &&
+            (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
+
 function getDeliveryZone(lat, lng) {
     const d = distKm(lat, lng, CENTER_LAT, CENTER_LNG);
 
@@ -264,7 +287,7 @@ function getDeliveryZone(lat, lng) {
     if (inEllipse(lat, lng, ZONE_B_CENTER_LAT, ZONE_B_CENTER_LNG, ZONE_B_LAT_SEMI, ZONE_B_LNG_SEMI)) {
         return { zone: 'zone-b', fee: 1.00, label: 'Zone B', feeLabel: '$1.00', cls: 'zone-b', emoji: '🛵', canDeliver: true };
     }
-    if (inEllipse(lat, lng, ZONE_C_CENTER_LAT, ZONE_C_CENTER_LNG, ZONE_C_LAT_SEMI, ZONE_C_LNG_SEMI)) {
+    if (pointInPolygon(lat, lng, ZONE_C_POLYGON)) {
         return { zone: 'zone-c', fee: 1.50, label: 'Zone C', feeLabel: '$1.50', cls: 'zone-c', emoji: '🗺️', canDeliver: true };
     }
     return { zone: 'none', fee: 0, label: 'Outside delivery area', feeLabel: '$0.00', cls: 'no-del', emoji: '🚫', canDeliver: false };
