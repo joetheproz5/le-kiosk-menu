@@ -144,6 +144,17 @@
         /* ── ERROR TEXT ── */
         .err-text { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
         .err-text.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .address-box { margin-top: 10px; display: none; }
+        .address-box.show { display: block; }
+        .address-wrap { position: relative; }
+        .address-input { width: 100%; padding: 11px 44px 11px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; resize: none; min-height: 70px; line-height: 1.5; }
+        .address-input:focus { border-color: #f59e0b; }
+        .address-input.error { border-color: #ef4444; background: #fef2f2; }
+        .locate-btn { position: absolute; bottom: 8px; right: 8px; background: #f59e0b; border: none; border-radius: 8px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 700; color: #1c0f00; transition: background 0.15s; }
+        .locate-btn:hover { background: #d97706; color: #fff; }
+        .locate-btn.got-location { background: #22c55e; color: #fff; }
+        .locate-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
     </style>
 </head>
 <body class="pb-32">
@@ -274,6 +285,7 @@
         let itemMeta        = {};       // itemKey -> item object
         let selectedType    = null;
         let selectedZone    = null;
+        let userLocation    = null;  // { lat, lng, label }
 
         // ── ORDER MODE TOGGLE ─────────────────────────────────────────
         function toggleOrderMode() {
@@ -340,8 +352,13 @@
         // Addon chip delegation map
         let _addonMap = [];
 
+        let deliveryAddress = '';
+
         function renderSheet() {
             _addonMap = [];
+            // Preserve address if already typed
+            const existingAddr = document.getElementById('delivery-address');
+            if (existingAddr) deliveryAddress = existingAddr.value;
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
             if (!entries.length) return;
 
@@ -393,7 +410,7 @@
             <div class="sheet-section-title">👤 Your Details</div>
             <div style="margin-bottom:10px">
                 <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
-                <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Elie" value="${document.getElementById('sheet-name') ? document.getElementById('sheet-name').value : ''}" autocomplete="off">
+                <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Ahmad" value="${document.getElementById('sheet-name') ? document.getElementById('sheet-name').value : ''}" autocomplete="off">
                 <div class="err-text" id="err-name">Please enter your name.</div>
             </div>
 
@@ -418,6 +435,17 @@
                     </button>
                 </div>
                 <div class="err-text" id="err-zone">Please select a delivery zone.</div>
+                <div class="address-box${selectedZone==='outside'?' show':''}" id="address-box">
+                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Address *</label>
+                    <div class="address-wrap" style="margin-top:6px">
+                        <textarea id="delivery-address" class="address-input" placeholder="Building, street, area, landmarks...">${deliveryAddress}</textarea>
+                        <button class="locate-btn${userLocation?' got-location':''}" id="locate-btn" onclick="getLocation()" title="Use my GPS location">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            ${userLocation?'📍 Got it':'📍 Use GPS'}
+                        </button>
+                    </div>
+                    <div class="err-text" id="err-address">Please enter your delivery address.</div>
+                </div>
             </div>`;
 
             // ── Total + send ──
@@ -485,17 +513,50 @@
 
         function selectZone(zone) {
             selectedZone = zone;
+            if (zone !== 'outside') { userLocation = null; deliveryAddress = ''; }
             ['inside','outside'].forEach(z => {
                 const el = document.getElementById('szone-' + z);
                 if (el) el.classList.toggle('selected', z === zone);
             });
             const errZone = document.getElementById('err-zone');
             if (errZone) errZone.classList.remove('show');
+            // Show/hide address box
+            const addrBox = document.getElementById('address-box');
+            if (addrBox) addrBox.classList.toggle('show', zone === 'outside');
             // Re-render total
             const fee = DELIVERY_FEES[zone] || 0;
             const total = getItemsTotal() + fee;
             const totalEl = document.querySelector('.total-row span:last-child');
             if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
+        }
+
+        // GPS location
+        function getLocation() {
+            if (!navigator.geolocation) { alert('Geolocation is not supported by your browser.'); return; }
+            const btn = document.getElementById('locate-btn');
+            if (btn) { btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;animation:spin .7s linear infinite"><path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/></svg> Getting…'; }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    const mapsUrl = 'https://maps.google.com/?q=' + userLocation.lat + ',' + userLocation.lng;
+                    userLocation.url = mapsUrl;
+                    const addrEl = document.getElementById('delivery-address');
+                    // Append map link to address field if empty
+                    if (addrEl && !addrEl.value.includes('maps.google')) {
+                        const current = addrEl.value.trim();
+                        addrEl.value = current ? current + '\n📍 ' + mapsUrl : '📍 ' + mapsUrl;
+                        deliveryAddress = addrEl.value;
+                    }
+                    if (btn) { btn.className = 'locate-btn got-location'; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 📍 Got it'; }
+                },
+                (err) => {
+                    let msg = 'Could not get location.';
+                    if (err.code === 1) msg = 'Location access denied. Please type your address manually.';
+                    alert(msg);
+                    if (btn) { btn.className = 'locate-btn'; btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 📍 Use GPS'; }
+                },
+                { timeout: 10000 }
+            );
         }
 
         // ── SEND ORDER ────────────────────────────────────────────────
@@ -514,6 +575,12 @@
             }
             if (!selectedType) { document.getElementById('err-type').classList.add('show'); valid = false; }
             if (selectedType === 'delivery' && !selectedZone) { document.getElementById('err-zone').classList.add('show'); valid = false; }
+            if (selectedType === 'delivery' && selectedZone === 'outside') {
+                const addrEl = document.getElementById('delivery-address');
+                const addr = addrEl ? addrEl.value.trim() : '';
+                if (!addr) { document.getElementById('err-address').classList.add('show'); if(addrEl) addrEl.classList.add('error'); valid = false; }
+                else { document.getElementById('err-address').classList.remove('show'); if(addrEl) addrEl.classList.remove('error'); }
+            }
             if (!valid) return;
 
             const entries = Object.entries(cart).filter(([,v]) => v > 0);
@@ -525,6 +592,11 @@
             msg += `📦 *Type:* ${typeNames[selectedType]}\n`;
             if (selectedType === 'delivery' && selectedZone) {
                 msg += `📍 *Zone:* ${selectedZone === 'inside' ? 'Inside Wadi Chahrour (+$0.50)' : 'Outside Wadi Chahrour (+$1.50)'}\n`;
+                if (selectedZone === 'outside') {
+                    const addrEl = document.getElementById('delivery-address');
+                    const addr = addrEl ? addrEl.value.trim() : deliveryAddress;
+                    if (addr) msg += `🏠 *Address:* ${addr}\n`;
+                }
             }
             msg += `🕐 *Time:* ${timeStr}\n━━━━━━━━━━━━━━━━━━\n`;
 
