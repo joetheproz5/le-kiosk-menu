@@ -115,13 +115,13 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-sidebar-btn .cat-icon{font-size:18px;display:block;margin-bottom:4px}
 .menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px}
 
-/* ── MENU CATEGORIES ── */
+/* ── MENU CATEGORIES — no more big colored bars ── */
 .menu-cat-section{margin-bottom:24px}
 .menu-cat-label{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:0 2px}
 .menu-cat-label .cat-name{font-family:var(--brand);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 14px;border-radius:20px;border:2px solid currentColor}
 .menu-cat-label .cat-count{font-size:11px;font-weight:600;color:var(--g400)}
 
-/* ── ITEM CARDS ── */
+/* ── ITEM CARDS — bigger, tinted by category ── */
 .menu-cat-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .item-card-wrap{position:relative}
 .item-card{border-radius:12px;border:2px solid transparent;overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -139,39 +139,48 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-color-0 .item-name{color:var(--cat0-text)}
 .cat-color-0 .item-price{color:var(--cat0-text)}
 .cat-color-0 .cat-name{color:var(--cat0-head)}
+
 .cat-color-1 .item-card{background:var(--cat1-bg);border-color:var(--cat1-border)}
 .cat-color-1 .item-name{color:var(--cat1-text)}
 .cat-color-1 .item-price{color:var(--cat1-text)}
 .cat-color-1 .cat-name{color:var(--cat1-head)}
+
 .cat-color-2 .item-card{background:var(--cat2-bg);border-color:var(--cat2-border)}
 .cat-color-2 .item-name{color:var(--cat2-text)}
 .cat-color-2 .item-price{color:var(--cat2-text)}
 .cat-color-2 .cat-name{color:var(--cat2-head)}
+
 .cat-color-3 .item-card{background:var(--cat3-bg);border-color:var(--cat3-border)}
 .cat-color-3 .item-name{color:var(--cat3-text)}
 .cat-color-3 .item-price{color:var(--cat3-text)}
 .cat-color-3 .cat-name{color:var(--cat3-head)}
+
 .cat-color-4 .item-card{background:var(--cat4-bg);border-color:var(--cat4-border)}
 .cat-color-4 .item-name{color:var(--cat4-text)}
 .cat-color-4 .item-price{color:var(--cat4-text)}
 .cat-color-4 .cat-name{color:var(--cat4-head)}
+
 .cat-color-5 .item-card{background:var(--cat5-bg);border-color:var(--cat5-border)}
 .cat-color-5 .item-name{color:var(--cat5-text)}
 .cat-color-5 .item-price{color:var(--cat5-text)}
 .cat-color-5 .cat-name{color:var(--cat5-head)}
+
 .cat-color-6 .item-card{background:var(--cat6-bg);border-color:var(--cat6-border)}
 .cat-color-6 .item-name{color:var(--cat6-text)}
 .cat-color-6 .item-price{color:var(--cat6-text)}
 .cat-color-6 .cat-name{color:var(--cat6-head)}
+
 .cat-color-7 .item-card{background:var(--cat7-bg);border-color:var(--cat7-border)}
 .cat-color-7 .item-name{color:var(--cat7-text)}
 .cat-color-7 .item-price{color:var(--cat7-text)}
 .cat-color-7 .cat-name{color:var(--cat7-head)}
+
 .cat-color-8 .item-card{background:var(--cat8-bg);border-color:var(--cat8-border)}
 .cat-color-8 .item-name{color:var(--cat8-text)}
 .cat-color-8 .item-price{color:var(--cat8-text)}
 .cat-color-8 .cat-name{color:var(--cat8-head)}
 
+/* Selected state — stronger border + slight scale */
 .cat-color-0 .item-card-wrap.has-qty .item-card{border-color:var(--cat0-head);border-width:2.5px}
 .cat-color-1 .item-card-wrap.has-qty .item-card{border-color:var(--cat1-head);border-width:2.5px}
 .cat-color-2 .item-card-wrap.has-qty .item-card{border-color:var(--cat2-head);border-width:2.5px}
@@ -182,6 +191,7 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-color-7 .item-card-wrap.has-qty .item-card{border-color:var(--cat7-head);border-width:2.5px}
 .cat-color-8 .item-card-wrap.has-qty .item-card{border-color:var(--cat8-head);border-width:2.5px}
 
+/* Sidebar active colors */
 .cat-sidebar-btn[data-ci="0"].active{background:var(--cat0-head);border-color:var(--cat0-head);color:#fff}
 .cat-sidebar-btn[data-ci="1"].active{background:var(--cat1-head);border-color:var(--cat1-head);color:#fff}
 .cat-sidebar-btn[data-ci="2"].active{background:var(--cat2-head);border-color:var(--cat2-head);color:#fff}
@@ -256,30 +266,12 @@ input,textarea,select{font-family:var(--font);outline:none}
 .inbox-empty-icon{font-size:48px;margin-bottom:12px}
 .inbox-gps-row{font-size:10px;color:var(--green-d);font-weight:600;padding:0 14px 8px;display:flex;align-items:center;gap:6px}
 
-/* ══════════════════════════════════════════════
-   ORDER PANEL — 2-step layout
-══════════════════════════════════════════════ */
+/* ── ORDER PANEL ── */
 .order-panel{width:var(--sidebar-order);flex-shrink:0;background:var(--white);border-left:2px solid var(--g200);display:flex;flex-direction:column;overflow:hidden}
-
-/* Step header */
 .order-header{padding:14px 16px 10px;border-bottom:1px solid var(--g200);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .order-title{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a950)}
 .clear-btn{font-size:11px;font-weight:700;color:var(--red-d);background:#fef2f2;border:1px solid #fecaca;padding:5px 10px;border-radius:8px}
 .clear-btn:hover{background:#fee2e2}
-
-/* Step indicator */
-.step-indicator{display:flex;align-items:center;gap:0;padding:10px 16px 0;flex-shrink:0}
-.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;transition:all .2s}
-.step-dot.active{background:var(--a500);color:#fff}
-.step-dot.done{background:var(--green);color:#fff}
-.step-dot.inactive{background:var(--g200);color:var(--g500)}
-.step-line{flex:1;height:2px;background:var(--g200);transition:background .2s}
-.step-line.done{background:var(--green)}
-.step-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g500);margin-top:3px;text-align:center}
-
-/* STEP 1 — cart */
-#order-step-1{display:flex;flex-direction:column;flex:1;min-height:0}
-#order-step-1.hidden{display:none}
 .order-scroll{flex:1;overflow-y:auto;padding:10px 14px;-webkit-overflow-scrolling:touch}
 .order-empty{text-align:center;padding:40px 20px;color:var(--g400);font-size:13px}
 .order-empty-icon{font-size:36px;margin-bottom:8px}
@@ -297,7 +289,7 @@ input,textarea,select{font-family:var(--font);outline:none}
 .q-del{margin-left:5px;width:26px;height:26px;border-radius:6px;background:#fef2f2;color:var(--red-d);font-size:13px;display:flex;align-items:center;justify-content:center}
 .q-del:hover{background:#fee2e2}
 
-/* Add-ons in step 1 */
+/* ── ORDER ADD-ONS (in order panel) ── */
 .order-addons{padding:0 10px 10px}
 .oa-section{margin-bottom:6px}
 .oa-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px}
@@ -307,24 +299,7 @@ input,textarea,select{font-family:var(--font);outline:none}
 .oa-chip.selected{background:var(--a500);border-color:var(--a500);color:var(--white)}
 .oa-chip .oa-chip-price{font-size:9px;opacity:.8;margin-left:2px}
 
-/* Step 1 footer */
-.step1-footer{padding:10px 14px 12px;border-top:1px solid var(--g200);flex-shrink:0;background:var(--white)}
-.step1-total{display:flex;justify-content:space-between;align-items:center;background:var(--a100);border-radius:10px;padding:10px 14px;margin-bottom:10px}
-.step1-total-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a800)}
-.step1-total-amount{font-size:20px;font-weight:800;color:var(--a700)}
-.proceed-btn{width:100%;padding:13px;background:var(--a500);color:var(--white);border-radius:11px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
-.proceed-btn:hover:not(:disabled){background:var(--a600)}
-.proceed-btn:disabled{opacity:.4;cursor:not-allowed}
-
-/* STEP 2 — details + actions */
-#order-step-2{display:none;flex-direction:column;flex:1;min-height:0}
-#order-step-2.show{display:flex}
-
-/* Step 2 — summary bar at top */
-.step2-summary{background:var(--a50);border-bottom:1px solid var(--a200);padding:8px 14px;flex-shrink:0}
-.step2-summary-items{font-size:11px;color:var(--a800);font-weight:600;line-height:1.5;max-height:56px;overflow-y:auto}
-
-.order-form-scroll{flex:1;overflow-y:auto;padding:10px 14px;-webkit-overflow-scrolling:touch}
+.order-form{padding:10px 14px 0;border-top:1px solid var(--g200);flex-shrink:0}
 .form-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px;display:block}
 .form-input{width:100%;padding:9px 11px;border:2px solid var(--a200);border-radius:10px;font-size:12px;font-weight:600;color:var(--a950);background:var(--a50);transition:border-color .2s;margin-bottom:8px}
 .form-input:focus{border-color:var(--a500);background:var(--white)}
@@ -344,8 +319,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .zone-fee{font-size:9px;font-weight:800;opacity:.85;display:block;margin-top:2px}
 .err-msg{font-size:11px;color:var(--red-d);font-weight:600;margin-top:-5px;margin-bottom:7px;display:none}
 .err-msg.show{display:block}
-
-/* Step 2 footer */
 .order-footer{padding:10px 14px 12px;border-top:1px solid var(--g200);flex-shrink:0;background:var(--white)}
 .total-display{display:flex;justify-content:space-between;align-items:center;background:var(--a100);border-radius:10px;padding:10px 14px;margin-bottom:10px}
 .total-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a800)}
@@ -354,8 +327,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .act-btn{padding:11px 6px;border-radius:11px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;touch-action:manipulation}
 .act-btn:active{transform:scale(.97)}
 .act-btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-back{background:var(--g200);color:var(--g700);grid-column:1/-1}
-.btn-back:hover{background:var(--g300)}
 .btn-charge{background:var(--green);color:var(--white);grid-column:1/-1}
 .btn-charge:hover:not(:disabled){background:var(--green-d)}
 .btn-print-thermal{background:var(--g800);color:var(--white)}
@@ -407,207 +378,149 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cr-meta span{font-weight:700;color:#451a03}
 .cr-total{display:flex;justify-content:space-between;background:#fef3c7;border-radius:8px;padding:10px 12px;font-weight:800;font-size:14px;color:#92400e;margin-top:8px}
 .cr-footer{text-align:center;font-size:10px;color:#9ca3af;margin-top:12px;padding-top:8px;border-top:1px dashed #fde68a}
+</style>
+</head>
+<body>
+<div id="loading"><div class="spinner"></div><div style="font-family:var(--brand);font-size:16px;color:var(--a900);font-weight:600" id="loading-text">Loading…</div></div>
+<div id="toast"></div>
+<div id="modal-overlay">
+  <div class="modal-box">
+    <h3 id="modal-title">Confirm</h3>
+    <p id="modal-body">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
 
-/* Step transition animation */
-@keyframes slideInRight{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
-#order-step-2.show{animation:slideInRight .22s ease}
-#order-step-1:not(.hidden){animation:slideInLeft .22s ease}
+<div id="token-modal">
+  <div class="token-modal-box">
+    <h3>GitHub Token Required</h3>
+    <p>To save orders and update the inbox, the POS needs a GitHub token with <strong>Contents: read &amp; write</strong> access to the <code>le-kiosk-menu</code> repo.</p>
+    <p style="margin-top:6px">Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → Fine-grained tokens → Contents: read &amp; write.</p>
+    <input type="password" class="token-modal-inp" id="token-modal-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="token-modal-actions">
+      <button class="token-modal-save" onclick="saveTokenFromModal()">Save Token</button>
+      <button class="token-modal-skip" onclick="closeTokenModal()">Skip for now</button>
+    </div>
+  </div>
+</div>
 
+<div id="print-area"></div>
 
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Le Kiosk</div>
+    <div class="login-sub">Point of Sale</div>
+    <label class="login-label">Password</label>
+    <input type="password" id="pw" class="login-input" placeholder="Enter POS password" autocomplete="current-password">
+    <button class="login-btn-main" id="login-btn" onclick="tryLogin()">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+    <div class="lockout-bar" id="lockout-bar"></div>
+    <div class="attempt-dots" id="attempt-dots"></div>
+    <div class="token-divider"><span>GitHub Token</span></div>
+    <p class="token-note">Needed to save orders &amp; update inbox. <a href="https://github.com/settings/tokens" target="_blank">Create one here</a> → Fine-grained → Contents: read &amp; write.</p>
+    <div class="token-row">
+      <input type="password" id="token-login-inp" class="token-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <button class="token-save-btn" onclick="saveTokenFromLogin()">Save</button>
+    </div>
+    <div class="token-status missing" id="token-login-status">✗ No token saved</div>
+  </div>
+</div>
 
-Loading…
-
-
-  
-    Confirm
-    Are you sure?
-    
-      Cancel
-      OK
-    
-  
-
-
-
-  
-    GitHub Token Required
-    To save orders and update the inbox, the POS needs a GitHub token with Contents: read & write access to the le-kiosk-menu repo.
-    Create one at github.com/settings/tokens → Fine-grained tokens → Contents: read & write.
-    
-    
-      Save Token
-      Skip for now
-    
-  
-
-
-
-
-
-
-  
-    Le Kiosk
-    Point of Sale
-    Password
-    
-    Sign In
-    
-    
-    
-    GitHub Token
-    Needed to save orders & update inbox. Create one here → Fine-grained → Contents: read & write.
-    
-      
-      Save
-    
-    ✗ No token saved
-  
-
-
-
-
-  
-    
-      Le Kiosk POS
-      
-    
-    
-      🔑 No Token
-      
+<!-- POS -->
+<div id="pos-screen">
+  <div class="pos-topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="pos-logo">Le Kiosk <span>POS</span></span>
+      <span class="session-badge" id="session-badge"></span>
+    </div>
+    <div class="pos-topbar-right">
+      <span class="token-topbar-badge missing" id="token-topbar-badge" onclick="openTokenModal()" title="Click to update token">🔑 No Token</span>
+      <button class="topbar-btn tb-inbox" id="inbox-tab-btn" onclick="toggleInboxView()" style="position:relative">
         📥 Incoming
-        0
-      
-      📋 Orders Log
-      Logout
-    
-  
+        <span class="inbox-badge" id="inbox-badge">0</span>
+      </button>
+      <button class="topbar-btn tb-orders" id="orders-tab-btn" onclick="toggleOrdersView()">📋 Orders Log</button>
+      <button class="topbar-btn tb-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="pos-main">
+    <div class="cat-sidebar" id="cat-sidebar"></div>
+    <div class="menu-panel" id="menu-panel"></div>
+    <div id="orders-view">
+      <div class="orders-toolbar">
+        <h2>Orders Log</h2>
+        <div class="filter-btns">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter(this,'all')">All</button>
+          <button class="filter-btn" data-filter="pending" onclick="setFilter(this,'pending')">Pending</button>
+          <button class="filter-btn" data-filter="done" onclick="setFilter(this,'done')">Done</button>
+          <button class="filter-btn" data-filter="cancelled" onclick="setFilter(this,'cancelled')">Cancelled</button>
+        </div>
+        <button class="topbar-btn tb-orders" onclick="loadOrders(true)" style="background:var(--a100);color:var(--a950)">🔄 Refresh</button>
+      </div>
+      <div class="orders-list" id="orders-list"><div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">Loading orders…</div></div>
+    </div>
+    <div id="inbox-view">
+      <div class="inbox-toolbar">
+        <h2>📥 Incoming Orders</h2>
+        <button class="topbar-btn" onclick="pollInbox(true)" style="background:var(--a100);color:var(--a950)">🔄 Refresh</button>
+      </div>
+      <div class="inbox-list" id="inbox-list">
+        <div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders yet</div></div>
+      </div>
+    </div>
+    <div class="order-panel">
+      <div class="order-header">
+        <span class="order-title">🛒 Current Order</span>
+        <button class="clear-btn" onclick="clearOrder()">Clear ✕</button>
+      </div>
+      <div class="order-scroll" id="order-scroll"></div>
+      <div class="order-form" id="order-form">
+        <label class="form-label">Customer Name *</label>
+        <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
+        <div class="err-msg" id="err-name">Name is required.</div>
+        <label class="form-label">Order Type *</label>
+        <div class="type-grid">
+          <button class="type-btn" onclick="selType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
+          <button class="type-btn" onclick="selType('takeaway')"><span class="type-icon">🥡</span>Takeaway</button>
+          <button class="type-btn" onclick="selType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
+        </div>
+        <div class="err-msg" id="err-type">Select an order type.</div>
+        <div id="zone-section" style="display:none">
+          <label class="form-label">Delivery Zone *</label>
+          <div class="zone-grid">
+            <button class="zone-btn za" onclick="selZone('A')">Zone A<span class="zone-fee">$0.50</span></button>
+            <button class="zone-btn zb" onclick="selZone('B')">Zone B<span class="zone-fee">$1.00</span></button>
+            <button class="zone-btn zc" onclick="selZone('C')">Zone C<span class="zone-fee">$1.50</span></button>
+          </div>
+          <div class="err-msg" id="err-zone">Select a delivery zone.</div>
+        </div>
+        <label class="form-label" id="note-label" style="display:none">Note (optional)</label>
+        <textarea id="order-note" class="form-input" rows="2" placeholder="Table number, address, special requests…" style="display:none;resize:none"></textarea>
+      </div>
+      <div class="order-footer">
+        <div class="total-display">
+          <div>
+            <div class="total-label">Total</div>
+            <div id="delivery-fee-label" style="font-size:10px;color:var(--a700);font-weight:600;display:none"></div>
+          </div>
+          <div class="total-amount" id="total-display">$0.00</div>
+        </div>
+        <div class="action-btns">
+          <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
+          <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
+          <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
+          <button class="act-btn btn-whatsapp" onclick="sendWhatsApp()">💬 WhatsApp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  
-    
-    
-
-    
-    
-      
-        Orders Log
-        
-          All
-          Pending
-          Done
-          Cancelled
-        
-        🔄 Refresh
-      
-      Loading orders…
-    
-
-    
-    
-      
-        📥 Incoming Orders
-        🔄 Refresh
-      
-      
-        📭No incoming orders yet
-      
-    
-
-    
-    
-
-      
-      
-        🛒 Current Order
-        Clear ✕
-      
-
-      
-      
-        
-          1
-          Items
-        
-        
-        
-          2
-          Details
-        
-      
-
-      
-      
-        
-        
-          
-            Subtotal
-            $0.00
-          
-          
-            Proceed to Details →
-          
-        
-      
-
-      
-      
-
-        
-        
-          
-        
-
-        
-          
-            Customer Name *
-            
-            Name is required.
-            Order Type *
-            
-              🪑Dine In
-              🥡Takeaway
-              🛵Delivery
-            
-            Select an order type.
-            
-              Delivery Zone *
-              
-                Zone A$0.50
-                Zone B$1.00
-                Zone C$1.50
-              
-              Select a delivery zone.
-            
-            Note (optional)
-            
-          
-        
-
-        
-          
-            
-              Total
-              
-            
-            $0.00
-          
-          
-            ← Back to Cart
-            ✅ Charge & Save
-            🖨 Thermal
-            💬 WhatsApp
-            🖨 Card
-          
-        
-      
-      
-
-    
-    
-  
-
-
-
+<script>
 // ═══════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════
@@ -640,17 +553,24 @@ let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=
 let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0;
 let inboxWritePending=false;
-let currentStep=1; // 1 = cart, 2 = details
 
 // ═══════════════════════════════════════════════════
 // TOKEN
 // ═══════════════════════════════════════════════════
-function xorStr(str,key=XOR_KEY){return Array.from(str).map((c,i)=>String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length))).join('');}
-function storeToken(raw){sessionStorage.setItem('pos_tok',btoa(xorStr(raw)));}
-function loadToken(){const s=sessionStorage.getItem('pos_tok');if(!s)return '';try{return xorStr(atob(s));}catch(_){return '';}}
-function clearStoredToken(){sessionStorage.removeItem('pos_tok');}
-function getToken(){return loadToken();}
-function hasToken(){return !!getToken();}
+function xorStr(str, key=XOR_KEY){
+  return Array.from(str).map((c,i)=>
+    String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length))
+  ).join('');
+}
+function storeToken(raw){ sessionStorage.setItem('pos_tok', btoa(xorStr(raw))); }
+function loadToken(){
+  const s=sessionStorage.getItem('pos_tok');
+  if(!s) return '';
+  try{ return xorStr(atob(s)); } catch(_){ return ''; }
+}
+function clearStoredToken(){ sessionStorage.removeItem('pos_tok'); }
+function getToken(){ return loadToken(); }
+function hasToken(){ return !!getToken(); }
 
 function updateTokenBadge(){
   const ok=hasToken();
@@ -664,11 +584,11 @@ function updateTokenBadge(){
 function updateLoginTokenStatus(){
   const ok=hasToken();
   const el=document.getElementById('token-login-status');
-  if(el){el.textContent=ok?'✓ Token saved (this session)':'✗ No token saved';el.className='token-status '+(ok?'ok':'missing');}
+  if(el){ el.textContent=ok?'✓ Token saved (this session)':'✗ No token saved'; el.className='token-status '+(ok?'ok':'missing'); }
 }
 function saveTokenFromLogin(){
   const t=document.getElementById('token-login-inp').value.trim();
-  if(!t){showToast('Enter a token first','error');return;}
+  if(!t){ showToast('Enter a token first','error'); return; }
   storeToken(t);
   document.getElementById('token-login-inp').value='';
   updateLoginTokenStatus();
@@ -676,15 +596,19 @@ function saveTokenFromLogin(){
 }
 function saveTokenFromModal(){
   const t=document.getElementById('token-modal-inp').value.trim();
-  if(!t){showToast('Enter a token first','error');return;}
+  if(!t){ showToast('Enter a token first','error'); return; }
   storeToken(t);
   document.getElementById('token-modal-inp').value='';
   closeTokenModal();
   updateTokenBadge();
   showToast('Token saved ✓','success');
 }
-function openTokenModal(){document.getElementById('token-modal').classList.add('show');}
-function closeTokenModal(){document.getElementById('token-modal').classList.remove('show');}
+function openTokenModal(){
+  document.getElementById('token-modal').classList.add('show');
+}
+function closeTokenModal(){
+  document.getElementById('token-modal').classList.remove('show');
+}
 
 // ═══════════════════════════════════════════════════
 // CRYPTO / HASH
@@ -767,7 +691,7 @@ async function bootPOS(){
   showLoading('Loading menu…');
   try{await loadMenu();renderCatSidebar();renderMenuPanel();}
   catch(e){showToast('Menu load failed: '+e.message,'error');}
-  renderOrderStep1();
+  renderOrderPanel();
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
   hideLoading();
@@ -791,17 +715,17 @@ function fromB64(b64){
 }
 function toB64(str){
   const bytes=new TextEncoder().encode(str);
-  let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));
+  let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
   return btoa(bin);
 }
 async function ghRead(path){
   const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:ghHeaders()});
-  if(res.status===404) return{data:null,sha:null};
+  if(res.status===404) return {data:null,sha:null};
   if(!res.ok) throw new Error('GitHub read '+res.status);
   const d=await res.json();
-  return{data:JSON.parse(fromB64(d.content)),sha:d.sha};
+  return{data:JSON.parse(fromB64(d.content)), sha:d.sha};
 }
-async function ghWrite(path,data,message){
+async function ghWrite(path, data, message){
   if(!hasToken()) throw new Error('No GitHub token — click the 🔑 button in the top bar');
   let sha=null;
   try{
@@ -853,7 +777,7 @@ function scrollToCategory(key,idx,btn){
 }
 
 // ═══════════════════════════════════════════════════
-// MENU PANEL
+// MENU PANEL — no colored headers, tinted cards
 // ═══════════════════════════════════════════════════
 function renderMenuPanel(){
   const panel=document.getElementById('menu-panel');
@@ -884,52 +808,12 @@ function setupScrollSpy(){
 }
 
 // ═══════════════════════════════════════════════════
-// STEP NAVIGATION
-// ═══════════════════════════════════════════════════
-function goToStep2(){
-  if(!orderLines.length){showToast('Add items first','error');return;}
-  currentStep=2;
-  document.getElementById('order-step-1').classList.add('hidden');
-  document.getElementById('order-step-2').classList.add('show');
-  document.getElementById('order-panel-title').textContent='📋 Order Details';
-  // Update step indicator
-  document.getElementById('sdot1').className='step-dot done';
-  document.getElementById('sdot1').textContent='✓';
-  document.getElementById('sline1').classList.add('done');
-  document.getElementById('sdot2').className='step-dot active';
-  // Build summary
-  buildStep2Summary();
-  updateTotal();
-}
-function goToStep1(){
-  currentStep=1;
-  document.getElementById('order-step-1').classList.remove('hidden');
-  document.getElementById('order-step-2').classList.remove('show');
-  document.getElementById('order-panel-title').textContent='🛒 Current Order';
-  // Reset step indicator
-  document.getElementById('sdot1').className='step-dot active';
-  document.getElementById('sdot1').textContent='1';
-  document.getElementById('sline1').classList.remove('done');
-  document.getElementById('sdot2').className='step-dot inactive';
-  renderOrderStep1();
-}
-function buildStep2Summary(){
-  const el=document.getElementById('step2-summary-items');
-  if(!el) return;
-  el.innerHTML=orderLines.map(l=>{
-    const lineTotal=l.price*l.qty+l.addons.reduce((a,x)=>a+x.price,0);
-    const addonsStr=l.addons.length?` <span style="color:var(--a600);font-size:10px">(+${l.addons.map(a=>a.label).join(', ')})</span>`:'';
-    const flavorStr=l.flavor?` <span style="color:var(--g500);font-size:10px">· ${l.flavor}</span>`:'';
-    return`<div style="display:flex;justify-content:space-between;gap:6px"><span>${l.name} x${l.qty}${flavorStr}${addonsStr}</span><span style="color:var(--a700);font-weight:700;flex-shrink:0">$${lineTotal.toFixed(2)}</span></div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════
 // ORDER MANAGEMENT
 // ═══════════════════════════════════════════════════
 function priceNum(p){return parseFloat((p||'0').replace(/[^0-9.]/g,''))||0;}
 function getQtyForItem(catKey,itemIdx){
   const cat=menuData.find(c=>c.key===catKey);if(!cat||!cat.items||!cat.items[itemIdx]) return 0;
+  const item=cat.items[itemIdx];
   const line=orderLines.find(l=>l.catKey===catKey&&l.itemIdx===itemIdx);
   return line?line.qty:0;
 }
@@ -940,10 +824,7 @@ function addToOrder(catKey,itemIdx){
   const existing=orderLines.find(l=>l.catKey===catKey&&l.itemIdx===itemIdx);
   if(existing){existing.qty++;}
   else{orderLines.push({id:Date.now()+Math.random(),catKey,itemIdx,name:item.name,price:pn,priceStr:item.price,qty:1,addons:[],flavor:null,meta:item});}
-  updateItemBadge(catKey,itemIdx);
-  renderOrderStep1();
-  // If we're on step 2, rebuild summary too
-  if(currentStep===2) buildStep2Summary();
+  updateItemBadge(catKey,itemIdx);renderOrderPanel();
 }
 function updateItemBadge(catKey,itemIdx){
   const qty=getQtyForItem(catKey,itemIdx);
@@ -956,9 +837,7 @@ function changeQty(id,delta){
   const line=orderLines.find(l=>l.id===id);if(!line) return;
   line.qty=Math.max(0,line.qty+delta);
   if(line.qty===0)orderLines=orderLines.filter(l=>l.id!==id);
-  updateItemBadge(line.catKey,line.itemIdx);
-  renderOrderStep1();
-  if(currentStep===2) buildStep2Summary();
+  updateItemBadge(line.catKey,line.itemIdx);renderOrderPanel();
 }
 function removeLine(id){
   const line=orderLines.find(l=>l.id===id);
@@ -967,25 +846,22 @@ function removeLine(id){
     if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}
     if(badge)badge.textContent='';
   }
-  orderLines=orderLines.filter(l=>l.id!==id);
-  renderOrderStep1();
-  if(currentStep===2) buildStep2Summary();
+  orderLines=orderLines.filter(l=>l.id!==id);renderOrderPanel();
 }
 function toggleAddon(lineId,addonLabel,addonPrice){
   const line=orderLines.find(l=>l.id===lineId);if(!line) return;
   const idx=line.addons.findIndex(a=>a.label===addonLabel);
   if(idx>-1)line.addons.splice(idx,1);else line.addons.push({label:addonLabel,price:addonPrice});
-  renderOrderStep1();
+  renderOrderPanel();
 }
 function toggleFlavor(lineId,flavor){
   const line=orderLines.find(l=>l.id===lineId);if(!line) return;
-  line.flavor=line.flavor===flavor?null:flavor;renderOrderStep1();
+  line.flavor=line.flavor===flavor?null:flavor;renderOrderPanel();
 }
 function clearOrder(){
   const prev=[...orderLines];
   orderLines=[];orderType=null;deliveryZone=null;
-  document.getElementById('cust-name').value='';
-  document.getElementById('order-note').value='';
+  document.getElementById('cust-name').value='';document.getElementById('order-note').value='';
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
   document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
   document.getElementById('zone-section').style.display='none';
@@ -996,9 +872,7 @@ function clearOrder(){
     if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}
     if(badge)badge.textContent='';
   });
-  // Always go back to step 1 on clear
-  if(currentStep===2) goToStep1();
-  else renderOrderStep1();
+  renderOrderPanel();
 }
 function selType(t){
   orderType=t;
@@ -1022,7 +896,6 @@ function selZone(z){
 function getItemsTotal(){return orderLines.reduce((s,l)=>s+l.price*l.qty+l.addons.reduce((a,x)=>a+x.price,0),0);}
 function getDeliveryFee(){return(orderType==='delivery'&&deliveryZone)?(ZONE_FEES[deliveryZone]||0):0;}
 function getGrandTotal(){return getItemsTotal()+getDeliveryFee();}
-
 function updateTotal(){
   const fee=getDeliveryFee(),total=getGrandTotal();
   document.getElementById('total-display').textContent='$'+total.toFixed(2);
@@ -1032,18 +905,11 @@ function updateTotal(){
 }
 
 // ═══════════════════════════════════════════════════
-// RENDER STEP 1 (cart only)
+// RENDER ORDER PANEL — with add-ons & flavors from menu meta
 // ═══════════════════════════════════════════════════
-function renderOrderStep1(){
-  // Update subtotal display & proceed button
-  const subtotal=getItemsTotal();
-  document.getElementById('step1-total-display').textContent='$'+subtotal.toFixed(2);
-  const proceedBtn=document.getElementById('proceed-btn');
-  if(proceedBtn) proceedBtn.disabled=orderLines.length===0;
-
+function renderOrderPanel(){
+  updateTotal();
   const scroll=document.getElementById('order-scroll');
-  if(!scroll) return;
-
   if(!orderLines.length){
     scroll.innerHTML=`<div class="order-empty"><div class="order-empty-icon">🛒</div><div>Tap items to add them</div></div>`;
     return;
@@ -1067,19 +933,19 @@ function renderOrderStep1(){
         <div class="order-line-price">$${lineTotal.toFixed(2)}</div>
       </div>`;
 
-    // Flavors
+    // ── Flavors (shisha etc.) ──
     if(line.meta?.flavors?.length){
       html+=`<div class="order-addons"><div class="oa-section">
         <div class="oa-label">💨 Flavor</div>
         <div class="oa-chips">`;
       line.meta.flavors.forEach(f=>{
-        const safe=f.replace(/'/g,"\'");
+        const safe=f.replace(/'/g,"\\'");
         html+=`<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavor(${lineId},'${safe}')">${f}</button>`;
       });
       html+=`</div></div></div>`;
     }
 
-    // Add-ons
+    // ── Add-ons from menu meta (e.g. extra cheese, sauce, etc.) ──
     if(line.meta?.addons?.length){
       html+=`<div class="order-addons"><div class="oa-section">
         <div class="oa-label">➕ Add-ons</div>
@@ -1088,7 +954,7 @@ function renderOrderStep1(){
         const label=addon.label||addon.name||addon;
         const price=typeof addon.price==='number'?addon.price:(parseFloat(String(addon.price||0).replace(/[^0-9.]/g,''))||0);
         const isSelected=line.addons.some(a=>a.label===label);
-        const safeLabel=label.replace(/'/g,"\'");
+        const safeLabel=label.replace(/'/g,"\\'");
         const priceStr=price>0?` +$${price.toFixed(2)}`:'';
         html+=`<button class="oa-chip${isSelected?' selected':''}" onclick="toggleAddon(${lineId},'${safeLabel}',${price})">${label}${priceStr?`<span class="oa-chip-price">${priceStr}</span>`:''}`;
         html+=`</button>`;
@@ -1125,7 +991,7 @@ function buildOrderObj(status='pending'){
 }
 
 // ═══════════════════════════════════════════════════
-// LOAD ORDER INTO CURRENT
+// LOAD INBOX ORDER → CURRENT ORDER
 // ═══════════════════════════════════════════════════
 function normalizeZone(zoneVal){
   if(!zoneVal) return null;
@@ -1151,8 +1017,7 @@ function loadOrderIntoCurrent(order){
     orderLines.push(line);
     if(foundCatKey!==null&&foundIdx!==null) updateItemBadge(foundCatKey,foundIdx);
   });
-  // Go to step 2 automatically with loaded order
-  goToStep2();
+  renderOrderPanel();
   showToast('Order loaded ✓','success');
   if(showingInbox) toggleInboxView();
   if(showingOrders) toggleOrdersView();
@@ -1169,7 +1034,7 @@ async function chargeOrder(){
   showLoading('Saving order…');
   try{
     let orders=[];
-    try{const r=await ghRead(ORDERS_PATH);orders=r.data||[];}catch(_){orders=[];}
+    try{ const r=await ghRead(ORDERS_PATH); orders=r.data||[]; }catch(_){ orders=[]; }
     orders.unshift(order);
     if(orders.length>MAX_ORDERS) orders=orders.slice(0,MAX_ORDERS);
     ordersData=orders;
@@ -1211,7 +1076,7 @@ async function updateOrderStatus(id,status){
 // INBOX POLL
 // ═══════════════════════════════════════════════════
 async function pollInbox(force=false){
-  if(inboxWritePending&&!force) return;
+  if(inboxWritePending && !force) return;
   try{
     const{data,sha}=await ghRead(INBOX_PATH);
     inboxData=data||[];
