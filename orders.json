@@ -1,5 +1,27 @@
 [
   {
+    "id": "ORD-1779634794609",
+    "status": "pending",
+    "timestamp": "2026-05-24T14:59:54.609Z",
+    "name": "Joe",
+    "note": "",
+    "orderType": "delivery",
+    "deliveryZone": "A",
+    "deliveryFee": 0.5,
+    "items": [
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 2,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "subtotal": 10,
+    "total": 10.5
+  },
+  {
     "id": "ORD-1779630179648",
     "status": "done",
     "timestamp": "2026-05-24T13:42:59.648Z",
