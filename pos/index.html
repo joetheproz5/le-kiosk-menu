@@ -52,18 +52,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .attempt-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--a200)}
 .dot.used{background:var(--red)}
-.token-divider{border-top:1px solid var(--a200);margin:20px 0 16px;text-align:center;position:relative}
-.token-divider span{background:var(--white);padding:0 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);position:relative;top:-9px}
-.token-note{font-size:11px;color:var(--g500);margin-bottom:10px;line-height:1.5}
-.token-note a{color:var(--a700);text-decoration:underline}
-.token-row{display:flex;gap:8px}
-.token-inp{flex:1;padding:10px 12px;border:2px solid var(--a200);border-radius:10px;font-size:13px;color:var(--a950);background:var(--a50)}
-.token-inp:focus{border-color:var(--a500)}
-.token-save-btn{padding:10px 14px;background:var(--a900);color:var(--a100);border-radius:10px;font-size:12px;font-weight:700;white-space:nowrap}
-.token-save-btn:hover{background:var(--a800)}
-.token-status{font-size:11px;font-weight:700;margin-top:8px}
-.token-status.ok{color:var(--green-d)}
-.token-status.missing{color:var(--red)}
 
 /* ── POS SHELL ── */
 #pos-screen{display:none;height:100vh;flex-direction:column}
@@ -84,27 +72,10 @@ input,textarea,select{font-family:var(--font);outline:none}
 .tb-logout{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
 .tb-logout:hover{background:rgba(255,255,255,.15)}
 .session-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.2);color:var(--a300);padding:3px 10px;border-radius:20px;letter-spacing:.06em}
-.token-topbar-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;cursor:pointer;transition:all .15s}
-.token-topbar-badge.ok{background:rgba(34,197,94,.2);color:#86efac}
-.token-topbar-badge.missing{background:rgba(239,68,68,.2);color:#fca5a5;animation:pulse-badge 2s ease-in-out infinite}
-@keyframes pulse-badge{0%,100%{opacity:1}50%{opacity:.5}}
 @keyframes ring{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
 .tb-inbox.has-new{animation:ring 1.4s ease-in-out infinite}
 
 /* ── TOKEN MODAL ── */
-#token-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9996;display:none;align-items:center;justify-content:center;padding:20px}
-#token-modal.show{display:flex}
-.token-modal-box{background:var(--white);border-radius:20px;padding:28px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.25)}
-.token-modal-box h3{font-family:var(--brand);font-size:22px;font-weight:700;color:var(--a950);margin-bottom:6px}
-.token-modal-box p{font-size:13px;color:var(--g500);margin-bottom:4px;line-height:1.6}
-.token-modal-box p a{color:var(--a700);text-decoration:underline}
-.token-modal-inp{width:100%;padding:11px 14px;border:2px solid var(--a200);border-radius:10px;font-size:13px;color:var(--a950);background:var(--a50);margin:12px 0 8px}
-.token-modal-inp:focus{border-color:var(--a500)}
-.token-modal-actions{display:flex;gap:10px;margin-top:4px}
-.token-modal-save{flex:1;padding:11px;background:var(--a900);color:var(--a100);border-radius:10px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-.token-modal-save:hover{background:var(--a800)}
-.token-modal-skip{padding:11px 16px;background:var(--g100);color:var(--g600);border-radius:10px;font-size:13px;font-weight:700}
-.token-modal-skip:hover{background:var(--g200)}
 
 .pos-main{display:flex;flex:1;min-height:0}
 .cat-sidebar{width:var(--cat-sidebar);flex-shrink:0;background:var(--a950);display:flex;flex-direction:column;overflow-y:auto;padding:10px 8px;gap:6px;-webkit-overflow-scrolling:touch}
@@ -394,18 +365,6 @@ input,textarea,select{font-family:var(--font);outline:none}
   </div>
 </div>
 
-<div id="token-modal">
-  <div class="token-modal-box">
-    <h3>GitHub Token Required</h3>
-    <p>To save orders and update the inbox, the POS needs a GitHub token with <strong>Contents: read &amp; write</strong> access to the <code>le-kiosk-menu</code> repo.</p>
-    <p style="margin-top:6px">Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → Fine-grained tokens → Contents: read &amp; write.</p>
-    <input type="password" class="token-modal-inp" id="token-modal-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    <div class="token-modal-actions">
-      <button class="token-modal-save" onclick="saveTokenFromModal()">Save Token</button>
-      <button class="token-modal-skip" onclick="closeTokenModal()">Skip for now</button>
-    </div>
-  </div>
-</div>
 
 <div id="print-area"></div>
 
@@ -420,13 +379,6 @@ input,textarea,select{font-family:var(--font);outline:none}
     <div class="login-err" id="login-err"></div>
     <div class="lockout-bar" id="lockout-bar"></div>
     <div class="attempt-dots" id="attempt-dots"></div>
-    <div class="token-divider"><span>GitHub Token</span></div>
-    <p class="token-note">Needed to save orders &amp; update inbox. <a href="https://github.com/settings/tokens" target="_blank">Create one here</a> → Fine-grained → Contents: read &amp; write.</p>
-    <div class="token-row">
-      <input type="password" id="token-login-inp" class="token-inp" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-      <button class="token-save-btn" onclick="saveTokenFromLogin()">Save</button>
-    </div>
-    <div class="token-status missing" id="token-login-status">✗ No token saved</div>
   </div>
 </div>
 
@@ -438,7 +390,6 @@ input,textarea,select{font-family:var(--font);outline:none}
       <span class="session-badge" id="session-badge"></span>
     </div>
     <div class="pos-topbar-right">
-      <span class="token-topbar-badge missing" id="token-topbar-badge" onclick="openTokenModal()" title="Click to update token">🔑 No Token</span>
       <button class="topbar-btn tb-inbox" id="inbox-tab-btn" onclick="toggleInboxView()" style="position:relative">
         📥 Incoming
         <span class="inbox-badge" id="inbox-badge">0</span>
@@ -480,7 +431,6 @@ input,textarea,select{font-family:var(--font);outline:none}
       <div class="order-scroll" id="order-scroll"></div>
         <div class="order-proceed-bar" id="order-proceed-bar" style="padding:12px 14px;border-top:1px solid var(--g200)">
   <button class="act-btn btn-charge" style="width:100%;justify-content:center" onclick="showOrderDetails()">Proceed →</button>
-</div>
       </div>
       <div class="order-details-section" id="order-details-section" style="display:none;flex-direction:column;flex:0 0 auto">
         <div class="order-form" id="order-form" style="padding-top:10px">
@@ -525,7 +475,6 @@ input,textarea,select{font-family:var(--font);outline:none}
           </div>
         </div>
       </div>
-      </div>
     </div>
   </div>
 </div>
@@ -535,12 +484,9 @@ input,textarea,select{font-family:var(--font);outline:none}
 // CONFIG
 // ═══════════════════════════════════════════════════
 const ADMIN_HASH   = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
-const REPO_OWNER   = 'joetheproz5';
-const REPO_NAME    = 'le-kiosk-menu';
 const MENU_PATH    = 'menu.json';
 const ORDERS_PATH  = 'orders.json';
 const INBOX_PATH   = 'inbox.json';
-const API          = 'https://api.github.com';
 const MAX_ORDERS   = 200;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS   = 2 * 60 * 1000;
@@ -551,7 +497,6 @@ const CAT_ICONS    = {
   appetizers:'🍟', sandwiches:'🥪', burgers:'🍔', sajj:'🫓',
   desserts:'🍨', shisha:'💨', beverages:'🥤', sweet:'🍫', savory:'🧀'
 };
-const XOR_KEY = 'pos_k3y_!2024';
 
 // ═══════════════════════════════════════════════════
 // STATE
@@ -564,61 +509,6 @@ let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0;
 let inboxWritePending=false;
 
-// ═══════════════════════════════════════════════════
-// TOKEN
-// ═══════════════════════════════════════════════════
-function xorStr(str, key=XOR_KEY){
-  return Array.from(str).map((c,i)=>
-    String.fromCharCode(c.charCodeAt(0)^key.charCodeAt(i%key.length))
-  ).join('');
-}
-function storeToken(raw){ sessionStorage.setItem('pos_tok', btoa(xorStr(raw))); }
-function loadToken(){
-  const s=sessionStorage.getItem('pos_tok');
-  if(!s) return '';
-  try{ return xorStr(atob(s)); } catch(_){ return ''; }
-}
-function clearStoredToken(){ sessionStorage.removeItem('pos_tok'); }
-function getToken(){ return loadToken(); }
-function hasToken(){ return !!getToken(); }
-
-function updateTokenBadge(){
-  const ok=hasToken();
-  const badge=document.getElementById('token-topbar-badge');
-  if(!badge) return;
-  badge.textContent=ok?'🔑 Token OK':'🔑 No Token';
-  badge.className='token-topbar-badge '+(ok?'ok':'missing');
-  const chargeBtn=document.getElementById('charge-btn');
-  if(chargeBtn) chargeBtn.disabled=!ok;
-}
-function updateLoginTokenStatus(){
-  const ok=hasToken();
-  const el=document.getElementById('token-login-status');
-  if(el){ el.textContent=ok?'✓ Token saved (this session)':'✗ No token saved'; el.className='token-status '+(ok?'ok':'missing'); }
-}
-function saveTokenFromLogin(){
-  const t=document.getElementById('token-login-inp').value.trim();
-  if(!t){ showToast('Enter a token first','error'); return; }
-  storeToken(t);
-  document.getElementById('token-login-inp').value='';
-  updateLoginTokenStatus();
-  showToast('Token saved ✓','success');
-}
-function saveTokenFromModal(){
-  const t=document.getElementById('token-modal-inp').value.trim();
-  if(!t){ showToast('Enter a token first','error'); return; }
-  storeToken(t);
-  document.getElementById('token-modal-inp').value='';
-  closeTokenModal();
-  updateTokenBadge();
-  showToast('Token saved ✓','success');
-}
-function openTokenModal(){
-  document.getElementById('token-modal').classList.add('show');
-}
-function closeTokenModal(){
-  document.getElementById('token-modal').classList.remove('show');
-}
 
 // ═══════════════════════════════════════════════════
 // CRYPTO / HASH
@@ -659,8 +549,6 @@ async function tryLogin(){
     resetLockout();hideLockBar();
     document.getElementById('login-screen').style.display='none';
     document.getElementById('pos-screen').classList.add('show');
-    updateTokenBadge();
-    if(!hasToken()) openTokenModal();
     startSession();bootPOS();
   } else {
     const na=(l.a||0)+1,nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
@@ -676,7 +564,6 @@ document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')
 (function(){
   const l=getLockout();renderDots(l.a||0);
   if(l.u>Date.now()){enableLogin(false);startLockCountdown();}
-  updateLoginTokenStatus();
 })();
 
 // ═══════════════════════════════════════════════════
@@ -687,11 +574,9 @@ function resetSession(){if(!document.getElementById('pos-screen').classList.cont
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),hrs=Math.floor(rem/3600000),mins=Math.floor((rem%3600000)/60000);document.getElementById('session-badge').textContent=hrs>0?`⏱ ${hrs}h ${mins}m`:`⏱ ${mins}m`;}
 function logout(){
   clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockCountdown);clearInterval(inboxPollInterval);
-  clearStoredToken();
   document.getElementById('pos-screen').classList.remove('show');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('pw').value='';document.getElementById('pw').focus();
-  updateLoginTokenStatus();
 }
 
 // ═══════════════════════════════════════════════════
@@ -708,26 +593,6 @@ async function bootPOS(){
   inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
 
-// ═══════════════════════════════════════════════════
-// GITHUB HELPERS
-// ═══════════════════════════════════════════════════
-function ghHeaders(){
-  const h={'Accept':'application/vnd.github.v3+json','User-Agent':'LeKiosk-POS/1.0'};
-  const tok=getToken();
-  if(tok) h['Authorization']='Bearer '+tok;
-  return h;
-}
-function fromB64(b64){
-  const bin=atob(b64.replace(/\n/g,''));
-  const bytes=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-  return new TextDecoder('utf-8').decode(bytes);
-}
-function toB64(str){
-  const bytes=new TextEncoder().encode(str);
-  let bin=''; bytes.forEach(b=>bin+=String.fromCharCode(b));
-  return btoa(bin);
-}
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 
 async function ghRead(path) {
@@ -994,7 +859,6 @@ function validateOrder(){
   if(orderType==='delivery'&&!deliveryZone){document.getElementById('err-zone').classList.add('show');ok=false;}
   else document.getElementById('err-zone').classList.remove('show');
   if(!orderLines.length){showToast('Add items to the order first','error');ok=false;}
-  if(!hasToken()){showToast('No GitHub token — click 🔑 in the top bar','error');openTokenModal();ok=false;}
   return ok;
 }
 function buildOrderObj(status='pending'){
@@ -1060,7 +924,6 @@ async function chargeOrder(){
   }catch(e){
     showToast('Save failed: '+e.message,'error');
   }
-  chargeBtn.disabled=!hasToken();
   chargeBtn.textContent='✅ Charge & Save';
   hideLoading();
 }
