@@ -219,22 +219,21 @@ const PILL_COLORS = {
 //   • Outside both → $1.50
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// Center of Le Kiosk (read from Image 2: "Le Kiosk" pin)
-const CENTER_LAT = 33.8338;
-const CENTER_LNG = 35.6392;
+// ── Le Kiosk exact GPS pin ──
+const CENTER_LAT = 33.821091538427524;
+const CENTER_LNG = 35.56496110422372;
 
-// Inner circle: ~550 m radius (covers Haret El Sett tight area)
-const INNER_RADIUS_KM = 0.55;
+// Inner circle ($0.50): ~600 m radius — matches the small circle in Image 2
+const INNER_RADIUS_KM = 0.60;
 
-// Outer ellipse semi-axes in degrees (from Image 1)
-// The oval stretches roughly:
-//   North edge  ~33.845, South edge ~33.808  → half-height ≈ 0.0185°
-//   West edge   ~35.612, East edge  ~35.668  → half-width  ≈ 0.028°
-const OUTER_LAT_SEMI = 0.0185;   // degrees N-S
-const OUTER_LNG_SEMI = 0.028;    // degrees E-W
-// Ellipse center is slightly south-west of the shop, matching the oval in Image 1
-const OUTER_CENTER_LAT = 33.826;
-const OUTER_CENTER_LNG = 35.640;
+// Outer ellipse ($1.00): matches the large oval in Image 1
+// Oval is centered near the shop, stretching roughly:
+//   ~2.0 km N-S  → OUTER_LAT_SEMI = 0.018°
+//   ~3.5 km E-W  → OUTER_LNG_SEMI = 0.032°
+const OUTER_LAT_SEMI    = 0.018;
+const OUTER_LNG_SEMI    = 0.032;
+const OUTER_CENTER_LAT  = 33.821091538427524;
+const OUTER_CENTER_LNG  = 35.56496110422372;
 
 // Haversine distance in km between two lat/lng points
 function distKm(lat1, lng1, lat2, lng2) {
