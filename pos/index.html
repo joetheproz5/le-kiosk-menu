@@ -302,8 +302,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .btn-charge:hover:not(:disabled){background:var(--green-d)}
 .btn-print-thermal{background:var(--g800);color:var(--white)}
 .btn-print-thermal:hover{background:var(--g900)}
-.btn-whatsapp{background:#22c55e;color:var(--white)}
-.btn-whatsapp:hover{background:#16a34a}
 .btn-print-card{background:var(--blue);color:var(--white)}
 .btn-print-card:hover{background:var(--blue-d)}
 
@@ -470,7 +468,13 @@ input,textarea,select{font-family:var(--font);outline:none}
           <div class="action-btns">
             <button class="act-btn btn-charge" id="charge-btn" onclick="chargeOrder()">✅ Charge &amp; Save</button>
             <button class="act-btn btn-print-thermal" onclick="printOrder('thermal')">🖨 Thermal</button>
-            <button class="act-btn btn-whatsapp" onclick="sendWhatsApp()">💬 WhatsApp</button>
+            <div style="grid-column:1/-1; background:var(--a50); border:1.5px solid var(--a200); border-radius:11px; padding:10px 12px; display:flex; align-items:center; gap:8px">
+  <span style="font-size:11px;font-weight:700;color:var(--a800);white-space:nowrap">💵 Cash</span>
+  <input id="cash-input" type="number" step="0.01" min="0" placeholder="0.00"
+    style="flex:1;min-width:0;padding:7px 10px;border:1.5px solid var(--a200);border-radius:8px;font-size:13px;font-weight:700;color:var(--a950);background:var(--white);outline:none"
+    oninput="calcChange()">
+  <span id="change-display" style="font-size:13px;font-weight:800;color:var(--g400);white-space:nowrap;min-width:60px;text-align:right">Change: —</span>
+</div>
             <button class="act-btn btn-print-card" onclick="printOrder('card')">🖨 Card</button>
           </div>
         </div>
@@ -780,6 +784,7 @@ function updateTotal(){
   const fl=document.getElementById('delivery-fee-label');
   if(fee>0){fl.style.display='block';fl.textContent=`Items $${getItemsTotal().toFixed(2)} + delivery $${fee.toFixed(2)}`;}
   else fl.style.display='none';
+  calcChange();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1136,25 +1141,24 @@ function buildCard(o){
   if(o.deliveryFee>0) rows+=`<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
   return`<div class="card-receipt"><div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div><div class="cr-meta"><div>Customer: <span>${o.name}</span></div><div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div>Zone: <span>${o.deliveryZone} (+$${o.deliveryFee?.toFixed(2)||'0.00'})</span></div>`:''} ${o.note?`<div>Note: <span>${o.note}</span></div>`:''}<div>Time: <span>${ts}</span></div></div><div class="cr-section">${rows}</div><div class="cr-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div><div class="cr-footer">Thank you for visiting Le Kiosk! ⭐<br>Leave us a Google review — it means the world to us.</div></div>`;
 }
-
+function calcChange() {
+  const cash = parseFloat(document.getElementById('cash-input').value) || 0;
+  const total = getGrandTotal();
+  const display = document.getElementById('change-display');
+  if (!cash) { display.textContent = 'Change: —'; display.style.color = 'var(--g400)'; return; }
+  const change = cash - total;
+  if (change < 0) {
+    display.textContent = `-$${Math.abs(change).toFixed(2)} short`;
+    display.style.color = 'var(--red-d)';
+  } else {
+    display.textContent = `Give: $${change.toFixed(2)}`;
+    display.style.color = 'var(--green-d)';
+  }
+}
 // ═══════════════════════════════════════════════════
 // WHATSAPP
 // ═══════════════════════════════════════════════════
-function sendWhatsApp(){if(!validateOrder()) return;doWhatsApp(buildOrderObj());}
 function sendWhatsAppFromOrder(o){doWhatsApp(o);}
-function doWhatsApp(o){
-  const typeLabels={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
-  const dt=new Date(o.timestamp||new Date()),ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-  let msg=`🛒 *Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n👤 *Name:* ${o.name}\n📦 *Type:* ${typeLabels[o.orderType]||o.orderType}\n`;
-  if(o.deliveryZone) msg+=`📍 *Zone:* ${o.deliveryZone} (fee: $${o.deliveryFee?.toFixed(2)||'0.00'})\n`;
-  if(o.note) msg+=`📝 *Note:* ${o.note}\n`;
-  msg+=`🕐 *Time:* ${ts}\n━━━━━━━━━━━━━━━━━━\n`;
-  o.items.forEach(it=>{msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;if(it.flavor)msg+=`  ↳ Flavor: ${it.flavor}\n`;(it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;});});
-  if(o.deliveryFee>0) msg+=`• 🛵 Delivery — $${o.deliveryFee.toFixed(2)}\n`;
-  msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${o.total.toFixed(2)}*`;
-  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
-}
-
 // ═══════════════════════════════════════════════════
 // MODAL / TOAST / LOADING
 // ═══════════════════════════════════════════════════
