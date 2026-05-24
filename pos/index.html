@@ -6,7 +6,6 @@
 <title>Le Kiosk — POS</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── RESET & BASE ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --a50:#fffbeb;--a100:#fef3c7;--a200:#fde68a;--a300:#fcd34d;--a400:#fbbf24;
@@ -16,15 +15,12 @@
   --green:#22c55e;--green-d:#16a34a;--red:#ef4444;--red-d:#dc2626;
   --blue:#3b82f6;--blue-d:#2563eb;
   --white:#fff;--font:'Poppins',sans-serif;--brand:'Fredoka',sans-serif;
-  --sidebar-order:320px;
-  --cat-sidebar:160px;
+  --sidebar-order:320px;--cat-sidebar:160px;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:var(--g100);color:var(--g900);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button{font-family:var(--font);cursor:pointer;border:none;outline:none}
 input,textarea,select{font-family:var(--font);outline:none}
-
-/* ── CATEGORY COLOR PALETTE ── */
 :root{
   --cat0-bg:#fef3c7;--cat0-border:#f59e0b;--cat0-text:#92400e;--cat0-head:#f59e0b;--cat0-headtext:#fff;
   --cat1-bg:#dbeafe;--cat1-border:#3b82f6;--cat1-text:#1e40af;--cat1-head:#3b82f6;--cat1-headtext:#fff;
@@ -36,8 +32,6 @@ input,textarea,select{font-family:var(--font);outline:none}
   --cat7-bg:#ffedd5;--cat7-border:#f97316;--cat7-text:#9a3412;--cat7-head:#f97316;--cat7-headtext:#fff;
   --cat8-bg:#e0f2fe;--cat8-border:#0ea5e9;--cat8-text:#075985;--cat8-head:#0ea5e9;--cat8-headtext:#fff;
 }
-
-/* ── LOGIN ── */
 #login-screen{position:fixed;inset:0;background:var(--a950);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px}
 .login-box{background:var(--white);border-radius:24px;padding:40px 36px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .login-logo{font-family:var(--brand);font-size:34px;font-weight:700;color:var(--a900)}
@@ -56,8 +50,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .attempt-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--a200)}
 .dot.used{background:var(--red)}
-
-/* ── POS SHELL ── */
 #pos-screen{display:none;height:100vh;flex-direction:column}
 #pos-screen.show{display:flex}
 .pos-topbar{background:var(--a950);color:var(--a100);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
@@ -71,33 +63,26 @@ input,textarea,select{font-family:var(--font);outline:none}
 .tb-inbox{background:rgba(34,197,94,.2);color:#86efac;position:relative}
 .tb-inbox:hover{background:rgba(34,197,94,.3)}
 .tb-inbox.active{background:var(--green);color:var(--white)}
-.inbox-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;display:none}
+.inbox-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px}
 .inbox-badge.show{display:flex}
 .tb-logout{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
 .tb-logout:hover{background:rgba(255,255,255,.15)}
 .session-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.2);color:var(--a300);padding:3px 10px;border-radius:20px;letter-spacing:.06em}
-
-/* ── MAIN AREA ── */
+/* ── INBOX PULSE RING on topbar btn ── */
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.tb-inbox.has-new{animation:ring 1.4s ease-in-out infinite}
 .pos-main{display:flex;flex:1;min-height:0}
-
-/* ── LEFT: CATEGORY SIDEBAR ── */
 .cat-sidebar{width:var(--cat-sidebar);flex-shrink:0;background:var(--a950);display:flex;flex-direction:column;overflow-y:auto;padding:10px 8px;gap:6px;-webkit-overflow-scrolling:touch}
 .cat-sidebar::-webkit-scrollbar{display:none}
 .cat-sidebar-btn{padding:10px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-align:center;color:rgba(255,255,255,.6);background:rgba(255,255,255,.07);border:1.5px solid transparent;cursor:pointer;transition:all .15s;line-height:1.3;word-break:break-word}
 .cat-sidebar-btn:hover{background:rgba(255,255,255,.14);color:var(--white)}
 .cat-sidebar-btn.active{color:var(--white);border-color:currentColor}
 .cat-sidebar-btn .cat-icon{font-size:18px;display:block;margin-bottom:4px}
-
-/* ── CENTER: MENU ── */
 .menu-panel{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--g100);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
-
-/* Category section in menu */
 .menu-cat-section{margin-bottom:16px;border-radius:14px;overflow:hidden;border:2px solid var(--g200)}
 .menu-cat-header{padding:10px 14px;display:flex;align-items:center;gap:8px;font-family:var(--brand);font-size:15px;font-weight:700;letter-spacing:.04em}
 .menu-cat-header .cat-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.25);color:inherit;margin-left:auto}
 .menu-cat-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:10px;background:var(--white)}
-
-/* Item card */
 .item-card-wrap{position:relative}
 .item-card{background:var(--white);border-radius:10px;border:2px solid var(--g200);overflow:hidden;cursor:pointer;transition:all .15s;user-select:none;display:flex;flex-direction:column;touch-action:manipulation}
 .item-card:hover{border-color:var(--a300);box-shadow:0 2px 12px rgba(245,158,11,.15)}
@@ -110,8 +95,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .item-qty-badge{display:none;position:absolute;top:5px;right:5px;background:var(--a500);color:var(--white);font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:10px;align-items:center;justify-content:center;padding:0 4px}
 .item-card-wrap.has-qty .item-qty-badge{display:flex}
 .item-card-wrap.has-qty .item-card{background:var(--a50)}
-
-/* Cat color classes applied per section */
 .cat-color-0 .menu-cat-header{background:var(--cat0-head);color:var(--cat0-headtext)}
 .cat-color-0 .menu-cat-section{border-color:var(--cat0-border)}
 .cat-color-0 .item-card-wrap.has-qty .item-card{border-color:var(--cat0-border)!important}
@@ -139,8 +122,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-color-8 .menu-cat-header{background:var(--cat8-head);color:var(--cat8-headtext)}
 .cat-color-8 .menu-cat-section{border-color:var(--cat8-border)}
 .cat-color-8 .item-card-wrap.has-qty .item-card{border-color:var(--cat8-border)!important}
-
-/* Cat sidebar active color matching */
 .cat-sidebar-btn[data-ci="0"].active{background:var(--cat0-head);border-color:var(--cat0-head);color:#fff}
 .cat-sidebar-btn[data-ci="1"].active{background:var(--cat1-head);border-color:var(--cat1-head);color:#fff}
 .cat-sidebar-btn[data-ci="2"].active{background:var(--cat2-head);border-color:var(--cat2-head);color:#fff}
@@ -150,8 +131,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .cat-sidebar-btn[data-ci="6"].active{background:var(--cat6-head);border-color:var(--cat6-head);color:#fff}
 .cat-sidebar-btn[data-ci="7"].active{background:var(--cat7-head);border-color:var(--cat7-head);color:#fff}
 .cat-sidebar-btn[data-ci="8"].active{background:var(--cat8-head);border-color:var(--cat8-head);color:#fff}
-
-/* ── ORDERS LOG VIEW (full-width center) ── */
 #orders-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
 #orders-view.show{display:flex}
 .orders-toolbar{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
@@ -189,8 +168,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .oc-wa:hover{background:#16a34a}
 .oc-load{background:var(--a500);color:var(--white)}
 .oc-load:hover{background:var(--a600)}
-
-/* ── INBOX VIEW ── */
 #inbox-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
 #inbox-view.show{display:flex}
 .inbox-toolbar{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0}
@@ -211,8 +188,8 @@ input,textarea,select{font-family:var(--font);outline:none}
 .inbox-decline-btn:hover{background:#fecaca}
 .inbox-empty{text-align:center;padding:60px 20px;color:var(--g400);font-size:14px}
 .inbox-empty-icon{font-size:48px;margin-bottom:12px}
-
-/* ── RIGHT: ORDER PANEL ── */
+/* GPS info in inbox card */
+.inbox-gps-row{font-size:10px;color:var(--green-d);font-weight:600;padding:0 14px 8px;display:flex;align-items:center;gap:6px}
 .order-panel{width:var(--sidebar-order);flex-shrink:0;background:var(--white);border-left:2px solid var(--g200);display:flex;flex-direction:column;overflow:hidden}
 .order-header{padding:14px 16px 10px;border-bottom:1px solid var(--g200);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .order-title{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a950)}
@@ -221,8 +198,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .order-scroll{flex:1;overflow-y:auto;padding:10px 14px;-webkit-overflow-scrolling:touch}
 .order-empty{text-align:center;padding:40px 20px;color:var(--g400);font-size:13px}
 .order-empty-icon{font-size:36px;margin-bottom:8px}
-
-/* ── ORDER LINE ITEMS ── */
 .order-line{background:var(--g50);border-radius:10px;margin-bottom:8px;overflow:hidden}
 .order-line-main{display:flex;align-items:flex-start;gap:8px;padding:10px 10px 8px}
 .order-line-name{flex:1;font-size:12px;font-weight:700;color:var(--a950);line-height:1.3}
@@ -236,16 +211,12 @@ input,textarea,select{font-family:var(--font);outline:none}
 .q-num{width:30px;text-align:center;font-size:13px;font-weight:800;color:var(--a950);background:var(--white);border-top:1.5px solid var(--a200);border-bottom:1.5px solid var(--a200);height:28px;line-height:28px}
 .q-del{margin-left:5px;width:26px;height:26px;border-radius:6px;background:#fef2f2;color:var(--red-d);font-size:13px;display:flex;align-items:center;justify-content:center}
 .q-del:hover{background:#fee2e2}
-
-/* ── ADDON/FLAVOR CHIPS IN ORDER ── */
 .order-addons{padding:0 10px 10px}
 .oa-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px}
 .oa-chips{display:flex;flex-wrap:wrap;gap:4px}
 .oa-chip{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--a200);background:var(--a50);color:var(--a800);cursor:pointer;transition:all .12s;touch-action:manipulation}
 .oa-chip:hover{border-color:var(--a400);background:var(--a100)}
 .oa-chip.selected{background:var(--a500);border-color:var(--a500);color:var(--white)}
-
-/* ── CUSTOMER & ORDER TYPE ── */
 .order-form{padding:10px 14px 0;border-top:1px solid var(--g200);flex-shrink:0}
 .form-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--a700);margin-bottom:5px;display:block}
 .form-input{width:100%;padding:9px 11px;border:2px solid var(--a200);border-radius:10px;font-size:12px;font-weight:600;color:var(--a950);background:var(--a50);transition:border-color .2s;margin-bottom:8px}
@@ -266,8 +237,6 @@ input,textarea,select{font-family:var(--font);outline:none}
 .zone-fee{font-size:9px;font-weight:800;opacity:.85;display:block;margin-top:2px}
 .err-msg{font-size:11px;color:var(--red-d);font-weight:600;margin-top:-5px;margin-bottom:7px;display:none}
 .err-msg.show{display:block}
-
-/* ── ORDER FOOTER ── */
 .order-footer{padding:10px 14px 12px;border-top:1px solid var(--g200);flex-shrink:0;background:var(--white)}
 .total-display{display:flex;justify-content:space-between;align-items:center;background:var(--a100);border-radius:10px;padding:10px 14px;margin-bottom:10px}
 .total-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a800)}
@@ -283,20 +252,14 @@ input,textarea,select{font-family:var(--font);outline:none}
 .btn-whatsapp:hover{background:#16a34a}
 .btn-print-card{background:var(--blue);color:var(--white)}
 .btn-print-card:hover{background:var(--blue-d)}
-
-/* ── TOAST ── */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:var(--white);padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9998;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.success{background:var(--green-d)}
 #toast.error{background:var(--red-d)}
-
-/* ── LOADING ── */
 #loading{position:fixed;inset:0;background:rgba(252,248,238,.9);backdrop-filter:blur(4px);z-index:9990;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 #loading.show{display:flex}
 .spinner{width:36px;height:36px;border:3px solid var(--a200);border-top-color:var(--a900);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── CONFIRM MODAL ── */
 #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9995;display:none;align-items:center;justify-content:center;padding:20px}
 #modal-overlay.show{display:flex}
 .modal-box{background:var(--white);border-radius:18px;padding:28px;max-width:380px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.2)}
@@ -305,47 +268,36 @@ input,textarea,select{font-family:var(--font);outline:none}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end}
 .modal-cancel{padding:9px 18px;border-radius:9px;background:var(--g100);color:var(--g700);font-size:12px;font-weight:700;text-transform:uppercase}
 .modal-confirm{padding:9px 18px;border-radius:9px;background:var(--green);color:var(--white);font-size:12px;font-weight:700;text-transform:uppercase}
-
-/* ── PRINT STYLES ── */
-@media print {
-  body * { visibility: hidden !important; }
-  #print-area, #print-area * { visibility: visible !important; }
-  #print-area { position: fixed !important; inset: 0 !important; background: white !important; padding: 0 !important; z-index: 99999; }
-  @page { margin: 4mm; size: auto; }
-}
-#print-area { display: none; }
-
-.thermal-receipt { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5; color: #000; background: #fff; padding: 8px 12px; max-width: 280px; }
-.th-center { text-align: center; }
-.th-logo { font-size: 18px; font-weight: 900; letter-spacing: .1em; margin-bottom: 2px; }
-.th-sub { font-size: 10px; margin-bottom: 8px; }
-.th-divider { border-top: 1px dashed #000; margin: 6px 0; }
-.th-row { display: flex; justify-content: space-between; font-size: 12px; }
-.th-row.bold { font-weight: 900; }
-.th-addon { padding-left: 12px; font-size: 11px; color: #555; }
-.th-total { font-size: 14px; font-weight: 900; border-top: 2px solid #000; padding-top: 4px; margin-top: 4px; }
-.th-footer { text-align: center; font-size: 10px; margin-top: 8px; }
-
-.card-receipt { font-family: 'Poppins', sans-serif; background: #fff; padding: 24px; max-width: 400px; margin: 0 auto; }
-.cr-header { text-align: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #fde68a; }
-.cr-logo { font-family: 'Fredoka', sans-serif; font-size: 28px; font-weight: 700; color: #78350f; }
-.cr-sub { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #b45309; }
-.cr-order-num { font-size: 11px; font-weight: 700; color: #9ca3af; margin-top: 4px; }
-.cr-section { margin-bottom: 12px; }
-.cr-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 4px 0; font-size: 12px; border-bottom: 1px solid #fef3c7; }
-.cr-row:last-child { border-bottom: none; }
-.cr-addon { padding: 2px 0 2px 14px; font-size: 11px; color: #6b7280; display: flex; justify-content: space-between; }
-.cr-meta { font-size: 11px; color: #6b7280; margin-bottom: 8px; }
-.cr-meta span { font-weight: 700; color: #451a03; }
-.cr-total { display: flex; justify-content: space-between; background: #fef3c7; border-radius: 8px; padding: 10px 12px; font-weight: 800; font-size: 14px; color: #92400e; margin-top: 8px; }
-.cr-footer { text-align: center; font-size: 10px; color: #9ca3af; margin-top: 12px; padding-top: 8px; border-top: 1px dashed #fde68a; }
+@media print{body *{visibility:hidden!important}#print-area,#print-area *{visibility:visible!important}#print-area{position:fixed!important;inset:0!important;background:white!important;padding:0!important;z-index:99999}@page{margin:4mm;size:auto}}
+#print-area{display:none}
+.thermal-receipt{font-family:'Courier New',monospace;font-size:12px;line-height:1.5;color:#000;background:#fff;padding:8px 12px;max-width:280px}
+.th-center{text-align:center}
+.th-logo{font-size:18px;font-weight:900;letter-spacing:.1em;margin-bottom:2px}
+.th-sub{font-size:10px;margin-bottom:8px}
+.th-divider{border-top:1px dashed #000;margin:6px 0}
+.th-row{display:flex;justify-content:space-between;font-size:12px}
+.th-row.bold{font-weight:900}
+.th-addon{padding-left:12px;font-size:11px;color:#555}
+.th-total{font-size:14px;font-weight:900;border-top:2px solid #000;padding-top:4px;margin-top:4px}
+.th-footer{text-align:center;font-size:10px;margin-top:8px}
+.card-receipt{font-family:'Poppins',sans-serif;background:#fff;padding:24px;max-width:400px;margin:0 auto}
+.cr-header{text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #fde68a}
+.cr-logo{font-family:'Fredoka',sans-serif;font-size:28px;font-weight:700;color:#78350f}
+.cr-sub{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#b45309}
+.cr-order-num{font-size:11px;font-weight:700;color:#9ca3af;margin-top:4px}
+.cr-section{margin-bottom:12px}
+.cr-row{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:12px;border-bottom:1px solid #fef3c7}
+.cr-row:last-child{border-bottom:none}
+.cr-addon{padding:2px 0 2px 14px;font-size:11px;color:#6b7280;display:flex;justify-content:space-between}
+.cr-meta{font-size:11px;color:#6b7280;margin-bottom:8px}
+.cr-meta span{font-weight:700;color:#451a03}
+.cr-total{display:flex;justify-content:space-between;background:#fef3c7;border-radius:8px;padding:10px 12px;font-weight:800;font-size:14px;color:#92400e;margin-top:8px}
+.cr-footer{text-align:center;font-size:10px;color:#9ca3af;margin-top:12px;padding-top:8px;border-top:1px dashed #fde68a}
 </style>
 </head>
 <body>
-
 <div id="loading"><div class="spinner"></div><div style="font-family:var(--brand);font-size:16px;color:var(--a900);font-weight:600" id="loading-text">Loading…</div></div>
 <div id="toast"></div>
-
 <div id="modal-overlay">
   <div class="modal-box">
     <h3 id="modal-title">Confirm</h3>
@@ -356,7 +308,6 @@ input,textarea,select{font-family:var(--font);outline:none}
     </div>
   </div>
 </div>
-
 <div id="print-area"></div>
 
 <!-- LOGIN -->
@@ -389,16 +340,9 @@ input,textarea,select{font-family:var(--font);outline:none}
       <button class="topbar-btn tb-logout" onclick="logout()">Logout</button>
     </div>
   </div>
-
   <div class="pos-main">
-
-    <!-- LEFT: CATEGORY SIDEBAR -->
     <div class="cat-sidebar" id="cat-sidebar"></div>
-
-    <!-- CENTER: MENU PANEL (all items listed) -->
     <div class="menu-panel" id="menu-panel"></div>
-
-    <!-- ORDERS LOG (hidden by default) -->
     <div id="orders-view">
       <div class="orders-toolbar">
         <h2>Orders Log</h2>
@@ -410,12 +354,8 @@ input,textarea,select{font-family:var(--font);outline:none}
         </div>
         <button class="topbar-btn tb-orders" onclick="loadOrders(true)" style="background:var(--a100);color:var(--a950)">🔄 Refresh</button>
       </div>
-      <div class="orders-list" id="orders-list">
-        <div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">Loading orders…</div>
-      </div>
+      <div class="orders-list" id="orders-list"><div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">Loading orders…</div></div>
     </div>
-
-    <!-- INBOX VIEW (hidden by default) -->
     <div id="inbox-view">
       <div class="inbox-toolbar">
         <h2>📥 Incoming Orders</h2>
@@ -425,20 +365,16 @@ input,textarea,select{font-family:var(--font);outline:none}
         <div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders yet</div></div>
       </div>
     </div>
-
-    <!-- RIGHT: ORDER PANEL (always visible) -->
     <div class="order-panel">
       <div class="order-header">
         <span class="order-title">🛒 Current Order</span>
         <button class="clear-btn" onclick="clearOrder()">Clear ✕</button>
       </div>
       <div class="order-scroll" id="order-scroll"></div>
-
       <div class="order-form" id="order-form">
         <label class="form-label">Customer Name *</label>
         <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
         <div class="err-msg" id="err-name">Name is required.</div>
-
         <label class="form-label">Order Type *</label>
         <div class="type-grid">
           <button class="type-btn" onclick="selType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
@@ -446,7 +382,6 @@ input,textarea,select{font-family:var(--font);outline:none}
           <button class="type-btn" onclick="selType('delivery')"><span class="type-icon">🛵</span>Delivery</button>
         </div>
         <div class="err-msg" id="err-type">Select an order type.</div>
-
         <div id="zone-section" style="display:none">
           <label class="form-label">Delivery Zone *</label>
           <div class="zone-grid">
@@ -456,11 +391,9 @@ input,textarea,select{font-family:var(--font);outline:none}
           </div>
           <div class="err-msg" id="err-zone">Select a delivery zone.</div>
         </div>
-
         <label class="form-label" id="note-label" style="display:none">Note (optional)</label>
         <textarea id="order-note" class="form-input" rows="2" placeholder="Table number, address, special requests…" style="display:none;resize:none"></textarea>
       </div>
-
       <div class="order-footer">
         <div class="total-display">
           <div>
@@ -477,765 +410,499 @@ input,textarea,select{font-family:var(--font);outline:none}
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 const ADMIN_HASH   = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
 const REPO_OWNER   = 'joetheproz5';
 const REPO_NAME    = 'le-kiosk-menu';
 const MENU_PATH    = 'menu.json';
 const ORDERS_PATH  = 'orders.json';
-const INBOX_PATH   = 'inbox.json';   // NEW: customer orders from menu page
+const INBOX_PATH   = 'inbox.json';
 const API          = 'https://api.github.com';
+const RAW_BASE     = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/`;
 const MAX_ORDERS   = 200;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS   = 2 * 60 * 1000;
 const SESSION_MS   = 4 * 60 * 60 * 1000;
-const WA_NUMBER    = '96176840244'; // Le Kiosk WhatsApp
-
-const ZONE_FEES = { A: 0.50, B: 1.00, C: 1.50 };
-
-// Category icons for sidebar
-const CAT_ICONS = {
+const WA_NUMBER    = '96176840244';
+const ZONE_FEES    = { A: 0.50, B: 1.00, C: 1.50 };
+const CAT_ICONS    = {
   appetizers:'🍟', sandwiches:'🥪', burgers:'🍔', sajj:'🫓',
   desserts:'🍨', shisha:'💨', beverages:'🥤', sweet:'🍫', savory:'🧀'
 };
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════════════
-let menuData     = [];
-let orderLines   = [];
-let orderType    = null;
-let deliveryZone = null;
-let ordersData   = [];
-let ordersSha    = null;
-let inboxData    = [];
-let inboxSha     = null;
-let ordersFilter = 'all';
-let showingOrders= false;
-let showingInbox = false;
-let sessionExpiry= 0;
-let sessionTimer = null;
-let sessionTick  = null;
-let sessionListenersAttached = false;
-let pendingModalFn = null;
-let inboxPollInterval = null;
-let activeCatKey = null;
+// ═══════════════════════════════════════════════════
+let menuData=[],orderLines=[],orderType=null,deliveryZone=null;
+let ordersData=[],ordersSha=null,inboxData=[],inboxSha=null;
+let ordersFilter='all',showingOrders=false,showingInbox=false;
+let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=false;
+let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
+let lastInboxCount = 0; // FIX: track badge count to detect new arrivals
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // HASH & LOGIN
-// ═══════════════════════════════════════════════════════════════
-async function sha256(str) {
-  if (!window.crypto?.subtle) throw new Error('HTTPS required');
-  const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2,'0')).join('');
+// ═══════════════════════════════════════════════════
+async function sha256(str){
+  if(!window.crypto?.subtle) throw new Error('HTTPS required');
+  const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
-function getLockout() { try { return JSON.parse(sessionStorage.getItem('pos_lock') || '{"a":0,"u":0}'); } catch { return {a:0,u:0}; } }
-function setLockout(d) { sessionStorage.setItem('pos_lock', JSON.stringify(d)); }
-function resetLockout() { sessionStorage.removeItem('pos_lock'); }
-function renderDots(n) {
-  document.getElementById('attempt-dots').innerHTML =
-    Array.from({length:MAX_ATTEMPTS}, (_,i) => `<div class="dot${i<n?' used':''}"></div>`).join('');
-}
-function enableLogin(v) {
-  document.getElementById('pw').disabled = !v;
-  document.getElementById('login-btn').disabled = !v;
-}
-let lockCountdown = null;
-function startLockCountdown() {
+function getLockout(){try{return JSON.parse(sessionStorage.getItem('pos_lock')||'{"a":0,"u":0}');}catch{return{a:0,u:0};}}
+function setLockout(d){sessionStorage.setItem('pos_lock',JSON.stringify(d));}
+function resetLockout(){sessionStorage.removeItem('pos_lock');}
+function renderDots(n){document.getElementById('attempt-dots').innerHTML=Array.from({length:MAX_ATTEMPTS},(_,i)=>`<div class="dot${i<n?' used':''}"></div>`).join('');}
+function enableLogin(v){document.getElementById('pw').disabled=!v;document.getElementById('login-btn').disabled=!v;}
+let lockCountdown=null;
+function startLockCountdown(){
   clearInterval(lockCountdown);
-  lockCountdown = setInterval(() => {
-    const l = getLockout();
-    if (l.u <= Date.now()) { clearInterval(lockCountdown); hideLockBar(); enableLogin(true); renderDots(0); }
-    else showLockBar(`Too many attempts. Retry in ${Math.ceil((l.u-Date.now())/1000)}s.`);
-  }, 1000);
+  lockCountdown=setInterval(()=>{const l=getLockout();if(l.u<=Date.now()){clearInterval(lockCountdown);hideLockBar();enableLogin(true);renderDots(0);}else showLockBar(`Too many attempts. Retry in ${Math.ceil((l.u-Date.now())/1000)}s.`);},1000);
 }
-function showLockBar(m) { const b=document.getElementById('lockout-bar'); b.textContent=m; b.classList.add('show'); }
-function hideLockBar()  { document.getElementById('lockout-bar').classList.remove('show'); }
-
-async function tryLogin() {
-  const l = getLockout();
-  if (l.u > Date.now()) { enableLogin(false); startLockCountdown(); return; }
-  const pw = document.getElementById('pw').value;
-  if (!pw) return;
-  let hash;
-  try { hash = await sha256(pw); }
-  catch(e) { showLoginErr(e.message === 'HTTPS required' ? 'Open POS over HTTPS.' : e.message); return; }
-  if (hash === ADMIN_HASH) {
-    resetLockout(); hideLockBar();
-    document.getElementById('login-screen').style.display = 'none';
+function showLockBar(m){const b=document.getElementById('lockout-bar');b.textContent=m;b.classList.add('show');}
+function hideLockBar(){document.getElementById('lockout-bar').classList.remove('show');}
+async function tryLogin(){
+  const l=getLockout();
+  if(l.u>Date.now()){enableLogin(false);startLockCountdown();return;}
+  const pw=document.getElementById('pw').value;if(!pw) return;
+  let hash;try{hash=await sha256(pw);}catch(e){showLoginErr(e.message==='HTTPS required'?'Open POS over HTTPS.':e.message);return;}
+  if(hash===ADMIN_HASH){
+    resetLockout();hideLockBar();
+    document.getElementById('login-screen').style.display='none';
     document.getElementById('pos-screen').classList.add('show');
-    startSession();
-    bootPOS();
+    startSession();bootPOS();
   } else {
-    const na = (l.a||0)+1, nu = na>=MAX_ATTEMPTS ? Date.now()+LOCKOUT_MS : 0;
-    setLockout({a:na,u:nu}); renderDots(na);
-    if (na >= MAX_ATTEMPTS) { enableLogin(false); startLockCountdown(); hideLoginErr(); }
+    const na=(l.a||0)+1,nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
+    setLockout({a:na,u:nu});renderDots(na);
+    if(na>=MAX_ATTEMPTS){enableLogin(false);startLockCountdown();hideLoginErr();}
     else showLoginErr(`Wrong password. ${MAX_ATTEMPTS-na} attempt${MAX_ATTEMPTS-na===1?'':'s'} left.`);
-    document.getElementById('pw').value = '';
-    document.getElementById('pw').focus();
+    document.getElementById('pw').value='';document.getElementById('pw').focus();
   }
 }
-function showLoginErr(m) { const e=document.getElementById('login-err'); e.textContent=m; e.classList.add('show'); }
-function hideLoginErr()   { document.getElementById('login-err').classList.remove('show'); }
-document.getElementById('pw').addEventListener('keydown', e => { if(e.key==='Enter') tryLogin(); });
-(function(){ const l=getLockout(); renderDots(l.a||0); if(l.u>Date.now()){enableLogin(false);startLockCountdown();} })();
+function showLoginErr(m){const e=document.getElementById('login-err');e.textContent=m;e.classList.add('show');}
+function hideLoginErr(){document.getElementById('login-err').classList.remove('show');}
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+(function(){const l=getLockout();renderDots(l.a||0);if(l.u>Date.now()){enableLogin(false);startLockCountdown();}})();
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // SESSION
-// ═══════════════════════════════════════════════════════════════
-function startSession() {
-  resetSession();
-  clearInterval(sessionTick);
-  sessionTick = setInterval(updateSessionBadge, 60000);
-  if (!sessionListenersAttached) {
-    ['mousemove','keydown','click','touchstart'].forEach(ev =>
-      document.addEventListener(ev, resetSession, {passive:true}));
-    sessionListenersAttached = true;
-  }
-}
-function resetSession() {
-  if (!document.getElementById('pos-screen').classList.contains('show')) return;
-  clearTimeout(sessionTimer);
-  sessionExpiry = Date.now() + SESSION_MS;
-  updateSessionBadge();
-  sessionTimer = setTimeout(() => { showToast('Session expired', 'error'); logout(); }, SESSION_MS);
-}
-function updateSessionBadge() {
-  const rem  = Math.max(0, sessionExpiry - Date.now());
-  const hrs  = Math.floor(rem / 3600000);
-  const mins = Math.floor((rem % 3600000) / 60000);
-  document.getElementById('session-badge').textContent = hrs>0 ? `⏱ ${hrs}h ${mins}m` : `⏱ ${mins}m`;
-}
-function logout() {
-  clearTimeout(sessionTimer); clearInterval(sessionTick); clearInterval(lockCountdown);
-  clearInterval(inboxPollInterval);
-  sessionStorage.removeItem('pos_gh_token');
-  document.getElementById('pos-screen').classList.remove('show');
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('pw').value = '';
-  document.getElementById('pw').focus();
-}
+// ═══════════════════════════════════════════════════
+function startSession(){resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,60000);if(!sessionListenersAttached){['mousemove','keydown','click','touchstart'].forEach(ev=>document.addEventListener(ev,resetSession,{passive:true}));sessionListenersAttached=true;}}
+function resetSession(){if(!document.getElementById('pos-screen').classList.contains('show'))return;clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout();},SESSION_MS);}
+function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),hrs=Math.floor(rem/3600000),mins=Math.floor((rem%3600000)/60000);document.getElementById('session-badge').textContent=hrs>0?`⏱ ${hrs}h ${mins}m`:`⏱ ${mins}m`;}
+function logout(){clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockCountdown);clearInterval(inboxPollInterval);sessionStorage.removeItem('pos_gh_token');document.getElementById('pos-screen').classList.remove('show');document.getElementById('login-screen').style.display='flex';document.getElementById('pw').value='';document.getElementById('pw').focus();}
+function getToken(){return sessionStorage.getItem('lk_gh_token')||sessionStorage.getItem('pos_gh_token')||'';}
 
-function getToken() { return sessionStorage.getItem('lk_gh_token') || sessionStorage.getItem('pos_gh_token') || ''; }
-
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // BOOT
-// ═══════════════════════════════════════════════════════════════
-async function bootPOS() {
+// ═══════════════════════════════════════════════════
+async function bootPOS(){
   showLoading('Loading menu…');
-  try {
-    await loadMenu();
-    renderCatSidebar();
-    renderMenuPanel();
-  } catch(e) {
-    showToast('Menu load failed: ' + e.message, 'error');
-  }
+  try{await loadMenu();renderCatSidebar();renderMenuPanel();}
+  catch(e){showToast('Menu load failed: '+e.message,'error');}
   renderOrderPanel();
   loadOrders(false).catch(()=>{});
-  pollInbox();
+  await pollInbox(); // FIX: await first poll so badge is accurate immediately
   hideLoading();
-  if (!getToken()) promptToken();
-
-  // Poll inbox every 30 seconds
-  inboxPollInterval = setInterval(pollInbox, 30000);
+  if(!getToken()) promptToken();
+  inboxPollInterval=setInterval(pollInbox,20000); // FIX: poll every 20s instead of 30s
 }
+function promptToken(){const t=prompt('Enter GitHub token (needed to save orders):\n(Leave blank to skip)');if(t&&t.trim()){sessionStorage.setItem('pos_gh_token',t.trim());showToast('Token saved ✓','success');}}
 
-function promptToken() {
-  const t = prompt('Enter GitHub token (needed to save orders):\n(Leave blank to skip)');
-  if (t && t.trim()) {
-    sessionStorage.setItem('pos_gh_token', t.trim());
-    showToast('Token saved ✓', 'success');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // MENU LOAD
-// ═══════════════════════════════════════════════════════════════
-async function loadMenu() {
-  const res = await fetch('../menu.json?v=' + Date.now());
-  if (!res.ok) throw new Error('Could not load menu.json');
-  const all = await res.json();
-  menuData = all.filter(c => c.type !== 'addons');
-  if (menuData.length) activeCatKey = menuData[0].key;
+// ═══════════════════════════════════════════════════
+async function loadMenu(){
+  const res=await fetch('../menu.json?v='+Date.now());
+  if(!res.ok) throw new Error('Could not load menu.json');
+  const all=await res.json();
+  menuData=all.filter(c=>c.type!=='addons');
+  if(menuData.length) activeCatKey=menuData[0].key;
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // CATEGORY SIDEBAR
-// ═══════════════════════════════════════════════════════════════
-function renderCatSidebar() {
-  const sidebar = document.getElementById('cat-sidebar');
-  sidebar.innerHTML = menuData.map((cat, i) => {
-    const icon = CAT_ICONS[cat.key] || CAT_ICONS[cat.key.toLowerCase()] || '🍽️';
-    const isActive = cat.key === activeCatKey;
-    return `<button class="cat-sidebar-btn${isActive?' active':''}" data-ci="${i}" onclick="scrollToCategory('${cat.key}', ${i}, this)">
-      <span class="cat-icon">${icon}</span>
-      ${cat.title}
-    </button>`;
+// ═══════════════════════════════════════════════════
+function renderCatSidebar(){
+  const sidebar=document.getElementById('cat-sidebar');
+  sidebar.innerHTML=menuData.map((cat,i)=>{
+    const icon=CAT_ICONS[cat.key]||CAT_ICONS[cat.key.toLowerCase()]||'🍽️';
+    return`<button class="cat-sidebar-btn${cat.key===activeCatKey?' active':''}" data-ci="${i}" onclick="scrollToCategory('${cat.key}',${i},this)"><span class="cat-icon">${icon}</span>${cat.title}</button>`;
   }).join('');
 }
-
-function scrollToCategory(key, idx, btn) {
-  activeCatKey = key;
-  // update active state
-  document.querySelectorAll('.cat-sidebar-btn').forEach(b => b.classList.remove('active'));
+function scrollToCategory(key,idx,btn){
+  activeCatKey=key;
+  document.querySelectorAll('.cat-sidebar-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  // scroll menu panel to that section
-  const el = document.getElementById('cat-section-' + key);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const el=document.getElementById('cat-section-'+key);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MENU PANEL (all categories listed vertically)
-// ═══════════════════════════════════════════════════════════════
-function renderMenuPanel() {
-  const panel = document.getElementById('menu-panel');
-  panel.innerHTML = menuData.map((cat, ci) => {
-    const icon = CAT_ICONS[cat.key] || '🍽️';
-    const itemsHtml = (cat.items || []).map((item, idx) => {
-      const wrapId = `wrap-${cat.key}-${idx}`;
-      const qty = getQtyForItem(cat.key, idx);
-      return `<div class="item-card-wrap${qty>0?' has-qty':''}" id="${wrapId}">
-        <div class="item-card${qty>0?' in-cart':''}" onclick="addToOrder('${cat.key}',${idx})">
-          <img class="item-img" src="${item.image||''}" alt="${item.name}" onerror="this.style.display='none'">
-          <div class="item-info">
-            <div class="item-name">${item.name}</div>
-            <div class="item-price">${item.price}</div>
-          </div>
-        </div>
-        <div class="item-qty-badge" id="badge-${cat.key}-${idx}">${qty>0?qty:''}</div>
-      </div>`;
+// ═══════════════════════════════════════════════════
+// MENU PANEL
+// ═══════════════════════════════════════════════════
+function renderMenuPanel(){
+  const panel=document.getElementById('menu-panel');
+  panel.innerHTML=menuData.map((cat,ci)=>{
+    const icon=CAT_ICONS[cat.key]||'🍽️';
+    const itemsHtml=(cat.items||[]).map((item,idx)=>{
+      const wrapId=`wrap-${cat.key}-${idx}`,qty=getQtyForItem(cat.key,idx);
+      return`<div class="item-card-wrap${qty>0?' has-qty':''}" id="${wrapId}"><div class="item-card${qty>0?' in-cart':''}" onclick="addToOrder('${cat.key}',${idx})"><img class="item-img" src="${item.image||''}" alt="${item.name}" onerror="this.style.display='none'"><div class="item-info"><div class="item-name">${item.name}</div><div class="item-price">${item.price}</div></div></div><div class="item-qty-badge" id="badge-${cat.key}-${idx}">${qty>0?qty:''}</div></div>`;
     }).join('');
-
-    return `<div class="menu-cat-section cat-color-${ci % 9}" id="cat-section-${cat.key}">
-      <div class="menu-cat-header">
-        ${icon} ${cat.title}
-        <span class="cat-badge">${(cat.items||[]).length} items</span>
-      </div>
-      <div class="menu-cat-items">${itemsHtml}</div>
-    </div>`;
+    return`<div class="menu-cat-section cat-color-${ci%9}" id="cat-section-${cat.key}"><div class="menu-cat-header">${icon} ${cat.title}<span class="cat-badge">${(cat.items||[]).length} items</span></div><div class="menu-cat-items">${itemsHtml}</div></div>`;
   }).join('');
-
-  // Set up scroll spy to highlight active category in sidebar
   setupScrollSpy();
 }
-
-function setupScrollSpy() {
-  const panel = document.getElementById('menu-panel');
-  panel.addEventListener('scroll', () => {
-    const sections = menuData.map(cat => document.getElementById('cat-section-' + cat.key)).filter(Boolean);
-    let activeIdx = 0;
-    sections.forEach((sec, i) => {
-      if (sec.offsetTop - panel.scrollTop <= 50) activeIdx = i;
-    });
-    document.querySelectorAll('.cat-sidebar-btn').forEach((btn, i) => {
-      btn.classList.toggle('active', i === activeIdx);
-    });
-    if (menuData[activeIdx]) activeCatKey = menuData[activeIdx].key;
-  }, { passive: true });
+function setupScrollSpy(){
+  const panel=document.getElementById('menu-panel');
+  panel.addEventListener('scroll',()=>{
+    const sections=menuData.map(cat=>document.getElementById('cat-section-'+cat.key)).filter(Boolean);
+    let ai=0;sections.forEach((sec,i)=>{if(sec.offsetTop-panel.scrollTop<=50)ai=i;});
+    document.querySelectorAll('.cat-sidebar-btn').forEach((btn,i)=>btn.classList.toggle('active',i===ai));
+    if(menuData[ai]) activeCatKey=menuData[ai].key;
+  },{passive:true});
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // ORDER MANAGEMENT
-// ═══════════════════════════════════════════════════════════════
-function priceNum(p) { return parseFloat((p||'0').replace('$','')) || 0; }
-
-function getQtyForItem(catKey, itemIdx) {
-  const cat = menuData.find(c => c.key === catKey);
-  if (!cat || !cat.items || !cat.items[itemIdx]) return 0;
-  const item = cat.items[itemIdx];
-  const pn = priceNum(item.price);
-  const line = orderLines.find(l => l.name === item.name && l.price === pn && l.catKey === catKey && l.itemIdx === itemIdx);
-  return line ? line.qty : 0;
+// ═══════════════════════════════════════════════════
+function priceNum(p){return parseFloat((p||'0').replace('$',''))||0;}
+function getQtyForItem(catKey,itemIdx){
+  const cat=menuData.find(c=>c.key===catKey);if(!cat||!cat.items||!cat.items[itemIdx]) return 0;
+  const item=cat.items[itemIdx],pn=priceNum(item.price);
+  const line=orderLines.find(l=>l.name===item.name&&l.price===pn&&l.catKey===catKey&&l.itemIdx===itemIdx);
+  return line?line.qty:0;
 }
-
-function addToOrder(catKey, itemIdx) {
-  const cat  = menuData.find(c => c.key === catKey);
-  if (!cat) return;
-  const item = cat.items?.[itemIdx];
-  if (!item) return;
-  const pn = priceNum(item.price);
-
-  // Find existing line by catKey+itemIdx (unique identifier)
-  const existing = orderLines.find(l => l.catKey === catKey && l.itemIdx === itemIdx);
-  if (existing) {
-    existing.qty++;
-  } else {
-    orderLines.push({
-      id: Date.now() + Math.random(),
-      catKey, itemIdx,
-      name: item.name,
-      price: pn,
-      priceStr: item.price,
-      qty: 1,
-      addons: [],
-      flavor: null,
-      meta: item
-    });
-  }
-  updateItemBadge(catKey, itemIdx);
+function addToOrder(catKey,itemIdx){
+  const cat=menuData.find(c=>c.key===catKey);if(!cat) return;
+  const item=cat.items?.[itemIdx];if(!item) return;
+  const pn=priceNum(item.price);
+  const existing=orderLines.find(l=>l.catKey===catKey&&l.itemIdx===itemIdx);
+  if(existing){existing.qty++;}
+  else{orderLines.push({id:Date.now()+Math.random(),catKey,itemIdx,name:item.name,price:pn,priceStr:item.price,qty:1,addons:[],flavor:null,meta:item});}
+  updateItemBadge(catKey,itemIdx);renderOrderPanel();
+}
+function updateItemBadge(catKey,itemIdx){
+  const qty=getQtyForItem(catKey,itemIdx);
+  const wrap=document.getElementById(`wrap-${catKey}-${itemIdx}`);
+  const badge=document.getElementById(`badge-${catKey}-${itemIdx}`);
+  if(wrap){wrap.classList.toggle('has-qty',qty>0);const card=wrap.querySelector('.item-card');if(card)card.classList.toggle('in-cart',qty>0);}
+  if(badge)badge.textContent=qty>0?qty:'';
+}
+function changeQty(id,delta){
+  const line=orderLines.find(l=>l.id===id);if(!line) return;
+  line.qty=Math.max(0,line.qty+delta);
+  if(line.qty===0)orderLines=orderLines.filter(l=>l.id!==id);
+  updateItemBadge(line.catKey,line.itemIdx);renderOrderPanel();
+}
+function removeLine(id){
+  const line=orderLines.find(l=>l.id===id);
+  if(line){const wrap=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`),badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}if(badge)badge.textContent='';}
+  orderLines=orderLines.filter(l=>l.id!==id);renderOrderPanel();
+}
+function toggleAddon(lineId,addonLabel,addonPrice){
+  const line=orderLines.find(l=>l.id===lineId);if(!line) return;
+  const idx=line.addons.findIndex(a=>a.label===addonLabel);
+  if(idx>-1)line.addons.splice(idx,1);else line.addons.push({label:addonLabel,price:addonPrice});
   renderOrderPanel();
 }
-
-function updateItemBadge(catKey, itemIdx) {
-  const qty = getQtyForItem(catKey, itemIdx);
-  const wrap = document.getElementById(`wrap-${catKey}-${itemIdx}`);
-  const badge = document.getElementById(`badge-${catKey}-${itemIdx}`);
-  if (wrap) {
-    wrap.classList.toggle('has-qty', qty > 0);
-    const card = wrap.querySelector('.item-card');
-    if (card) card.classList.toggle('in-cart', qty > 0);
-  }
-  if (badge) badge.textContent = qty > 0 ? qty : '';
+function toggleFlavor(lineId,flavor){
+  const line=orderLines.find(l=>l.id===lineId);if(!line) return;
+  line.flavor=line.flavor===flavor?null:flavor;renderOrderPanel();
 }
-
-function refreshAllBadges() {
-  menuData.forEach((cat, ci) => {
-    (cat.items || []).forEach((item, idx) => {
-      updateItemBadge(cat.key, idx);
-    });
-  });
-}
-
-function changeQty(id, delta) {
-  const line = orderLines.find(l => l.id === id);
-  if (!line) return;
-  const prevQty = line.qty;
-  line.qty = Math.max(0, line.qty + delta);
-  if (line.qty === 0) orderLines = orderLines.filter(l => l.id !== id);
-  updateItemBadge(line.catKey, line.itemIdx);
-  renderOrderPanel();
-}
-
-function removeLine(id) {
-  const line = orderLines.find(l => l.id === id);
-  if (line) updateItemBadge(line.catKey, line.itemIdx);
-  orderLines = orderLines.filter(l => l.id !== id);
-  // after removal, update badge
-  if (line) {
-    const wrap = document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`);
-    const badge = document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
-    if (wrap) { wrap.classList.remove('has-qty'); const card = wrap.querySelector('.item-card'); if(card) card.classList.remove('in-cart'); }
-    if (badge) badge.textContent = '';
-  }
-  renderOrderPanel();
-}
-
-function toggleAddon(lineId, addonLabel, addonPrice) {
-  const line = orderLines.find(l => l.id === lineId);
-  if (!line) return;
-  const idx = line.addons.findIndex(a => a.label === addonLabel);
-  if (idx > -1) line.addons.splice(idx, 1);
-  else line.addons.push({ label: addonLabel, price: addonPrice });
-  renderOrderPanel();
-}
-
-function toggleFlavor(lineId, flavor) {
-  const line = orderLines.find(l => l.id === lineId);
-  if (!line) return;
-  line.flavor = line.flavor === flavor ? null : flavor;
-  renderOrderPanel();
-}
-
-function clearOrder() {
-  const prevLines = [...orderLines];
-  orderLines = []; orderType = null; deliveryZone = null;
-  document.getElementById('cust-name').value = '';
-  document.getElementById('order-note').value = '';
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('sel'));
-  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('sel'));
-  document.getElementById('zone-section').style.display = 'none';
-  document.getElementById('note-label').style.display = 'none';
-  document.getElementById('order-note').style.display = 'none';
-  // Clear all badges
-  prevLines.forEach(line => {
-    const wrap = document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`);
-    const badge = document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
-    if (wrap) { wrap.classList.remove('has-qty'); const card = wrap.querySelector('.item-card'); if(card) card.classList.remove('in-cart'); }
-    if (badge) badge.textContent = '';
+function clearOrder(){
+  const prev=[...orderLines];
+  orderLines=[];orderType=null;deliveryZone=null;
+  document.getElementById('cust-name').value='';document.getElementById('order-note').value='';
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('zone-section').style.display='none';
+  document.getElementById('note-label').style.display='none';
+  document.getElementById('order-note').style.display='none';
+  prev.forEach(line=>{
+    const wrap=document.getElementById(`wrap-${line.catKey}-${line.itemIdx}`),badge=document.getElementById(`badge-${line.catKey}-${line.itemIdx}`);
+    if(wrap){wrap.classList.remove('has-qty');const card=wrap.querySelector('.item-card');if(card)card.classList.remove('in-cart');}
+    if(badge)badge.textContent='';
   });
   renderOrderPanel();
 }
-
-function selType(t) {
-  orderType = t;
-  document.querySelectorAll('.type-btn').forEach((b,i) => {
-    b.classList.toggle('sel', ['dinein','takeaway','delivery'][i] === t);
-  });
+function selType(t){
+  orderType=t;
+  document.querySelectorAll('.type-btn').forEach((b,i)=>b.classList.toggle('sel',['dinein','takeaway','delivery'][i]===t));
   document.getElementById('err-type').classList.remove('show');
-  const isDelivery = t === 'delivery';
-  document.getElementById('zone-section').style.display = isDelivery ? 'block' : 'none';
-  document.getElementById('note-label').style.display = 'block';
-  document.getElementById('order-note').style.display = 'block';
+  document.getElementById('zone-section').style.display=t==='delivery'?'block':'none';
+  document.getElementById('note-label').style.display='block';
+  document.getElementById('order-note').style.display='block';
   updateTotal();
 }
-
-function selZone(z) {
-  deliveryZone = z;
-  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('sel'));
-  document.querySelectorAll('.zone-btn').forEach(b => {
-    if ((b.classList.contains('za')&&z==='A')||(b.classList.contains('zb')&&z==='B')||(b.classList.contains('zc')&&z==='C'))
-      b.classList.add('sel');
-  });
+function selZone(z){
+  deliveryZone=z;
+  document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.zone-btn').forEach(b=>{if((b.classList.contains('za')&&z==='A')||(b.classList.contains('zb')&&z==='B')||(b.classList.contains('zc')&&z==='C'))b.classList.add('sel');});
   document.getElementById('err-zone').classList.remove('show');
   updateTotal();
 }
-
-function getItemsTotal() {
-  return orderLines.reduce((s, l) => s + l.price * l.qty + l.addons.reduce((a,x) => a+x.price, 0), 0);
+function getItemsTotal(){return orderLines.reduce((s,l)=>s+l.price*l.qty+l.addons.reduce((a,x)=>a+x.price,0),0);}
+function getDeliveryFee(){return(orderType==='delivery'&&deliveryZone)?(ZONE_FEES[deliveryZone]||0):0;}
+function getGrandTotal(){return getItemsTotal()+getDeliveryFee();}
+function updateTotal(){
+  const fee=getDeliveryFee(),total=getGrandTotal();
+  document.getElementById('total-display').textContent='$'+total.toFixed(2);
+  const fl=document.getElementById('delivery-fee-label');
+  if(fee>0){fl.style.display='block';fl.textContent=`Items $${getItemsTotal().toFixed(2)} + delivery $${fee.toFixed(2)}`;}
+  else fl.style.display='none';
 }
-function getDeliveryFee() {
-  return (orderType === 'delivery' && deliveryZone) ? (ZONE_FEES[deliveryZone] || 0) : 0;
-}
-function getGrandTotal() { return getItemsTotal() + getDeliveryFee(); }
-
-function updateTotal() {
-  const fee   = getDeliveryFee();
-  const total = getGrandTotal();
-  document.getElementById('total-display').textContent = '$' + total.toFixed(2);
-  const fl = document.getElementById('delivery-fee-label');
-  if (fee > 0) { fl.style.display='block'; fl.textContent=`Items $${getItemsTotal().toFixed(2)} + delivery $${fee.toFixed(2)}`; }
-  else { fl.style.display='none'; }
-}
-
-function renderOrderPanel() {
+function renderOrderPanel(){
   updateTotal();
-  const scroll = document.getElementById('order-scroll');
-
-  if (!orderLines.length) {
-    scroll.innerHTML = `<div class="order-empty"><div class="order-empty-icon">🛒</div><div>Tap items to add them</div></div>`;
-    return;
-  }
-
-  const savedScroll = scroll.scrollTop;
-  let html = '';
-
-  orderLines.forEach(line => {
-    const lineTotal = line.price * line.qty + line.addons.reduce((a,x) => a+x.price, 0);
-    // Use numeric id safely in onclick
-    const lineId = line.id;
-    html += `<div class="order-line">
-      <div class="order-line-main">
-        <div style="flex:1">
-          <div class="order-line-name">${line.name}</div>
-          <div class="qty-row">
-            <button class="q-btn q-minus" onclick="changeQtyById(${lineId},-1)">−</button>
-            <div class="q-num">${line.qty}</div>
-            <button class="q-btn q-plus" onclick="changeQtyById(${lineId},1)">+</button>
-            <button class="q-del" onclick="removeLineById(${lineId})">✕</button>
-          </div>
-        </div>
-        <div class="order-line-price">$${lineTotal.toFixed(2)}</div>
-      </div>`;
-
-    if (line.meta?.flavors?.length) {
-      html += `<div class="order-addons"><div class="oa-label">💨 Flavor</div><div class="oa-chips">`;
-      line.meta.flavors.forEach(f => {
-        const safe = f.replace(/'/g, "\\'");
-        html += `<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavorById(${lineId},'${safe}')">${f}</button>`;
-      });
-      html += `</div></div>`;
-    }
-
-    if (line.meta?.addons?.length) {
-      html += `<div class="order-addons"><div class="oa-label">➕ Extras</div><div class="oa-chips">`;
-      line.meta.addons.forEach(a => {
-        const pn  = priceNum(a.price);
-        const sel = line.addons.some(x => x.label === a.label);
-        const safe = a.label.replace(/'/g, "\\'");
-        html += `<button class="oa-chip${sel?' selected':''}" onclick="toggleAddonById(${lineId},'${safe}',${pn})">${a.label} <span style="opacity:.7">${a.price}</span></button>`;
-      });
-      html += `</div></div>`;
-    }
-
-    html += `</div>`;
+  const scroll=document.getElementById('order-scroll');
+  if(!orderLines.length){scroll.innerHTML=`<div class="order-empty"><div class="order-empty-icon">🛒</div><div>Tap items to add them</div></div>`;return;}
+  const savedScroll=scroll.scrollTop;let html='';
+  orderLines.forEach(line=>{
+    const lineTotal=line.price*line.qty+line.addons.reduce((a,x)=>a+x.price,0),lineId=line.id;
+    html+=`<div class="order-line"><div class="order-line-main"><div style="flex:1"><div class="order-line-name">${line.name}</div><div class="qty-row"><button class="q-btn q-minus" onclick="changeQtyById(${lineId},-1)">−</button><div class="q-num">${line.qty}</div><button class="q-btn q-plus" onclick="changeQtyById(${lineId},1)">+</button><button class="q-del" onclick="removeLineById(${lineId})">✕</button></div></div><div class="order-line-price">$${lineTotal.toFixed(2)}</div></div>`;
+    if(line.meta?.flavors?.length){html+=`<div class="order-addons"><div class="oa-label">💨 Flavor</div><div class="oa-chips">`;line.meta.flavors.forEach(f=>{const safe=f.replace(/'/g,"\\'");html+=`<button class="oa-chip${line.flavor===f?' selected':''}" onclick="toggleFlavorById(${lineId},'${safe}')">${f}</button>`;});html+=`</div></div>`;}
+    if(line.meta?.addons?.length){html+=`<div class="order-addons"><div class="oa-label">➕ Extras</div><div class="oa-chips">`;line.meta.addons.forEach(a=>{const pn=priceNum(a.price),sel=line.addons.some(x=>x.label===a.label),safe=a.label.replace(/'/g,"\\'");html+=`<button class="oa-chip${sel?' selected':''}" onclick="toggleAddonById(${lineId},'${safe}',${pn})">${a.label} <span style="opacity:.7">${a.price}</span></button>`;});html+=`</div></div>`;}
+    html+=`</div>`;
   });
-
-  scroll.innerHTML = html;
-  scroll.scrollTop = savedScroll;
+  scroll.innerHTML=html;scroll.scrollTop=savedScroll;
 }
+function changeQtyById(id,delta){changeQty(id,delta);}
+function removeLineById(id){removeLine(id);}
+function toggleAddonById(id,label,price){toggleAddon(id,label,price);}
+function toggleFlavorById(id,flavor){toggleFlavor(id,flavor);}
 
-// Safe id-based wrappers (avoid floating point issues in onclick)
-function changeQtyById(id, delta) { changeQty(id, delta); }
-function removeLineById(id) { removeLine(id); }
-function toggleAddonById(id, label, price) { toggleAddon(id, label, price); }
-function toggleFlavorById(id, flavor) { toggleFlavor(id, flavor); }
-
-// ═══════════════════════════════════════════════════════════════
-// VALIDATION
-// ═══════════════════════════════════════════════════════════════
-function validateOrder() {
-  let ok = true;
-  const name = document.getElementById('cust-name').value.trim();
-  if (!name) { document.getElementById('err-name').classList.add('show'); document.getElementById('cust-name').classList.add('error'); ok=false; }
-  else { document.getElementById('err-name').classList.remove('show'); document.getElementById('cust-name').classList.remove('error'); }
-  if (!orderType) { document.getElementById('err-type').classList.add('show'); ok=false; }
+// ═══════════════════════════════════════════════════
+// VALIDATION & BUILD ORDER
+// ═══════════════════════════════════════════════════
+function validateOrder(){
+  let ok=true;
+  const name=document.getElementById('cust-name').value.trim();
+  if(!name){document.getElementById('err-name').classList.add('show');document.getElementById('cust-name').classList.add('error');ok=false;}
+  else{document.getElementById('err-name').classList.remove('show');document.getElementById('cust-name').classList.remove('error');}
+  if(!orderType){document.getElementById('err-type').classList.add('show');ok=false;}
   else document.getElementById('err-type').classList.remove('show');
-  if (orderType==='delivery' && !deliveryZone) { document.getElementById('err-zone').classList.add('show'); ok=false; }
+  if(orderType==='delivery'&&!deliveryZone){document.getElementById('err-zone').classList.add('show');ok=false;}
   else document.getElementById('err-zone').classList.remove('show');
-  if (!orderLines.length) { showToast('Add items to the order first', 'error'); ok=false; }
+  if(!orderLines.length){showToast('Add items to the order first','error');ok=false;}
   return ok;
 }
-
-// ═══════════════════════════════════════════════════════════════
-// BUILD ORDER OBJECT
-// ═══════════════════════════════════════════════════════════════
-function buildOrderObj(status='pending') {
-  const name  = document.getElementById('cust-name').value.trim();
-  const note  = document.getElementById('order-note').value.trim();
-  const fee   = getDeliveryFee();
-  const total = getGrandTotal();
-  const id    = 'ORD-' + Date.now();
-  return {
-    id, status,
-    timestamp: new Date().toISOString(),
-    name, note,
-    orderType,
-    deliveryZone: orderType==='delivery' ? deliveryZone : null,
-    deliveryFee: fee,
-    items: orderLines.map(l => ({
-      name: l.name,
-      price: l.price,
-      priceStr: l.priceStr,
-      qty: l.qty,
-      flavor: l.flavor || null,
-      addons: l.addons.map(a => ({label:a.label, price:a.price}))
-    })),
-    subtotal: getItemsTotal(),
-    total
-  };
+function buildOrderObj(status='pending'){
+  const name=document.getElementById('cust-name').value.trim(),note=document.getElementById('order-note').value.trim();
+  const fee=getDeliveryFee(),total=getGrandTotal(),id='ORD-'+Date.now();
+  return{id,status,timestamp:new Date().toISOString(),name,note,orderType,deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:fee,items:orderLines.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),subtotal:getItemsTotal(),total};
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOAD ORDER INTO CURRENT ORDER (from inbox confirmation)
-// ═══════════════════════════════════════════════════════════════
-function loadOrderIntoCurrent(order) {
+// ═══════════════════════════════════════════════════
+// LOAD INBOX ORDER → CURRENT ORDER
+// FIX: normalize deliveryZone label ("Zone A" → "A")
+// ═══════════════════════════════════════════════════
+function normalizeZone(zoneVal) {
+  if (!zoneVal) return null;
+  // Handle "Zone A", "Zone B", "Zone C" → "A", "B", "C"
+  const match = String(zoneVal).match(/\b([ABC])\b/i);
+  return match ? match[1].toUpperCase() : null;
+}
+
+function loadOrderIntoCurrent(order){
   clearOrder();
-  // Set form fields
-  document.getElementById('cust-name').value = order.name || '';
-  if (order.note) {
-    document.getElementById('order-note').value = order.note;
-    document.getElementById('note-label').style.display = 'block';
-    document.getElementById('order-note').style.display = 'block';
+  document.getElementById('cust-name').value=order.name||'';
+  if(order.note){document.getElementById('order-note').value=order.note;document.getElementById('note-label').style.display='block';document.getElementById('order-note').style.display='block';}
+  if(order.orderType) selType(order.orderType);
+
+  // FIX: normalize zone before calling selZone
+  const zone = normalizeZone(order.deliveryZone);
+  if(zone) selZone(zone);
+
+  // FIX: show note field and address info if delivery
+  if(order.orderType === 'delivery') {
+    document.getElementById('note-label').style.display='block';
+    document.getElementById('order-note').style.display='block';
+    // Pre-fill address as note if present and note is empty
+    if(order.address && !order.note) {
+      document.getElementById('order-note').value = order.address;
+    }
   }
-  if (order.orderType) selType(order.orderType);
-  if (order.deliveryZone) selZone(order.deliveryZone);
 
-  // Rebuild orderLines from order items
-  order.items.forEach(it => {
-    // Try to find matching item in menu for meta (addons/flavors)
-    let foundCatKey = null, foundIdx = null, foundMeta = null;
-    menuData.forEach(cat => {
-      (cat.items || []).forEach((mitem, idx) => {
-        if (mitem.name === it.name) { foundCatKey = cat.key; foundIdx = idx; foundMeta = mitem; }
-      });
-    });
-
-    const line = {
-      id: Date.now() + Math.random(),
-      catKey: foundCatKey,
-      itemIdx: foundIdx,
-      name: it.name,
-      price: it.price,
-      priceStr: it.priceStr || ('$' + it.price),
-      qty: it.qty,
-      addons: (it.addons || []).map(a => ({label:a.label, price:a.price})),
-      flavor: it.flavor || null,
-      meta: foundMeta || {}
-    };
+  order.items.forEach(it=>{
+    let foundCatKey=null,foundIdx=null,foundMeta=null;
+    menuData.forEach(cat=>{(cat.items||[]).forEach((mitem,idx)=>{if(mitem.name===it.name){foundCatKey=cat.key;foundIdx=idx;foundMeta=mitem;}});});
+    const line={id:Date.now()+Math.random(),catKey:foundCatKey,itemIdx:foundIdx,name:it.name,price:it.price,priceStr:it.priceStr||('$'+it.price),qty:it.qty,addons:(it.addons||[]).map(a=>({label:a.label,price:a.price})),flavor:it.flavor||null,meta:foundMeta||{}};
     orderLines.push(line);
-    if (foundCatKey !== null && foundIdx !== null) updateItemBadge(foundCatKey, foundIdx);
+    if(foundCatKey!==null&&foundIdx!==null)updateItemBadge(foundCatKey,foundIdx);
   });
-
   renderOrderPanel();
-  showToast('Order loaded into current order ✓', 'success');
-
-  // Switch back to menu view
-  if (showingInbox) toggleInboxView();
-  if (showingOrders) toggleOrdersView();
+  showToast('Order loaded into current order ✓','success');
+  if(showingInbox)toggleInboxView();
+  if(showingOrders)toggleOrdersView();
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // CHARGE & SAVE
-// ═══════════════════════════════════════════════════════════════
-async function chargeOrder() {
-  if (!validateOrder()) return;
-  const order = buildOrderObj('pending');
+// ═══════════════════════════════════════════════════
+async function chargeOrder(){
+  if(!validateOrder()) return;
+  const order=buildOrderObj('pending');
   showLoading('Saving order…');
-  try {
-    await saveOrderToGitHub(order);
-    showToast(`Order ${order.id} saved ✓`, 'success');
-    clearOrder();
-    loadOrders(false).catch(()=>{});
-  } catch(e) {
-    showToast('Save failed: ' + e.message, 'error');
-  }
+  try{await saveOrderToGitHub(order);showToast(`Order ${order.id} saved ✓`,'success');clearOrder();loadOrders(false).catch(()=>{});}
+  catch(e){showToast('Save failed: '+e.message,'error');}
   hideLoading();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// GITHUB: ORDERS FILE
-// ═══════════════════════════════════════════════════════════════
-function fromB64(b64) {
-  const bin = atob(b64); const b = new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) b[i]=bin.charCodeAt(i);
-  return new TextDecoder().decode(b);
-}
-function toB64(str) {
-  const b = new TextEncoder().encode(str); let s='';
-  b.forEach(x => s+=String.fromCharCode(x));
-  return btoa(s);
-}
+// ═══════════════════════════════════════════════════
+// GITHUB FILE HELPERS
+// ═══════════════════════════════════════════════════
+function fromB64(b64){const bin=atob(b64);const b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return new TextDecoder().decode(b);}
+function toB64(str){const b=new TextEncoder().encode(str);let s='';b.forEach(x=>s+=String.fromCharCode(x));return btoa(s);}
 
-async function fetchGitHubFile(path) {
-  const h = {'Accept':'application/vnd.github.v3+json'};
-  if (getToken()) h['Authorization'] = 'Bearer ' + getToken();
-  const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {headers:h});
+// FIX: use raw.githubusercontent.com for reading (no cache, no auth needed)
+// Only use the contents API (with SHA) for writing
+async function fetchRawFile(path) {
+  const url = RAW_BASE + path + '?v=' + Date.now();
+  const res = await fetch(url);
   if (res.status === 404) return { data: null, sha: null };
-  if (!res.ok) throw new Error('GitHub ' + res.status);
-  const d = await res.json();
-  return { data: JSON.parse(fromB64(d.content.replace(/\n/g,''))), sha: d.sha };
+  if (!res.ok) throw new Error('Raw fetch ' + res.status);
+  const data = await res.json();
+  return { data, sha: null }; // sha not available from raw, fetch separately when needed
 }
 
-async function putGitHubFile(path, data, sha, message) {
-  if (!getToken()) throw new Error('No GitHub token');
-  const content = toB64(JSON.stringify(data, null, 2));
-  const body = { message, content };
-  if (sha) body.sha = sha;
-  const res = await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-    method: 'PUT',
-    headers: {'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) { const e=await res.json(); throw new Error(e.message||res.status); }
-  const saved = await res.json();
-  return saved.content.sha;
+async function fetchGitHubFileSHA(path) {
+  // Only used to get SHA before a write
+  const h={'Accept':'application/vnd.github.v3+json'};
+  if(getToken()) h['Authorization']='Bearer '+getToken();
+  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{headers:h});
+  if(res.status===404) return null;
+  if(!res.ok) throw new Error('GitHub '+res.status);
+  const d=await res.json();
+  return d.sha;
 }
 
-async function fetchOrdersFile() {
-  const { data, sha } = await fetchGitHubFile(ORDERS_PATH);
-  ordersSha = sha;
-  return data || [];
+async function putGitHubFile(path,data,sha,message){
+  if(!getToken()) throw new Error('No GitHub token');
+  const content=toB64(JSON.stringify(data,null,2));
+  const body={message,content};if(sha)body.sha=sha;
+  const res=await fetch(`${API}/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`,{method:'PUT',headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:JSON.stringify(body)});
+  if(!res.ok){const e=await res.json();throw new Error(e.message||res.status);}
+  const saved=await res.json();return saved.content.sha;
 }
 
-async function saveOrdersFile(orders) {
-  ordersSha = await putGitHubFile(ORDERS_PATH, orders, ordersSha, 'Update orders');
+async function fetchOrdersFile(){
+  const{data}=await fetchRawFile(ORDERS_PATH);
+  // Still need SHA for writing — fetch it separately
+  ordersSha=await fetchGitHubFileSHA(ORDERS_PATH).catch(()=>null);
+  return data||[];
 }
-
-async function saveOrderToGitHub(order) {
-  let orders = [];
-  try { orders = await fetchOrdersFile(); } catch(e) {}
-  orders.unshift(order);
-  if (orders.length > MAX_ORDERS) orders = orders.slice(0, MAX_ORDERS);
-  ordersData = orders;
-  await saveOrdersFile(orders);
+async function saveOrdersFile(orders){
+  if(!ordersSha) ordersSha=await fetchGitHubFileSHA(ORDERS_PATH).catch(()=>null);
+  ordersSha=await putGitHubFile(ORDERS_PATH,orders,ordersSha,'Update orders');
 }
-
-async function loadOrders(showUI) {
-  if (showUI) showLoading('Loading orders…');
-  try {
-    ordersData = await fetchOrdersFile();
-    renderOrdersList();
-  } catch(e) {
-    if (showUI) showToast('Load failed: ' + e.message, 'error');
-  }
-  if (showUI) hideLoading();
+async function saveOrderToGitHub(order){
+  let orders=[];try{orders=await fetchOrdersFile();}catch(e){}
+  orders.unshift(order);if(orders.length>MAX_ORDERS)orders=orders.slice(0,MAX_ORDERS);
+  ordersData=orders;await saveOrdersFile(orders);
 }
-
-async function updateOrderStatus(id, status) {
-  const order = ordersData.find(o => o.id === id);
-  if (!order) return;
-  order.status = status;
-  showLoading('Updating…');
-  try {
-    await saveOrdersFile(ordersData);
-    showToast('Status updated ✓', 'success');
-    renderOrdersList();
-  } catch(e) { showToast('Update failed: ' + e.message, 'error'); }
+async function loadOrders(showUI){
+  if(showUI)showLoading('Loading orders…');
+  try{ordersData=await fetchOrdersFile();renderOrdersList();}
+  catch(e){if(showUI)showToast('Load failed: '+e.message,'error');}
+  if(showUI)hideLoading();
+}
+async function updateOrderStatus(id,status){
+  const order=ordersData.find(o=>o.id===id);if(!order) return;
+  order.status=status;showLoading('Updating…');
+  try{await saveOrdersFile(ordersData);showToast('Status updated ✓','success');renderOrdersList();}
+  catch(e){showToast('Update failed: '+e.message,'error');}
   hideLoading();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INBOX (orders from menu page → inbox.json on GitHub)
-// ═══════════════════════════════════════════════════════════════
-async function pollInbox() {
-  try {
-    const { data, sha } = await fetchGitHubFile(INBOX_PATH);
-    inboxSha = sha;
-    const pending = (data || []).filter(o => o.status === 'pending');
-    inboxData = data || [];
-    updateInboxBadge(pending.length);
-    if (showingInbox) renderInboxList();
-  } catch(e) {
-    // silently fail if inbox.json doesn't exist yet
+// ═══════════════════════════════════════════════════
+// INBOX — FIX: use raw fetch (no GitHub API cache)
+// ═══════════════════════════════════════════════════
+async function pollInbox(){
+  try{
+    const{data}=await fetchRawFile(INBOX_PATH);
+    // FIX: get SHA only if we need to write (lazy)
+    const pending=(data||[]).filter(o=>o.status==='pending');
+    inboxData=data||[];
+
+    const newCount=pending.length;
+    updateInboxBadge(newCount);
+
+    // FIX: if inbox is open, always re-render so new orders appear immediately
+    if(showingInbox) renderInboxList();
+
+    // FIX: if new orders appeared since last poll and inbox is closed → pulse the button
+    if(newCount > lastInboxCount && !showingInbox){
+      document.getElementById('inbox-tab-btn').classList.add('has-new');
+      showToast(`📥 ${newCount - lastInboxCount} new order${newCount-lastInboxCount>1?'s':''} incoming!`,'success');
+    }
+    if(newCount === 0){
+      document.getElementById('inbox-tab-btn').classList.remove('has-new');
+    }
+    lastInboxCount=newCount;
+
+  }catch(e){
+    // silently fail
   }
 }
 
-function updateInboxBadge(count) {
-  const badge = document.getElementById('inbox-badge');
-  badge.textContent = count;
-  badge.classList.toggle('show', count > 0);
+function updateInboxBadge(count){
+  const badge=document.getElementById('inbox-badge');
+  badge.textContent=count;badge.classList.toggle('show',count>0);
 }
 
-async function confirmInboxOrder(id) {
-  const order = inboxData.find(o => o.id === id);
-  if (!order) return;
-  // Load into current order
+async function confirmInboxOrder(id){
+  const order=inboxData.find(o=>o.id===id);if(!order) return;
   loadOrderIntoCurrent(order);
-  // Mark as confirmed in inbox
-  order.status = 'confirmed';
-  try {
-    inboxSha = await putGitHubFile(INBOX_PATH, inboxData, inboxSha, 'Confirm order ' + id);
-  } catch(e) {}
+  order.status='confirmed';
+  try{
+    // FIX: fetch fresh SHA right before write
+    inboxSha=await fetchGitHubFileSHA(INBOX_PATH).catch(()=>null);
+    inboxSha=await putGitHubFile(INBOX_PATH,inboxData,inboxSha,'Confirm order '+id);
+  }catch(e){}
   renderInboxList();
+  updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
+  document.getElementById('inbox-tab-btn').classList.remove('has-new');
+}
+
+async function declineInboxOrder(id){
+  const order=inboxData.find(o=>o.id===id);if(!order) return;
+  order.status='declined';showLoading('Declining…');
+  try{
+    inboxSha=await fetchGitHubFileSHA(INBOX_PATH).catch(()=>null);
+    inboxSha=await putGitHubFile(INBOX_PATH,inboxData,inboxSha,'Decline order '+id);
+    showToast('Order declined','');
+  }catch(e){showToast('Error: '+e.message,'error');}
+  hideLoading();renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
 }
 
-async function declineInboxOrder(id) {
-  const order = inboxData.find(o => o.id === id);
-  if (!order) return;
-  order.status = 'declined';
-  showLoading('Declining…');
-  try {
-    inboxSha = await putGitHubFile(INBOX_PATH, inboxData, inboxSha, 'Decline order ' + id);
-    showToast('Order declined', '');
-  } catch(e) { showToast('Error: ' + e.message, 'error'); }
-  hideLoading();
-  renderInboxList();
-  updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
-}
-
-function renderInboxList() {
-  const list = document.getElementById('inbox-list');
-  const pending = inboxData.filter(o => o.status === 'pending');
-  if (!pending.length) {
-    list.innerHTML = `<div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders right now</div><div style="font-size:12px;margin-top:8px;color:var(--g400)">Orders from customers on the menu page will appear here</div></div>`;
-    return;
-  }
-  const typeEmoji = {dinein:'🪑', takeaway:'🥡', delivery:'🛵'};
-  list.innerHTML = pending.map(o => {
-    const dt = new Date(o.timestamp);
-    const ts = dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-    let metaStr = `${typeEmoji[o.orderType]||''} ${o.orderType||''}`;
-    if (o.deliveryZone) metaStr += ` · Zone ${o.deliveryZone}`;
-    let itemsHtml = (o.items||[]).map(it => `<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`).join('');
-    const safeO = JSON.stringify(o).replace(/"/g,'&quot;');
-    return `<div class="inbox-card">
+function renderInboxList(){
+  const list=document.getElementById('inbox-list');
+  const pending=inboxData.filter(o=>o.status==='pending');
+  if(!pending.length){list.innerHTML=`<div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders right now</div><div style="font-size:12px;margin-top:8px;color:var(--g400)">Orders from customers on the menu page will appear here</div></div>`;return;}
+  const typeEmoji={dinein:'🪑',takeaway:'🥡',delivery:'🛵'};
+  list.innerHTML=pending.map(o=>{
+    const dt=new Date(o.timestamp),ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+    // FIX: handle both "Zone A" and "A" format for display
+    const zoneDisplay = o.deliveryZone ? ` · ${o.deliveryZone}` : '';
+    let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType||''}${zoneDisplay}`;
+    const itemsHtml=(o.items||[]).map(it=>`<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`).join('');
+    // FIX: show GPS link if available
+    const gpsHtml = o.gps ? `<div class="inbox-gps-row">📍 <a href="https://maps.google.com/?q=${o.gps.lat},${o.gps.lng}" target="_blank" style="color:var(--green-d);text-decoration:underline">View customer location on Maps</a></div>` : '';
+    // FIX: show address if present
+    const addrHtml = o.address ? `<div style="font-size:11px;color:var(--g600);padding:0 14px 8px">🏠 ${o.address}</div>` : '';
+    return`<div class="inbox-card">
       <div class="inbox-card-header">
-        <div>
-          <div class="inbox-oc-name">${o.name}</div>
-          <div class="inbox-oc-meta">${metaStr}</div>
-          <div class="inbox-oc-time">🕐 ${ts}</div>
-        </div>
+        <div><div class="inbox-oc-name">${o.name}</div><div class="inbox-oc-meta">${metaStr}</div><div class="inbox-oc-time">🕐 ${ts}</div></div>
         <span class="new-badge">NEW</span>
       </div>
       <div class="oc-items" style="border-top:1px solid #dcfce7">${itemsHtml}</div>
+      ${gpsHtml}${addrHtml}
       <div class="oc-total"><span>Total</span><span>$${(o.total||0).toFixed(2)}</span></div>
       <div class="inbox-actions">
         <button class="inbox-confirm-btn" onclick="confirmInboxOrder('${o.id}')">✅ Confirm & Load</button>
@@ -1245,223 +912,125 @@ function renderInboxList() {
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ORDERS LOG UI
-// ═══════════════════════════════════════════════════════════════
-function toggleOrdersView() {
-  if (showingInbox) toggleInboxView(); // close inbox first
-  showingOrders = !showingOrders;
-  document.getElementById('cat-sidebar').style.display  = showingOrders ? 'none' : 'flex';
-  document.getElementById('menu-panel').style.display   = showingOrders ? 'none' : 'block';
-  document.getElementById('orders-view').classList.toggle('show', showingOrders);
-  document.getElementById('orders-tab-btn').classList.toggle('active', showingOrders);
-  if (showingOrders) loadOrders(true);
+// ═══════════════════════════════════════════════════
+// ORDERS LOG
+// ═══════════════════════════════════════════════════
+function toggleOrdersView(){
+  if(showingInbox)toggleInboxView();
+  showingOrders=!showingOrders;
+  document.getElementById('cat-sidebar').style.display=showingOrders?'none':'flex';
+  document.getElementById('menu-panel').style.display=showingOrders?'none':'block';
+  document.getElementById('orders-view').classList.toggle('show',showingOrders);
+  document.getElementById('orders-tab-btn').classList.toggle('active',showingOrders);
+  if(showingOrders)loadOrders(true);
 }
-
-function toggleInboxView() {
-  if (showingOrders) toggleOrdersView(); // close orders first
-  showingInbox = !showingInbox;
-  document.getElementById('cat-sidebar').style.display  = showingInbox ? 'none' : 'flex';
-  document.getElementById('menu-panel').style.display   = showingInbox ? 'none' : 'block';
-  document.getElementById('inbox-view').classList.toggle('show', showingInbox);
-  document.getElementById('inbox-tab-btn').classList.toggle('active', showingInbox);
-  if (showingInbox) renderInboxList();
-}
-
-function setFilter(btn, filter) {
-  ordersFilter = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderOrdersList();
-}
-
-function renderOrdersList() {
-  const list = document.getElementById('orders-list');
-  let filtered = ordersData;
-  if (ordersFilter !== 'all') filtered = ordersData.filter(o => o.status === ordersFilter);
-  if (!filtered.length) {
-    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No ${ordersFilter==='all'?'':ordersFilter} orders found.</div>`;
-    return;
+function toggleInboxView(){
+  if(showingOrders)toggleOrdersView();
+  showingInbox=!showingInbox;
+  document.getElementById('cat-sidebar').style.display=showingInbox?'none':'flex';
+  document.getElementById('menu-panel').style.display=showingInbox?'none':'block';
+  document.getElementById('inbox-view').classList.toggle('show',showingInbox);
+  document.getElementById('inbox-tab-btn').classList.toggle('active',showingInbox);
+  // FIX: remove pulse once user opens inbox
+  if(showingInbox){
+    document.getElementById('inbox-tab-btn').classList.remove('has-new');
+    renderInboxList(); // always re-render with latest data when opening
   }
-  const typeEmoji = {dinein:'🪑', takeaway:'🥡', delivery:'🛵'};
-  list.innerHTML = filtered.map(o => {
-    const dt  = new Date(o.timestamp);
-    const ts  = dt.toLocaleDateString('en-GB') + ' ' + dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-    const sbCls = o.status==='done'?'sb-done':o.status==='cancelled'?'sb-cancelled':'sb-pending';
-    let metaStr = `${typeEmoji[o.orderType]||''} ${o.orderType}`;
-    if (o.deliveryZone) metaStr += ` · Zone ${o.deliveryZone} ($${o.deliveryFee?.toFixed(2)||'0.00'})`;
-    if (o.note) metaStr += ` · "${o.note}"`;
-
-    let itemRows = '';
-    o.items.forEach(it => {
-      itemRows += `<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;
-      if (it.flavor) itemRows += `<div class="oc-item-row addon-row"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
-      (it.addons||[]).forEach(a => { itemRows += `<div class="oc-item-row addon-row"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`; });
+}
+function setFilter(btn,filter){ordersFilter=filter;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderOrdersList();}
+function renderOrdersList(){
+  const list=document.getElementById('orders-list');
+  let filtered=ordersData;
+  if(ordersFilter!=='all')filtered=ordersData.filter(o=>o.status===ordersFilter);
+  if(!filtered.length){list.innerHTML=`<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No ${ordersFilter==='all'?'':ordersFilter} orders found.</div>`;return;}
+  const typeEmoji={dinein:'🪑',takeaway:'🥡',delivery:'🛵'};
+  list.innerHTML=filtered.map(o=>{
+    const dt=new Date(o.timestamp),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+    const sbCls=o.status==='done'?'sb-done':o.status==='cancelled'?'sb-cancelled':'sb-pending';
+    let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType}`;
+    if(o.deliveryZone)metaStr+=` · ${o.deliveryZone} ($${o.deliveryFee?.toFixed(2)||'0.00'})`;
+    if(o.note)metaStr+=` · "${o.note}"`;
+    let itemRows='';
+    o.items.forEach(it=>{
+      itemRows+=`<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;
+      if(it.flavor)itemRows+=`<div class="oc-item-row addon-row"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
+      (it.addons||[]).forEach(a=>{itemRows+=`<div class="oc-item-row addon-row"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;});
     });
-    if (o.deliveryFee > 0) itemRows += `<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
-
-    const canDone   = o.status !== 'done';
-    const canCancel = o.status !== 'cancelled';
-    const safeO = JSON.stringify(o).replace(/"/g,'&quot;');
-
-    return `<div class="order-card status-${o.status}">
-      <div class="oc-header">
-        <div>
-          <div class="oc-num">${o.id} · ${ts}</div>
-          <div class="oc-name">${o.name}</div>
-          <div class="oc-meta">${metaStr}</div>
-        </div>
-        <span class="status-badge ${sbCls}">${o.status}</span>
-      </div>
+    if(o.deliveryFee>0)itemRows+=`<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+    const canDone=o.status!=='done',canCancel=o.status!=='cancelled';
+    return`<div class="order-card status-${o.status}">
+      <div class="oc-header"><div><div class="oc-num">${o.id} · ${ts}</div><div class="oc-name">${o.name}</div><div class="oc-meta">${metaStr}</div></div><span class="status-badge ${sbCls}">${o.status}</span></div>
       <div class="oc-items">${itemRows}</div>
       <div class="oc-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div>
       <div class="oc-actions">
-        ${canDone   ? `<button class="oc-btn oc-done"     onclick="confirmStatus('${o.id}','done')">✅ Done</button>` : ''}
-        ${canCancel ? `<button class="oc-btn oc-cancel"   onclick="confirmStatus('${o.id}','cancelled')">✕ Cancel</button>` : ''}
-        <button class="oc-btn oc-load"    onclick="loadOrderIntoCurrent(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" title="Load into current order">📋 Load</button>
+        ${canDone?`<button class="oc-btn oc-done" onclick="confirmStatus('${o.id}','done')">✅ Done</button>`:''}
+        ${canCancel?`<button class="oc-btn oc-cancel" onclick="confirmStatus('${o.id}','cancelled')">✕ Cancel</button>`:''}
+        <button class="oc-btn oc-load" onclick="loadOrderIntoCurrent(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" title="Load into current order">📋 Load</button>
         <button class="oc-btn oc-print-t" onclick="printFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')),'thermal')">🖨 Thermal</button>
         <button class="oc-btn oc-print-c" onclick="printFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')),'card')">🖨 Card</button>
-        <button class="oc-btn oc-wa"      onclick="sendWhatsAppFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" >💬 WA</button>
+        <button class="oc-btn oc-wa" onclick="sendWhatsAppFromOrder(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify(o))}')))" >💬 WA</button>
       </div>
     </div>`;
   }).join('');
 }
+function confirmStatus(id,status){openModal(status==='done'?'Mark as Done':'Cancel Order',`Mark order as ${status}?`,()=>updateOrderStatus(id,status));}
 
-function confirmStatus(id, status) {
-  openModal(
-    status==='done' ? 'Mark as Done' : 'Cancel Order',
-    `Mark order as ${status}?`,
-    () => updateOrderStatus(id, status)
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // PRINT
-// ═══════════════════════════════════════════════════════════════
-function printOrder(format) {
-  if (!validateOrder()) return;
-  const order = buildOrderObj();
-  doPrint(order, format);
+// ═══════════════════════════════════════════════════
+function printOrder(format){if(!validateOrder()) return;doPrint(buildOrderObj(),format);}
+function printFromOrder(order,format){doPrint(order,format);}
+function doPrint(order,format){
+  const area=document.getElementById('print-area');
+  area.innerHTML=format==='thermal'?buildThermal(order):buildCard(order);
+  area.style.display='block';
+  setTimeout(()=>{window.print();area.style.display='none';},150);
 }
-function printFromOrder(order, format) { doPrint(order, format); }
-
-function doPrint(order, format) {
-  const area = document.getElementById('print-area');
-  area.innerHTML = format === 'thermal' ? buildThermal(order) : buildCard(order);
-  area.style.display = 'block';
-  setTimeout(() => { window.print(); area.style.display='none'; }, 150);
+function buildThermal(o){
+  const dt=new Date(o.timestamp||new Date()),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const typeLabels={dinein:'Dine In',takeaway:'Takeaway',delivery:'Delivery'};
+  let lines='';
+  o.items.forEach(it=>{lines+=`<div class="th-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;if(it.flavor)lines+=`<div class="th-addon">↳ Flavor: ${it.flavor}</div>`;(it.addons||[]).forEach(a=>{lines+=`<div class="th-addon">↳ ${a.label}: +$${a.price.toFixed(2)}</div>`;});});
+  if(o.deliveryFee>0)lines+=`<div class="th-row"><span>Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+  return`<div class="thermal-receipt"><div class="th-center"><div class="th-logo">LE KIOSK</div><div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div><div class="th-divider"></div><div class="th-row"><span>Order:</span><span>${o.id||'POS'}</span></div><div class="th-row"><span>Name:</span><span>${o.name}</span></div><div class="th-row"><span>Type:</span><span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div class="th-row"><span>Zone:</span><span>${o.deliveryZone}</span></div>`:''} ${o.note?`<div class="th-row"><span>Note:</span><span>${o.note}</span></div>`:''}<div class="th-row"><span>Time:</span><span>${ts}</span></div><div class="th-divider"></div>${lines}<div class="th-divider"></div><div class="th-row th-total bold"><span>TOTAL</span><span>$${o.total.toFixed(2)}</span></div><div class="th-divider"></div><div class="th-footer">Thank you for visiting!<br>⭐ Leave us a Google review</div></div>`;
 }
-
-function buildThermal(o) {
-  const dt  = new Date(o.timestamp || new Date());
-  const ts  = dt.toLocaleDateString('en-GB') + ' ' + dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-  const typeLabels = {dinein:'Dine In', takeaway:'Takeaway', delivery:'Delivery'};
-  let lines = '';
-  o.items.forEach(it => {
-    lines += `<div class="th-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;
-    if (it.flavor) lines += `<div class="th-addon">↳ Flavor: ${it.flavor}</div>`;
-    (it.addons||[]).forEach(a => { lines += `<div class="th-addon">↳ ${a.label}: +$${a.price.toFixed(2)}</div>`; });
-  });
-  if (o.deliveryFee > 0) lines += `<div class="th-row"><span>Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
-  return `<div class="thermal-receipt">
-    <div class="th-center"><div class="th-logo">LE KIOSK</div><div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div>
-    <div class="th-divider"></div>
-    <div class="th-row"><span>Order:</span><span>${o.id||'POS'}</span></div>
-    <div class="th-row"><span>Name:</span><span>${o.name}</span></div>
-    <div class="th-row"><span>Type:</span><span>${typeLabels[o.orderType]||o.orderType}</span></div>
-    ${o.deliveryZone ? `<div class="th-row"><span>Zone:</span><span>${o.deliveryZone}</span></div>` : ''}
-    ${o.note ? `<div class="th-row"><span>Note:</span><span>${o.note}</span></div>` : ''}
-    <div class="th-row"><span>Time:</span><span>${ts}</span></div>
-    <div class="th-divider"></div>
-    ${lines}
-    <div class="th-divider"></div>
-    <div class="th-row th-total bold"><span>TOTAL</span><span>$${o.total.toFixed(2)}</span></div>
-    <div class="th-divider"></div>
-    <div class="th-footer">Thank you for visiting!<br>⭐ Leave us a Google review</div>
-  </div>`;
+function buildCard(o){
+  const dt=new Date(o.timestamp||new Date()),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const typeLabels={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
+  let rows='';
+  o.items.forEach(it=>{rows+=`<div class="cr-row"><span style="font-weight:700">${it.name} <span style="color:#9ca3af;font-weight:500">x${it.qty}</span></span><span style="font-weight:700">$${(it.price*it.qty).toFixed(2)}</span></div>`;if(it.flavor)rows+=`<div class="cr-addon"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;(it.addons||[]).forEach(a=>{rows+=`<div class="cr-addon"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;});});
+  if(o.deliveryFee>0)rows+=`<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
+  return`<div class="card-receipt"><div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div><div class="cr-meta"><div>Customer: <span>${o.name}</span></div><div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div>Zone: <span>${o.deliveryZone} (+$${o.deliveryFee?.toFixed(2)||'0.00'})</span></div>`:''} ${o.note?`<div>Note: <span>${o.note}</span></div>`:''}<div>Time: <span>${ts}</span></div></div><div class="cr-section">${rows}</div><div class="cr-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div><div class="cr-footer">Thank you for visiting Le Kiosk! ⭐<br>Leave us a Google review — it means the world to us.</div></div>`;
 }
 
-function buildCard(o) {
-  const dt  = new Date(o.timestamp || new Date());
-  const ts  = dt.toLocaleDateString('en-GB') + ' ' + dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-  const typeLabels = {dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery'};
-  let rows = '';
-  o.items.forEach(it => {
-    rows += `<div class="cr-row"><span style="font-weight:700">${it.name} <span style="color:#9ca3af;font-weight:500">x${it.qty}</span></span><span style="font-weight:700">$${(it.price*it.qty).toFixed(2)}</span></div>`;
-    if (it.flavor) rows += `<div class="cr-addon"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;
-    (it.addons||[]).forEach(a => { rows += `<div class="cr-addon"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`; });
-  });
-  if (o.deliveryFee > 0) rows += `<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
-  return `<div class="card-receipt">
-    <div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div>
-    <div class="cr-meta">
-      <div>Customer: <span>${o.name}</span></div>
-      <div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>
-      ${o.deliveryZone ? `<div>Zone: <span>${o.deliveryZone} (+$${o.deliveryFee?.toFixed(2)||'0.00'})</span></div>` : ''}
-      ${o.note ? `<div>Note: <span>${o.note}</span></div>` : ''}
-      <div>Time: <span>${ts}</span></div>
-    </div>
-    <div class="cr-section">${rows}</div>
-    <div class="cr-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div>
-    <div class="cr-footer">Thank you for visiting Le Kiosk! ⭐<br>Leave us a Google review — it means the world to us.</div>
-  </div>`;
+// ═══════════════════════════════════════════════════
+// WHATSAPP
+// ═══════════════════════════════════════════════════
+function sendWhatsApp(){if(!validateOrder()) return;doWhatsApp(buildOrderObj());}
+function sendWhatsAppFromOrder(o){doWhatsApp(o);}
+function doWhatsApp(o){
+  const typeLabels={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
+  const dt=new Date(o.timestamp||new Date()),ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  let msg=`🛒 *Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n👤 *Name:* ${o.name}\n📦 *Type:* ${typeLabels[o.orderType]||o.orderType}\n`;
+  if(o.deliveryZone)msg+=`📍 *Zone:* ${o.deliveryZone} (fee: $${o.deliveryFee?.toFixed(2)||'0.00'})\n`;
+  if(o.note)msg+=`📝 *Note:* ${o.note}\n`;
+  msg+=`🕐 *Time:* ${ts}\n━━━━━━━━━━━━━━━━━━\n`;
+  o.items.forEach(it=>{msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;if(it.flavor)msg+=`  ↳ Flavor: ${it.flavor}\n`;(it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;});});
+  if(o.deliveryFee>0)msg+=`• 🛵 Delivery — $${o.deliveryFee.toFixed(2)}\n`;
+  msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${o.total.toFixed(2)}*`;
+  window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// WHATSAPP — fixed to store number
-// ═══════════════════════════════════════════════════════════════
-function sendWhatsApp() {
-  if (!validateOrder()) return;
-  const order = buildOrderObj();
-  doWhatsApp(order);
-}
-function sendWhatsAppFromOrder(o) { doWhatsApp(o); }
-function doWhatsApp(o) {
-  const typeLabels = {dinein:'🪑 Dine In', takeaway:'🥡 Takeaway', delivery:'🛵 Delivery'};
-  const dt  = new Date(o.timestamp||new Date());
-  const ts  = dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-  let msg = `🛒 *Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n`;
-  msg += `👤 *Name:* ${o.name}\n`;
-  msg += `📦 *Type:* ${typeLabels[o.orderType]||o.orderType}\n`;
-  if (o.deliveryZone) msg += `📍 *Zone:* ${o.deliveryZone} (fee: $${o.deliveryFee?.toFixed(2)||'0.00'})\n`;
-  if (o.note) msg += `📝 *Note:* ${o.note}\n`;
-  msg += `🕐 *Time:* ${ts}\n━━━━━━━━━━━━━━━━━━\n`;
-  o.items.forEach(it => {
-    msg += `• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
-    if (it.flavor) msg += `  ↳ Flavor: ${it.flavor}\n`;
-    (it.addons||[]).forEach(a => { msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`; });
-  });
-  if (o.deliveryFee > 0) msg += `• 🛵 Delivery — $${o.deliveryFee.toFixed(2)}\n`;
-  msg += `━━━━━━━━━━━━━━━━━━\n💰 *Total: $${o.total.toFixed(2)}*`;
-  window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════════════════════════════
-function openModal(title, body, onOk) {
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-body').textContent  = body;
-  document.getElementById('modal-ok').onclick = () => { closeModal(); onOk(); };
-  document.getElementById('modal-overlay').classList.add('show');
-}
-function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
-document.getElementById('modal-overlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
-
-// ═══════════════════════════════════════════════════════════════
-// TOAST & LOADING
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// MODAL / TOAST / LOADING
+// ═══════════════════════════════════════════════════
+function openModal(title,body,onOk){document.getElementById('modal-title').textContent=title;document.getElementById('modal-body').textContent=body;document.getElementById('modal-ok').onclick=()=>{closeModal();onOk();};document.getElementById('modal-overlay').classList.add('show');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 let toastT;
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
-  clearTimeout(toastT); toastT = setTimeout(()=>{ t.className=''; }, 3500);
-}
-function showLoading(msg) {
-  document.getElementById('loading-text').textContent = msg||'Loading…';
-  document.getElementById('loading').classList.add('show');
-}
-function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastT);toastT=setTimeout(()=>{t.className='';},3500);}
+function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading…';document.getElementById('loading').classList.add('show');}
+function hideLoading(){document.getElementById('loading').classList.remove('show');}
 </script>
 </body>
 </html>
