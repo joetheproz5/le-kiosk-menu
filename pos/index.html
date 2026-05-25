@@ -584,14 +584,19 @@ async function loadKnownCustomers(){
     }catch(_){ knownCustomers=new Set(); customersSha=null; }
 }
 async function recordCustomer(phone){
+  if(!phone) return;
+  if(knownCustomers.has(phone)) return; // already known, skip
   try{
-    const list = await ghRead('customers.json').catch(()=>[]);
-    if(!list.find(c=>c.phone===phone)){
+    let list = [];
+    try{ const r = await ghRead('customers.json'); list = r.data || []; }catch(_){}
+    if(!list.find(c => c.phone === phone)){
       list.push({phone, firstSeen: Date.now()});
       await ghWrite('customers.json', list, `Record customer ${phone}`);
     }
+    knownCustomers.add(phone); // update local cache immediately
   }catch(e){ console.warn('recordCustomer failed', e); }
 }
+
 
 
 // ═══════════════════════════════════════════════════
