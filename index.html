@@ -271,13 +271,17 @@ function normalizePhone(raw){
     return null;
 }
 async function isPhoneBlocked(phone){
-    try{
-        const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`,{cache:'no-store'});
-        if(!res.ok) return false;
-        const j=await res.json();
-        const data=j.data||[];
-        return Array.isArray(data) && data.some(b=>b.phone===phone);
-    }catch(_){ return false; }
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/blocklist`, { cache:'no-store' });
+    if(!res.ok) return false;
+
+    const j = await res.json();
+    const list = Array.isArray(j.data) ? j.data : [];
+
+    return list.some(b => String(b.phone || '') === String(phone || ''));
+  }catch(_){
+    return false;
+  }
 }
 
 // STATE
