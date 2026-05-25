@@ -258,8 +258,8 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
 const ADMIN_HASH  = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
 const WORKER_URL  = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const IMG_FOLDER  = 'menupictures';
-const GH_RAW      = 'https://raw.githubusercontent.com/joetheproz5/le-kiosk-menu/main';
-const PILL_PRESETS = [
+const STORAGE_PUBLIC_BASE = 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
+  const PILL_PRESETS = [
   {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
   {id:'red',  bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
   {id:'green',bg:'#dcfce7',border:'#bbf7d0',text:'#166534',label:'Green'},
@@ -887,7 +887,7 @@ function renderSection(sec,si){
 }
 
 function renderItem(item,si,ii){
-  const imgSrc=item.image?`${GH_RAW}/${item.image}?v=${Date.now()}`:'';
+  const imgSrc=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
   const dropZone=`<div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
     ${item.image?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''"><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`:`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
     <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>
@@ -992,7 +992,7 @@ async function handleImageUpload(si,ii,input){
   try{
     const path=await uploadImage(file,(pct)=>{if(progBar)progBar.style.width=pct+'%';});
     collectAll();menuData[si].items[ii].image=path;markUnsaved();
-    const rawUrl=`${GH_RAW}/${path}?v=${Date.now()}`;
+    const rawUrl=`${STORAGE_PUBLIC_BASE}/${path}?v=${Date.now()}`;
     dropZone.classList.add('has-img');
     dropZone.innerHTML=`<img src="${rawUrl}" alt=""><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div><div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>`;
     const pathEl=document.getElementById('img-path-'+si+'-'+ii);
@@ -1040,7 +1040,7 @@ function renderPreview(){
     html+=`<div style="margin-bottom:20px"><div style="font-family:var(--brand);font-size:16px;font-weight:700;color:var(--a900);border-bottom:3px solid var(--a400);padding-bottom:4px;margin-bottom:10px">${sec.title}</div>`;
     (sec.items||[]).forEach(item=>{
       if(item.active===false)return;
-      const img=item.image?`${GH_RAW}/${item.image}`:'';
+      const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
       html+=`<div class="preview-item">${img?`<img src="${img}" alt="${esc(item.name)}" onerror="this.style.background='var(--a100)'">`:`<div style="width:52px;height:52px;border-radius:8px;background:var(--a100);flex-shrink:0"></div>`}<div class="preview-item-info"><div class="preview-item-name">${esc(item.name)}</div><div class="preview-item-desc">${esc(item.desc)}</div></div><div class="preview-item-price">${esc(item.price)}</div></div>`;
     });
     html+='</div>';
