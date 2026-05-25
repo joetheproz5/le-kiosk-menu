@@ -1,14 +1,13 @@
 [
   {
     "key": "appetizers",
-    "title": "Appetizers",
     "items": [
       {
-        "name": "Fries Box",
-        "price": "$5",
         "desc": "Crispy golden fries served with ketchup, mayo and bbq",
+        "name": "Fries Box test",
         "image": "menupictures/friesbox.jpg",
-        "flavorColor": "pink",
+        "price": "$5",
+        "active": true,
         "addons": [
           {
             "label": "Melted Cheddar",
@@ -19,13 +18,14 @@
             "price": "$0.60"
           }
         ],
-        "active": true
+        "flavorColor": "pink"
       },
       {
-        "name": "Loaded Fries",
-        "price": "$7",
         "desc": "A decadent mix of crispy chicken, fries, melted cheddar and BBQ sauce",
+        "name": "Loaded Fries",
         "image": "menupictures/loadedfries.jpg",
+        "price": "$7",
+        "active": true,
         "addons": [
           {
             "label": "Melted Cheddar",
@@ -36,13 +36,14 @@
             "price": "$0.60"
           }
         ],
-        "active": true
+        "flavorColor": "amber"
       },
       {
-        "name": "Chicken Wings (8pcs)",
-        "price": "$6",
         "desc": "Juicy wings tossed in your choice of Buffalo or BBQ sauce",
+        "name": "Chicken Wings (8pcs)",
         "image": "menupictures/wings.jpg",
+        "price": "$6",
+        "active": true,
         "addons": [
           {
             "label": "Melted Cheddar",
@@ -53,20 +54,19 @@
             "price": "$0.60"
           }
         ],
-        "active": true
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Appetizers"
   },
   {
     "key": "sandwiches",
-    "title": "Sandwiches",
-    "bottomBanner": "🚀 BOOST YOUR MEAL: Add fries + soft drink for only $3!",
     "items": [
       {
-        "name": "Crispy Sandwich",
-        "price": "$6",
         "desc": "Golden crispy chicken, fries, pickles, fresh lettuce & mayo",
+        "name": "Crispy Sandwich",
         "image": "menupictures/crispysandwish.jpg",
+        "price": "$6",
         "addons": [
           {
             "label": "Boost Your Meal (Fries + Drink)",
@@ -80,53 +80,16 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Hotdog Sandwich",
-        "price": "$6",
         "desc": "Hotdog sausage topped with chips, ketchup, mayo, BBQ & mustard",
+        "name": "Hotdog Sandwich",
         "image": "menupictures/hotdog.jpg",
-        "addons": [
-          {
-            "label": "Boost Your Meal (Fries + Drink)",
-            "price": "$3"
-          },
-          {
-            "label": "Melted Cheddar",
-            "price": "$1"
-          },
-          {
-            "label": "Buffalo Sauce",
-            "price": "$0.60"
-          }
-        ]
-      },
-      {
-        "name": "Fries Sandwich",
-        "price": "$4",
-        "desc": "Golden fries with creamy coleslaw, pickles, ketchup & mayonnaise",
-        "image": "menupictures/friessandwish.jpg",
-        "addons": [
-          {
-            "label": "Boost Your Meal (Fries + Drink)",
-            "price": "$3"
-          },
-          {
-            "label": "Melted Cheddar",
-            "price": "$1"
-          },
-          {
-            "label": "Buffalo Sauce",
-            "price": "$0.60"
-          }
-        ]
-      },
-      {
-        "name": "Taouk Sandwich",
         "price": "$6",
-        "desc": "House-marinated grilled chicken, fries, coleslaw, pickles, and rich garlic sauce.",
-        "image": "menupictures/taouk.jpg",
         "addons": [
           {
             "label": "Boost Your Meal (Fries + Drink)",
@@ -140,39 +103,69 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
+      },
+      {
+        "desc": "Golden fries with creamy coleslaw, pickles, ketchup & mayonnaise",
+        "name": "Fries Sandwich",
+        "image": "menupictures/friessandwish.jpg",
+        "price": "$4",
+        "addons": [
+          {
+            "label": "Boost Your Meal (Fries + Drink)",
+            "price": "$3"
+          },
+          {
+            "label": "Melted Cheddar",
+            "price": "$1"
+          },
+          {
+            "label": "Buffalo Sauce",
+            "price": "$0.60"
+          }
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
+      },
+      {
+        "desc": "House-marinated grilled chicken, fries, coleslaw, pickles, and rich garlic sauce.",
+        "name": "Taouk Sandwich",
+        "image": "menupictures/taouk.jpg",
+        "price": "$6",
+        "addons": [
+          {
+            "label": "Boost Your Meal (Fries + Drink)",
+            "price": "$3"
+          },
+          {
+            "label": "Melted Cheddar",
+            "price": "$1"
+          },
+          {
+            "label": "Buffalo Sauce",
+            "price": "$0.60"
+          }
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Sandwiches",
+    "bottomBanner": "🚀 BOOST YOUR MEAL: Add fries + soft drink for only $3!"
   },
   {
     "key": "Burgers",
-    "title": "Burgers",
     "items": [
       {
-        "name": "Lebanese Burger",
-        "price": "$6",
         "desc": "Grilled beef patty, coleslaw, fries, tomato, pickles and our special sauce.",
+        "name": "Lebanese Burger",
         "image": "menupictures/lebaneseburger.jpg",
-        "addons": [
-          {
-            "label": "Boost Your Meal (Fries + Drink)",
-            "price": "$3"
-          },
-          {
-            "label": "Melted Cheddar",
-            "price": "$1"
-          },
-          {
-            "label": "Buffalo Sauce",
-            "price": "$0.60"
-          }
-        ]
-      },
-      {
-        "name": "Crispy Burger",
         "price": "$6",
-        "desc": "Crispy chicken breast, lettuce, pickles, and our house-made special sauce",
-        "image": "menupictures/crispyburger.jpg",
         "addons": [
           {
             "label": "Boost Your Meal (Fries + Drink)",
@@ -186,13 +179,16 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Special Le Kiosk Burger",
-        "price": "$8",
-        "desc": "Crispy chicken, ham, cheddar, lettuce, pickles, special sauce, and garlic sauce.",
-        "image": "menupictures/lekioskburger.jpg",
+        "desc": "Crispy chicken breast, lettuce, pickles, and our house-made special sauce",
+        "name": "Crispy Burger",
+        "image": "menupictures/crispyburger.jpg",
+        "price": "$6",
         "addons": [
           {
             "label": "Boost Your Meal (Fries + Drink)",
@@ -206,86 +202,127 @@
             "label": "Buffalo Sauce",
             "price": "$0.60"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
+      },
+      {
+        "desc": "Crispy chicken, ham, cheddar, lettuce, pickles, special sauce, and garlic sauce.",
+        "name": "Special Le Kiosk Burger",
+        "image": "menupictures/lekioskburger.jpg",
+        "price": "$8",
+        "addons": [
+          {
+            "label": "Boost Your Meal (Fries + Drink)",
+            "price": "$3"
+          },
+          {
+            "label": "Melted Cheddar",
+            "price": "$1"
+          },
+          {
+            "label": "Buffalo Sauce",
+            "price": "$0.60"
+          }
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Burgers"
   },
   {
     "key": "sajj",
-    "title": "Sajj",
-    "bottomBanner": "🥗 Sahen Khodra — A fresh side plate of mixed greens $3",
     "items": [
       {
-        "name": "Zaatar",
-        "price": "$2",
         "desc": "Freshly rolled sajj with fragrant thyme, olive oil and sesame",
+        "name": "Zaatar",
         "image": "menupictures/sajj-zaatar.jpg",
+        "price": "$2",
         "addons": [
           {
             "label": "Sahen Khodra",
             "price": "$3"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Labneh",
-        "price": "$3",
         "desc": "Creamy strained yogurt with a drizzle of olive oil, wrapped in thin sajj",
+        "name": "Labneh",
         "image": "menupictures/sajj-labne.jpg",
-        "addons": [
-          {
-            "label": "Sahen Khodra",
-            "price": "$3"
-          }
-        ]
-      },
-      {
-        "name": "Cheese",
         "price": "$3",
+        "addons": [
+          {
+            "label": "Sahen Khodra",
+            "price": "$3"
+          }
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
+      },
+      {
         "desc": "Melted white cheese folded in a warm, crispy sajj wrap",
+        "name": "Cheese",
         "image": "menupictures/sajj-jebne.jpg",
+        "price": "$3",
         "addons": [
           {
             "label": "Sahen Khodra",
             "price": "$3"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Keshek",
-        "price": "$4",
         "desc": "Traditional fermented wheat and yogurt spread on toasted sajj bread",
+        "name": "Keshek",
         "image": "menupictures/sajj-keshek.jpg",
+        "price": "$4",
         "addons": [
           {
             "label": "Sahen Khodra",
             "price": "$3"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Cheese & Ham",
-        "price": "$4",
         "desc": "Melted white cheese and savory ham, grilled together in a golden sajj wrap",
+        "name": "Cheese & Ham",
         "image": "menupictures/sajj-jebnejambon.jpg",
+        "price": "$4",
         "addons": [
           {
             "label": "Sahen Khodra",
             "price": "$3"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Sajj",
+    "bottomBanner": "🥗 Sahen Khodra — A fresh side plate of mixed greens $3"
   },
   {
     "key": "desserts",
-    "title": "Desserts",
     "items": [
       {
-        "name": "Mini Pancakes (15pcs)",
-        "price": "$7",
         "desc": "Fluffy mini pancakes served fresh with your choice of chocolate",
+        "name": "Mini Pancakes (15pcs)",
         "image": "menupictures/minipancake.jpg",
+        "price": "$7",
         "addons": [
           {
             "label": "Hershey's Chocolate",
@@ -315,83 +352,113 @@
             "label": "Banana",
             "price": "$1"
           }
-        ]
+        ],
+        "active": true,
+        "flavors": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Ice Cream Cup",
-        "price": "$2",
         "desc": "Authentic, creamy Lebanese style premium ice cream",
-        "image": "menupictures/icecream.jpg"
+        "name": "Ice Cream Cup",
+        "image": "menupictures/icecream.jpg",
+        "price": "$2",
+        "active": true,
+        "flavors": [],
+        "addons": [],
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Desserts"
   },
   {
     "key": "shisha",
-    "title": "Shisha",
     "items": [
       {
-        "name": "Argile",
-        "price": "$5",
         "desc": "Lebanese hookah with premium tobacco",
+        "name": "Argile",
         "image": "menupictures/shisha-argile.jpg",
+        "price": "$5",
         "flavors": [
           "Double Apple",
           "Lemon & Mint"
-        ]
+        ],
+        "active": true,
+        "addons": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Argile + rass",
-        "price": "$7",
         "desc": "Double the flavor — your shisha comes loaded with 2 heads instead of one",
+        "name": "Argile + rass",
         "image": "menupictures/shisha-2rass.jpg",
+        "price": "$7",
         "flavors": [
           "Double Apple",
           "Lemon & Mint"
-        ]
+        ],
+        "active": true,
+        "addons": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Te8yir Rass",
-        "price": "$3",
         "desc": "Swap out your current head for a fresh one mid-session",
-        "image": "menupictures/shisha-te8yirrass.jpg"
+        "name": "Te8yir Rass",
+        "image": "menupictures/shisha-te8yirrass.jpg",
+        "price": "$3",
+        "active": true,
+        "flavors": [],
+        "addons": [],
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Shisha"
   },
   {
     "key": "beverages",
-    "title": "Beverages",
     "items": [
       {
-        "name": "Soft Drinks",
-        "price": "$1",
         "desc": "Selection of your favorite carbonated sodas",
+        "name": "Soft Drinks",
         "image": "menupictures/soda.jpg",
+        "price": "$1",
         "flavors": [
           "Pepsi",
           "7Up",
           "Miranda"
-        ]
+        ],
+        "active": true,
+        "addons": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Mineral Water",
-        "price": "$0.60",
         "desc": "Pure bottled refreshing water",
-        "image": "menupictures/water.jpg"
+        "name": "Mineral Water",
+        "image": "menupictures/water.jpg",
+        "price": "$0.60",
+        "active": true,
+        "flavors": [],
+        "addons": [],
+        "flavorColor": "amber"
       },
       {
-        "name": "Beer",
-        "price": "$1.5",
         "desc": "Crisp, refreshing, and the classic Lebanese pilsner.",
-        "image": "menupictures/beer.jpg"
+        "name": "Beer",
+        "image": "menupictures/beer.jpg",
+        "price": "$1.5",
+        "active": true,
+        "flavors": [],
+        "addons": [],
+        "flavorColor": "amber"
       }
-    ]
+    ],
+    "title": "Beverages"
   },
   {
     "key": "sweet",
-    "title": "Sweet Add-Ons",
     "type": "addons",
+    "title": "Sweet Add-Ons",
     "addonGroups": [
       {
+        "note": "Pick your favorite drizzle",
         "emoji": "🍫",
         "label": "Sweet Sauce",
         "price": "$2",
@@ -401,45 +468,46 @@
           "Pink Chocolate",
           "Kinder",
           "Oreo"
-        ],
-        "note": "Pick your favorite drizzle"
+        ]
       },
       {
+        "note": "Sliced fresh, added to your dessert",
         "emoji": "🍓",
         "label": "Fresh Fruit",
         "price": "$1",
         "options": [
           "Strawberry",
           "Banana"
-        ],
-        "note": "Sliced fresh, added to your dessert"
+        ]
       }
-    ]
+    ],
+    "items": []
   },
   {
     "key": "savory",
-    "title": "Savory Add-Ons",
     "type": "addons",
+    "title": "Savory Add-Ons",
     "addonGroups": [
       {
+        "note": "Warm & gooey melted cheddar",
         "emoji": "🧀",
         "label": "Melted Cheddar",
         "price": "$1",
         "options": [
           "In a cup",
           "Inside your sandwich"
-        ],
-        "note": "Warm & gooey melted cheddar"
+        ]
       },
       {
+        "note": "Tangy, spicy signature buffalo",
         "emoji": "🌶️",
         "label": "Buffalo Sauce",
         "price": "$0.60",
         "options": [
           "Dipping cup"
-        ],
-        "note": "Tangy, spicy signature buffalo"
+        ]
       }
-    ]
+    ],
+    "items": []
   }
 ]
