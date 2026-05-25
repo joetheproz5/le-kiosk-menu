@@ -563,11 +563,13 @@ const SESSION_MS   = 4 * 60 * 60 * 1000;
 const WA_NUMBER    = '96176840244';
 const ZONE_FEES    = { A: 0.50, B: 1.00, C: 1.50 };
 const LOYALTY_TARGET = 10;
-const LOYALTY_REWARD_OPTIONS = [
-  { type:'soft_drink', label:'Free Soft Drink' },
-  { type:'discount_10', label:'10% Discount' },
-  { type:'ice_cream_cup', label:'Free Ice Cream Cup' }
+const DEFAULT_LOYALTY_REWARDS = [
+  { id:'soft_drink', label:'Free Soft Drink', kind:'fixed', value:2 },
+  { id:'discount_10', label:'10% Discount', kind:'percent', value:10 },
+  { id:'ice_cream_cup', label:'Free Ice Cream Cup', kind:'fixed', value:3 }
 ];
+
+let loyaltyRewardOptions = DEFAULT_LOYALTY_REWARDS.map(r => ({ ...r }));
 const CAT_ICONS    = {
   appetizers:'🍟', sandwiches:'🥪', burgers:'🍔', sajj:'🫓',
   desserts:'🍨', shisha:'💨', beverages:'🥤', sweet:'🍫', savory:'🧀'
@@ -669,17 +671,32 @@ function printLoggedOrder(id, format){
     : type === 'delivery' ? 'Delivery'
     : (type || '');
 }
-  function getRewardLabel(type){
-  return type === 'soft_drink' ? 'Free Soft Drink'
-    : type === 'discount_10' ? '10% Discount'
-    : type === 'ice_cream_cup' ? 'Free Ice Cream Cup'
-    : '';
+  function normalizeReward(r){
+  return {
+    id: r.id || r.type || 'custom_reward',
+    label: r.label || 'Custom Reward',
+    kind: r.kind || 'fixed',
+    value: Math.max(0, Number(r.value || 0))
+  };
 }
 
-function getRewardDiscount(subtotal, type){
-  if(type === 'discount_10') return subtotal * 0.10;
-  if(type === 'soft_drink') return 2.00;
-  if(type === 'ice_cream_cup') return 3.00;
+function getRewardById(id){
+  return loyaltyRewardOptions.find(r => r.id === id) || null;
+}
+
+function getRewardLabel(id){
+  const r = getRewardById(id);
+  return r ? r.label : '';
+}
+
+function getRewardDiscount(subtotal, id){
+  const r = getRewardById(id);
+  if(!r) return 0;
+
+  if(r.kind === 'percent') return subtotal * (r.value / 100);
+  if(r.kind === 'fixed') return r.value;
+  if(r.kind === 'free_item') return r.value;
+
   return 0;
 }
 
@@ -716,26 +733,50 @@ function logout(){
 // ═══════════════════════════════════════════════════
 async function bootPOS(){
   showLoading('Loading menu…');
-  try{await loadMenu();renderCatSidebar();renderMenuPanel();}
-  catch(e){showToast('Menu load failed: '+e.message,'error');}
+
+  try{
+    await loadMenu();
+    renderCatSidebar();
+    renderMenuPanel();
+  }catch(e){
+    showToast('Menu load failed: '+e.message,'error');
+  }
+
   renderOrderPanel();
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
-  await loadCustomers();  // load full customer list on boot
+  await loadCustomers();
+
   try{
-  const cfgRes = await fetch(`${WORKER_URL}/supabase/config`, { cache:'no-store' });
-  if(cfgRes.ok){
-    const j = await cfgRes.json();
-    loyaltyEnabled = j.data && typeof j.data.loyaltyEnabled === 'boolean'
-  ? j.data.loyaltyEnabled
-  : true;
+    const cfgRes = await fetch(`${WORKER_URL}/supabase/config`, { cache:'no-store' });
+
+    if(cfgRes.ok){
+      const j = await cfgRes.json();
+      const cfg = j.data || {};
+
+      loyaltyEnabled =
+        typeof cfg.loyaltyEnabled === 'boolean'
+          ? cfg.loyaltyEnabled
+          : true;
+
+      if(Array.isArray(cfg.loyaltyRewards) && cfg.loyaltyRewards.length){
+        loyaltyRewardOptions = cfg.loyaltyRewards.map(normalizeReward);
+      }else{
+        loyaltyRewardOptions = DEFAULT_LOYALTY_REWARDS.map(r => ({ ...r }));
+      }
+    }
+  }catch(_){
+    loyaltyEnabled = true;
+    loyaltyRewardOptions = DEFAULT_LOYALTY_REWARDS.map(r => ({ ...r }));
   }
-}catch(_){}
+
   hideLoading();
-  inboxPollInterval=setInterval(()=>pollInbox(false),15000);
+  inboxPollInterval = setInterval(()=>pollInbox(false),15000);
 }
+
 let showingCustomers = false;
 
+  
 function toggleCustomersView() {
   if(showingOrders) toggleOrdersView();
   if(showingInbox) toggleInboxView();
@@ -1189,9 +1230,9 @@ ${faves ? `<div class="cpc-fave">🍽️ Usually orders: <strong>${faves}</stron
 ${note ? `<div class="cpc-fave">📝 Note: <strong>${note}</strong></div>` : ''}
 ${rewardReady ? `
   <div style="padding:8px 12px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:6px;flex-wrap:wrap;background:#fff">
-    <button class="oa-chip${selectedRewardType==='soft_drink'?' selected':''}" onclick="selectReward('soft_drink')">Free Soft Drink</button>
-    <button class="oa-chip${selectedRewardType==='discount_10'?' selected':''}" onclick="selectReward('discount_10')">10% Discount</button>
-    <button class="oa-chip${selectedRewardType==='ice_cream_cup'?' selected':''}" onclick="selectReward('ice_cream_cup')">Free Ice Cream Cup</button>
+    ${loyaltyRewardOptions.map(r => `
+  <button class="oa-chip${selectedRewardType===r.id?' selected':''}" onclick="selectReward('${r.id}')">${r.label}</button>
+`).join('')}
   </div>
 ` : ''}`;
   }
