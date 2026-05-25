@@ -1,5 +1,38 @@
 [
   {
+    "id": "MENU-1779704653011",
+    "status": "pending",
+    "timestamp": "2026-05-25T10:24:13.011Z",
+    "source": "menu",
+    "name": "Tony",
+    "phone": "76840244",
+    "orderType": "takeaway",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "gps": {
+      "lat": 33.8749234,
+      "lng": 35.5511584
+    },
+    "address": null,
+    "changeFor": 100,
+    "items": [
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Melted Cheddar",
+            "price": 1
+          }
+        ]
+      }
+    ],
+    "total": 6
+  },
+  {
     "id": "MENU-1779704626344",
     "status": "confirmed",
     "timestamp": "2026-05-25T10:23:46.344Z",
