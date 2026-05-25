@@ -1,5 +1,43 @@
 [
   {
+    "id": "MENU-1779723182738",
+    "status": "pending",
+    "timestamp": "2026-05-25T15:33:02.739Z",
+    "source": "menu",
+    "name": "Tony",
+    "phone": "76840244",
+    "orderType": "takeaway",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "gps": null,
+    "address": null,
+    "changeFor": null,
+    "items": [
+      {
+        "name": "Loaded Fries",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Hotdog Sandwich",
+        "price": 6,
+        "priceStr": "$6",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Boost Your Meal (Fries + Drink)",
+            "price": 3
+          }
+        ]
+      }
+    ],
+    "total": 16
+  },
+  {
     "id": "MENU-1779717478300",
     "status": "declined",
     "timestamp": "2026-05-25T13:57:58.300Z",
