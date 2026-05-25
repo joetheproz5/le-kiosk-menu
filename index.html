@@ -201,7 +201,8 @@
 </div>
 
 <script>
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━
+    ━━━━━━━━━━━━━━━━━━━━━━━━
 let TESTING_MODE = false;
 // load from config
 fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', { cache: 'no-store' })
@@ -227,7 +228,7 @@ fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', {
     });
   });
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
+const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const PILL_COLORS = {
     amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
     red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
