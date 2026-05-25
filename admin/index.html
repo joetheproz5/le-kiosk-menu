@@ -3,174 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le Kiosk — Admin</title>
+<title>Le Kiosk - Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --a50:#fffbeb;--a100:#fef3c7;--a200:#fde68a;--a300:#fcd34d;
-  --a400:#fbbf24;--a500:#f59e0b;--a700:#b45309;--a800:#92400e;
-  --a900:#78350f;--a950:#451a03;
-  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;
-  --g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g800:#1f2937;--g900:#111827;
-  --red:#ef4444;--red-d:#dc2626;--green:#22c55e;--green-d:#16a34a;
-  --white:#fff;--font:'Poppins',sans-serif;--brand:'Fredoka',sans-serif;
+  --brand:#78350f;--brand-dark:#451a03;--brand-mid:#b45309;--brand-soft:#fef3c7;--brand-line:#fde68a;--accent:#f59e0b;
+  --bg:#f6f7f9;--panel:#fff;--panel-2:#fbfbfd;--line:#e5e7eb;--muted:#6b7280;--soft:#f3f4f6;
+  --ink:#111827;--ink-2:#374151;--green:#16a34a;--green-soft:#dcfce7;--red:#dc2626;--red-soft:#fee2e2;
+  --blue:#2563eb;--blue-soft:#dbeafe;--purple:#7c3aed;--purple-soft:#ede9fe;
+  --font:'Poppins',sans-serif;--brandfont:'Fredoka',sans-serif;
 }
-body{font-family:var(--font);background:#fcf8ee;background-image:linear-gradient(#f7f1e1 1.5px,transparent 1.5px),linear-gradient(90deg,#f7f1e1 1.5px,transparent 1.5px);background-size:24px 24px;min-height:100vh;color:var(--a950)}
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.login-card{background:var(--white);border:1px solid var(--a200);border-radius:20px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(120,53,15,.08);text-align:center}
-.login-logo{font-family:var(--brand);font-size:32px;font-weight:700;color:var(--a900);letter-spacing:.05em}
-.login-sub{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--a700);margin-top:2px;margin-bottom:32px}
-.lbl{display:block;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--a800);margin-bottom:6px}
-.inp{width:100%;padding:12px 14px;border:1.5px solid var(--a200);border-radius:12px;font-family:var(--font);font-size:14px;background:var(--a50);color:var(--a950);outline:none;transition:border-color .2s;margin-bottom:16px}
-.inp:focus{border-color:var(--a500)}
-.inp:disabled{opacity:.5;cursor:not-allowed}
-.login-btn{width:100%;background:var(--a900);color:var(--a100);border:none;border-radius:12px;padding:13px;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background .2s}
-.login-btn:hover:not(:disabled){background:var(--a800)}
-.login-btn:disabled{opacity:.5;cursor:not-allowed}
-.login-error{background:#fef2f2;border:1px solid #fecaca;color:var(--red-d);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;display:none}
-.login-error.show{display:block}
-.lockout-bar{background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:600;margin-top:10px;display:none}
-.lockout-bar.show{display:block}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);overflow:hidden}
+button,input,textarea{font-family:var(--font)}
+button{border:0;cursor:pointer}
+input,textarea{outline:none}
+
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#451a03,#78350f)}
+.login-card{width:100%;max-width:390px;background:#fff;border:1px solid rgba(253,230,138,.55);border-radius:18px;padding:38px 34px;box-shadow:0 24px 70px rgba(0,0,0,.28);text-align:center}
+.login-logo{font-family:var(--brandfont);font-size:34px;font-weight:700;color:var(--brand)}
+.login-sub{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--brand-mid);margin:3px 0 28px}
+.lbl{display:block;text-align:left;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--brand);margin-bottom:7px}
+.inp{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;transition:border-color .15s,box-shadow .15s}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.14)}
+.inp:disabled{opacity:.55;cursor:not-allowed}
+.login-btn{width:100%;margin-top:14px;background:var(--brand);color:#fff7ed;border-radius:10px;padding:13px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:background .15s}
+.login-btn:hover:not(:disabled){background:var(--brand-dark)}
+.login-btn:disabled{opacity:.55;cursor:not-allowed}
+.login-error,.lockout-bar{display:none;margin-top:12px;border-radius:10px;padding:10px 13px;font-size:12px;font-weight:700;text-align:left}
+.login-error{background:var(--red-soft);border:1px solid #fecaca;color:var(--red)}
+.login-error.show,.lockout-bar.show{display:block}
+.lockout-bar{background:#fff7ed;border:1px solid #fed7aa;color:#c2410c}
 .attempt-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--a200);transition:background .2s}
+.dot{width:8px;height:8px;border-radius:999px;background:var(--brand-line)}
 .dot.used{background:var(--red)}
-#admin-screen{display:none}
-.admin-header{background:var(--a900);color:var(--a100);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(120,53,15,.15)}
-.header-brand{font-family:var(--brand);font-size:22px;font-weight:700;letter-spacing:.05em}
-.header-brand span{font-family:var(--font);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;opacity:.65;margin-left:8px}
-.header-actions{display:flex;gap:10px;align-items:center}
-.btn{padding:9px 18px;border-radius:10px;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border:none;transition:background .2s,opacity .2s}
+
+#admin-screen{display:none;height:100vh}
+.app-shell{height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr);background:var(--bg)}
+.sidebar{background:#111827;color:#f9fafb;display:flex;flex-direction:column;border-right:1px solid #0f172a}
+.side-brand{height:74px;padding:17px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand-stack{min-width:0}
+.brand-name{font-family:var(--brandfont);font-size:24px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.brand-sub{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fbbf24;margin-top:1px}
+.unsaved-dot{display:none;width:10px;height:10px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 4px rgba(245,158,11,.16)}
+.unsaved-dot.show{display:block}
+.side-nav{padding:14px 10px;display:flex;flex-direction:column;gap:5px}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:8px;background:transparent;color:#d1d5db;font-size:13px;font-weight:700;text-align:left;transition:background .12s,color .12s}
+.nav-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-btn.active{background:#f59e0b;color:#111827}
+.nav-icon{width:20px;text-align:center;font-size:15px;flex-shrink:0}
+.side-footer{margin-top:auto;padding:14px 12px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:9px}
+.status-row{display:flex;gap:6px;flex-wrap:wrap}
+.status-pill{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.08);color:#cbd5e1}
+.status-pill.on{background:rgba(34,197,94,.18);color:#86efac}
+.status-pill.warn{background:rgba(245,158,11,.18);color:#fcd34d}
+.session-badge{font-size:11px;font-weight:800;color:#d1d5db}
+.logout-btn{width:100%;padding:9px 12px;border-radius:8px;background:rgba(255,255,255,.08);color:#f9fafb;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+.logout-btn:hover{background:rgba(255,255,255,.14)}
+
+.main{min-width:0;display:flex;flex-direction:column;height:100vh}
+.topbar{height:74px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;flex-shrink:0}
+.page-kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.page-title{font-family:var(--brandfont);font-size:25px;font-weight:700;color:var(--brand-dark);margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;padding:9px 13px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;transition:background .12s,border-color .12s,color .12s,opacity .12s;white-space:nowrap}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-save{background:var(--a400);color:var(--a950)}
-.btn-save:hover:not(:disabled){background:var(--a200)}
-.btn-logout{background:rgba(255,255,255,.12);color:var(--a100)}
-.btn-logout:hover{background:rgba(255,255,255,.2)}
-.btn-add{background:var(--a950);color:var(--a100);padding:8px 14px;font-size:11px}
-.btn-add:hover{background:var(--a800)}
-.btn-danger{background:#fef2f2;color:var(--red-d);border:1px solid #fecaca;padding:6px 10px;font-size:11px;border-radius:8px}
-.btn-danger:hover{background:#fee2e2}
-.btn-sm{padding:6px 12px;font-size:11px;border-radius:8px}
-.btn-ghost{background:var(--a100);color:var(--a800);border:1px solid var(--a200)}
-.btn-ghost:hover{background:var(--a200)}
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:#fff;padding:12px 22px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
-#toast.show{transform:translateX(-50%) translateY(0)}
-#toast.success{background:var(--green-d)}
-#toast.error{background:var(--red-d)}
-.session-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.25);color:var(--a300);padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
-.tabs-bar{background:var(--white);border-bottom:1px solid var(--a200);padding:0 24px;display:flex;gap:0;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
-.tabs-bar::-webkit-scrollbar{display:none}
-.tab{padding:14px 18px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--g500);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s,opacity .15s;background:none;border-left:none;border-right:none;border-top:none;font-family:var(--font);user-select:none}
-.tab.active{color:var(--a900);border-bottom-color:var(--a500)}
-.tab:hover:not(.active){color:var(--a700)}
-.tab.drag-over{border-bottom-color:var(--a400);opacity:.6}
-.tab.dragging{opacity:.35;cursor:grabbing}
-.tab-drag-hint{font-size:9px;font-weight:600;letter-spacing:.06em;color:var(--g400);text-transform:uppercase;padding:14px 8px 14px 4px;white-space:nowrap;align-self:center}
-.admin-body{max-width:900px;margin:0 auto;padding:28px 20px 100px}
-.section-block{background:var(--white);border:1px solid var(--a200);border-radius:16px;margin-bottom:20px;overflow:hidden;box-shadow:0 1px 4px rgba(120,53,15,.05)}
-.section-header{background:var(--a950);color:var(--a100);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.section-header-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
-.section-title-input{font-family:var(--brand);font-size:18px;font-weight:700;letter-spacing:.04em;background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,.2);color:var(--a100);outline:none;width:160px;padding:2px 4px}
-.section-title-input:focus{border-bottom-color:var(--a400)}
-.section-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.section-count{font-size:11px;font-weight:600;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;letter-spacing:.06em}
-.section-type-badge{font-size:10px;font-weight:700;background:rgba(251,191,36,.25);color:var(--a300);padding:3px 8px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
-.section-key-wrap{padding:8px 20px 0;background:var(--a950);display:flex;align-items:center;gap:8px}
-.section-key-label{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.section-key-input{font-size:11px;font-weight:600;font-family:var(--font);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.7);outline:none;padding:3px 8px;width:140px}
-.section-key-input:focus{border-color:var(--a400)}
-.type-toggle{display:flex;gap:6px;padding:12px 20px;border-bottom:1px solid var(--a100);background:var(--a50);flex-wrap:wrap;align-items:center}
-.type-toggle-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--a700);margin-right:4px}
-.type-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--a200);background:var(--white);color:var(--g500);cursor:pointer;font-family:var(--font);transition:all .15s}
-.type-btn.active{background:var(--a900);color:var(--a100);border-color:var(--a900)}
-.features-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
-.feat-btn{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;border:1.5px solid var(--a200);background:var(--white);color:var(--g500);cursor:pointer;font-family:var(--font);transition:all .15s}
-.feat-btn.active{background:var(--a200);color:var(--a900);border-color:var(--a400)}
-.item-card{border-bottom:1px solid var(--a100);padding:16px 20px;display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:start}
-.item-card:last-child{border-bottom:none}
-.img-drop-zone{width:80px;height:80px;border-radius:10px;border:2px dashed var(--a300);background:var(--a50);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;flex-shrink:0}
-.img-drop-zone:hover{border-color:var(--a500);background:var(--a100)}
-.img-drop-zone.has-img{border-style:solid;border-color:var(--a200)}
-.img-drop-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px}
-.img-drop-overlay{position:absolute;inset:0;background:rgba(69,26,3,.55);display:flex;align-items:center;justify-content:center;border-radius:8px;opacity:0;transition:opacity .2s}
+.btn-save{background:var(--brand);color:#fff}
+.btn-save:hover:not(:disabled){background:var(--brand-dark)}
+.btn-add{background:#111827;color:#fff}
+.btn-add:hover{background:#000}
+.btn-soft{background:var(--soft);border:1px solid var(--line);color:var(--ink-2)}
+.btn-soft:hover{background:#e5e7eb}
+.btn-danger{background:var(--red-soft);border:1px solid #fecaca;color:var(--red)}
+.btn-danger:hover{background:#fecaca}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#1d4ed8}
+.btn-sm{padding:6px 10px;font-size:10px;border-radius:7px}
+
+.content{flex:1;overflow:auto;padding:22px 24px 80px}
+.view{display:none}
+.view.active{display:block}
+.grid-menu{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 1px 3px rgba(17,24,39,.04)}
+.panel-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--panel-2)}
+.panel-title{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
+.panel-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
+.panel-body{padding:14px 16px}
+
+.category-list{display:flex;flex-direction:column;gap:6px;padding:10px}
+.cat-row{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:1px solid transparent;border-radius:8px;background:#fff;color:var(--ink);text-align:left;transition:background .12s,border-color .12s}
+.cat-row:hover{background:var(--panel-2);border-color:var(--line)}
+.cat-row.active{background:var(--brand-soft);border-color:var(--brand-line)}
+.cat-row.drag-over{border-color:var(--accent);background:#fff7ed}
+.cat-grip{color:var(--muted);font-size:13px;cursor:grab}
+.cat-main{flex:1;min-width:0}
+.cat-name{font-size:13px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-meta{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.cat-badge{font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;background:var(--soft);color:var(--muted);flex-shrink:0}
+.cat-row.active .cat-badge{background:#fff;color:var(--brand)}
+
+.editor-head{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,.9fr);gap:12px}
+.field{min-width:0}
+.field-label{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.field-input{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;outline:none}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
+.toggle-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.segment{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.segment button{padding:8px 12px;font-size:11px;font-weight:800;color:var(--muted);background:#fff;border-right:1px solid var(--line)}
+.segment button:last-child{border-right:0}
+.segment button.active{background:var(--brand);color:#fff}
+.chip-btn{padding:7px 10px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.chip-btn.active{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand)}
+
+.items-stack{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.item-card{display:grid;grid-template-columns:92px minmax(0,1fr) 76px;gap:14px;padding:14px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.item-card.inactive{opacity:.62}
+.img-drop-zone{width:92px;height:92px;border:2px dashed var(--brand-line);border-radius:8px;background:#fffbeb;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;cursor:pointer}
+.img-drop-zone:hover{border-color:var(--accent);background:#fff7ed}
+.img-drop-zone img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.img-drop-label{font-size:10px;font-weight:800;color:var(--brand);line-height:1.25;text-transform:uppercase}
+.img-drop-overlay{position:absolute;inset:0;background:rgba(17,24,39,.58);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;text-transform:uppercase;opacity:0;transition:opacity .12s}
 .img-drop-zone:hover .img-drop-overlay{opacity:1}
-.img-drop-icon{font-size:20px;display:block}
-.img-drop-text{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a700);margin-top:4px;text-align:center;line-height:1.3}
-.img-drop-text-overlay{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--white)}
-.img-upload-input{display:none}
-.img-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--a500);transition:width .3s;border-radius:0 0 8px 8px}
-.img-path{font-size:10px;color:var(--g400);margin-top:3px;word-break:break-all;line-height:1.3}
-.item-fields{display:flex;flex-direction:column;gap:8px}
-.field-row{display:grid;grid-template-columns:1fr 110px;gap:8px}
-.field-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--a700);margin-bottom:3px}
-.field-input{width:100%;padding:8px 10px;border:1.5px solid var(--a100);border-radius:8px;font-family:var(--font);font-size:13px;color:var(--a950);background:var(--a50);outline:none;transition:border-color .15s,background .15s}
-.field-input:focus{border-color:var(--a400);background:var(--white)}
-textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
-.addons-editor{margin-top:6px;background:var(--a50);border:1.5px solid var(--a100);border-radius:10px;padding:10px 12px}
-.addons-editor-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--a700);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.addon-entry{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.img-progress{position:absolute;left:0;bottom:0;height:3px;background:var(--accent);width:0}
+.img-path{font-size:10px;color:var(--muted);line-height:1.3;margin-top:6px;word-break:break-all}
+.file-input{display:none}
+.item-fields{display:flex;flex-direction:column;gap:9px}
+.field-row{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:9px}
+.item-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.active-box{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px}
+.active-box input{width:16px;height:16px;accent-color:var(--accent)}
+
+.pills-area,.addons-editor{border:1px solid var(--line);border-radius:8px;background:var(--panel-2);padding:10px}
+.pill-colors{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px}
+.color-dot{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.color-dot.active{transform:scale(1.18)}
+.pill-preview{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pill-preview span{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;border:1px solid}
+.addons-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.addons-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.addon-entry{display:grid;grid-template-columns:minmax(0,1fr) 88px 32px;gap:6px;margin-bottom:6px}
 .addon-entry:last-child{margin-bottom:0}
-.addon-label-inp{flex:1;padding:6px 8px;border:1.5px solid var(--a200);border-radius:7px;font-family:var(--font);font-size:12px;color:var(--a950);background:var(--white);outline:none}
-.addon-label-inp:focus{border-color:var(--a400)}
-.addon-price-inp{width:70px;padding:6px 8px;border:1.5px solid var(--a200);border-radius:7px;font-family:var(--font);font-size:12px;color:var(--a950);background:var(--white);outline:none}
-.addon-price-inp:focus{border-color:var(--a400)}
-.addon-del-btn{background:#fef2f2;border:1px solid #fecaca;color:var(--red-d);border-radius:6px;padding:4px 7px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;font-family:var(--font)}
-.addon-del-btn:hover{background:#fee2e2}
-.btn-add-addon{background:var(--a200);color:var(--a900);border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;font-family:var(--font)}
-.btn-add-addon:hover{background:var(--a300)}
-.addon-card{border-bottom:1px solid var(--a100);padding:16px 20px;display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start}
-.addon-card:last-child{border-bottom:none}
-.addon-emoji-input{font-size:26px;width:44px;height:44px;border:1.5px solid var(--a100);border-radius:10px;background:var(--a50);text-align:center;outline:none;cursor:pointer;font-family:var(--font)}
-.addon-emoji-input:focus{border-color:var(--a400)}
+.addon-input{padding:7px 8px;border:1.5px solid var(--line);border-radius:7px;background:#fff;font-size:12px;font-weight:600}
+.addon-input:focus{border-color:var(--accent)}
+.icon-btn{height:32px;border-radius:7px;background:var(--soft);color:var(--ink-2);font-weight:900}
+.icon-btn:hover{background:#e5e7eb}
+.icon-btn.danger{background:var(--red-soft);color:var(--red)}
+.icon-btn.danger:hover{background:#fecaca}
+
+.addon-group-card{display:grid;grid-template-columns:54px minmax(0,1fr) 42px;gap:12px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px;margin-bottom:10px}
+.emoji-input{width:54px;height:54px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:28px;text-align:center}
 .addon-fields{display:flex;flex-direction:column;gap:8px}
-.addon-row{display:grid;grid-template-columns:1fr 100px;gap:8px}
-.banner-field{padding:12px 20px;border-top:1px dashed var(--a200);background:var(--a50)}
-.add-item-footer{padding:12px 20px;border-top:1px dashed var(--a200);background:var(--g50);display:flex;gap:8px}
-.add-category-wrap{text-align:center;padding:8px 0 24px}
-.btn-del-section{background:rgba(239,68,68,.12);color:var(--red-d);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);text-transform:uppercase;letter-spacing:.04em;transition:background .15s;flex-shrink:0}
-.btn-del-section:hover{background:rgba(239,68,68,.22)}
-#loading-overlay{display:none;position:fixed;inset:0;background:rgba(252,248,238,.85);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-#loading-overlay.show{display:flex}
-.spinner{width:40px;height:40px;border:3px solid var(--a200);border-top-color:var(--a900);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-family:var(--brand);font-size:18px;color:var(--a900);font-weight:600}
-#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;padding:20px}
-#modal-overlay.show{display:flex}
-.modal{background:var(--white);border-radius:20px;padding:32px;max-width:460px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15)}
-.modal h3{font-family:var(--brand);font-size:22px;font-weight:700;color:var(--a950);margin-bottom:6px}
-.modal p{font-size:13px;color:var(--g500);margin-bottom:24px}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end}
-#preview-panel{position:fixed;right:0;top:0;bottom:0;width:360px;background:var(--white);border-left:1px solid var(--a200);box-shadow:-4px 0 20px rgba(0,0,0,.08);z-index:90;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+.banner-box{border:1px dashed var(--brand-line);background:#fffbeb;border-radius:8px;padding:12px;margin-top:14px}
+.empty-state{padding:38px 16px;text-align:center;color:var(--muted);font-size:13px;font-weight:600}
+
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.search-input{width:min(360px,100%);padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-weight:600}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+.customer-list,.block-list{display:flex;flex-direction:column;gap:8px}
+.customer-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px}
+.customer-grid{display:grid;grid-template-columns:minmax(150px,1.2fr) 130px 82px 98px 86px 84px 70px;gap:8px;align-items:end}
+.note-row{margin-top:8px}
+.customer-meta{margin-top:8px;font-size:11px;color:var(--muted);font-weight:600}
+.reward-toggle{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted);height:36px}
+.reward-toggle input{width:16px;height:16px;accent-color:var(--accent)}
+.block-card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px}
+.block-info{flex:1;min-width:0}
+.block-phone{font-size:14px;font-weight:900;color:var(--ink)}
+.block-meta{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.setting-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}
+.setting-title{font-size:14px;font-weight:900;color:var(--ink)}
+.setting-copy{font-size:12px;font-weight:600;color:var(--muted);line-height:1.5;margin-top:5px}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px}
+.dash-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.dash-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px}
+.dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
+.dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
+.feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
+.feature-icon{width:36px;height:36px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900}
+.feature-title{font-size:14px;font-weight:900;color:var(--ink)}
+.feature-copy{font-size:12px;font-weight:600;color:var(--muted);line-height:1.45;flex:1}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.hub-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.hub-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
+.hub-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.hub-title{font-size:14px;font-weight:900;color:var(--ink)}
+.hub-meta{font-size:11px;font-weight:700;color:var(--muted);line-height:1.45;margin-top:3px}
+.hub-badge{font-size:10px;font-weight:900;border-radius:999px;padding:4px 8px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.hub-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}
+.mini-list{display:flex;flex-direction:column;gap:7px}
+.mini-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px}
+.mini-row:hover{border-color:var(--brand-line)}
+.mini-img{width:44px;height:44px;border-radius:7px;background:var(--soft);object-fit:cover}
+.mini-name{font-size:13px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.loyalty-grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:14px;align-items:start}
+.loyalty-meter{height:12px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:8px}
+.loyalty-meter span{display:block;height:100%;background:var(--accent);border-radius:999px}
+.loyalty-customer{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px 90px;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px;margin-bottom:8px}
+.loyalty-name{font-size:13px;font-weight:900;color:var(--ink)}
+.loyalty-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.loyalty-stamps{font-size:13px;font-weight:900;color:var(--brand)}
+.loyalty-ready{font-size:10px;font-weight:900;text-transform:uppercase;border-radius:999px;padding:4px 8px;text-align:center;background:var(--soft);color:var(--muted)}
+.loyalty-ready.on{background:var(--green-soft);color:var(--green)}
+.quick-stack{display:flex;flex-direction:column;gap:8px}
+.switch{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:999px;transition:.16s}
+.slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.16s;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.switch input:checked+.slider{background:var(--green)}
+.switch input:checked+.slider:before{transform:translateX(20px)}
+
+#preview-panel{position:fixed;right:0;top:0;bottom:0;width:390px;background:#fff;border-left:1px solid var(--line);box-shadow:-8px 0 28px rgba(17,24,39,.12);z-index:160;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
 #preview-panel.open{transform:translateX(0)}
-.preview-header{padding:16px 20px;border-bottom:1px solid var(--a100);display:flex;align-items:center;justify-content:space-between}
-.preview-header h4{font-family:var(--brand);font-size:18px;font-weight:700;color:var(--a900)}
-.preview-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--g400);padding:4px}
-.preview-body{flex:1;overflow-y:auto;padding:16px}
-.preview-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--a100)}
-.preview-item img{width:52px;height:52px;border-radius:8px;object-fit:cover;background:var(--a50);flex-shrink:0}
-.preview-item-info{flex:1;min-width:0}
-.preview-item-name{font-size:13px;font-weight:700;color:var(--a950)}
-.preview-item-desc{font-size:11px;color:var(--g400);line-height:1.4;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.preview-item-price{font-size:13px;font-weight:700;color:#d97706;flex-shrink:0}
-.unsaved-dot{width:8px;height:8px;border-radius:50%;background:var(--a400);display:inline-block;margin-left:6px;animation:pulse 1.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.preview-header{height:64px;padding:0 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.preview-header h4{font-family:var(--brandfont);font-size:21px;color:var(--brand-dark)}
+.preview-close{width:34px;height:34px;border-radius:8px;background:var(--soft);font-size:18px;color:var(--ink-2)}
+.preview-body{flex:1;overflow:auto;padding:14px 16px}
+.preview-section-title{font-family:var(--brandfont);font-size:18px;font-weight:700;color:var(--brand);border-bottom:3px solid var(--accent);padding-bottom:4px;margin:14px 0 8px}
+.preview-item{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.preview-item img{width:54px;height:54px;border-radius:8px;object-fit:cover;background:var(--soft)}
+.preview-name{font-size:13px;font-weight:800;color:var(--ink)}
+.preview-desc{font-size:11px;color:var(--muted);line-height:1.35;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.preview-price{font-size:13px;font-weight:900;color:var(--brand-mid)}
+
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(90px);background:#111827;color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:500;transition:transform .25s;box-shadow:0 8px 24px rgba(0,0,0,.2);white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--red)}
+#loading-overlay{display:none;position:fixed;inset:0;background:rgba(246,247,249,.76);backdrop-filter:blur(4px);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:13px}
+#loading-overlay.show{display:flex}
+.spinner{width:38px;height:38px;border:3px solid #fde68a;border-top-color:var(--brand);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:var(--brandfont);font-size:18px;color:var(--brand);font-weight:700}
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(17,24,39,.54);z-index:450;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.show{display:flex}
+.modal{width:100%;max-width:430px;background:#fff;border-radius:10px;padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.25)}
+.modal h3{font-family:var(--brandfont);font-size:22px;color:var(--brand-dark)}
+.modal p{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5;margin:6px 0 20px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px}
+
+@media(max-width:980px){
+  body{overflow:auto}
+  #admin-screen{height:auto;min-height:100vh}
+  .app-shell{height:auto;min-height:100vh;grid-template-columns:1fr}
+  .sidebar{position:static}
+  .side-nav{display:grid;grid-template-columns:repeat(4,1fr)}
+  .side-footer{display:none}
+  .topbar{height:auto;align-items:flex-start;padding:16px;flex-direction:column}
+  .content{padding:16px 14px 80px}
+  .grid-menu,.settings-grid{grid-template-columns:1fr}
+  .dash-grid,.feature-grid,.loyalty-grid{grid-template-columns:1fr}
+  .customer-grid{grid-template-columns:1fr 1fr}
+  .loyalty-customer{grid-template-columns:1fr 1fr}
+  .item-card{grid-template-columns:80px minmax(0,1fr)}
+  .item-actions{grid-column:1/-1;flex-direction:row}
+}
 </style>
 </head>
 <body>
-<div id="loading-overlay"><div class="spinner"></div><div class="loading-text" id="loading-text">Loading…</div></div>
+<div id="loading-overlay"><div class="spinner"></div><div class="loading-text" id="loading-text">Loading...</div></div>
 <div id="toast"></div>
 <div id="modal-overlay">
   <div class="modal">
-    <h3 id="modal-title">Are you sure?</h3>
-    <p id="modal-body">This action cannot be undone.</p>
+    <h3 id="modal-title">Confirm</h3>
+    <p id="modal-body">Are you sure?</p>
     <div class="modal-actions">
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-soft btn-sm" onclick="closeModal()">Cancel</button>
       <button class="btn btn-danger btn-sm" id="modal-confirm-btn">Delete</button>
     </div>
   </div>
 </div>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">Le Kiosk</div>
@@ -184,116 +294,325 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
   </div>
 </div>
 
-<!-- ADMIN -->
 <div id="admin-screen">
-  <header class="admin-header">
-    <div style="display:flex;align-items:center;gap:12px">
-      <span class="header-brand">Le Kiosk <span>Menu CMS</span></span>
-      <span id="unsaved-indicator" style="display:none"><span class="unsaved-dot"></span></span>
-    </div>
-    <div class="header-actions">
-      <span class="session-badge" id="session-timer"></span>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--a200)">
-        <input type="checkbox" id="testing-toggle" style="width:15px;height:15px;cursor:pointer;accent-color:var(--a400)">
-        Test Mode
-      </label>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--a200)">
-  <input type="checkbox" id="loyalty-toggle" style="width:15px;height:15px;cursor:pointer;accent-color:var(--a400)">
-  Loyalty
-</label>
-      <button class="btn btn-sm btn-ghost" onclick="openBlockList()" style="color:var(--a950)">🚫 Block List</button>
-      <button class="btn btn-sm btn-ghost" onclick="openCustomersAdmin()" style="color:var(--a950)">👥 Customers</button>
-      <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
-      <button class="btn btn-save" id="save-btn" onclick="saveMenu()">💾 Save</button>
-      <button class="btn btn-logout" onclick="logout()">Logout</button>
-    </div>
-  </header>
-  <div class="tabs-bar" id="tabs-bar"></div>
-  <div class="admin-body" id="editor-root"></div>
-  <div class="add-category-wrap">
-    <button class="btn btn-add" onclick="addCategory()">＋ Add New Category</button>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <div class="brand-stack">
+          <div class="brand-name">Le Kiosk</div>
+          <div class="brand-sub">Control Center</div>
+        </div>
+        <span class="unsaved-dot" id="unsaved-indicator"></span>
+      </div>
+      <nav class="side-nav">
+        <button class="nav-btn active" id="nav-dashboard" onclick="switchView('dashboard')"><span class="nav-icon">D</span>Dashboard</button>
+        <button class="nav-btn" id="nav-menu" onclick="switchView('menu')"><span class="nav-icon">E</span>Editor</button>
+        <button class="nav-btn" id="nav-categories" onclick="switchView('categories')"><span class="nav-icon">G</span>Categories</button>
+        <button class="nav-btn" id="nav-items" onclick="switchView('items')"><span class="nav-icon">I</span>Menu Items</button>
+        <button class="nav-btn" id="nav-addons" onclick="switchView('addons')"><span class="nav-icon">A</span>Add-ons</button>
+        <button class="nav-btn" id="nav-loyalty" onclick="switchView('loyalty')"><span class="nav-icon">L</span>Loyalty</button>
+        <button class="nav-btn" id="nav-customers" onclick="switchView('customers')"><span class="nav-icon">C</span>Customers</button>
+        <button class="nav-btn" id="nav-blocklist" onclick="switchView('blocklist')"><span class="nav-icon">B</span>Block List</button>
+        <button class="nav-btn" id="nav-settings" onclick="switchView('settings')"><span class="nav-icon">S</span>Settings</button>
+      </nav>
+      <div class="side-footer">
+        <div class="status-row">
+          <span class="status-pill" id="status-test">Test Off</span>
+          <span class="status-pill" id="status-loyalty">Loyalty On</span>
+        </div>
+        <div class="session-badge" id="session-timer"></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="page-kicker" id="page-kicker">Control Center</div>
+          <div class="page-title" id="page-title">Dashboard</div>
+        </div>
+        <div class="top-actions">
+          <button class="btn btn-soft" onclick="togglePreview()">Preview</button>
+          <button class="btn btn-add" onclick="addCategory()">Add Category</button>
+          <button class="btn btn-save" id="save-btn" onclick="saveMenu()">Save Menu</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="view active" id="view-dashboard">
+          <div class="dash-grid" id="dashboard-stats"></div>
+          <div class="feature-grid">
+            <button class="feature-card" onclick="switchView('menu')">
+              <span class="feature-icon">E</span>
+              <span class="feature-title">Menu Editor</span>
+              <span class="feature-copy">Edit the active category, upload item images, manage prices, descriptions, pills, and item add-ons.</span>
+              <span class="btn btn-soft btn-sm">Open Editor</span>
+            </button>
+            <button class="feature-card" onclick="switchView('categories')">
+              <span class="feature-icon">G</span>
+              <span class="feature-title">Categories</span>
+              <span class="feature-copy">Review every category, reorder the menu, create new groups, and jump directly into the editor.</span>
+              <span class="btn btn-soft btn-sm">Manage Categories</span>
+            </button>
+            <button class="feature-card" onclick="switchView('items')">
+              <span class="feature-icon">I</span>
+              <span class="feature-title">Menu Items</span>
+              <span class="feature-copy">Browse all active and inactive items in one place, then open the right category for detailed editing.</span>
+              <span class="btn btn-soft btn-sm">Browse Items</span>
+            </button>
+            <button class="feature-card" onclick="switchView('loyalty')">
+              <span class="feature-icon">L</span>
+              <span class="feature-title">Loyalty</span>
+              <span class="feature-copy">Control the loyalty toggle, inspect ready rewards, and edit customer stamps from the customer records.</span>
+              <span class="btn btn-soft btn-sm">Open Loyalty</span>
+            </button>
+            <button class="feature-card" onclick="switchView('customers')">
+              <span class="feature-icon">C</span>
+              <span class="feature-title">Customers</span>
+              <span class="feature-copy">Edit profiles, phone numbers, notes, visits, spend, favorites, and loyalty values.</span>
+              <span class="btn btn-soft btn-sm">Open Customers</span>
+            </button>
+            <button class="feature-card" onclick="switchView('blocklist')">
+              <span class="feature-icon">B</span>
+              <span class="feature-title">Block List</span>
+              <span class="feature-copy">Add blocked phone numbers with reasons and keep risky orders away from the website inbox.</span>
+              <span class="btn btn-soft btn-sm">Open Block List</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="view" id="view-menu">
+          <div class="grid-menu">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Categories</div>
+                  <div class="panel-sub">Drag to reorder</div>
+                </div>
+                <button class="btn btn-add btn-sm" onclick="addCategory()">Add</button>
+              </div>
+              <div class="category-list" id="category-list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title" id="editor-panel-title">Category Editor</div>
+                  <div class="panel-sub" id="editor-panel-sub">Edit menu content and options</div>
+                </div>
+              </div>
+              <div class="panel-body" id="editor-root"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-categories">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Categories</div>
+                <div class="panel-sub">Dedicated category control with reorder and jump-to-edit actions</div>
+              </div>
+              <button class="btn btn-add btn-sm" onclick="addCategory()">Add Category</button>
+            </div>
+            <div class="panel-body">
+              <div class="hub-grid" id="categories-hub"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-items">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Menu Items</div>
+                <div class="panel-sub">All regular menu items across every category</div>
+              </div>
+              <button class="btn btn-save btn-sm" onclick="saveMenu()">Save Menu</button>
+            </div>
+            <div class="panel-body">
+              <div class="table-toolbar">
+                <input class="search-input" id="items-search" type="text" placeholder="Search items, category, price..." oninput="renderItemsHub()">
+                <button class="btn btn-add" onclick="switchView('menu');addItem()">Add Item</button>
+              </div>
+              <div class="mini-list" id="items-hub"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-addons">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Add-ons</div>
+                <div class="panel-sub">Add-on categories, global groups, and item-level extras</div>
+              </div>
+              <button class="btn btn-add btn-sm" onclick="createAddonCategory()">Add Add-on Category</button>
+            </div>
+            <div class="panel-body">
+              <div class="hub-grid" id="addons-hub"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-loyalty">
+          <div class="loyalty-grid">
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Loyalty Controls</div>
+                  <div class="panel-sub">Feature status and reward rules used by POS</div>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="setting-card">
+                  <div class="setting-title">Loyalty System</div>
+                  <div class="setting-copy">Enable or disable stamps and reward redemption in the POS.</div>
+                  <div class="switch-row">
+                    <span class="field-label">Status</span>
+                    <label class="switch"><input type="checkbox" id="loyalty-toggle-main" onchange="setLoyaltyMode(this.checked)"><span class="slider"></span></label>
+                  </div>
+                </div>
+                <div class="setting-card" style="margin-top:12px">
+                  <div class="setting-title">Reward Rules</div>
+                  <div class="setting-copy">10 stamps unlock a reward. POS supports Free Soft Drink, 10% Discount, and Free Ice Cream Cup.</div>
+                  <div class="loyalty-meter"><span style="width:100%"></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Customer Rewards</div>
+                  <div class="panel-sub">Ready rewards and stamp balances from customer profiles</div>
+                </div>
+                <button class="btn btn-save btn-sm" onclick="saveCustomersAdmin()">Save Loyalty</button>
+              </div>
+              <div class="panel-body">
+                <div class="table-toolbar">
+                  <input class="search-input" id="loyalty-search" type="text" placeholder="Search loyalty customers..." oninput="renderLoyaltyHub()">
+                  <button class="btn btn-soft" onclick="switchView('customers')">Edit CRM</button>
+                </div>
+                <div id="loyalty-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-customers">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Customers</div>
+                <div class="panel-sub">Profiles, loyalty, notes, visits, and spend</div>
+              </div>
+              <button class="btn btn-save btn-sm" id="cust-save-btn" onclick="saveCustomersAdmin()">Save Customers</button>
+            </div>
+            <div class="panel-body">
+              <div class="table-toolbar">
+                <input class="search-input" id="cust-admin-search" type="text" placeholder="Search name or phone..." oninput="renderCustomersAdmin()">
+                <button class="btn btn-add" onclick="addCustomerAdmin()">Add Customer</button>
+              </div>
+              <div class="customer-list" id="customers-admin-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-blocklist">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Block List</div>
+                <div class="panel-sub">Blocked phone numbers cannot place website orders</div>
+              </div>
+              <button class="btn btn-save btn-sm" id="bl-save-btn" onclick="saveBlockList()">Save Block List</button>
+            </div>
+            <div class="panel-body">
+              <div class="table-toolbar">
+                <input class="search-input" id="bl-phone" type="tel" maxlength="11" placeholder="Phone number">
+                <input class="search-input" id="bl-reason" type="text" placeholder="Reason">
+                <button class="btn btn-add" onclick="addBlockEntry()">Block</button>
+              </div>
+              <div class="block-list" id="bl-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view" id="view-settings">
+          <div class="settings-grid">
+            <div class="setting-card">
+              <div class="setting-title">Test Mode</div>
+              <div class="setting-copy">When enabled, the public site can show testing-only behavior controlled by your shared config.</div>
+              <div class="switch-row">
+                <span class="field-label">Status</span>
+                <label class="switch"><input type="checkbox" id="testing-toggle" onchange="setTestingMode(this.checked)"><span class="slider"></span></label>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-title">Loyalty System</div>
+              <div class="setting-copy">Controls whether POS shows rewards, applies discounts, and awards stamps on completed orders.</div>
+              <div class="switch-row">
+                <span class="field-label">Status</span>
+                <label class="switch"><input type="checkbox" id="loyalty-toggle" onchange="setLoyaltyMode(this.checked)"><span class="slider"></span></label>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-title">Reward Values</div>
+              <div class="setting-copy">POS currently uses fixed reward values in code: free soft drink is $2.00, free ice cream cup is $3.00, and discount reward is 10%.</div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-title">Publishing</div>
+              <div class="setting-copy">Menu changes are saved directly to Supabase. Image uploads go to Supabase Storage through the Worker.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 </div>
 
 <div id="preview-panel">
   <div class="preview-header">
     <h4>Live Preview</h4>
-    <button class="preview-close" onclick="togglePreview()">✕</button>
+    <button class="preview-close" onclick="togglePreview()">x</button>
   </div>
   <div class="preview-body" id="preview-body"></div>
 </div>
 
-<div id="blocklist-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:301;align-items:center;justify-content:center;padding:20px">
-  <div class="modal" style="max-width:520px">
-    <h3>🚫 Customer Block List</h3>
-    <p>Phone numbers in this list cannot place orders. 8-digit Lebanese format (no +961).</p>
-    <div style="display:flex;gap:8px;margin-bottom:14px">
-      <input id="bl-phone" class="inp" type="tel" placeholder="76840244" maxlength="8" style="margin-bottom:0;flex:1">
-      <input id="bl-reason" class="inp" type="text" placeholder="Reason (optional)" style="margin-bottom:0;flex:1.2">
-      <button class="btn btn-add" onclick="addBlockEntry()">＋ Block</button>
-    </div>
-    <div id="bl-list" style="max-height:320px;overflow-y:auto;border:1px solid var(--a200);border-radius:10px"></div>
-    <div class="modal-actions" style="margin-top:18px">
-      <button class="btn btn-ghost btn-sm" onclick="closeBlockList()">Close</button>
-      <button class="btn btn-save btn-sm" id="bl-save-btn" onclick="saveBlockList()">💾 Save</button>
-    </div>
-  </div>
-</div>
-<div id="customers-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:302;align-items:center;justify-content:center;padding:20px">
-  <div class="modal" style="max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column">
-    <h3>👥 Customers</h3>
-    <p>Edit customer names, phone numbers, notes, and customer stats.</p>
-
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <input id="cust-admin-search" class="inp" type="text" placeholder="Search name or phone…" oninput="renderCustomersAdmin()" style="margin-bottom:0;flex:1">
-      <button class="btn btn-add" onclick="addCustomerAdmin()">＋ Add</button>
-    </div>
-
-    <div id="customers-admin-list" style="flex:1;overflow-y:auto;border:1px solid var(--a200);border-radius:12px;min-height:280px"></div>
-
-    <div class="modal-actions" style="margin-top:18px">
-      <button class="btn btn-ghost btn-sm" onclick="closeCustomersAdmin()">Close</button>
-      <button class="btn btn-save btn-sm" id="cust-save-btn" onclick="saveCustomersAdmin()">💾 Save</button>
-    </div>
-  </div>
-</div>
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────
-const ADMIN_HASH  = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
-const WORKER_URL  = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
-const IMG_FOLDER  = 'menupictures';
-const STORAGE_PUBLIC_BASE = 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
-  const PILL_PRESETS = [
-  {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
-  {id:'red',  bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
-  {id:'green',bg:'#dcfce7',border:'#bbf7d0',text:'#166534',label:'Green'},
-  {id:'blue', bg:'#dbeafe',border:'#bfdbfe',text:'#1e40af',label:'Blue'},
-  {id:'purple',bg:'#ede9fe',border:'#ddd6fe',text:'#5b21b6',label:'Purple'},
-  {id:'pink', bg:'#fce7f3',border:'#fbcfe8',text:'#9d174d',label:'Pink'},
-  {id:'gray', bg:'#f3f4f6',border:'#e5e7eb',text:'#374151',label:'Gray'},
-  {id:'dark', bg:'#1f2937',border:'#374151',text:'#f9fafb',label:'Dark'}
-];
+const ADMIN_HASH='b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
+const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
+const IMG_FOLDER='menupictures';
+const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
 const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=20*60*1000;
+const PILL_PRESETS=[
+  {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
+  {id:'red',bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
+  {id:'green',bg:'#dcfce7',border:'#bbf7d0',text:'#166534',label:'Green'},
+  {id:'blue',bg:'#dbeafe',border:'#bfdbfe',text:'#1e40af',label:'Blue'},
+  {id:'purple',bg:'#ede9fe',border:'#ddd6fe',text:'#5b21b6',label:'Purple'},
+  {id:'pink',bg:'#fce7f3',border:'#fbcfe8',text:'#9d174d',label:'Pink'},
+  {id:'gray',bg:'#f3f4f6',border:'#e5e7eb',text:'#374151',label:'Gray'},
+  {id:'dark',bg:'#1f2937',border:'#374151',text:'#f9fafb',label:'Dark'}
+];
 
-// ── STATE ─────────────────────────────────────────────────────────────
-let menuData=[], fileSha=null, hasUnsaved=false, activeTab=0;
-let sessionTimer=null, sessionExpiry=0, sessionTick=null, sessionListenersAttached=false;
+let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null;
+let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
+let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
+let configData={testingMode:false,loyaltyEnabled:true};
+let pendingDelete=null,toastTimer=null;
 
-// ── CRYPTO ────────────────────────────────────────────────────────────
 async function hashPassword(pw){
   if(!window.crypto||!window.crypto.subtle) throw new Error('HTTPS_REQUIRED');
   const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
   return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
-
-// ── LOCKOUT ───────────────────────────────────────────────────────────
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('lk_lockout')||'{"attempts":0,"until":0}');}catch(_){return{attempts:0,until:0};}}
 function setLockout(d){sessionStorage.setItem('lk_lockout',JSON.stringify(d));}
 function resetLockout(){sessionStorage.removeItem('lk_lockout');}
 function renderAttemptDots(a){document.getElementById('attempt-dots').innerHTML=Array.from({length:MAX_ATTEMPTS},(_,i)=>`<div class="dot${i<a?' used':''}"></div>`).join('');}
-function checkLockout(){const l=getLockout();if(l.until>Date.now()){showLockoutBar(`Too many failed attempts. Try again in ${Math.ceil((l.until-Date.now())/1000)}s.`);return true;}return false;}
 function showLockoutBar(m){const b=document.getElementById('lockout-bar');b.textContent=m;b.classList.add('show');}
 function hideLockoutBar(){document.getElementById('lockout-bar').classList.remove('show');}
+function enableLoginForm(e){document.getElementById('pw-input').disabled=!e;document.getElementById('login-btn').disabled=!e;}
 let lockoutCountdown=null;
 function startLockoutCountdown(){
   clearInterval(lockoutCountdown);
@@ -303,561 +622,495 @@ function startLockoutCountdown(){
     else showLockoutBar(`Too many failed attempts. Try again in ${Math.ceil((l.until-Date.now())/1000)}s.`);
   },1000);
 }
-function enableLoginForm(e){document.getElementById('pw-input').disabled=!e;document.getElementById('login-btn').disabled=!e;}
-
-// ── LOGIN ─────────────────────────────────────────────────────────────
+function checkLockout(){const l=getLockout();if(l.until>Date.now()){showLockoutBar(`Too many failed attempts. Try again in ${Math.ceil((l.until-Date.now())/1000)}s.`);return true;}return false;}
 async function tryLogin(){
   if(checkLockout()){enableLoginForm(false);startLockoutCountdown();return;}
   const pw=document.getElementById('pw-input').value;if(!pw)return;
-  let hash;
-  try{hash=await hashPassword(pw);}
-  catch(e){
-    document.getElementById('login-error').textContent=e.message==='HTTPS_REQUIRED'?'Admin must be opened over HTTPS.':'Login error: '+e.message;
-    document.getElementById('login-error').classList.add('show');
-    return;
-  }
+  let h;
+  try{h=await hashPassword(pw);}
+  catch(e){document.getElementById('login-error').textContent=e.message==='HTTPS_REQUIRED'?'Admin must be opened over HTTPS.':'Login error: '+e.message;document.getElementById('login-error').classList.add('show');return;}
   const lock=getLockout();
-  if(hash===ADMIN_HASH){
-    resetLockout();hideLockoutBar();
-    document.getElementById('login-error').classList.remove('show');
+  if(h===ADMIN_HASH){
+    resetLockout();hideLockoutBar();document.getElementById('login-error').classList.remove('show');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('admin-screen').style.display='block';
     startSession();initAdmin();
-  } else {
-    const na=(lock.attempts||0)+1;
-    const nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
+  }else{
+    const na=(lock.attempts||0)+1,nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
     setLockout({attempts:na,until:nu});renderAttemptDots(na);
     if(na>=MAX_ATTEMPTS){enableLoginForm(false);startLockoutCountdown();document.getElementById('login-error').classList.remove('show');}
-    else{
-      const r=MAX_ATTEMPTS-na;
-      document.getElementById('login-error').textContent=`Wrong password. ${r} attempt${r===1?'':'s'} remaining before lockout.`;
-      document.getElementById('login-error').classList.add('show');
-    }
+    else{const r=MAX_ATTEMPTS-na;document.getElementById('login-error').textContent=`Wrong password. ${r} attempt${r===1?'':'s'} remaining before lockout.`;document.getElementById('login-error').classList.add('show');}
     document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
   }
 }
 document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
-(function initDots(){
-  const l=getLockout();
-  renderAttemptDots(l.attempts||0);
-  if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}
-})();
+(function(){const l=getLockout();renderAttemptDots(l.attempts||0);if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}})();
 
-document.getElementById('testing-toggle').addEventListener('change', function(){
-  setTestingMode(this.checked);
-});
-  document.getElementById('loyalty-toggle').addEventListener('change', function(){
-  setLoyaltyMode(this.checked);
-});
-// ── SESSION ───────────────────────────────────────────────────────────
 function startSession(){
-  resetSessionTimer();
-  clearInterval(sessionTick);
-  sessionTick=setInterval(tickSession,30000);
-  if(!sessionListenersAttached){
-    document.addEventListener('mousemove',resetSessionTimer,{passive:true});
-    document.addEventListener('keydown',resetSessionTimer,{passive:true});
-    document.addEventListener('click',resetSessionTimer,{passive:true});
-    sessionListenersAttached=true;
-  }
+  resetSessionTimer();clearInterval(sessionTick);sessionTick=setInterval(tickSession,30000);
+  if(!sessionListenersAttached){['mousemove','keydown','click','touchstart'].forEach(ev=>document.addEventListener(ev,resetSessionTimer,{passive:true}));sessionListenersAttached=true;}
 }
 function resetSessionTimer(){
   if(document.getElementById('admin-screen').style.display==='none')return;
-  clearTimeout(sessionTimer);
-  sessionExpiry=Date.now()+SESSION_MS;
-  updateSessionBadge();
-  sessionTimer=setTimeout(()=>{showToast('Session expired — logged out','error');logout();},SESSION_MS);
+  clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();
+  sessionTimer=setTimeout(()=>{showToast('Session expired - logged out','error');logout();},SESSION_MS);
 }
 function tickSession(){if(document.getElementById('admin-screen').style.display!=='none')updateSessionBadge();}
 function updateSessionBadge(){
-  const el=document.getElementById('session-timer');
-  const rem=Math.max(0,sessionExpiry-Date.now());
-  const mins=Math.floor(rem/60000);
-  el.textContent=`⏱ Session: ${mins}m`;
-  el.style.display=rem>0?'inline-block':'none';
+  const rem=Math.max(0,sessionExpiry-Date.now()),mins=Math.floor(rem/60000);
+  document.getElementById('session-timer').textContent=`Session: ${mins}m`;
 }
 function logout(){
   clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);
-  document.removeEventListener('mousemove',resetSessionTimer);
-  document.removeEventListener('keydown',resetSessionTimer);
-  document.removeEventListener('click',resetSessionTimer);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
-  document.getElementById('pw-input').value='';
-  document.getElementById('pw-input').focus();
+  document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
 }
 
-// ── BLOCK LIST ─────────────────────────────────────────────────────────
-let blockList=[], blockSha=null, blockDirty=false;
-
-async function openBlockList(){
-    showLoading('Loading block list…');
-    try{
-        const res=await fetch(`${WORKER_URL}/supabase/blocklist`, { cache:'no-store' });
-        if(res.ok){
-            const j=await res.json();
-            blockList=(j.data||[]).map(b=>({
-                phone:b.phone||'',
-                reason:b.reason||'',
-                blockedAt:b.blocked_at||b.blockedAt||new Date().toISOString()
-            }));
-            blockSha=null;
-        } else {
-            blockList=[];
-            blockSha=null;
-        }
-    }catch(_){
-        blockList=[];
-        blockSha=null;
-    }
-    blockDirty=false;
-    renderBlockList();
-    document.getElementById('blocklist-overlay').style.display='flex';
-    hideLoading();
-}
-function closeBlockList(){
-    if(blockDirty && !confirm('Discard unsaved changes?')) return;
-    document.getElementById('blocklist-overlay').style.display='none';
-}
-function renderBlockList(){
-    const list=document.getElementById('bl-list');
-    if(!blockList.length){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--g400);font-size:13px">No blocked numbers.</div>';return;}
-    list.innerHTML=blockList.map((b,i)=>`
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--a100)">
-            <div style="flex:1">
-                <div style="font-weight:700;color:var(--a950);font-size:13px">📞 ${b.phone}</div>
-                <div style="font-size:11px;color:var(--g500)">${b.reason||'No reason'} · ${new Date(b.blockedAt).toLocaleDateString()}</div>
-            </div>
-            <button class="btn-danger" onclick="removeBlockEntry(${i})">Unblock</button>
-        </div>`).join('');
-}
-function addBlockEntry(){
-    const raw=document.getElementById('bl-phone').value.trim();
-    const reason=document.getElementById('bl-reason').value.trim();
-    const d=raw.replace(/\D/g,'');
-    let phone=null;
-    if(d.length===8) phone=d;
-    else if(d.length===11 && d.startsWith('961')) phone=d.slice(3);
-    if(!phone){showToast('Invalid phone — must be 8 digits','error');return;}
-    if(blockList.some(b=>b.phone===phone)){showToast('Already blocked','error');return;}
-    blockList.unshift({phone,reason,blockedAt:new Date().toISOString()});
-    blockDirty=true;
-    document.getElementById('bl-phone').value='';
-    document.getElementById('bl-reason').value='';
-    renderBlockList();
-}
-function removeBlockEntry(i){
-    blockList.splice(i,1); blockDirty=true; renderBlockList();
-}
-
-// ── FIX: Always fetch fresh SHA before writing — handles new file (sha=null) and existing ──
-async function saveBlockList(){
-    const btn=document.getElementById('bl-save-btn');
-    btn.disabled=true;
-    showLoading('Saving block list…');
-
-    try{
-        const res=await fetch(`${WORKER_URL}/supabase/blocklist`,{
-            method:'PUT',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({data:blockList})
-        });
-
-        if(!res.ok){
-            const e=await res.json().catch(()=>({}));
-            throw new Error(e.error||res.status);
-        }
-
-        blockDirty=false;
-        showToast('Block list saved ✓','success');
-    }catch(e){
-        showToast('Save failed: '+e.message,'error');
-    }
-
-    btn.disabled=false;
-    hideLoading();
-}
-// ── CUSTOMERS ADMIN ───────────────────────────────────────────────────
-let customersAdminData = [];
-let customersAdminSha = null;
-let customersAdminDirty = false;
-
-async function openCustomersAdmin(){
-  showLoading('Loading customers…');
-  try{
-    const res = await fetch(`${WORKER_URL}/supabase/customers`, { cache:'no-store' });
-if(res.ok){
-  const j = await res.json();
-  customersAdminData = Array.isArray(j.data) ? j.data.map(c => ({
-  phone: c.phone || '',
-  name: c.name || '',
-  note: c.note || '',
-  firstSeen: c.first_seen || '',
-  lastSeen: c.last_seen || '',
-  totalOrders: c.total_orders || 0,
-  totalSpent: c.total_spent || 0,
-  orderIds: c.order_ids || [],
-  itemFreq: c.item_freq || {},
-  favoriteItems: c.favorite_items || [],
-  loyaltyStamps: c.loyalty_stamps || 0,
-  loyaltyRewardReady: !!c.loyalty_reward_ready,
-  loyaltyLastReward: c.loyalty_last_reward || null,
-  loyaltyRewardRedeemedAt: c.loyalty_reward_redeemed_at || null,
-  loyaltyLifetimeRedemptions: c.loyalty_lifetime_redemptions || 0
-})) : [];
-  customersAdminSha = null;
-} else {
-  customersAdminData = [];
-  customersAdminSha = null;
-}
-  }catch(_){
-    customersAdminData = [];
-    customersAdminSha = null;
-  }
-
-  customersAdminDirty = false;
-document.getElementById('cust-admin-search').value = '';
-renderCustomersAdmin();
-document.getElementById('customers-overlay').style.display = 'flex';
-hideLoading();
-}
-
-function closeCustomersAdmin(){
-  if(customersAdminDirty && !confirm('Discard unsaved customer changes?')) return;
-  document.getElementById('customers-overlay').style.display = 'none';
-}
-
-function normalizeCustomerPhone(raw){
-  const d = String(raw || '').replace(/\D/g,'');
-  if(d.length === 8) return d;
-  if(d.length === 11 && d.startsWith('961')) return d.slice(3);
-  return d;
-}
-
-function renderCustomersAdmin(){
-  const list = document.getElementById('customers-admin-list');
-  const q = (document.getElementById('cust-admin-search')?.value || '').toLowerCase();
-
-  const rows = customersAdminData
-    .map((c,i)=>({c,i}))
-    .filter(({c}) =>
-      !q ||
-      String(c.name || '').toLowerCase().includes(q) ||
-      String(c.phone || '').includes(q)
-    );
-
-  if(!rows.length){
-    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--g400);font-size:13px">No customers found.</div>';
-    return;
-  }
-
-  list.innerHTML = rows.map(({c,i}) => `
-    <div style="padding:14px;border-bottom:1px solid var(--a100);background:#fff">
-      <div style="display:grid;grid-template-columns:1fr 140px 110px 110px auto;gap:8px;align-items:end">
-        <div>
-          <div class="field-label">Name</div>
-          <input class="field-input" value="${esc(c.name || '')}" oninput="editCustomerField(${i},'name',this.value)">
-        </div>
-        <div>
-          <div class="field-label">Phone</div>
-          <input class="field-input" value="${esc(c.phone || '')}" oninput="editCustomerField(${i},'phone',this.value)">
-        </div>
-        <div>
-          <div class="field-label">Visits</div>
-          <input class="field-input" type="number" min="0" value="${Number(c.totalOrders || 0)}" oninput="editCustomerField(${i},'totalOrders',this.value)">
-        </div>
-        <div>
-          <div class="field-label">Spent</div>
-          <input class="field-input" type="number" min="0" step="0.01" value="${Number(c.totalSpent || 0)}" oninput="editCustomerField(${i},'totalSpent',this.value)">
-        </div>
-        <button class="btn-danger" onclick="deleteCustomerAdmin(${i})">Delete</button>
-      </div>
-
-      <div style="margin-top:8px">
-        <div class="field-label">Note</div>
-        <textarea class="field-input" rows="2" oninput="editCustomerField(${i},'note',this.value)">${esc(c.note || '')}</textarea>
-      </div>
-
-      <div style="font-size:11px;color:var(--g500);margin-top:6px">
-        First seen: ${c.firstSeen ? new Date(c.firstSeen).toLocaleDateString() : '—'}
-        · Last seen: ${c.lastSeen ? new Date(c.lastSeen).toLocaleDateString() : '—'}
-        ${c.favoriteItems?.length ? ` · Usually: ${esc(c.favoriteItems.join(', '))}` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function editCustomerField(i, field, value){
-  const c = customersAdminData[i];
-  if(!c) return;
-
-  if(field === 'phone') c.phone = normalizeCustomerPhone(value);
-  else if(field === 'totalOrders') c.totalOrders = Math.max(0, parseInt(value || '0', 10) || 0);
-  else if(field === 'totalSpent') c.totalSpent = Math.max(0, parseFloat(value || '0') || 0);
-  else c[field] = value;
-
-  customersAdminDirty = true;
-}
-
-function addCustomerAdmin(){
-    customersAdminData.unshift({
-    phone:'',
-    name:'New Customer',
-    note:'',
-    firstSeen:new Date().toISOString(),
-    lastSeen:new Date().toISOString(),
-    totalOrders:0,
-    totalSpent:0,
-    orderIds:[],
-    itemFreq:{},
-    favoriteItems:[],
-    loyaltyStamps:0,
-    loyaltyRewardReady:false,
-    loyaltyLastReward:null,
-    loyaltyRewardRedeemedAt:null,
-    loyaltyLifetimeRedemptions:0
-  });
-  customersAdminDirty = true;
-  renderCustomersAdmin();
-}
-
-function deleteCustomerAdmin(i){
-  const c = customersAdminData[i];
-  if(!c) return;
-  if(!confirm(`Delete customer "${c.name || c.phone || 'Unknown'}"?`)) return;
-  customersAdminData.splice(i,1);
-  customersAdminDirty = true;
-  renderCustomersAdmin();
-}
-
-async function saveCustomersAdmin(){
-  const btn = document.getElementById('cust-save-btn');
-  btn.disabled = true;
-  showLoading('Saving customers…');
-
-  try{
-    // clean + de-dupe phones
-    const seen = new Set();
-    const clean = [];
-
-    for(const c of customersAdminData){
-      const phone = normalizeCustomerPhone(c.phone);
-      if(!phone) continue;
-      if(seen.has(phone)) continue;
-      seen.add(phone);
-
-            clean.push({
-        ...c,
-        phone,
-        name: String(c.name || '').trim(),
-        note: String(c.note || '').trim(),
-        totalOrders: Math.max(0, Number(c.totalOrders || 0)),
-        totalSpent: Math.max(0, Number(c.totalSpent || 0)),
-        loyaltyStamps: Math.max(0, Number(c.loyaltyStamps || 0)),
-        loyaltyRewardReady: !!c.loyaltyRewardReady,
-        loyaltyLastReward: c.loyaltyLastReward || null,
-        loyaltyRewardRedeemedAt: c.loyaltyRewardRedeemedAt || null,
-        loyaltyLifetimeRedemptions: Math.max(0, Number(c.loyaltyLifetimeRedemptions || 0))
-      });
-    }
-
-    const res = await fetch(`${WORKER_URL}/supabase/customers`, {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ data: clean })
-});
-    if(!res.ok){
-      const e = await res.json().catch(()=>({}));
-      throw new Error(e.error || res.status);
-    }
-
-    const saved = await res.json();
-    customersAdminData = clean;
-    customersAdminSha = saved.sha || null;
-    customersAdminDirty = false;
-    showToast('Customers saved ✓','success');
-    document.getElementById('cust-admin-search').value = '';
-    renderCustomersAdmin();
-  }catch(e){
-    showToast('Save failed: '+e.message,'error');
-  }
-
-  btn.disabled = false;
-  hideLoading();
-}
-// ── INIT ──────────────────────────────────────────────────────────────
 async function initAdmin(){
-  showLoading('Loading menu…');
+  showLoading('Loading admin...');
   try{
+    await fetchConfig();
     await fetchMenu();
-    try{
-  const cfgRes=await fetch(`${WORKER_URL}/supabase/config`,{cache:'no-store'});
-  if(cfgRes.ok){
-    const j=await cfgRes.json();
-    document.getElementById('testing-toggle').checked = !!(j.data && j.data.testingMode);
-document.getElementById('loyalty-toggle').checked =
-  j.data && typeof j.data.loyaltyEnabled === 'boolean'
-    ? j.data.loyaltyEnabled
-    : true;
-  }
-}catch(_){}
+    renderStatus();
     renderAll();
-  } catch(e){
-    hideLoading();
-    document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px;border:1px solid #fde68a"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Could not load menu</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px;max-width:340px;margin-left:auto;margin-right:auto">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Retry Load</button></div>`;
-    showToast(e.message,'error');
-    return;
-  }
-  hideLoading();
-}
-async function retryLoad(){
-  showLoading('Loading menu…');
-  try{await fetchMenu();renderAll();}
-  catch(e){
-    hideLoading();
-    document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Still can't load</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Try Again</button></div>`;
-    showToast(e.message,'error');
-  }
-  hideLoading();
-}
-
-// ── WORKER API ────────────────────────────────────────────────────────
-async function fetchMenu(){
-  try{
-    const res = await fetch(`${WORKER_URL}/supabase/menu`, { cache:'no-store' });
-    if(!res.ok) throw new Error('Supabase menu failed');
-
-    const j = await res.json();
-    menuData = Array.isArray(j.data) ? j.data : [];
-
-    if(!menuData.length) throw new Error('Empty Supabase menu');
-
-    fileSha = null;
   }catch(e){
-    console.warn('Using menu.json fallback:', e);
-
-    const res=await fetch(`${WORKER_URL}/gh?file=menu.json`);
-    if(!res.ok) throw new Error('Worker error '+res.status);
-
-    const {data,sha}=await res.json();
-    fileSha=sha;
-    menuData=data;
+    showToast('Load failed: '+e.message,'error');
+    document.getElementById('editor-root').innerHTML=`<div class="empty-state">Could not load menu. <button class="btn btn-save btn-sm" onclick="initAdmin()">Retry</button></div>`;
   }
+  hideLoading();
+}
+async function fetchConfig(){
+  try{
+    const res=await fetch(`${WORKER_URL}/supabase/config`,{cache:'no-store'});
+    if(res.ok){
+      const j=await res.json();
+      configData=j.data||{};
+      if(typeof configData.loyaltyEnabled!=='boolean')configData.loyaltyEnabled=true;
+      if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
+    }
+  }catch(_){}
+}
+async function saveConfig(){
+  const res=await fetch(`${WORKER_URL}/supabase/config`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:configData})});
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
+}
+function renderStatus(){
+  const test=document.getElementById('status-test'),loy=document.getElementById('status-loyalty');
+  test.textContent=configData.testingMode?'Test On':'Test Off';test.className='status-pill '+(configData.testingMode?'warn':'');
+  loy.textContent=configData.loyaltyEnabled?'Loyalty On':'Loyalty Off';loy.className='status-pill '+(configData.loyaltyEnabled?'on':'');
+  const t=document.getElementById('testing-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main');
+  if(t)t.checked=!!configData.testingMode;
+  if(l)l.checked=!!configData.loyaltyEnabled;
+  if(lm)lm.checked=!!configData.loyaltyEnabled;
 }
 async function setTestingMode(enabled){
-  showLoading(enabled?'Enabling test mode…':'Disabling test mode…');
-
-  try{
-    const cfgRes=await fetch(`${WORKER_URL}/supabase/config`,{cache:'no-store'});
-    let cfg={};
-
-    if(cfgRes.ok){
-      const j=await cfgRes.json();
-      cfg=j.data||{};
-    }
-
-    cfg.testingMode=enabled;
-
-    const saveRes=await fetch(`${WORKER_URL}/supabase/config`,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({data:cfg})
-    });
-
-    if(!saveRes.ok){
-      const e=await saveRes.json().catch(()=>({}));
-      throw new Error(e.error||saveRes.status);
-    }
-
-    showToast(enabled?'Test mode ON — live in ~30s':'Test mode OFF — live in ~30s','success');
-  }catch(e){
-    showToast('Failed: '+e.message,'error');
-    document.getElementById('testing-toggle').checked=!enabled;
-  }
-
+  showLoading(enabled?'Enabling test mode...':'Disabling test mode...');
+  try{configData.testingMode=enabled;await saveConfig();renderStatus();showToast(enabled?'Test mode ON':'Test mode OFF','success');}
+  catch(e){configData.testingMode=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
 }
-  async function setLoyaltyMode(enabled){
-  showLoading(enabled ? 'Enabling loyalty…' : 'Disabling loyalty…');
-
-  try{
-    const cfgRes = await fetch(`${WORKER_URL}/supabase/config`, { cache:'no-store' });
-    let cfg = {};
-
-    if(cfgRes.ok){
-      const j = await cfgRes.json();
-      cfg = j.data || {};
-    }
-
-    cfg.loyaltyEnabled = enabled;
-
-    const saveRes = await fetch(`${WORKER_URL}/supabase/config`, {
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ data: cfg })
-    });
-
-    if(!saveRes.ok){
-      const e = await saveRes.json().catch(()=>({}));
-      throw new Error(e.error || saveRes.status);
-    }
-
-    showToast(enabled ? 'Loyalty enabled' : 'Loyalty disabled', 'success');
-  }catch(e){
-    showToast('Failed: ' + e.message, 'error');
-    document.getElementById('loyalty-toggle').checked = !enabled;
-  }
-
+async function setLoyaltyMode(enabled){
+  showLoading(enabled?'Enabling loyalty...':'Disabling loyalty...');
+  try{configData.loyaltyEnabled=enabled;await saveConfig();renderStatus();showToast(enabled?'Loyalty enabled':'Loyalty disabled','success');}
+  catch(e){configData.loyaltyEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
+}
+
+async function fetchMenu(){
+  try{
+    const res=await fetch(`${WORKER_URL}/supabase/menu`,{cache:'no-store'});
+    if(!res.ok) throw new Error('Supabase menu failed');
+    const j=await res.json();
+    menuData=Array.isArray(j.data)?j.data:[];
+    if(!menuData.length) throw new Error('Empty Supabase menu');
+  }catch(e){
+    console.warn('Using menu.json fallback:', e);
+    const res=await fetch(`${WORKER_URL}/gh?file=menu.json`);
+    if(!res.ok) throw new Error('Worker error '+res.status);
+    const j=await res.json();
+    menuData=Array.isArray(j.data)?j.data:[];
+    if(!menuData.length) throw new Error('Empty menu fallback');
+  }
+  activeTab=Math.min(activeTab,Math.max(0,menuData.length-1));
 }
 async function saveMenu(){
-  collectAll();
-
-  const clean=menuData.map(sec=>{
-    const s={...sec};
-    delete s._hasFlav;
-    return s;
-  });
-
-  showLoading('Saving…');
-
+  showLoading('Saving menu...');
   try{
-    const res=await fetch(`${WORKER_URL}/supabase/menu`,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({data:clean})
-    });
-
-    if(!res.ok){
-      const e=await res.json().catch(()=>({}));
-      throw new Error(e.error||res.status);
-    }
-
-    markSaved();
-    showToast('Saved to Supabase ✓','success');
-  }catch(e){
-    showToast('Save failed: '+e.message,'error');
-  }
-
+    const clean=menuData.map(sec=>JSON.parse(JSON.stringify(sec)));
+    const res=await fetch(`${WORKER_URL}/supabase/menu`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:clean})});
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
+    markSaved();showToast('Menu saved','success');
+  }catch(e){showToast('Save failed: '+e.message,'error');}
   hideLoading();
 }
 
+function switchView(view){
+  currentView=view;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('nav-'+view).classList.add('active');
+  const titles={
+    dashboard:['Control Center','Dashboard'],
+    menu:['Menu CMS','Menu Editor'],
+    categories:['Menu Structure','Categories'],
+    items:['Catalog','Menu Items'],
+    addons:['Options','Add-ons'],
+    loyalty:['Rewards','Loyalty'],
+    customers:['Customer CRM','Customers'],
+    blocklist:['Risk Control','Block List'],
+    settings:['System Config','Settings']
+  };
+  document.getElementById('page-kicker').textContent=titles[view][0];
+  document.getElementById('page-title').textContent=titles[view][1];
+  document.querySelector('.top-actions').style.display=['dashboard','menu','categories','items','addons'].includes(view)?'flex':'none';
+  renderDashboard();
+  renderCategoriesHub();
+  renderItemsHub();
+  renderAddonsHub();
+  renderLoyaltyHub();
+  if(view==='customers')openCustomersAdmin();
+  if(view==='loyalty')openCustomersAdmin();
+  if(view==='blocklist')openBlockList();
+  if(view==='settings')renderSettings();
+}
+function renderAll(){
+  renderCategoryList();
+  renderEditor();
+  renderDashboard();
+  renderCategoriesHub();
+  renderItemsHub();
+  renderAddonsHub();
+  renderLoyaltyHub();
+  renderPreview();
+  renderStatus();
+  markSaved();
+}
+function markUnsaved(){hasUnsaved=true;document.getElementById('unsaved-indicator').classList.add('show');}
+function markSaved(){hasUnsaved=false;document.getElementById('unsaved-indicator').classList.remove('show');}
+window.addEventListener('beforeunload',e=>{if(hasUnsaved){e.preventDefault();e.returnValue='';}});
+
+function menuStats(){
+  let regular=0,addonCats=0,items=0,active=0,itemAddons=0,globalGroups=0;
+  menuData.forEach(sec=>{
+    if(sec.type==='addons'){
+      addonCats++;
+      globalGroups+=(sec.addonGroups||[]).length;
+    }else{
+      regular++;
+      (sec.items||[]).forEach(item=>{
+        items++;
+        if(item.active!==false)active++;
+        itemAddons+=(item.addons||[]).length;
+      });
+    }
+  });
+  return {regular,addonCats,items,active,itemAddons,globalGroups};
+}
+function renderDashboard(){
+  const statsEl=document.getElementById('dashboard-stats');
+  if(!statsEl)return;
+  const s=menuStats();
+  const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
+  statsEl.innerHTML=`
+    <div class="dash-card"><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} item groups · ${s.addonCats} add-on groups</div></div>
+    <div class="dash-card"><div class="dash-label">Menu Items</div><div class="dash-value">${s.items}</div><div class="dash-note">${s.active} active on the POS/menu</div></div>
+    <div class="dash-card"><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} item extras · ${s.globalGroups} group options</div></div>
+    <div class="dash-card"><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty is enabled':'Loyalty is disabled'}</div></div>
+  `;
+}
+function renderCategoriesHub(){
+  const el=document.getElementById('categories-hub');
+  if(!el)return;
+  if(!menuData.length){el.innerHTML='<div class="empty-state">No categories yet.</div>';return;}
+  el.innerHTML=menuData.map((sec,i)=>{
+    const isAddon=sec.type==='addons';
+    const count=isAddon?(sec.addonGroups||[]).length:(sec.items||[]).length;
+    const banner=!isAddon&&sec.bottomBanner!==undefined?' · Banner on':'';
+    return `<div class="hub-card">
+      <div class="hub-top">
+        <div><div class="hub-title">${esc(sec.title||'Untitled')}</div><div class="hub-meta">${esc(sec.key||'no-key')} · ${isAddon?'Add-ons':'Menu Items'}${banner}</div></div>
+        <span class="hub-badge">${count}</span>
+      </div>
+      <div class="hub-actions">
+        <button class="btn btn-soft btn-sm" onclick="openCategory(${i})">Edit</button>
+        <button class="btn btn-soft btn-sm" onclick="moveCategory(${i},-1)">Up</button>
+        <button class="btn btn-soft btn-sm" onclick="moveCategory(${i},1)">Down</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderItemsHub(){
+  const el=document.getElementById('items-hub');
+  if(!el)return;
+  const q=(document.getElementById('items-search')?.value||'').toLowerCase();
+  const rows=[];
+  menuData.forEach((sec,si)=>{
+    if(sec.type==='addons')return;
+    (sec.items||[]).forEach((item,ii)=>{
+      const hay=[item.name,item.price,item.desc,sec.title,sec.key].join(' ').toLowerCase();
+      if(!q||hay.includes(q))rows.push({sec,si,item,ii});
+    });
+  });
+  if(!rows.length){el.innerHTML='<div class="empty-state">No menu items found.</div>';return;}
+  el.innerHTML=rows.map(({sec,si,item,ii})=>{
+    const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
+    return `<div class="mini-row">
+      ${img?`<img class="mini-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="mini-img"></div>`}
+      <div><div class="mini-name">${esc(item.name||'Untitled')}</div><div class="mini-meta">${esc(sec.title||'Category')} · ${esc(item.price||'$0')} · ${item.active===false?'Inactive':'Active'}</div></div>
+      <button class="btn btn-soft btn-sm" onclick="openItem(${si},${ii})">Edit</button>
+    </div>`;
+  }).join('');
+}
+function renderAddonsHub(){
+  const el=document.getElementById('addons-hub');
+  if(!el)return;
+  const addonCats=menuData.map((sec,i)=>({sec,i})).filter(({sec})=>sec.type==='addons');
+  const itemAddonCount=menuStats().itemAddons;
+  let html=addonCats.map(({sec,i})=>`<div class="hub-card">
+    <div class="hub-top">
+      <div><div class="hub-title">${esc(sec.title||'Untitled')}</div><div class="hub-meta">${(sec.addonGroups||[]).length} global add-on groups · ${esc(sec.key||'no-key')}</div></div>
+      <span class="hub-badge">Global</span>
+    </div>
+    <div class="quick-stack">${(sec.addonGroups||[]).slice(0,4).map(g=>`<div class="mini-meta">${esc(g.emoji||'*')} ${esc(g.label||'Add-on')} · ${esc(g.price||'$0')}</div>`).join('')||'<div class="mini-meta">No add-on groups yet.</div>'}</div>
+    <div class="hub-actions"><button class="btn btn-soft btn-sm" onclick="openCategory(${i})">Edit Group</button></div>
+  </div>`).join('');
+  html+=`<div class="hub-card">
+    <div class="hub-top">
+      <div><div class="hub-title">Item Add-ons</div><div class="hub-meta">Extras attached directly to individual menu items.</div></div>
+      <span class="hub-badge">${itemAddonCount}</span>
+    </div>
+    <div class="hub-actions"><button class="btn btn-soft btn-sm" onclick="switchView('items')">Browse Items</button></div>
+  </div>`;
+  el.innerHTML=html||'<div class="empty-state">No add-ons yet.</div>';
+}
+function renderLoyaltyHub(){
+  const el=document.getElementById('loyalty-list');
+  if(!el)return;
+  renderStatus();
+  const q=(document.getElementById('loyalty-search')?.value||'').toLowerCase();
+  const rows=customersAdminData
+    .map((c,i)=>({c,i}))
+    .filter(({c})=>!q||String(c.name||'').toLowerCase().includes(q)||String(c.phone||'').includes(q))
+    .sort((a,b)=>Number(b.c.loyaltyRewardReady)-Number(a.c.loyaltyRewardReady)||Number(b.c.loyaltyStamps||0)-Number(a.c.loyaltyStamps||0));
+  if(!rows.length){el.innerHTML='<div class="empty-state">No loyalty customers loaded yet.</div>';return;}
+  el.innerHTML=rows.map(({c,i})=>`<div class="loyalty-customer">
+    <div><div class="loyalty-name">${esc(c.name||'Unnamed')}</div><div class="loyalty-meta">+961 ${esc(c.phone||'')} · ${Number(c.totalOrders||0)} visits</div></div>
+    <div class="loyalty-stamps">${Number(c.loyaltyStamps||0)} / 10</div>
+    <span class="loyalty-ready${c.loyaltyRewardReady?' on':''}">${c.loyaltyRewardReady?'Ready':'Not Ready'}</span>
+    <button class="btn btn-soft btn-sm" onclick="openCustomerFromLoyalty(${i})">Edit</button>
+  </div>`).join('');
+}
+function openCategory(i){
+  activeTab=i;
+  switchView('menu');
+  renderCategoryList();
+  renderEditor();
+}
+function openItem(si,ii){
+  activeTab=si;
+  switchView('menu');
+  renderCategoryList();
+  renderEditor();
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('.item-card');
+    if(cards[ii])cards[ii].scrollIntoView({behavior:'smooth',block:'center'});
+  },50);
+}
+function moveCategory(i,delta){
+  const ni=i+delta;
+  if(ni<0||ni>=menuData.length)return;
+  const moved=menuData.splice(i,1)[0];
+  menuData.splice(ni,0,moved);
+  activeTab=ni;
+  markUnsaved();
+  renderCategoryList();
+  renderCategoriesHub();
+  renderEditor();
+}
+function addCategory(){
+  const key='category-'+(Date.now()%100000);
+  menuData.push({key,title:'New Category',items:[]});
+  activeTab=menuData.length-1;
+  markUnsaved();
+  renderCategoryList();
+  renderCategoriesHub();
+  renderEditor();
+  if(currentView!=='menu')switchView('menu');
+}
+function createAddonCategory(){
+  const key='addons-'+(Date.now()%100000);
+  menuData.push({key,title:'New Add-ons',type:'addons',addonGroups:[]});
+  activeTab=menuData.length-1;
+  markUnsaved();
+  renderCategoryList();
+  renderAddonsHub();
+  renderEditor();
+  switchView('menu');
+}
+function openCustomerFromLoyalty(i){
+  switchView('customers');
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('.customer-card');
+    if(cards[i])cards[i].scrollIntoView({behavior:'smooth',block:'center'});
+  },50);
+}
+
+function renderCategoryList(){
+  const el=document.getElementById('category-list');
+  if(!menuData.length){el.innerHTML='<div class="empty-state">No categories yet.</div>';return;}
+  el.innerHTML=menuData.map((sec,i)=>{
+    const count=sec.type==='addons'?(sec.addonGroups||[]).length:(sec.items||[]).length;
+    return `<button class="cat-row${i===activeTab?' active':''}" draggable="true" ondragstart="dragCategoryStart(event,${i})" ondragover="dragCategoryOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropCategory(event,${i})" onclick="setActiveCategory(${i})">
+      <span class="cat-grip">::</span>
+      <span class="cat-main"><span class="cat-name">${esc(sec.title||'Untitled')}</span><span class="cat-meta">${sec.key||'no-key'} · ${sec.type==='addons'?'Add-ons':'Items'}</span></span>
+      <span class="cat-badge">${count}</span>
+    </button>`;
+  }).join('');
+}
+function setActiveCategory(i){activeTab=i;renderCategoryList();renderEditor();}
+function dragCategoryStart(e,i){dragSrcIdx=i;e.dataTransfer.effectAllowed='move';}
+function dragCategoryOver(e,i){e.preventDefault();if(i!==dragSrcIdx)e.currentTarget.classList.add('drag-over');}
+function dropCategory(e,i){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragSrcIdx===null||dragSrcIdx===i)return;
+  const moved=menuData.splice(dragSrcIdx,1)[0];menuData.splice(i,0,moved);activeTab=i;dragSrcIdx=null;markUnsaved();renderCategoryList();renderEditor();
+}
+function getSec(){return menuData[activeTab];}
+function renderEditor(){
+  const root=document.getElementById('editor-root'),sec=getSec();
+  if(!sec){root.innerHTML='<div class="empty-state">Choose or add a category.</div>';return;}
+  const isAddon=sec.type==='addons',hasBanner=sec.bottomBanner!==undefined;
+  document.getElementById('editor-panel-title').textContent=sec.title||'Category Editor';
+  document.getElementById('editor-panel-sub').textContent=isAddon?'Add-on groups and options':'Menu items, images, pills, and add-ons';
+  root.innerHTML=`
+    <div class="editor-head">
+      <div class="field"><label class="field-label">Category Name</label><input class="field-input" value="${esc(sec.title||'')}" oninput="editCategory('title',this.value)"></div>
+      <div class="field"><label class="field-label">URL Key</label><input class="field-input" value="${esc(sec.key||'')}" oninput="editCategory('key',this.value)"></div>
+    </div>
+    <div class="toggle-line">
+      <span class="field-label" style="margin:0">Type</span>
+      <span class="segment"><button class="${!isAddon?'active':''}" onclick="setSectionType('regular')">Items</button><button class="${isAddon?'active':''}" onclick="setSectionType('addons')">Add-ons</button></span>
+      ${!isAddon?`<button class="chip-btn${hasBanner?' active':''}" onclick="toggleFeature('banner')">Bottom Banner</button>`:''}
+      <button class="chip-btn" onclick="confirmDeleteSection()">Delete Category</button>
+    </div>
+    ${isAddon?renderAddonGroups(sec):renderItems(sec)}
+  `;
+}
+function editCategory(field,value){const sec=getSec();if(!sec)return;sec[field]=value;markUnsaved();renderCategoryList();}
+function setSectionType(type){
+  const sec=getSec();if(!sec)return;
+  if(type==='addons'){sec.type='addons';if(!sec.addonGroups)sec.addonGroups=[];delete sec.items;delete sec.bottomBanner;}
+  else{delete sec.type;if(!sec.items)sec.items=[];delete sec.addonGroups;}
+  markUnsaved();renderCategoryList();renderEditor();
+}
+function toggleFeature(feat){const sec=getSec();if(!sec)return;if(feat==='banner'){if(sec.bottomBanner!==undefined)delete sec.bottomBanner;else sec.bottomBanner='';}markUnsaved();renderEditor();}
+function renderItems(sec){
+  const items=sec.items||[];
+  return `<div class="items-stack">${items.map((item,i)=>renderItem(item,i)).join('')||'<div class="empty-state">No items yet.</div>'}</div>
+  <div class="toggle-line"><button class="btn btn-add" onclick="addItem()">Add Item</button></div>
+  ${sec.bottomBanner!==undefined?`<div class="banner-box"><label class="field-label">Bottom Banner</label><input class="field-input" value="${esc(sec.bottomBanner||'')}" oninput="editCategory('bottomBanner',this.value)"></div>`:''}`;
+}
+function renderItem(item,i){
+  const color=item.flavorColor||'amber',pc=PILL_PRESETS.find(p=>p.id===color)||PILL_PRESETS[0];
+  const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
+  return `<div class="item-card${item.active===false?' inactive':''}">
+    <div>
+      <div class="img-drop-zone" onclick="triggerUpload(${i})">
+        ${img?`<img src="${img}" alt=""><div class="img-drop-overlay">Change</div>`:`<div class="img-drop-label">Upload<br>Image</div>`}
+        <div class="img-progress" id="prog-${i}"></div>
+      </div>
+      <input class="file-input" id="file-${i}" type="file" accept="image/*" onchange="handleImageUpload(${i},this)">
+      <div class="img-path">${esc(item.image||'')}</div>
+    </div>
+    <div class="item-fields">
+      <div class="field-row">
+        <div class="field"><label class="field-label">Name</label><input class="field-input" value="${esc(item.name||'')}" oninput="editItem(${i},'name',this.value)"></div>
+        <div class="field"><label class="field-label">Price</label><input class="field-input" value="${esc(item.price||'')}" oninput="editItem(${i},'price',this.value)"></div>
+      </div>
+      <div class="field"><label class="field-label">Description</label><textarea class="field-input" oninput="editItem(${i},'desc',this.value)">${esc(item.desc||'')}</textarea></div>
+      <div class="pills-area">
+        <label class="field-label">Pills / Options</label>
+        <input class="field-input" value="${esc((item.flavors||[]).join(', '))}" placeholder="Double Apple, Lemon & Mint" oninput="editItemFlavors(${i},this.value)">
+        <div class="pill-colors">
+          <span class="field-label" style="margin:0">Color</span>
+          ${PILL_PRESETS.map(p=>`<button class="color-dot${p.id===color?' active':''}" style="background:${p.bg};border-color:${p.id===color?p.text:p.border}" title="${p.label}" onclick="setPillColor(${i},'${p.id}')"></button>`).join('')}
+        </div>
+        <div class="pill-preview">${(item.flavors||[]).map(f=>`<span style="background:${pc.bg};border-color:${pc.border};color:${pc.text}">${esc(f)}</span>`).join('')}</div>
+      </div>
+      ${renderItemAddons(item,i)}
+    </div>
+    <div class="item-actions">
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteItem(${i})">Delete</button>
+      <label class="active-box"><input type="checkbox" ${item.active===false?'':'checked'} onchange="editItem(${i},'active',this.checked);renderEditor()">Active</label>
+    </div>
+  </div>`;
+}
+function renderItemAddons(item,i){
+  const addons=item.addons||[];
+  return `<div class="addons-editor">
+    <div class="addons-head"><div class="addons-title">Order Add-ons</div><button class="btn btn-soft btn-sm" onclick="addAddonEntry(${i})">Add</button></div>
+    ${addons.map((a,ai)=>`<div class="addon-entry">
+      <input class="addon-input" value="${esc(a.label||'')}" placeholder="Addon name" oninput="editAddonEntry(${i},${ai},'label',this.value)">
+      <input class="addon-input" value="${esc(a.price||'')}" placeholder="$0" oninput="editAddonEntry(${i},${ai},'price',this.value)">
+      <button class="icon-btn danger" onclick="removeAddonEntry(${i},${ai})">x</button>
+    </div>`).join('')||'<div class="panel-sub">No item add-ons.</div>'}
+  </div>`;
+}
+function editItem(i,field,value){const sec=getSec();if(!sec||!sec.items[i])return;sec.items[i][field]=value;markUnsaved();if(field==='name')renderCategoryList();}
+function editItemFlavors(i,value){const item=getSec().items[i];const arr=value.split(',').map(s=>s.trim()).filter(Boolean);if(arr.length)item.flavors=arr;else delete item.flavors;markUnsaved();}
+function setPillColor(i,color){const item=getSec().items[i];item.flavorColor=color;markUnsaved();renderEditor();}
+function addItem(){const sec=getSec();if(!sec.items)sec.items=[];sec.items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',active:true,addons:[]});markUnsaved();renderCategoryList();renderEditor();}
+function confirmDeleteItem(i){const item=getSec().items[i];openConfirm('Delete Item',`Delete "${item.name||'this item'}"?`,'Delete',()=>{getSec().items.splice(i,1);markUnsaved();renderCategoryList();renderEditor();});}
+function addAddonEntry(i){const item=getSec().items[i];if(!item.addons)item.addons=[];item.addons.push({label:'',price:'$0'});markUnsaved();renderEditor();}
+function editAddonEntry(i,ai,field,value){getSec().items[i].addons[ai][field]=value;markUnsaved();}
+function removeAddonEntry(i,ai){getSec().items[i].addons.splice(ai,1);markUnsaved();renderEditor();}
+function confirmDeleteSection(){const sec=getSec();openConfirm('Delete Category',`Delete "${sec.title||'this category'}" and everything inside?`,'Delete',()=>{menuData.splice(activeTab,1);activeTab=Math.max(0,activeTab-1);markUnsaved();renderCategoryList();renderEditor();});}
+
+function renderAddonGroups(sec){
+  const groups=sec.addonGroups||[];
+  return `<div class="items-stack">${groups.map((g,i)=>renderAddonGroup(g,i)).join('')||'<div class="empty-state">No add-on groups yet.</div>'}</div>
+  <div class="toggle-line"><button class="btn btn-add" onclick="addAddonGroup()">Add Add-on Group</button></div>`;
+}
+function renderAddonGroup(g,i){
+  return `<div class="addon-group-card">
+    <input class="emoji-input" maxlength="2" value="${esc(g.emoji||'')}" oninput="editAddonGroup(${i},'emoji',this.value)">
+    <div class="addon-fields">
+      <div class="field-row">
+        <div class="field"><label class="field-label">Label</label><input class="field-input" value="${esc(g.label||'')}" oninput="editAddonGroup(${i},'label',this.value)"></div>
+        <div class="field"><label class="field-label">Price</label><input class="field-input" value="${esc(g.price||'')}" oninput="editAddonGroup(${i},'price',this.value)"></div>
+      </div>
+      <div class="field"><label class="field-label">Note</label><input class="field-input" value="${esc(g.note||'')}" oninput="editAddonGroup(${i},'note',this.value)"></div>
+      <div class="field"><label class="field-label">Options</label><input class="field-input" value="${esc((g.options||[]).join(', '))}" oninput="editAddonGroupOptions(${i},this.value)"></div>
+    </div>
+    <button class="icon-btn danger" onclick="confirmDeleteAddonGroup(${i})">x</button>
+  </div>`;
+}
+function addAddonGroup(){const sec=getSec();if(!sec.addonGroups)sec.addonGroups=[];sec.addonGroups.push({emoji:'*',label:'New Add-on',price:'$0',note:'Description',options:['Option 1']});markUnsaved();renderCategoryList();renderEditor();}
+function editAddonGroup(i,field,value){getSec().addonGroups[i][field]=value;markUnsaved();}
+function editAddonGroupOptions(i,value){getSec().addonGroups[i].options=value.split(',').map(s=>s.trim()).filter(Boolean);markUnsaved();}
+function confirmDeleteAddonGroup(i){const g=getSec().addonGroups[i];openConfirm('Delete Add-on Group',`Remove "${g.label||'this group'}"?`,'Delete',()=>{getSec().addonGroups.splice(i,1);markUnsaved();renderCategoryList();renderEditor();});}
+
+function triggerUpload(i){document.getElementById('file-'+i).click();}
+async function handleImageUpload(i,input){
+  if(!input.files||!input.files[0])return;
+  const file=input.files[0],bar=document.getElementById('prog-'+i);
+  try{
+    const path=await uploadImage(file,p=>{if(bar)bar.style.width=p+'%';});
+    getSec().items[i].image=path;markUnsaved();renderEditor();showToast('Image uploaded','success');
+  }catch(e){showToast('Upload failed: '+e.message,'error');if(bar)bar.style.width='0';}
+}
 async function uploadImage(file,onProgress){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=async(e)=>{
-      const b64=e.target.result.split(',')[1];
-      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase();
-      const path=IMG_FOLDER+'/'+safe;
-      if(onProgress) onProgress(40);
+      const b64=e.target.result.split(',')[1],safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase(),path=IMG_FOLDER+'/'+safe;
+      if(onProgress)onProgress(40);
       try{
-        const res=await fetch(`${WORKER_URL}/image`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({path,b64,message:'Upload image: '+safe})
-        });
-        if(onProgress) onProgress(100);
-        if(!res.ok){const er=await res.json();reject(new Error(er.error));return;}
+        const res=await fetch(`${WORKER_URL}/image`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,b64,message:'Upload image: '+safe})});
+        if(onProgress)onProgress(100);
+        if(!res.ok){const er=await res.json().catch(()=>({}));reject(new Error(er.error||res.status));return;}
         resolve(path);
       }catch(err){reject(err);}
     };
@@ -866,281 +1119,141 @@ async function uploadImage(file,onProgress){
   });
 }
 
-// ── COLLECT ───────────────────────────────────────────────────────────
-function collectAll(){
-  const si=activeTab;const sec=menuData[si];if(!sec)return;
-  const titleEl=document.getElementById('sec-title-'+si);const keyEl=document.getElementById('sec-key-'+si);
-  if(titleEl)sec.title=titleEl.value;if(keyEl)sec.key=keyEl.value;
-  if(sec.type==='addons'){
-    sec.addonGroups=(sec.addonGroups||[]).map((grp,gi)=>({
-      ...grp,
-      emoji:v('ag-emoji-'+si+'-'+gi)||grp.emoji,
-      label:v('ag-label-'+si+'-'+gi),
-      price:v('ag-price-'+si+'-'+gi),
-      note:v('ag-note-'+si+'-'+gi),
-      options:(v('ag-opts-'+si+'-'+gi)||'').split(',').map(s=>s.trim()).filter(Boolean)
-    }));
-  }else{
-    if(sec.bottomBanner!==undefined)sec.bottomBanner=v('banner-'+si)||'';
-    sec.items=(sec.items||[]).map((item,ii)=>{
-      const activeEl=document.getElementById('i-active-'+si+'-'+ii);
-      const updated={...item,name:v('i-name-'+si+'-'+ii),price:v('i-price-'+si+'-'+ii),desc:v('i-desc-'+si+'-'+ii),active:activeEl?activeEl.checked:true};
-      const _pills=(v('i-flavors-'+si+'-'+ii)||'').split(',').map(s=>s.trim()).filter(Boolean);
-      if(_pills.length>0)updated.flavors=_pills;else delete updated.flavors;
-      if(item._pillColor)updated.flavorColor=item._pillColor;
-      const addons=[];
-      const addonCount=parseInt(document.getElementById('addon-count-'+si+'-'+ii)?.value||'0');
-      for(let ai=0;ai<addonCount;ai++){
-        const lbl=v('addon-lbl-'+si+'-'+ii+'-'+ai);const prc=v('addon-prc-'+si+'-'+ii+'-'+ai);
-        if(lbl.trim())addons.push({label:lbl.trim(),price:prc.trim()||'$0'});
-      }
-      if(addons.length>0)updated.addons=addons;else delete updated.addons;
-      return updated;
-    });
-  }
-}
-function v(id){const el=document.getElementById(id);return el?el.value:'';}
-
-// ── RENDER ────────────────────────────────────────────────────────────
-function renderAll(){renderTabs();renderEditor();markSaved();}
-let dragSrcIdx=null;
-function renderTabs(){
-  const bar=document.getElementById('tabs-bar');
-  bar.innerHTML=menuData.map((s,i)=>`<button class="tab${i===activeTab?' active':''}" draggable="true" data-idx="${i}" onclick="switchTab(${i})" ondragstart="tabDragStart(event,${i})" ondragover="tabDragOver(event,${i})" ondragleave="tabDragLeave(event)" ondrop="tabDrop(event,${i})" ondragend="tabDragEnd(event)">${s.title||'Untitled'}</button>`).join('')+
-    `<span class="tab-drag-hint">drag to reorder</span><button class="tab" onclick="addCategory()" style="color:var(--a500)">＋ Add</button>`;
-}
-function tabDragStart(e,idx){collectAll();dragSrcIdx=idx;e.dataTransfer.effectAllowed='move';e.currentTarget.classList.add('dragging');}
-function tabDragOver(e,idx){e.preventDefault();e.dataTransfer.dropEffect='move';if(idx!==dragSrcIdx)e.currentTarget.classList.add('drag-over');}
-function tabDragLeave(e){e.currentTarget.classList.remove('drag-over');}
-function tabDrop(e,toIdx){
-  e.preventDefault();e.currentTarget.classList.remove('drag-over');
-  if(dragSrcIdx===null||dragSrcIdx===toIdx)return;
-  const moved=menuData.splice(dragSrcIdx,1)[0];menuData.splice(toIdx,0,moved);
-  if(activeTab===dragSrcIdx)activeTab=toIdx;
-  else if(dragSrcIdx<activeTab&&toIdx>=activeTab)activeTab--;
-  else if(dragSrcIdx>activeTab&&toIdx<=activeTab)activeTab++;
-  markUnsaved();renderAll();
-}
-function tabDragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('drag-over'));dragSrcIdx=null;}
-function switchTab(i){collectAll();activeTab=i;renderAll();document.getElementById('editor-root').scrollIntoView({behavior:'smooth',block:'start'});}
-function renderEditor(){
-  const root=document.getElementById('editor-root');
-  if(!menuData.length){root.innerHTML='<div style="text-align:center;padding:40px;color:var(--g400);font-size:14px">No categories yet. Add one below.</div>';return;}
-  const sec=menuData[activeTab];if(!sec){root.innerHTML='';return;}
-  root.innerHTML=renderSection(sec,activeTab);
-}
-function renderSection(sec,si){
-  const isAddon=sec.type==='addons';const hasBanner=sec.bottomBanner!==undefined;
-  let body='';
-  if(isAddon){
-    body=(sec.addonGroups||[]).map((grp,gi)=>renderAddon(grp,si,gi)).join('');
-    body+=`<div class="add-item-footer"><button class="btn btn-add btn-sm" onclick="addAddonGroup(${si})">＋ Add Add-on Group</button></div>`;
-  }else{
-    body=(sec.items||[]).map((item,ii)=>renderItem(item,si,ii)).join('');
-    body+=`<div class="add-item-footer"><button class="btn btn-add btn-sm" onclick="addItem(${si})">＋ Add Item</button></div>`;
-    if(hasBanner)body+=`<div class="banner-field"><div class="field-label">🔖 Bottom Banner</div><input class="field-input" type="text" id="banner-${si}" value="${esc(sec.bottomBanner)}" oninput="markUnsaved()"></div>`;
-  }
-  const featBar=isAddon?'':`<div class="type-toggle"><span class="type-toggle-label">Features:</span><div class="features-wrap"><button class="feat-btn${hasBanner?' active':''}" onclick="toggleFeature(${si},'banner')">📢 Banner</button></div></div>`;
-  const typeToggle=`<div class="type-toggle"><span class="type-toggle-label">Type:</span><button class="type-btn${!isAddon?' active':''}" onclick="setSectionType(${si},'regular')">Regular Items</button><button class="type-btn${isAddon?' active':''}" onclick="setSectionType(${si},'addons')">Add-ons</button></div>`;
-  return `<div class="section-block"><div class="section-header"><div class="section-header-left"><input class="section-title-input" type="text" id="sec-title-${si}" value="${esc(sec.title)}" placeholder="Category name" oninput="markUnsaved();updateTab(${si},this.value)"><span class="section-type-badge">${isAddon?'add-ons':'items'}</span></div><div class="section-meta"><span class="section-count">${isAddon?(sec.addonGroups||[]).length+' groups':(sec.items||[]).length+' items'}</span><button class="btn-del-section" onclick="confirmDeleteSection(${si})">🗑 Delete</button></div></div><div class="section-key-wrap" style="padding-bottom:8px"><span class="section-key-label">URL key:</span><input class="section-key-input" type="text" id="sec-key-${si}" value="${esc(sec.key)}" placeholder="section-key" oninput="markUnsaved()"></div>${typeToggle}${featBar}${body}</div>`;
-}
-
-function renderItem(item,si,ii){
-  const imgSrc=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
-  const dropZone=`<div class="img-drop-zone${item.image?' has-img':''}" id="drop-${si}-${ii}" onclick="triggerUpload(${si},${ii})">
-    ${item.image?`<img src="${imgSrc}" alt="" id="drop-img-${si}-${ii}" onerror="this.src=''"><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div>`:`<span class="img-drop-icon">📷</span><span class="img-drop-text">Click to upload</span>`}
-    <div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>
-  </div>
-  <input type="file" class="img-upload-input" id="file-${si}-${ii}" accept="image/*" onchange="handleImageUpload(${si},${ii},this)">
-  <div class="img-path" id="img-path-${si}-${ii}">${item.image||''}</div>`;
-  const _pillColor=item.flavorColor||'amber';const _pc=PILL_PRESETS.find(p=>p.id===_pillColor)||PILL_PRESETS[0];
-  const flavorsField=`<div style="margin-top:4px">
-    <div class="field-label">🏷 Pills / Options <span style="font-weight:400;opacity:.7;text-transform:none">(comma-separated)</span></div>
-    <input class="field-input" type="text" id="i-flavors-${si}-${ii}" value="${esc((item.flavors||[]).join(', '))}" placeholder="Double Apple, Lemon & Mint" oninput="markUnsaved();updatePillsPreview(${si},${ii},this)">
-    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--a700)">Pill Color:</span>
-      ${PILL_PRESETS.map(p=>`<button type="button" id="pill-color-btn-${si}-${ii}-${p.id}" onclick="setPillColor(${si},${ii},'${p.id}')" title="${p.label}" style="width:22px;height:22px;border-radius:50%;background:${p.bg};border:2px solid ${p.id===_pillColor?p.text:p.border};cursor:pointer;transition:transform .15s;transform:${p.id===_pillColor?'scale(1.3)':'scale(1)'};flex-shrink:0"></button>`).join('')}
-      <span style="font-size:10px;color:var(--g400);font-style:italic">${_pc.label}</span>
-    </div>
-    <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px" id="pills-preview-${si}-${ii}">
-      ${(item.flavors||[]).map(f=>`<span style="background:${_pc.bg};border:1px solid ${_pc.border};color:${_pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('')}
-    </div>
-  </div>`;
-  const existingAddons=item.addons||[];
-  const addonRows=existingAddons.map((a,ai)=>`
-    <div class="addon-entry" id="addon-entry-${si}-${ii}-${ai}">
-      <input class="addon-label-inp" type="text" id="addon-lbl-${si}-${ii}-${ai}" value="${esc(a.label)}" placeholder="Addon name" oninput="markUnsaved()">
-      <input class="addon-price-inp" type="text" id="addon-prc-${si}-${ii}-${ai}" value="${esc(a.price)}" placeholder="$0" oninput="markUnsaved()">
-      <button class="addon-del-btn" onclick="removeAddonEntry(${si},${ii},${ai})">✕</button>
-    </div>`).join('');
-  const addonsEditor=`
-    <div class="addons-editor">
-      <div class="addons-editor-title">
-        <span>➕ Order Add-ons</span>
-        <button class="btn-add-addon" onclick="addAddonEntry(${si},${ii})">＋ Add</button>
-      </div>
-      <div id="addon-entries-${si}-${ii}">${addonRows}</div>
-      <input type="hidden" id="addon-count-${si}-${ii}" value="${existingAddons.length}">
-    </div>`;
-  return `<div class="item-card" id="item-card-${si}-${ii}">
-    <div>${dropZone}</div>
-    <div class="item-fields">
-      <div class="field-row">
-        <div><div class="field-label">Name</div><input class="field-input" type="text" id="i-name-${si}-${ii}" value="${esc(item.name)}" oninput="markUnsaved()"></div>
-        <div><div class="field-label">Price</div><input class="field-input" type="text" id="i-price-${si}-${ii}" value="${esc(item.price)}" oninput="markUnsaved()"></div>
-      </div>
-      <div><div class="field-label">Description</div><textarea class="field-input" id="i-desc-${si}-${ii}" oninput="markUnsaved()">${esc(item.desc)}</textarea></div>
-      ${flavorsField}
-      ${addonsEditor}
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
-      <button class="btn btn-danger" onclick="confirmDeleteItem(${si},${ii})" title="Delete item">🗑</button>
-      <label style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
-        <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)">Active</span>
-        <input type="checkbox" id="i-active-${si}-${ii}" ${item.active===false?'':'checked'} onchange="markUnsaved()" style="width:18px;height:18px;cursor:pointer;accent-color:var(--a500)">
-      </label>
-    </div>
-  </div>`;
-}
-
-// ── ADDON ENTRY MANAGEMENT ────────────────────────────────────────────
-function addAddonEntry(si,ii){
-  collectAll();
-  if(!menuData[si].items[ii].addons)menuData[si].items[ii].addons=[];
-  menuData[si].items[ii].addons.push({label:'',price:'$0'});
-  markUnsaved();renderAll();
-  const ai=menuData[si].items[ii].addons.length-1;
-  setTimeout(()=>{const el=document.getElementById(`addon-lbl-${si}-${ii}-${ai}`);if(el)el.focus();},50);
-}
-function removeAddonEntry(si,ii,ai){
-  collectAll();
-  if(menuData[si].items[ii].addons)menuData[si].items[ii].addons.splice(ai,1);
-  markUnsaved();renderAll();
-}
-
-function renderAddon(grp,si,gi){
-  return `<div class="addon-card" id="addon-card-${si}-${gi}">
-    <div><input class="addon-emoji-input" type="text" id="ag-emoji-${si}-${gi}" value="${esc(grp.emoji||'🔸')}" maxlength="2" oninput="markUnsaved()" title="Emoji"></div>
-    <div class="addon-fields">
-      <div class="addon-row">
-        <div><div class="field-label">Label</div><input class="field-input" type="text" id="ag-label-${si}-${gi}" value="${esc(grp.label)}" oninput="markUnsaved()"></div>
-        <div><div class="field-label">Price</div><input class="field-input" type="text" id="ag-price-${si}-${gi}" value="${esc(grp.price)}" oninput="markUnsaved()"></div>
-      </div>
-      <div><div class="field-label">Note</div><input class="field-input" type="text" id="ag-note-${si}-${gi}" value="${esc(grp.note)}" oninput="markUnsaved()"></div>
-      <div><div class="field-label">Options <span style="font-weight:400;opacity:.7">(comma-separated)</span></div><input class="field-input" type="text" id="ag-opts-${si}-${gi}" value="${esc((grp.options||[]).join(', '))}" oninput="markUnsaved()"></div>
-    </div>
-    <button class="btn btn-danger" onclick="confirmDeleteAddon(${si},${gi})" title="Delete group">🗑</button>
-  </div>`;
-}
-
-// ── ITEM / SECTION ACTIONS ────────────────────────────────────────────
-function addItem(si){collectAll();menuData[si].items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',active:true,addons:[]});markUnsaved();renderAll();}
-function addAddonGroup(si){collectAll();if(!menuData[si].addonGroups)menuData[si].addonGroups=[];menuData[si].addonGroups.push({emoji:'🔸',label:'New Add-on',price:'$0',note:'Description',options:['Option 1']});markUnsaved();renderAll();}
-function addCategory(){collectAll();const key='category-'+(Date.now()%100000);menuData.push({key,title:'New Category',items:[]});activeTab=menuData.length-1;markUnsaved();renderAll();}
-function setSectionType(si,type){collectAll();const sec=menuData[si];if(type==='addons'){sec.type='addons';if(!sec.addonGroups)sec.addonGroups=[];delete sec.items;delete sec.bottomBanner;delete sec._hasFlav;}else{delete sec.type;if(!sec.items)sec.items=[];delete sec.addonGroups;}markUnsaved();renderAll();}
-function toggleFeature(si,feat){collectAll();const sec=menuData[si];if(feat==='banner'){if(sec.bottomBanner!==undefined)delete sec.bottomBanner;else sec.bottomBanner='';}markUnsaved();renderAll();}
-function updateTab(si,val){const tabs=document.getElementById('tabs-bar').querySelectorAll('.tab');if(tabs[si])tabs[si].textContent=val||'Untitled';}
-
-// ── IMAGE UPLOAD ──────────────────────────────────────────────────────
-function triggerUpload(si,ii){document.getElementById('file-'+si+'-'+ii).click();}
-async function handleImageUpload(si,ii,input){
-  if(!input.files||!input.files[0])return;
-  const file=input.files[0];
-  const progBar=document.getElementById('prog-'+si+'-'+ii);
-  const dropZone=document.getElementById('drop-'+si+'-'+ii);
+async function openBlockList(){
+  showLoading('Loading block list...');
   try{
-    const path=await uploadImage(file,(pct)=>{if(progBar)progBar.style.width=pct+'%';});
-    collectAll();menuData[si].items[ii].image=path;markUnsaved();
-    const rawUrl=`${STORAGE_PUBLIC_BASE}/${path}?v=${Date.now()}`;
-    dropZone.classList.add('has-img');
-    dropZone.innerHTML=`<img src="${rawUrl}" alt=""><div class="img-drop-overlay"><span class="img-drop-text-overlay">📷 Change</span></div><div class="img-progress" id="prog-${si}-${ii}" style="width:0"></div>`;
-    const pathEl=document.getElementById('img-path-'+si+'-'+ii);
-    if(pathEl)pathEl.textContent=path;
-    showToast('Image uploaded ✓','success');
-  }catch(e){
-    showToast('Upload failed: '+e.message,'error');
-    if(progBar)progBar.style.width='0';
-  }
+    const res=await fetch(`${WORKER_URL}/supabase/blocklist`,{cache:'no-store'});
+    blockList=res.ok?(await res.json()).data||[]:[];
+    blockList=blockList.map(b=>({phone:b.phone||'',reason:b.reason||'',blockedAt:b.blocked_at||b.blockedAt||new Date().toISOString()}));
+    blockDirty=false;renderBlockList();
+  }catch(_){blockList=[];renderBlockList();}
+  hideLoading();
+}
+function renderBlockList(){
+  const el=document.getElementById('bl-list');
+  if(!blockList.length){el.innerHTML='<div class="empty-state">No blocked numbers.</div>';return;}
+  el.innerHTML=blockList.map((b,i)=>`<div class="block-card"><div class="block-info"><div class="block-phone">${esc(b.phone)}</div><div class="block-meta">${esc(b.reason||'No reason')} · ${new Date(b.blockedAt).toLocaleDateString()}</div></div><button class="btn btn-danger btn-sm" onclick="removeBlockEntry(${i})">Unblock</button></div>`).join('');
+}
+function addBlockEntry(){
+  const raw=document.getElementById('bl-phone').value.trim(),reason=document.getElementById('bl-reason').value.trim(),d=raw.replace(/\D/g,'');
+  let phone=null;if(d.length===8)phone=d;else if(d.length===11&&d.startsWith('961'))phone=d.slice(3);
+  if(!phone){showToast('Invalid phone','error');return;}
+  if(blockList.some(b=>b.phone===phone)){showToast('Already blocked','error');return;}
+  blockList.unshift({phone,reason,blockedAt:new Date().toISOString()});blockDirty=true;
+  document.getElementById('bl-phone').value='';document.getElementById('bl-reason').value='';renderBlockList();
+}
+function removeBlockEntry(i){blockList.splice(i,1);blockDirty=true;renderBlockList();}
+async function saveBlockList(){
+  showLoading('Saving block list...');
+  try{
+    const res=await fetch(`${WORKER_URL}/supabase/blocklist`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:blockList})});
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
+    blockDirty=false;showToast('Block list saved','success');
+  }catch(e){showToast('Save failed: '+e.message,'error');}
+  hideLoading();
 }
 
-// ── DELETE MODALS ─────────────────────────────────────────────────────
-let pendingDelete=null;
-function confirmDeleteItem(si,ii){collectAll();pendingDelete={type:'item',si,ii};openModal('Delete Item','Delete "'+menuData[si].items[ii].name+'"? This cannot be undone.');}
-function confirmDeleteAddon(si,gi){collectAll();pendingDelete={type:'addon',si,gi};openModal('Delete Add-on Group','Remove "'+menuData[si].addonGroups[gi].label+'"? This cannot be undone.');}
-function confirmDeleteSection(si){collectAll();pendingDelete={type:'section',si};openModal('Delete Category','Delete the "'+menuData[si].title+'" category and all its items? This cannot be undone.');}
-function executeDelete(){
-  if(!pendingDelete)return;
-  const{type,si,ii,gi}=pendingDelete;
-  if(type==='item')menuData[si].items.splice(ii,1);
-  else if(type==='addon')menuData[si].addonGroups.splice(gi,1);
-  else if(type==='section'){menuData.splice(si,1);if(activeTab>=menuData.length)activeTab=Math.max(0,menuData.length-1);}
-  pendingDelete=null;closeModal();markUnsaved();renderAll();
+async function openCustomersAdmin(){
+  showLoading('Loading customers...');
+  try{
+    const res=await fetch(`${WORKER_URL}/supabase/customers`,{cache:'no-store'});
+    if(res.ok){
+      const j=await res.json();
+      customersAdminData=(j.data||[]).map(c=>({
+        phone:c.phone||'',name:c.name||'',note:c.note||'',firstSeen:c.first_seen||'',lastSeen:c.last_seen||'',
+        totalOrders:c.total_orders||0,totalSpent:c.total_spent||0,orderIds:c.order_ids||[],itemFreq:c.item_freq||{},favoriteItems:c.favorite_items||[],
+        loyaltyStamps:c.loyalty_stamps||0,loyaltyRewardReady:!!c.loyalty_reward_ready,loyaltyLastReward:c.loyalty_last_reward||null,
+        loyaltyRewardRedeemedAt:c.loyalty_reward_redeemed_at||null,loyaltyLifetimeRedemptions:c.loyalty_lifetime_redemptions||0
+      }));
+    }else customersAdminData=[];
+    customersAdminDirty=false;renderCustomersAdmin();renderLoyaltyHub();renderDashboard();
+  }catch(_){customersAdminData=[];renderCustomersAdmin();renderLoyaltyHub();renderDashboard();}
+  hideLoading();
 }
-function openModal(title,body){
-  document.getElementById('modal-title').textContent=title;
-  document.getElementById('modal-body').textContent=body;
-  document.getElementById('modal-confirm-btn').onclick=executeDelete;
-  document.getElementById('modal-overlay').classList.add('show');
+function normalizeCustomerPhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d;}
+function renderCustomersAdmin(){
+  const el=document.getElementById('customers-admin-list');if(!el)return;
+  const q=(document.getElementById('cust-admin-search')?.value||'').toLowerCase();
+  const rows=customersAdminData.map((c,i)=>({c,i})).filter(({c})=>!q||String(c.name||'').toLowerCase().includes(q)||String(c.phone||'').includes(q));
+  if(!rows.length){el.innerHTML='<div class="empty-state">No customers found.</div>';return;}
+  el.innerHTML=rows.map(({c,i})=>`<div class="customer-card">
+    <div class="customer-grid">
+      <div class="field"><label class="field-label">Name</label><input class="field-input" value="${esc(c.name||'')}" oninput="editCustomerField(${i},'name',this.value)"></div>
+      <div class="field"><label class="field-label">Phone</label><input class="field-input" value="${esc(c.phone||'')}" oninput="editCustomerField(${i},'phone',this.value)"></div>
+      <div class="field"><label class="field-label">Visits</label><input class="field-input" type="number" min="0" value="${Number(c.totalOrders||0)}" oninput="editCustomerField(${i},'totalOrders',this.value)"></div>
+      <div class="field"><label class="field-label">Spent</label><input class="field-input" type="number" min="0" step="0.01" value="${Number(c.totalSpent||0)}" oninput="editCustomerField(${i},'totalSpent',this.value)"></div>
+      <div class="field"><label class="field-label">Stamps</label><input class="field-input" type="number" min="0" value="${Number(c.loyaltyStamps||0)}" oninput="editCustomerField(${i},'loyaltyStamps',this.value)"></div>
+      <label class="reward-toggle"><input type="checkbox" ${c.loyaltyRewardReady?'checked':''} onchange="editCustomerField(${i},'loyaltyRewardReady',this.checked)">Reward</label>
+      <button class="btn btn-danger btn-sm" onclick="deleteCustomerAdmin(${i})">Delete</button>
+    </div>
+    <div class="note-row"><label class="field-label">Note</label><textarea class="field-input" rows="2" oninput="editCustomerField(${i},'note',this.value)">${esc(c.note||'')}</textarea></div>
+    <div class="customer-meta">First seen: ${c.firstSeen?new Date(c.firstSeen).toLocaleDateString():'-'} · Last seen: ${c.lastSeen?new Date(c.lastSeen).toLocaleDateString():'-'}${c.favoriteItems?.length?` · Usually: ${esc(c.favoriteItems.join(', '))}`:''} · Redemptions: ${Number(c.loyaltyLifetimeRedemptions||0)}</div>
+  </div>`).join('');
 }
-function closeModal(){document.getElementById('modal-overlay').classList.remove('show');pendingDelete=null;}
-document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function editCustomerField(i,field,value){
+  const c=customersAdminData[i];if(!c)return;
+  if(field==='phone')c.phone=normalizeCustomerPhone(value);
+  else if(['totalOrders','loyaltyStamps','loyaltyLifetimeRedemptions'].includes(field))c[field]=Math.max(0,parseInt(value||'0',10)||0);
+  else if(field==='totalSpent')c.totalSpent=Math.max(0,parseFloat(value||'0')||0);
+  else if(field==='loyaltyRewardReady')c.loyaltyRewardReady=!!value;
+  else c[field]=value;
+  customersAdminDirty=true;
+  renderLoyaltyHub();
+  renderDashboard();
+}
+function addCustomerAdmin(){
+  customersAdminData.unshift({phone:'',name:'New Customer',note:'',firstSeen:new Date().toISOString(),lastSeen:new Date().toISOString(),totalOrders:0,totalSpent:0,orderIds:[],itemFreq:{},favoriteItems:[],loyaltyStamps:0,loyaltyRewardReady:false,loyaltyLastReward:null,loyaltyRewardRedeemedAt:null,loyaltyLifetimeRedemptions:0});
+  customersAdminDirty=true;renderCustomersAdmin();renderLoyaltyHub();renderDashboard();
+}
+function deleteCustomerAdmin(i){const c=customersAdminData[i];openConfirm('Delete Customer',`Delete "${c.name||c.phone||'this customer'}"?`,'Delete',()=>{customersAdminData.splice(i,1);customersAdminDirty=true;renderCustomersAdmin();renderLoyaltyHub();renderDashboard();});}
+async function saveCustomersAdmin(){
+  showLoading('Saving customers...');
+  try{
+    const seen=new Set(),clean=[];
+    for(const c of customersAdminData){
+      const phone=normalizeCustomerPhone(c.phone);if(!phone||seen.has(phone))continue;seen.add(phone);
+      clean.push({...c,phone,name:String(c.name||'').trim(),note:String(c.note||'').trim(),totalOrders:Math.max(0,Number(c.totalOrders||0)),totalSpent:Math.max(0,Number(c.totalSpent||0)),loyaltyStamps:Math.max(0,Number(c.loyaltyStamps||0)),loyaltyRewardReady:!!c.loyaltyRewardReady,loyaltyLastReward:c.loyaltyLastReward||null,loyaltyRewardRedeemedAt:c.loyaltyRewardRedeemedAt||null,loyaltyLifetimeRedemptions:Math.max(0,Number(c.loyaltyLifetimeRedemptions||0))});
+    }
+    const res=await fetch(`${WORKER_URL}/supabase/customers`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:clean})});
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
+    customersAdminData=clean;customersAdminDirty=false;showToast('Customers saved','success');renderCustomersAdmin();renderLoyaltyHub();renderDashboard();
+  }catch(e){showToast('Save failed: '+e.message,'error');}
+  hideLoading();
+}
 
-// ── UNSAVED STATE ─────────────────────────────────────────────────────
-function markUnsaved(){hasUnsaved=true;document.getElementById('unsaved-indicator').style.display='inline';}
-function markSaved(){hasUnsaved=false;document.getElementById('unsaved-indicator').style.display='none';}
-window.addEventListener('beforeunload',e=>{if(hasUnsaved){e.preventDefault();e.returnValue='';}});
-
-// ── PREVIEW ───────────────────────────────────────────────────────────
-function togglePreview(){collectAll();const panel=document.getElementById('preview-panel');const open=panel.classList.toggle('open');if(open)renderPreview();}
+function renderSettings(){renderStatus();}
+function togglePreview(){renderPreview();document.getElementById('preview-panel').classList.toggle('open');}
 function renderPreview(){
-  const body=document.getElementById('preview-body');let html='';
+  const body=document.getElementById('preview-body');if(!body)return;
+  let html='';
   menuData.forEach(sec=>{
     if(sec.type==='addons')return;
-    html+=`<div style="margin-bottom:20px"><div style="font-family:var(--brand);font-size:16px;font-weight:700;color:var(--a900);border-bottom:3px solid var(--a400);padding-bottom:4px;margin-bottom:10px">${sec.title}</div>`;
+    html+=`<div class="preview-section-title">${esc(sec.title||'Untitled')}</div>`;
     (sec.items||[]).forEach(item=>{
       if(item.active===false)return;
       const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
-      html+=`<div class="preview-item">${img?`<img src="${img}" alt="${esc(item.name)}" onerror="this.style.background='var(--a100)'">`:`<div style="width:52px;height:52px;border-radius:8px;background:var(--a100);flex-shrink:0"></div>`}<div class="preview-item-info"><div class="preview-item-name">${esc(item.name)}</div><div class="preview-item-desc">${esc(item.desc)}</div></div><div class="preview-item-price">${esc(item.price)}</div></div>`;
+      html+=`<div class="preview-item">${img?`<img src="${img}" alt="${esc(item.name||'')}">`:`<div style="width:54px;height:54px;border-radius:8px;background:var(--soft)"></div>`}<div><div class="preview-name">${esc(item.name||'')}</div><div class="preview-desc">${esc(item.desc||'')}</div></div><div class="preview-price">${esc(item.price||'')}</div></div>`;
     });
-    html+='</div>';
   });
-  body.innerHTML=html||'<div style="color:var(--g400);text-align:center;padding:40px;font-size:13px">No regular item categories to preview.</div>';
+  body.innerHTML=html||'<div class="empty-state">No active items to preview.</div>';
 }
 
-// ── PILLS ─────────────────────────────────────────────────────────────
-function updatePillsPreview(si,ii,inputEl){
-  const preview=document.getElementById('pills-preview-'+si+'-'+ii);if(!preview)return;
-  const item=menuData[si]&&menuData[si].items&&menuData[si].items[ii];
-  const colorId=(item&&item._pillColor)||'amber';
-  const pc=PILL_PRESETS.find(p=>p.id===colorId)||PILL_PRESETS[0];
-  const pills=inputEl.value.split(',').map(s=>s.trim()).filter(Boolean);
-  preview.innerHTML=pills.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${esc(f)}</span>`).join('');
+function openConfirm(title,body,confirmText,onOk){
+  pendingDelete=onOk;
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  document.getElementById('modal-confirm-btn').textContent=confirmText;
+  document.getElementById('modal-confirm-btn').onclick=()=>{const fn=pendingDelete;closeModal();if(fn)fn();};
+  document.getElementById('modal-overlay').classList.add('show');
 }
-function setPillColor(si,ii,colorId){
-  if(!menuData[si]||!menuData[si].items||!menuData[si].items[ii])return;
-  menuData[si].items[ii]._pillColor=colorId;menuData[si].items[ii].flavorColor=colorId;markUnsaved();
-  PILL_PRESETS.forEach(p=>{
-    const btn=document.getElementById('pill-color-btn-'+si+'-'+ii+'-'+p.id);if(!btn)return;
-    btn.style.borderColor=p.id===colorId?p.text:p.border;
-    btn.style.transform=p.id===colorId?'scale(1.3)':'scale(1)';
-  });
-  const inputEl=document.getElementById('i-flavors-'+si+'-'+ii);
-  if(inputEl)updatePillsPreview(si,ii,inputEl);
-}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');pendingDelete=null;}
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
-// ── UTILS ─────────────────────────────────────────────────────────────
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-let toastTimer;
-function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3500);}
-function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading…';document.getElementById('loading-overlay').classList.add('show');}
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3300);}
+function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading...';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
-
-// ── DEV HELPER ────────────────────────────────────────────────────────
-window.getNewHash=async function(pw){
-  const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
-  const h=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
-  console.log('%cSHA-256 hash:','color:orange;font-weight:bold');console.log(h);return h;
-};
+window.getNewHash=async function(pw){const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));const h=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');console.log(h);return h;};
 </script>
 </body>
 </html>
