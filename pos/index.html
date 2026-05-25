@@ -584,6 +584,8 @@ let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0,inboxWritePending=false;
 let loadedInboxOrderId=null;
 let selectedRewardType = null;
+let loyaltyEnabled = true;
+
 
 // ── Customer profile state ──
 let customersData = [];   // full array loaded from customers.json
@@ -682,6 +684,7 @@ function getRewardDiscount(subtotal, type){
 }
 
 function getCurrentRewardDiscount(){
+  if(!loyaltyEnabled) return 0;
   if(!currentCustomerProfile?.loyaltyRewardReady || !selectedRewardType) return 0;
   return getRewardDiscount(getItemsTotal(), selectedRewardType);
 }
@@ -719,6 +722,13 @@ async function bootPOS(){
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
   await loadCustomers();  // load full customer list on boot
+  try{
+  const cfgRes = await fetch(`${WORKER_URL}/supabase/config`, { cache:'no-store' });
+  if(cfgRes.ok){
+    const j = await cfgRes.json();
+    loyaltyEnabled = !!(j.data && j.data.loyaltyEnabled);
+  }
+}catch(_){}
   hideLoading();
   inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
@@ -1144,7 +1154,7 @@ const spent  = profile.totalSpent || 0;
 const faves  = (profile.favoriteItems || []).slice(0,2).join(', ');
 const note   = profile.note || '';
 const stamps = Number(profile.loyaltyStamps || 0);
-const rewardReady = !!profile.loyaltyRewardReady;
+const rewardReady = loyaltyEnabled && !!profile.loyaltyRewardReady;
 
     // Milestone message
     let tagline = `${visits} visit${visits!==1?'s':''} · $${spent.toFixed(2)} total`;
@@ -1172,7 +1182,7 @@ const rewardReady = !!profile.loyaltyRewardReady;
         <div class="cpc-stat"><div class="cpc-stat-val">$${spent.toFixed(0)}</div><div class="cpc-stat-key">Spent</div></div>
         <div class="cpc-stat"><div class="cpc-stat-val">${profile.firstSeen ? new Date(profile.firstSeen).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}) : '—'}</div><div class="cpc-stat-key">Since</div></div>
       </div>
-      <div class="cpc-fave">🎟 Loyalty: <strong>${stamps} / ${LOYALTY_TARGET}</strong>${rewardReady ? ' · Reward Ready 🎉' : ''}</div>
+      ${loyaltyEnabled ? `<div class="cpc-fave">🎟 Loyalty: <strong>${stamps} / ${LOYALTY_TARGET}</strong>${rewardReady ? ' · Reward Ready 🎉' : ''}</div>` : ''}
 ${faves ? `<div class="cpc-fave">🍽️ Usually orders: <strong>${faves}</strong></div>` : ''}
 ${note ? `<div class="cpc-fave">📝 Note: <strong>${note}</strong></div>` : ''}
 ${rewardReady ? `
@@ -1253,6 +1263,7 @@ try{
   return existing;
 }
 async function applyLoyaltyCompletion(order){
+  if(!loyaltyEnabled) return;
   if(!order || !order.phone || order.phone === '00000000') return;
   if(order.loyaltyProcessed) return;
 
