@@ -488,7 +488,7 @@ input,textarea,select{font-family:var(--font);outline:none}
           <!-- Phone first so lookup fires before name -->
           <label class="form-label">Phone Number *</label>
           <div class="phone-lookup-wrap">
-            <input id="cust-phone" type="tel" class="form-input" placeholder="00000000" value="00000000"
+            <input id="cust-phone" type="tel" class="form-input" placeholder="00000000"
               maxlength="11" autocomplete="off" inputmode="numeric"
               oninput="onPhoneInput(this.value)"
               style="padding-right:32px;margin-bottom:0">
@@ -680,7 +680,6 @@ async function bootPOS(){
   try{await loadMenu();renderCatSidebar();renderMenuPanel();}
   catch(e){showToast('Menu load failed: '+e.message,'error');}
   renderOrderPanel();
-  ensureDefaultWalkInPhone();
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
   await loadCustomers();  // load full customer list on boot
@@ -868,7 +867,7 @@ function clearOrder(){
   const prev=[...orderLines];
   orderLines=[];orderType=null;deliveryZone=null;
   document.getElementById('cust-name').value='';
-  document.getElementById('cust-phone').value='00000000';
+  document.getElementById('cust-phone').value='';
   document.getElementById('order-note').value='';
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
   document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
@@ -1270,11 +1269,6 @@ function buildOrderObj(status='pending'){
     subtotal:getItemsTotal(),
     total
   };
-}
-  function ensureDefaultWalkInPhone(){
-  const el = document.getElementById('cust-phone');
-  if(el && !el.value) el.value = '00000000';
-}
 
 // ═══════════════════════════════════════════════════
 // LOAD INBOX ORDER → CURRENT ORDER
