@@ -1010,17 +1010,22 @@ async function loadCustomers(){
 
     const j = await res.json();
     customersData = (j.data || []).map(c => ({
-      phone: c.phone || '',
-      name: c.name || '',
-      note: c.note || '',
-      firstSeen: c.first_seen || '',
-      lastSeen: c.last_seen || '',
-      totalOrders: c.total_orders || 0,
-      totalSpent: Number(c.total_spent || 0),
-      orderIds: c.order_ids || [],
-      itemFreq: c.item_freq || {},
-      favoriteItems: c.favorite_items || []
-    }));
+  phone: c.phone || '',
+  name: c.name || '',
+  note: c.note || '',
+  firstSeen: c.first_seen || '',
+  lastSeen: c.last_seen || '',
+  totalOrders: c.total_orders || 0,
+  totalSpent: Number(c.total_spent || 0),
+  orderIds: c.order_ids || [],
+  itemFreq: c.item_freq || {},
+  favoriteItems: c.favorite_items || [],
+  loyaltyStamps: c.loyalty_stamps || 0,
+  loyaltyRewardReady: !!c.loyalty_reward_ready,
+  loyaltyLastReward: c.loyalty_last_reward || null,
+  loyaltyRewardRedeemedAt: c.loyalty_reward_redeemed_at || null,
+  loyaltyLifetimeRedemptions: c.loyalty_lifetime_redemptions || 0
+}));
 
     customersSha = null;
   }catch(_){
