@@ -694,10 +694,26 @@ async function retryLoad(){
 
 // ── WORKER API ────────────────────────────────────────────────────────
 async function fetchMenu(){
-  const res=await fetch(`${WORKER_URL}/gh?file=menu.json`);
-  if(!res.ok) throw new Error('Worker error '+res.status);
-  const {data,sha}=await res.json();
-  fileSha=sha; menuData=data;
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/menu`, { cache:'no-store' });
+    if(!res.ok) throw new Error('Supabase menu failed');
+
+    const j = await res.json();
+    menuData = Array.isArray(j.data) ? j.data : [];
+
+    if(!menuData.length) throw new Error('Empty Supabase menu');
+
+    fileSha = null;
+  }catch(e){
+    console.warn('Using menu.json fallback:', e);
+
+    const res=await fetch(`${WORKER_URL}/gh?file=menu.json`);
+    if(!res.ok) throw new Error('Worker error '+res.status);
+
+    const {data,sha}=await res.json();
+    fileSha=sha;
+    menuData=data;
+  }
 }
 async function setTestingMode(enabled){
   showLoading(enabled?'Enabling test mode…':'Disabling test mode…');
