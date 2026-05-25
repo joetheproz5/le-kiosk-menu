@@ -1267,17 +1267,28 @@ async function updateOrderStatus(id,status){
 async function pollInbox(force=false){
   if(inboxWritePending&&!force) return;
   try{
-    const{data,sha}=await ghRead(INBOX_PATH);
-    inboxData=data||[];
-    if(!inboxWritePending) inboxSha=sha;
+    const res = await fetch(`${WORKER_URL}/supabase/orders?status=inbox`, { cache:'no-store' });
+    if(!res.ok) throw new Error('Inbox read '+res.status);
+
+    const j = await res.json();
+    inboxData = (j.data || []).map(row => ({
+      ...(row.payload || {}),
+      id: row.id,
+      status: 'pending',
+      _supabaseRow: row
+    }));
+
     const pending=inboxData.filter(o=>o.status==='pending');
     const newCount=pending.length;
     updateInboxBadge(newCount);
+
     if(showingInbox) renderInboxList();
+
     if(newCount>lastInboxCount&&!showingInbox){
       document.getElementById('inbox-tab-btn').classList.add('has-new');
       showToast(`📥 ${newCount-lastInboxCount} new order${newCount-lastInboxCount>1?'s':''} incoming!`,'success');
     }
+
     if(newCount===0) document.getElementById('inbox-tab-btn').classList.remove('has-new');
     lastInboxCount=newCount;
   }catch(_){}
@@ -1288,15 +1299,23 @@ function updateInboxBadge(count){
 }
 
 async function confirmInboxOrder(id){
-  const order=inboxData.find(o=>o.id===id);if(!order) return;
+  const order=inboxData.find(o=>o.id===id);
+  if(!order) return;
+
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
+
   order.status='confirmed';
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
   renderInboxList();
   inboxWritePending=true;
+
   try{
-    await ghWrite(INBOX_PATH,inboxData,`Confirm order ${id}`);
-    // ★ Update customer profile from inbox confirm too
+    await fetch(`${WORKER_URL}/supabase/order`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(order)
+    });
+
     if(order.phone) await upsertCustomer(order);
   }catch(e){
     order.status='pending';
@@ -1306,18 +1325,28 @@ async function confirmInboxOrder(id){
   }finally{
     inboxWritePending=false;
   }
+
   loadOrderIntoCurrent(order);
   document.getElementById('inbox-tab-btn').classList.remove('has-new');
 }
 
 async function declineInboxOrder(id){
-  const order=inboxData.find(o=>o.id===id);if(!order) return;
+  const order=inboxData.find(o=>o.id===id);
+  if(!order) return;
+
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
+
   order.status='declined';
   inboxWritePending=true;
   showLoading('Declining…');
+
   try{
-    await ghWrite(INBOX_PATH,inboxData,`Decline order ${id}`);
+    await fetch(`${WORKER_URL}/supabase/order`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(order)
+    });
+
     showToast('Order declined','');
   }catch(e){
     order.status='pending';
@@ -1325,11 +1354,11 @@ async function declineInboxOrder(id){
   }finally{
     inboxWritePending=false;
   }
+
   hideLoading();
   renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
 }
-
 function renderInboxList(){
   const list=document.getElementById('inbox-list');
   const pending=inboxData.filter(o=>o.status==='pending');
