@@ -1,5 +1,44 @@
 [
   {
+    "id": "ORD-1779726796903",
+    "status": "pending",
+    "timestamp": "2026-05-25T16:33:16.903Z",
+    "name": "tony bou moussa",
+    "phone": "81345836",
+    "note": "",
+    "orderType": "dinein",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "items": [
+      {
+        "name": "Cheese",
+        "price": 3,
+        "priceStr": "$3",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Special Le Kiosk Burger",
+        "price": 8,
+        "priceStr": "$8",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Hotdog Sandwich",
+        "price": 6,
+        "priceStr": "$6",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "subtotal": 17,
+    "total": 17
+  },
+  {
     "id": "ORD-1779724168507",
     "status": "pending",
     "timestamp": "2026-05-25T15:49:28.507Z",
