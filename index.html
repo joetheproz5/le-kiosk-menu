@@ -765,8 +765,30 @@ document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.ta
 })();
 
 // Boot — fetch config first, then render everything
-fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', { cache: 'no-store' })
+fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
   .then(r => r.ok ? r.json() : null)
+  .then(j => {
+    if(j && j.data && j.data.testingMode !== undefined) {
+      TESTING_MODE = !!j.data.testingMode;
+    }
+  })
+  .catch(() => {})
+  .finally(() => {
+    updateStatusBadge();
+    setInterval(updateStatusBadge, 60000);
+    loadMenu().then(data => {
+      if(!data) return;
+      initMenu(data);
+      initScrollSpy(data);
+      itemMeta = {};
+      data.forEach(cat => {
+        if(cat.type === 'addons') return;
+        (cat.items || []).filter(item => item.active !== false).forEach(item => {
+          itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
+        });
+      });
+    });
+  });  .then(r => r.ok ? r.json() : null)
   .then(j => { if(j && j.data && j.data.testingMode !== undefined) TESTING_MODE = !!j.data.testingMode; })
   .catch(() => {})
   .finally(() => {
