@@ -1284,17 +1284,47 @@ async function chargeOrder(){
 // ═══════════════════════════════════════════════════
 async function loadOrders(showUI){
   if(showUI) showLoading('Loading orders…');
-  try{const{data}=await ghRead(ORDERS_PATH);ordersData=data||[];renderOrdersList();}
-  catch(e){if(showUI) showToast('Load failed: '+e.message,'error');}
+
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/orders`, { cache:'no-store' });
+    if(!res.ok) throw new Error('Orders read '+res.status);
+
+    const j = await res.json();
+    ordersData = (j.data || [])
+      .filter(row => row.status !== 'inbox')
+      .map(row => ({
+        ...(row.payload || {}),
+        id: row.id,
+        status: row.status || (row.payload && row.payload.status) || 'pending'
+      }));
+
+    renderOrdersList();
+  }catch(e){
+    if(showUI) showToast('Load failed: '+e.message,'error');
+  }
+
   if(showUI) hideLoading();
 }
 async function updateOrderStatus(id,status){
-  const order=ordersData.find(o=>o.id===id);if(!order) return;
-  order.status=status;showLoading('Updating…');
+  const order=ordersData.find(o=>o.id===id);
+  if(!order) return;
+
+  order.status=status;
+  showLoading('Updating…');
+
   try{
-    await ghWrite(ORDERS_PATH,ordersData,`Update order ${id} → ${status}`);
-    showToast('Status updated ✓','success');renderOrdersList();
-  }catch(e){showToast('Update failed: '+e.message,'error');}
+    await fetch(`${WORKER_URL}/supabase/order`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(order)
+    });
+
+    showToast('Status updated ✓','success');
+    renderOrdersList();
+  }catch(e){
+    showToast('Update failed: '+e.message,'error');
+  }
+
   hideLoading();
 }
 
