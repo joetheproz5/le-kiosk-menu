@@ -497,7 +497,7 @@ input,textarea,select{font-family:var(--font);outline:none}
           <div class="err-msg" id="err-phone" style="margin-top:4px;margin-bottom:6px">Valid 8-digit Lebanese number required.</div>
 
           <label class="form-label">Customer Name *</label>
-          <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
+          <input id="cust-name" type="text" class="form-input" placeholder="Guest" value="Guest" autocomplete="off">
           <div class="err-msg" id="err-name">Name is required.</div>
 
           <label class="form-label">Order Type *</label>
@@ -872,7 +872,7 @@ function toggleFlavor(lineId,flavor){
 function clearOrder(){
   const prev=[...orderLines];
   orderLines=[];orderType=null;deliveryZone=null;
-  document.getElementById('cust-name').value='';
+  document.getElementById('cust-name').value='Guest';
   document.getElementById('cust-phone').value='';
   document.getElementById('order-note').value='';
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
@@ -1032,13 +1032,24 @@ function onPhoneInput(raw){
   clearTimeout(phoneDebounce);
   hideCustomerProfileCard();
   currentCustomerProfile = null;
+  const nameField = document.getElementById('cust-name');
+const digitsOnly = raw.replace(/\D/g,'');
 
+// If cashier starts entering a real phone, remove the default Guest name
+if(digitsOnly && digitsOnly !== '00000000' && nameField.value.trim() === 'Guest'){
+  nameField.value = '';
+}
+
+// If phone field becomes empty again, restore Guest
+if(!digitsOnly && !nameField.value.trim()){
+  nameField.value = 'Guest';
+}
   const digits = raw.replace(/\D/g,'');
   let phone = null;
   if(digits.length === 8) phone = digits;
   else if(digits.length === 11 && digits.startsWith('961')) phone = digits.slice(3);
 
-  if(!phone) return;
+  if(!phone || phone === '00000000') return;
 
   // Show spinner
   document.getElementById('phone-spinner').classList.add('show');
@@ -1189,7 +1200,7 @@ try{
 function validateOrder(){
   let ok=true;
 
-  const name=(document.getElementById('cust-name').value || '').trim() || 'Walk-in Customer';
+  const name=(document.getElementById('cust-name').value || '').trim() || 'Guest';
   document.getElementById('cust-name').value = name;
 
   if(!name){
@@ -1238,7 +1249,7 @@ function validateOrder(){
 }
 
 function buildOrderObj(status='pending'){
-  const name=(document.getElementById('cust-name').value || '').trim() || 'Walk-in Customer';
+  const name=(document.getElementById('cust-name').value || '').trim() || 'Guest';
   const note=document.getElementById('order-note').value.trim();
 
   let phoneRaw=(document.getElementById('cust-phone').value || '').trim();
