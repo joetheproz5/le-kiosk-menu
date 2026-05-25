@@ -178,6 +178,9 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .setting-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}
 .setting-title{font-size:14px;font-weight:900;color:var(--ink)}
 .setting-copy{font-size:12px;font-weight:600;color:var(--muted);line-height:1.5;margin-top:5px}
+.setting-stat{font-size:18px;font-weight:900;color:var(--brand-dark);margin-top:12px}
+.setting-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:4px}
+.setting-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px}
 .dash-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
 .dash-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px}
@@ -573,12 +576,23 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
             </div>
             <div class="setting-card">
-              <div class="setting-title">Reward Values</div>
-              <div class="setting-copy">POS currently uses fixed reward values in code: free soft drink is $2.00, free ice cream cup is $3.00, and discount reward is 10%.</div>
+              <div class="setting-title">Reward Catalog</div>
+              <div class="setting-copy">Manage the reward buttons cashiers can redeem from the POS.</div>
+              <div class="setting-stat" id="settings-reward-count">0 rewards configured</div>
+              <div class="setting-note" id="settings-reward-note">Rewards sync through shared config.</div>
+              <div class="setting-actions">
+                <button class="btn btn-dark" onclick="switchView('loyalty')">Manage Rewards</button>
+              </div>
             </div>
             <div class="setting-card">
-              <div class="setting-title">Publishing</div>
-              <div class="setting-copy">Menu changes are saved directly to Supabase. Image uploads go to Supabase Storage through the Worker.</div>
+              <div class="setting-title">Menu Health</div>
+              <div class="setting-copy">Quick check for hidden items, categories, and add-ons before a busy shift.</div>
+              <div class="setting-stat" id="settings-menu-counts">0 active items</div>
+              <div class="setting-note" id="settings-menu-warning">Menu status will appear here.</div>
+              <div class="setting-actions">
+                <button class="btn btn-dark" onclick="switchView('items')">Review Items</button>
+                <button class="btn btn-ghost" onclick="switchView('addons')">Check Add-ons</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1360,7 +1374,23 @@ async function saveCustomersAdmin(){
   hideLoading();
 }
 
-function renderSettings(){renderStatus();}
+function renderSettings(){
+  renderStatus();
+  normalizeLoyaltyRewards();
+  const s=menuStats();
+  const rewards=configData.loyaltyRewards||[];
+  const rewardCount=document.getElementById('settings-reward-count');
+  if(rewardCount)rewardCount.textContent=`${rewards.length} reward${rewards.length===1?'':'s'} configured`;
+  const rewardNote=document.getElementById('settings-reward-note');
+  if(rewardNote)rewardNote.textContent=configData.loyaltyEnabled?'Available in POS when a customer has a reward ready.':'Loyalty is off, so POS will hide reward redemption.';
+  const menuCounts=document.getElementById('settings-menu-counts');
+  if(menuCounts)menuCounts.textContent=`${s.active}/${s.items} active items · ${s.regular} categories · ${s.itemAddons+s.globalGroups} add-ons`;
+  const menuWarning=document.getElementById('settings-menu-warning');
+  if(menuWarning){
+    const inactive=s.items-s.active;
+    menuWarning.textContent=inactive>0?`${inactive} inactive item${inactive===1?'':'s'} hidden from the menu/POS.`:'All menu items are active.';
+  }
+}
 function togglePreview(){renderPreview();document.getElementById('preview-panel').classList.toggle('open');}
 function renderPreview(){
   const body=document.getElementById('preview-body');if(!body)return;
