@@ -1402,8 +1402,14 @@ async function confirmInboxOrder(id){
     inboxWritePending=false;
   }
 
-  loadOrderIntoCurrent(order);
-  document.getElementById('inbox-tab-btn').classList.remove('has-new');
+  inboxData = inboxData.filter(o => o.id !== id);
+updateInboxBadge(inboxData.filter(o => o.status === 'pending').length);
+renderInboxList();
+
+loadOrderIntoCurrent(order);
+loadOrders(false).catch(()=>{});
+
+document.getElementById('inbox-tab-btn').classList.remove('has-new');
 }
 
 async function declineInboxOrder(id){
