@@ -578,6 +578,7 @@ let ordersFilter='all',showingOrders=false,showingInbox=false;
 let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=false;
 let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0,inboxWritePending=false;
+let loadedInboxOrderId=null;
 
 // ── Customer profile state ──
 let customersData = [];   // full array loaded from customers.json
@@ -882,7 +883,8 @@ function clearOrder(){
   });
   hideCustomerProfileCard();
   currentCustomerProfile = null;
-  renderOrderPanel();
+loadedInboxOrderId = null;
+renderOrderPanel();
 }
 function showOrderDetails(){
   if(!orderLines.length){showToast('Add items first','error');return;}
@@ -1205,8 +1207,7 @@ function buildOrderObj(status='pending'){
   const note=document.getElementById('order-note').value.trim();
   const phoneRaw=document.getElementById('cust-phone').value.trim().replace(/\D/g,'');
   const phone=phoneRaw.length===11&&phoneRaw.startsWith('961')?phoneRaw.slice(3):phoneRaw;
-  const fee=getDeliveryFee(),total=getGrandTotal(),id='ORD-'+Date.now();
-  return{id,status,timestamp:new Date().toISOString(),name,phone,note,orderType,
+  const fee=getDeliveryFee(),total=getGrandTotal(),id=loadedInboxOrderId||'ORD-'+Date.now();  return{id,status,timestamp:new Date().toISOString(),name,phone,note,orderType,
     deliveryZone:orderType==='delivery'?deliveryZone:null,
     deliveryFee:fee,
     items:orderLines.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,
@@ -1224,6 +1225,7 @@ function normalizeZone(zoneVal){
 }
 function loadOrderIntoCurrent(order){
   clearOrder();
+  loadedInboxOrderId = order.id || null;
   document.getElementById('cust-name').value=order.name||'';
   document.getElementById('cust-phone').value=order.phone||'';
   if(order.note||order.address){
