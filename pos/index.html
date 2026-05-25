@@ -439,6 +439,10 @@ input,textarea,select{font-family:var(--font);outline:none}
           <label class="form-label">Customer Name *</label>
           <input id="cust-name" type="text" class="form-input" placeholder="e.g. Elio" autocomplete="off">
           <div class="err-msg" id="err-name">Name is required.</div>
+          
+          <label class="form-label">Phone Number *</label>
+          <input id="cust-phone" type="tel" class="form-input" placeholder="76 840 244" maxlength="11" autocomplete="off" inputmode="numeric">
+          <div class="err-msg" id="err-phone">Valid 8-digit Lebanese number required.</div>
           <label class="form-label">Order Type *</label>
           <div class="type-grid">
             <button class="type-btn" onclick="selType('dinein')"><span class="type-icon">🪑</span>Dine In</button>
@@ -765,7 +769,7 @@ function toggleFlavor(lineId,flavor){
 function clearOrder(){
   const prev=[...orderLines];
   orderLines=[];orderType=null;deliveryZone=null;
-  document.getElementById('cust-name').value='';document.getElementById('order-note').value='';
+  document.getElementById('cust-name').value='';document.getElementById('cust-phone').value='';document.getElementById('order-note').value='';
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
   document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
   document.getElementById('zone-section').style.display='none';
@@ -892,6 +896,15 @@ function validateOrder(){
   const name=document.getElementById('cust-name').value.trim();
   if(!name){document.getElementById('err-name').classList.add('show');document.getElementById('cust-name').classList.add('error');ok=false;}
   else{document.getElementById('err-name').classList.remove('show');document.getElementById('cust-name').classList.remove('error');}
+
+  const phoneRaw=document.getElementById('cust-phone').value.trim();
+  const phoneDigits=phoneRaw.replace(/\D/g,'');
+  let phone=null;
+  if(phoneDigits.length===8) phone=phoneDigits;
+  else if(phoneDigits.length===11 && phoneDigits.startsWith('961')) phone=phoneDigits.slice(3);
+  if(!phone){document.getElementById('err-phone').classList.add('show');document.getElementById('cust-phone').classList.add('error');ok=false;}
+  else{document.getElementById('err-phone').classList.remove('show');document.getElementById('cust-phone').classList.remove('error');}
+
   if(!orderType){document.getElementById('err-type').classList.add('show');ok=false;}
   else document.getElementById('err-type').classList.remove('show');
   if(orderType==='delivery'&&!deliveryZone){document.getElementById('err-zone').classList.add('show');ok=false;}
@@ -899,11 +912,16 @@ function validateOrder(){
   if(!orderLines.length){showToast('Add items to the order first','error');ok=false;}
   return ok;
 }
+
 function buildOrderObj(status='pending'){
-  const name=document.getElementById('cust-name').value.trim(),note=document.getElementById('order-note').value.trim();
+  const name=document.getElementById('cust-name').value.trim();
+  const note=document.getElementById('order-note').value.trim();
+  const phoneRaw=document.getElementById('cust-phone').value.trim().replace(/\D/g,'');
+  const phone = phoneRaw.length===11 && phoneRaw.startsWith('961') ? phoneRaw.slice(3) : phoneRaw;
   const fee=getDeliveryFee(),total=getGrandTotal(),id='ORD-'+Date.now();
-  return{id,status,timestamp:new Date().toISOString(),name,note,orderType,deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:fee,items:orderLines.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),subtotal:getItemsTotal(),total};
+  return{id,status,timestamp:new Date().toISOString(),name,phone,note,orderType,deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:fee,items:orderLines.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),subtotal:getItemsTotal(),total};
 }
+
 
 // ═══════════════════════════════════════════════════
 // LOAD INBOX ORDER → CURRENT ORDER
@@ -916,6 +934,7 @@ function normalizeZone(zoneVal){
 function loadOrderIntoCurrent(order){
   clearOrder();
   document.getElementById('cust-name').value=order.name||'';
+  document.getElementById('cust-phone').value=order.phone||'';
   if(order.note||order.address){
     const noteVal=order.note||(order.address?`Address: ${order.address}`:'');
     document.getElementById('order-note').value=noteVal;
@@ -957,6 +976,7 @@ async function chargeOrder(){
     ordersData=orders;
     await ghWrite(ORDERS_PATH,orders,`Order ${order.id} — ${order.name}`);
     showToast(`Order ${order.id} saved ✓`,'success');
+    if(order.phone) await recordCustomer(order.phone);
     clearOrder();
     loadOrders(false).catch(()=>{});
   }catch(e){
@@ -1186,7 +1206,8 @@ function buildThermal(o){
   let lines='';
   o.items.forEach(it=>{lines+=`<div class="th-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`;if(it.flavor)lines+=`<div class="th-addon">↳ Flavor: ${it.flavor}</div>`;(it.addons||[]).forEach(a=>{lines+=`<div class="th-addon">↳ ${a.label}: +$${a.price.toFixed(2)}</div>`;});});
   if(o.deliveryFee>0) lines+=`<div class="th-row"><span>Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
-  return`<div class="thermal-receipt"><div class="th-center"><div class="th-logo">LE KIOSK</div><div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div><div class="th-divider"></div><div class="th-row"><span>Order:</span><span>${o.id||'POS'}</span></div><div class="th-row"><span>Name:</span><span>${o.name}</span></div><div class="th-row"><span>Type:</span><span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div class="th-row"><span>Zone:</span><span>${o.deliveryZone}</span></div>`:''} ${o.note?`<div class="th-row"><span>Note:</span><span>${o.note}</span></div>`:''}<div class="th-row"><span>Time:</span><span>${ts}</span></div><div class="th-divider"></div>${lines}<div class="th-divider"></div><div class="th-row th-total bold"><span>TOTAL</span><span>$${o.total.toFixed(2)}</span></div><div class="th-divider"></div><div class="th-footer">Thank you for visiting!<br>⭐ Leave us a Google review</div></div>`;
+  return`<div class="thermal-receipt"><div class="th-center"><div class="th-logo">LE KIOSK</div><div class="th-sub">Wadi Chahrour · +961 76 840 244</div></div><div class="th-divider"></div><div class="th-row"><span>Order:</span><span>${o.id||'POS'}</span></div><div class="th-row"><span>Name:</span><span>${o.name}</span></div>${o.phone?`<div class="th-row"><span>Phone:</span><span>+961 ${o.phone}</span></div>`:''}
+<div class="th-row"><span>Type:</span><span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div class="th-row"><span>Zone:</span><span>${o.deliveryZone}</span></div>`:''} ${o.note?`<div class="th-row"><span>Note:</span><span>${o.note}</span></div>`:''}<div class="th-row"><span>Time:</span><span>${ts}</span></div><div class="th-divider"></div>${lines}<div class="th-divider"></div><div class="th-row th-total bold"><span>TOTAL</span><span>$${o.total.toFixed(2)}</span></div><div class="th-divider"></div><div class="th-footer">Thank you for visiting!<br>⭐ Leave us a Google review</div></div>`;
 }
 function buildCard(o){
   const dt=new Date(o.timestamp||new Date()),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
@@ -1194,7 +1215,8 @@ function buildCard(o){
   let rows='';
   o.items.forEach(it=>{rows+=`<div class="cr-row"><span style="font-weight:700">${it.name} <span style="color:#9ca3af;font-weight:500">x${it.qty}</span></span><span style="font-weight:700">$${(it.price*it.qty).toFixed(2)}</span></div>`;if(it.flavor)rows+=`<div class="cr-addon"><span>↳ Flavor: ${it.flavor}</span><span></span></div>`;(it.addons||[]).forEach(a=>{rows+=`<div class="cr-addon"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;});});
   if(o.deliveryFee>0) rows+=`<div class="cr-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
-  return`<div class="card-receipt"><div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div><div class="cr-meta"><div>Customer: <span>${o.name}</span></div><div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div>Zone: <span>${o.deliveryZone} (+$${o.deliveryFee?.toFixed(2)||'0.00'})</span></div>`:''} ${o.note?`<div>Note: <span>${o.note}</span></div>`:''}<div>Time: <span>${ts}</span></div></div><div class="cr-section">${rows}</div><div class="cr-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div><div class="cr-footer">Thank you for visiting Le Kiosk! ⭐<br>Leave us a Google review — it means the world to us.</div></div>`;
+  return`<div class="card-receipt"><div class="cr-header"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Wadi Chahrour · +961 76 840 244</div>${o.id?`<div class="cr-order-num">${o.id}</div>`:''}</div><div class="cr-meta"><div>Customer: <span>${o.name}</span></div>${o.phone?`<div>Phone: <span>+961 ${o.phone}</span></div>`:''}
+<div>Type: <span>${typeLabels[o.orderType]||o.orderType}</span></div>${o.deliveryZone?`<div>Zone: <span>${o.deliveryZone} (+$${o.deliveryFee?.toFixed(2)||'0.00'})</span></div>`:''} ${o.note?`<div>Note: <span>${o.note}</span></div>`:''}<div>Time: <span>${ts}</span></div></div><div class="cr-section">${rows}</div><div class="cr-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div><div class="cr-footer">Thank you for visiting Le Kiosk! ⭐<br>Leave us a Google review — it means the world to us.</div></div>`;
 }
 function calcChange() {
   const cash = parseFloat(document.getElementById('cash-input').value) || 0;
