@@ -16,9 +16,10 @@
 }
 html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--ink);overflow:hidden}
-button,input,textarea{font-family:var(--font)}
+button,input,textarea,select{font-family:var(--font)}
 button{border:0;cursor:pointer}
 input,textarea{outline:none}
+select{outline:none}
 
 #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#451a03,#78350f)}
 .login-card{width:100%;max-width:390px;background:#fff;border:1px solid rgba(253,230,138,.55);border-radius:18px;padding:38px 34px;box-shadow:0 24px 70px rgba(0,0,0,.28);text-align:center}
@@ -206,6 +207,13 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .loyalty-grid{display:grid;grid-template-columns:330px minmax(0,1fr);gap:14px;align-items:start}
 .loyalty-meter{height:12px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:8px}
 .loyalty-meter span{display:block;height:100%;background:var(--accent);border-radius:999px}
+.reward-editor{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.reward-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(120px,.8fr) 120px 74px 34px;gap:7px;align-items:end;border:1px solid var(--line);border-radius:8px;background:#fff;padding:9px}
+.reward-id{font-size:10px;font-weight:800;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reward-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
+.reward-empty{border:1px dashed var(--line);border-radius:8px;background:#fff;padding:16px;text-align:center;font-size:12px;font-weight:700;color:var(--muted);margin-top:12px}
+.reward-dirty{display:none;font-size:11px;font-weight:800;color:var(--brand);background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:999px;padding:5px 9px}
+.reward-dirty.show{display:inline-flex}
 .loyalty-customer{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px 90px;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px;margin-bottom:8px}
 .loyalty-name{font-size:13px;font-weight:900;color:var(--ink)}
 .loyalty-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
@@ -262,6 +270,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .dash-grid,.feature-grid,.loyalty-grid{grid-template-columns:1fr}
   .customer-grid{grid-template-columns:1fr 1fr}
   .loyalty-customer{grid-template-columns:1fr 1fr}
+  .reward-row{grid-template-columns:1fr 1fr}
   .item-card{grid-template-columns:80px minmax(0,1fr)}
   .item-actions{grid-column:1/-1;flex-direction:row}
 }
@@ -473,9 +482,15 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
                   </div>
                 </div>
                 <div class="setting-card" style="margin-top:12px">
-                  <div class="setting-title">Reward Rules</div>
-                  <div class="setting-copy">10 stamps unlock a reward. POS supports Free Soft Drink, 10% Discount, and Free Ice Cream Cup.</div>
+                  <div class="setting-title">Reward Catalog</div>
+                  <div class="setting-copy">Add, remove, reorder, and customize rewards. Saved rewards live in the shared config as <strong>loyaltyRewards</strong>.</div>
                   <div class="loyalty-meter"><span style="width:100%"></span></div>
+                  <div id="rewards-editor"></div>
+                  <div class="reward-actions">
+                    <button class="btn btn-add btn-sm" onclick="addLoyaltyReward()">Add Reward</button>
+                    <button class="btn btn-save btn-sm" onclick="saveLoyaltyRewards()">Save Rewards</button>
+                    <span class="reward-dirty" id="reward-dirty">Unsaved rewards</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -594,11 +609,17 @@ const PILL_PRESETS=[
   {id:'gray',bg:'#f3f4f6',border:'#e5e7eb',text:'#374151',label:'Gray'},
   {id:'dark',bg:'#1f2937',border:'#374151',text:'#f9fafb',label:'Dark'}
 ];
+const DEFAULT_LOYALTY_REWARDS=[
+  {id:'soft_drink',label:'Free Soft Drink',kind:'fixed',value:2},
+  {id:'discount_10',label:'10% Discount',kind:'percent',value:10},
+  {id:'ice_cream_cup',label:'Free Ice Cream Cup',kind:'fixed',value:3}
+];
 
 let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null;
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
-let configData={testingMode:false,loyaltyEnabled:true};
+let configData={testingMode:false,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
+let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 
 async function hashPassword(pw){
@@ -688,8 +709,9 @@ async function fetchConfig(){
       configData=j.data||{};
       if(typeof configData.loyaltyEnabled!=='boolean')configData.loyaltyEnabled=true;
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
+      normalizeLoyaltyRewards();
     }
-  }catch(_){}
+  }catch(_){normalizeLoyaltyRewards();}
 }
 async function saveConfig(){
   const res=await fetch(`${WORKER_URL}/supabase/config`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:configData})});
@@ -703,17 +725,128 @@ function renderStatus(){
   if(t)t.checked=!!configData.testingMode;
   if(l)l.checked=!!configData.loyaltyEnabled;
   if(lm)lm.checked=!!configData.loyaltyEnabled;
+  renderRewardEditor();
 }
 async function setTestingMode(enabled){
   showLoading(enabled?'Enabling test mode...':'Disabling test mode...');
-  try{configData.testingMode=enabled;await saveConfig();renderStatus();showToast(enabled?'Test mode ON':'Test mode OFF','success');}
+  try{configData.testingMode=enabled;await saveConfig();clearRewardsDirty();renderStatus();showToast(enabled?'Test mode ON':'Test mode OFF','success');}
   catch(e){configData.testingMode=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
 }
 async function setLoyaltyMode(enabled){
   showLoading(enabled?'Enabling loyalty...':'Disabling loyalty...');
-  try{configData.loyaltyEnabled=enabled;await saveConfig();renderStatus();showToast(enabled?'Loyalty enabled':'Loyalty disabled','success');}
+  try{configData.loyaltyEnabled=enabled;await saveConfig();clearRewardsDirty();renderStatus();showToast(enabled?'Loyalty enabled':'Loyalty disabled','success');}
   catch(e){configData.loyaltyEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
+  hideLoading();
+}
+function makeRewardId(label){
+  const base=String(label||'custom_reward').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'custom_reward';
+  let id=base,idx=2;
+  const used=new Set((configData.loyaltyRewards||[]).map(r=>r.id));
+  while(used.has(id)){id=base+'_'+idx;idx++;}
+  return id;
+}
+function normalizeLoyaltyRewards(){
+  if(!Array.isArray(configData.loyaltyRewards)||!configData.loyaltyRewards.length){
+    configData.loyaltyRewards=DEFAULT_LOYALTY_REWARDS.map(r=>({...r}));
+  }
+  configData.loyaltyRewards=configData.loyaltyRewards.map((r,i)=>{
+    const label=String(r.label||r.name||'Custom Reward').trim()||'Custom Reward';
+    const kind=['fixed','percent','free_item'].includes(r.kind)?r.kind:(r.type==='discount_10'?'percent':'fixed');
+    const value=Math.max(0,Number(r.value ?? r.discount ?? (kind==='percent'?10:0))||0);
+    return {
+      id:String(r.id||r.type||makeRewardId(label+' '+i)).replace(/[^a-zA-Z0-9_-]/g,'_'),
+      label,
+      kind,
+      value
+    };
+  });
+}
+function markRewardsDirty(){
+  rewardsDirty=true;
+  const el=document.getElementById('reward-dirty');
+  if(el)el.classList.add('show');
+}
+function clearRewardsDirty(){
+  rewardsDirty=false;
+  const el=document.getElementById('reward-dirty');
+  if(el)el.classList.remove('show');
+}
+function renderRewardEditor(){
+  normalizeLoyaltyRewards();
+  const el=document.getElementById('rewards-editor');
+  if(!el)return;
+  if(!configData.loyaltyRewards.length){
+    el.innerHTML='<div class="reward-empty">No rewards yet. Add one to start.</div>';
+    return;
+  }
+  el.innerHTML=`<div class="reward-editor">${configData.loyaltyRewards.map((r,i)=>`
+    <div class="reward-row">
+      <div>
+        <label class="field-label">Reward Name</label>
+        <input class="field-input" value="${esc(r.label)}" oninput="editLoyaltyReward(${i},'label',this.value)">
+        <div class="reward-id">ID: ${esc(r.id)}</div>
+      </div>
+      <div>
+        <label class="field-label">Reward ID</label>
+        <input class="field-input" value="${esc(r.id)}" oninput="editLoyaltyReward(${i},'id',this.value)">
+      </div>
+      <div>
+        <label class="field-label">Type</label>
+        <select class="field-input" onchange="editLoyaltyReward(${i},'kind',this.value)">
+          <option value="fixed" ${r.kind==='fixed'?'selected':''}>Fixed $</option>
+          <option value="percent" ${r.kind==='percent'?'selected':''}>Percent %</option>
+          <option value="free_item" ${r.kind==='free_item'?'selected':''}>Free Item</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">${r.kind==='percent'?'Percent':'Value'}</label>
+        <input class="field-input" type="number" min="0" step="0.01" value="${Number(r.value||0)}" oninput="editLoyaltyReward(${i},'value',this.value)">
+      </div>
+      <button class="icon-btn danger" title="Remove reward" onclick="removeLoyaltyReward(${i})">x</button>
+    </div>`).join('')}</div>`;
+}
+function editLoyaltyReward(i,field,value){
+  const reward=configData.loyaltyRewards[i];
+  if(!reward)return;
+  if(field==='id')reward.id=String(value||'').replace(/[^a-zA-Z0-9_-]/g,'_');
+  else if(field==='value')reward.value=Math.max(0,Number(value||0)||0);
+  else reward[field]=value;
+  markRewardsDirty();
+  if(field==='kind')renderRewardEditor();
+}
+function addLoyaltyReward(){
+  normalizeLoyaltyRewards();
+  configData.loyaltyRewards.push({
+    id:makeRewardId('custom_reward'),
+    label:'Custom Reward',
+    kind:'fixed',
+    value:0
+  });
+  markRewardsDirty();
+  renderRewardEditor();
+}
+function removeLoyaltyReward(i){
+  const reward=configData.loyaltyRewards[i];
+  if(!reward)return;
+  openConfirm('Remove Reward',`Remove "${reward.label}" from loyalty rewards?`,'Remove',()=>{
+    configData.loyaltyRewards.splice(i,1);
+    markRewardsDirty();
+    renderRewardEditor();
+  });
+}
+async function saveLoyaltyRewards(){
+  showLoading('Saving rewards...');
+  try{
+    normalizeLoyaltyRewards();
+    await saveConfig();
+    clearRewardsDirty();
+    renderRewardEditor();
+    renderDashboard();
+    showToast('Loyalty rewards saved','success');
+  }catch(e){
+    showToast('Save failed: '+e.message,'error');
+  }
   hideLoading();
 }
 
