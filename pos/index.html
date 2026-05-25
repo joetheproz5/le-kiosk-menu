@@ -726,7 +726,9 @@ async function bootPOS(){
   const cfgRes = await fetch(`${WORKER_URL}/supabase/config`, { cache:'no-store' });
   if(cfgRes.ok){
     const j = await cfgRes.json();
-    loyaltyEnabled = !!(j.data && j.data.loyaltyEnabled);
+    loyaltyEnabled = j.data && typeof j.data.loyaltyEnabled === 'boolean'
+  ? j.data.loyaltyEnabled
+  : true;
   }
 }catch(_){}
   hideLoading();
