@@ -1255,25 +1255,32 @@ function loadOrderIntoCurrent(order){
 // ═══════════════════════════════════════════════════
 async function chargeOrder(){
   if(!validateOrder()) return;
+
   const order=buildOrderObj('pending');
   const chargeBtn=document.getElementById('charge-btn');
-  chargeBtn.disabled=true;chargeBtn.textContent='Saving…';
+
+  chargeBtn.disabled=true;
+  chargeBtn.textContent='Saving…';
   showLoading('Saving order…');
+
   try{
-    let orders=[];
-    try{const r=await ghRead(ORDERS_PATH);orders=r.data||[];}catch(_){orders=[];}
-    orders.unshift(order);
-    if(orders.length>MAX_ORDERS) orders=orders.slice(0,MAX_ORDERS);
-    ordersData=orders;
-    await ghWrite(ORDERS_PATH,orders,`Order ${order.id} — ${order.name}`);
-    // ★ Update customer profile
+    await fetch(`${WORKER_URL}/supabase/order`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(order)
+    });
+
+    ordersData.unshift(order);
+
     await upsertCustomer(order);
+
     showToast(`Order ${order.id} saved ✓`,'success');
     clearOrder();
     loadOrders(false).catch(()=>{});
   }catch(e){
     showToast('Save failed: '+e.message,'error');
   }
+
   chargeBtn.disabled=false;
   chargeBtn.textContent='✅ Charge & Save';
   hideLoading();
