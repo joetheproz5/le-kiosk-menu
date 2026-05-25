@@ -1,5 +1,64 @@
 [
   {
+    "id": "MENU-1779705170493",
+    "status": "pending",
+    "timestamp": "2026-05-25T10:32:50.493Z",
+    "source": "menu",
+    "name": "Toby",
+    "phone": "76840244",
+    "orderType": "takeaway",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "gps": null,
+    "address": null,
+    "changeFor": 20,
+    "items": [
+      {
+        "name": "Labneh",
+        "price": 3,
+        "priceStr": "$3",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Beer",
+        "price": 1.5,
+        "priceStr": "$1.5",
+        "qty": 4,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Mini Pancakes (15pcs)",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Hershey's Chocolate",
+            "price": 2
+          }
+        ]
+      },
+      {
+        "name": "Crispy Burger",
+        "price": 6,
+        "priceStr": "$6",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Buffalo Sauce",
+            "price": 0.6
+          }
+        ]
+      }
+    ],
+    "total": 24.6
+  },
+  {
     "id": "MENU-1779704707430",
     "status": "declined",
     "timestamp": "2026-05-25T10:25:07.430Z",
