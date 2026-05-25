@@ -198,6 +198,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
         Test Mode
       </label>
       <button class="btn btn-sm btn-ghost" onclick="openBlockList()" style="color:var(--a950)">🚫 Block List</button>
+      <button class="btn btn-sm btn-ghost" onclick="openCustomersAdmin()" style="color:var(--a950)">👥 Customers</button>
       <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
       <button class="btn btn-save" id="save-btn" onclick="saveMenu()">💾 Save</button>
       <button class="btn btn-logout" onclick="logout()">Logout</button>
@@ -234,7 +235,24 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
     </div>
   </div>
 </div>
+<div id="customers-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:302;align-items:center;justify-content:center;padding:20px">
+  <div class="modal" style="max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column">
+    <h3>👥 Customers</h3>
+    <p>Edit customer names, phone numbers, notes, and customer stats.</p>
 
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="cust-admin-search" class="inp" type="text" placeholder="Search name or phone…" oninput="renderCustomersAdmin()" style="margin-bottom:0;flex:1">
+      <button class="btn btn-add" onclick="addCustomerAdmin()">＋ Add</button>
+    </div>
+
+    <div id="customers-admin-list" style="flex:1;overflow-y:auto;border:1px solid var(--a200);border-radius:12px;min-height:280px"></div>
+
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-ghost btn-sm" onclick="closeCustomersAdmin()">Close</button>
+      <button class="btn btn-save btn-sm" id="cust-save-btn" onclick="saveCustomersAdmin()">💾 Save</button>
+    </div>
+  </div>
+</div>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const ADMIN_HASH  = 'b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
@@ -435,7 +453,202 @@ async function saveBlockList(){
     }catch(e){showToast('Save failed: '+e.message,'error');}
     btn.disabled=false; hideLoading();
 }
+// ── CUSTOMERS ADMIN ───────────────────────────────────────────────────
+let customersAdminData = [];
+let customersAdminSha = null;
+let customersAdminDirty = false;
 
+async function openCustomersAdmin(){
+  showLoading('Loading customers…');
+  try{
+    const res = await fetch(`${WORKER_URL}/gh?file=customers.json`, { cache:'no-store' });
+    if(res.ok){
+      const j = await res.json();
+      customersAdminData = Array.isArray(j.data) ? j.data : [];
+      customersAdminSha = j.sha || null;
+    } else {
+      customersAdminData = [];
+      customersAdminSha = null;
+    }
+  }catch(_){
+    customersAdminData = [];
+    customersAdminSha = null;
+  }
+
+  customersAdminDirty = false;
+document.getElementById('cust-admin-search').value = '';
+renderCustomersAdmin();
+document.getElementById('customers-overlay').style.display = 'flex';
+hideLoading();
+}
+
+function closeCustomersAdmin(){
+  if(customersAdminDirty && !confirm('Discard unsaved customer changes?')) return;
+  document.getElementById('customers-overlay').style.display = 'none';
+}
+
+function normalizeCustomerPhone(raw){
+  const d = String(raw || '').replace(/\D/g,'');
+  if(d.length === 8) return d;
+  if(d.length === 11 && d.startsWith('961')) return d.slice(3);
+  return d;
+}
+
+function renderCustomersAdmin(){
+  const list = document.getElementById('customers-admin-list');
+  const q = (document.getElementById('cust-admin-search')?.value || '').toLowerCase();
+
+  const rows = customersAdminData
+    .map((c,i)=>({c,i}))
+    .filter(({c}) =>
+      !q ||
+      String(c.name || '').toLowerCase().includes(q) ||
+      String(c.phone || '').includes(q)
+    );
+
+  if(!rows.length){
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--g400);font-size:13px">No customers found.</div>';
+    return;
+  }
+
+  list.innerHTML = rows.map(({c,i}) => `
+    <div style="padding:14px;border-bottom:1px solid var(--a100);background:#fff">
+      <div style="display:grid;grid-template-columns:1fr 140px 110px 110px auto;gap:8px;align-items:end">
+        <div>
+          <div class="field-label">Name</div>
+          <input class="field-input" value="${esc(c.name || '')}" oninput="editCustomerField(${i},'name',this.value)">
+        </div>
+        <div>
+          <div class="field-label">Phone</div>
+          <input class="field-input" value="${esc(c.phone || '')}" oninput="editCustomerField(${i},'phone',this.value)">
+        </div>
+        <div>
+          <div class="field-label">Visits</div>
+          <input class="field-input" type="number" min="0" value="${Number(c.totalOrders || 0)}" oninput="editCustomerField(${i},'totalOrders',this.value)">
+        </div>
+        <div>
+          <div class="field-label">Spent</div>
+          <input class="field-input" type="number" min="0" step="0.01" value="${Number(c.totalSpent || 0)}" oninput="editCustomerField(${i},'totalSpent',this.value)">
+        </div>
+        <button class="btn-danger" onclick="deleteCustomerAdmin(${i})">Delete</button>
+      </div>
+
+      <div style="margin-top:8px">
+        <div class="field-label">Note</div>
+        <textarea class="field-input" rows="2" oninput="editCustomerField(${i},'note',this.value)">${esc(c.note || '')}</textarea>
+      </div>
+
+      <div style="font-size:11px;color:var(--g500);margin-top:6px">
+        First seen: ${c.firstSeen ? new Date(c.firstSeen).toLocaleDateString() : '—'}
+        · Last seen: ${c.lastSeen ? new Date(c.lastSeen).toLocaleDateString() : '—'}
+        ${c.favoriteItems?.length ? ` · Usually: ${esc(c.favoriteItems.join(', '))}` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function editCustomerField(i, field, value){
+  const c = customersAdminData[i];
+  if(!c) return;
+
+  if(field === 'phone') c.phone = normalizeCustomerPhone(value);
+  else if(field === 'totalOrders') c.totalOrders = Math.max(0, parseInt(value || '0', 10) || 0);
+  else if(field === 'totalSpent') c.totalSpent = Math.max(0, parseFloat(value || '0') || 0);
+  else c[field] = value;
+
+  customersAdminDirty = true;
+}
+
+function addCustomerAdmin(){
+  customersAdminData.unshift({
+    phone:'',
+    name:'New Customer',
+    note:'',
+    firstSeen:new Date().toISOString(),
+    lastSeen:new Date().toISOString(),
+    totalOrders:0,
+    totalSpent:0,
+    orderIds:[],
+    itemFreq:{},
+    favoriteItems:[]
+  });
+  customersAdminDirty = true;
+  renderCustomersAdmin();
+}
+
+function deleteCustomerAdmin(i){
+  const c = customersAdminData[i];
+  if(!c) return;
+  if(!confirm(`Delete customer "${c.name || c.phone || 'Unknown'}"?`)) return;
+  customersAdminData.splice(i,1);
+  customersAdminDirty = true;
+  renderCustomersAdmin();
+}
+
+async function saveCustomersAdmin(){
+  const btn = document.getElementById('cust-save-btn');
+  btn.disabled = true;
+  showLoading('Saving customers…');
+
+  try{
+    // clean + de-dupe phones
+    const seen = new Set();
+    const clean = [];
+
+    for(const c of customersAdminData){
+      const phone = normalizeCustomerPhone(c.phone);
+      if(!phone) continue;
+      if(seen.has(phone)) continue;
+      seen.add(phone);
+
+      clean.push({
+        ...c,
+        phone,
+        name: String(c.name || '').trim(),
+        note: String(c.note || '').trim(),
+        totalOrders: Math.max(0, Number(c.totalOrders || 0)),
+        totalSpent: Math.max(0, Number(c.totalSpent || 0))
+      });
+    }
+
+    let latestSha = null;
+    try{
+      const r = await fetch(`${WORKER_URL}/gh?file=customers.json`, { cache:'no-store' });
+      if(r.ok){
+        const j = await r.json();
+        latestSha = j.sha || null;
+      }
+    }catch(_){}
+
+    const res = await fetch(`${WORKER_URL}/gh?file=customers.json`, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(
+    latestSha
+      ? { data: clean, message: 'Update customers via Admin CMS', sha: latestSha }
+      : { data: clean, message: 'Update customers via Admin CMS' }
+  )
+});
+
+    if(!res.ok){
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e.error || res.status);
+    }
+
+    const saved = await res.json();
+    customersAdminData = clean;
+    customersAdminSha = saved.sha || null;
+    customersAdminDirty = false;
+    showToast('Customers saved ✓','success');
+    document.getElementById('cust-admin-search').value = '';
+    renderCustomersAdmin();
+  }catch(e){
+    showToast('Save failed: '+e.message,'error');
+  }
+
+  btn.disabled = false;
+  hideLoading();
+}
 // ── INIT ──────────────────────────────────────────────────────────────
 async function initAdmin(){
   showLoading('Loading menu…');
