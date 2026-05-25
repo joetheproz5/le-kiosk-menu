@@ -1,5 +1,36 @@
 [
   {
+    "id": "ORD-1779708791670",
+    "status": "pending",
+    "timestamp": "2026-05-25T11:33:11.670Z",
+    "name": "joe ghaoui",
+    "phone": "81345836",
+    "note": "",
+    "orderType": "dinein",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "items": [
+      {
+        "name": "Loaded Fries",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Chicken Wings (8pcs)",
+        "price": 6,
+        "priceStr": "$6",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "subtotal": 13,
+    "total": 13
+  },
+  {
     "id": "ORD-1779704681005",
     "status": "pending",
     "timestamp": "2026-05-25T10:24:41.005Z",
