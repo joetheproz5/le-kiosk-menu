@@ -975,9 +975,24 @@ function renderOrderPanel(){
 
 async function loadCustomers(){
   try{
-    const {data, sha} = await ghRead(CUSTOMERS_PATH);
-    customersData = data || [];
-    customersSha = sha;
+    const res = await fetch(`${WORKER_URL}/supabase/customers`, { cache:'no-store' });
+    if(!res.ok) throw new Error('Customer read '+res.status);
+
+    const j = await res.json();
+    customersData = (j.data || []).map(c => ({
+      phone: c.phone || '',
+      name: c.name || '',
+      note: c.note || '',
+      firstSeen: c.first_seen || '',
+      lastSeen: c.last_seen || '',
+      totalOrders: c.total_orders || 0,
+      totalSpent: Number(c.total_spent || 0),
+      orderIds: c.order_ids || [],
+      itemFreq: c.item_freq || {},
+      favoriteItems: c.favorite_items || []
+    }));
+
+    customersSha = null;
   }catch(_){
     customersData = [];
     customersSha = null;
@@ -1130,11 +1145,16 @@ async function upsertCustomer(order){
   }
 
   // Persist to GitHub
-  try{
-    await ghWrite(CUSTOMERS_PATH, customersData, `Update customer ${phone}`);
-  }catch(e){
-    console.warn('Customer save failed:', e);
-  }
+  // Persist to Supabase
+try{
+  await fetch(`${WORKER_URL}/supabase/customers`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ data: customersData })
+  });
+}catch(e){
+  console.warn('Customer save failed:', e);
+}
 
   // Update local cache immediately
   return existing;
