@@ -1,5 +1,74 @@
 [
   {
+    "id": "ORD-1779715054637",
+    "status": "pending",
+    "timestamp": "2026-05-25T13:17:34.637Z",
+    "name": "Joe",
+    "phone": "81345836",
+    "note": "",
+    "orderType": "dinein",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "items": [
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Melted Cheddar",
+            "price": 1
+          },
+          {
+            "label": "Buffalo Sauce",
+            "price": 0.6
+          }
+        ]
+      },
+      {
+        "name": "Mini Pancakes (15pcs)",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Hershey's Chocolate",
+            "price": 2
+          },
+          {
+            "label": "Lotus",
+            "price": 2
+          },
+          {
+            "label": "Pink Chocolate",
+            "price": 2
+          },
+          {
+            "label": "Kinder",
+            "price": 2
+          },
+          {
+            "label": "Oreo",
+            "price": 2
+          },
+          {
+            "label": "Strawberry",
+            "price": 1
+          },
+          {
+            "label": "Banana",
+            "price": 1
+          }
+        ]
+      }
+    ],
+    "subtotal": 25.6,
+    "total": 25.6
+  },
+  {
     "id": "ORD-1779714685153",
     "status": "done",
     "timestamp": "2026-05-25T13:11:25.153Z",
