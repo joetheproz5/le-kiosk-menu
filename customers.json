@@ -4,19 +4,23 @@
     "name": "joe ghaoui",
     "note": "",
     "firstSeen": "2026-05-25T11:33:13.395Z",
-    "lastSeen": "2026-05-25T11:33:13.395Z",
-    "totalOrders": 1,
-    "totalSpent": 13,
+    "lastSeen": "2026-05-25T13:11:12.991Z",
+    "totalOrders": 2,
+    "totalSpent": 40.1,
     "orderIds": [
-      "ORD-1779708791670"
+      "ORD-1779708791670",
+      "MENU-1779714650041"
     ],
     "itemFreq": {
       "Loaded Fries": 1,
-      "Chicken Wings (8pcs)": 1
+      "Chicken Wings (8pcs)": 1,
+      "Fries Box": 1,
+      "Mini Pancakes (15pcs)": 1
     },
     "favoriteItems": [
       "Loaded Fries",
-      "Chicken Wings (8pcs)"
+      "Chicken Wings (8pcs)",
+      "Fries Box"
     ]
   }
 ]
