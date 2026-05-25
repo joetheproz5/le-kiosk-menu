@@ -270,6 +270,12 @@ input,textarea,select{font-family:var(--font);outline:none}
   animation:profileSlide .25s ease;
   flex-shrink:0;
 }
+  #order-details-section{
+  flex:1 1 auto!important;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
 @keyframes profileSlide{
   from{opacity:0;transform:translateY(-6px);max-height:0}
   to{opacity:1;transform:translateY(0);max-height:200px}
@@ -632,6 +638,28 @@ function hideLoginErr(){document.getElementById('login-err').classList.remove('s
 document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
 (function(){const l=getLockout();renderDots(l.a||0);if(l.u>Date.now()){enableLogin(false);startLockCountdown();}})();
 
+
+  function getLoggedOrder(id){
+  return ordersData.find(o => o.id === id) || null;
+}
+
+function loadLoggedOrder(id){
+  const order = getLoggedOrder(id);
+  if(!order){ showToast('Order not found', 'error'); return; }
+  loadOrderIntoCurrent(order);
+}
+
+function printLoggedOrder(id, format){
+  const order = getLoggedOrder(id);
+  if(!order){ showToast('Order not found', 'error'); return; }
+  printFromOrder(order, format);
+}
+
+function sendWhatsAppLoggedOrder(id){
+  const order = getLoggedOrder(id);
+  if(!order){ showToast('Order not found', 'error'); return; }
+  sendWhatsAppFromOrder(order);
+}
 // ═══════════════════════════════════════════════════
 // SESSION
 // ═══════════════════════════════════════════════════
@@ -841,10 +869,16 @@ function clearOrder(){
 }
 function showOrderDetails(){
   if(!orderLines.length){showToast('Add items first','error');return;}
+
   document.getElementById('order-proceed-bar').style.display='none';
-  document.getElementById('order-details-section').style.display='flex';
-  document.getElementById('order-details-section').style.flexDirection='column';
-  // Re-trigger lookup if phone already filled (e.g. loaded from inbox)
+
+  const details = document.getElementById('order-details-section');
+  details.style.display = 'flex';
+  details.style.flexDirection = 'column';
+  details.style.flex = '1 1 auto';
+  details.style.minHeight = '0';
+  details.style.overflowY = 'auto';
+
   const phone = document.getElementById('cust-phone').value;
   if(phone) onPhoneInput(phone);
 }
@@ -1396,7 +1430,6 @@ function renderOrdersList(){
     });
     if(o.deliveryFee>0) itemRows+=`<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
     const canDone=o.status!=='done',canCancel=o.status!=='cancelled';
-    const oe=encodeURIComponent(JSON.stringify(o));
     return`<div class="order-card status-${o.status}">
       <div class="oc-header"><div><div class="oc-num">${o.id} · ${ts}</div><div class="oc-name">${o.name}${visitStr}</div><div class="oc-meta">${metaStr}</div></div><span class="status-badge ${sbCls}">${o.status}</span></div>
       <div class="oc-items">${itemRows}</div>
@@ -1404,10 +1437,10 @@ function renderOrdersList(){
       <div class="oc-actions">
         ${canDone?`<button class="oc-btn oc-done" onclick="confirmStatus('${o.id}','done')">✅ Done</button>`:''}
         ${canCancel?`<button class="oc-btn oc-cancel" onclick="confirmStatus('${o.id}','cancelled')">✕ Cancel</button>`:''}
-        <button class="oc-btn oc-load" onclick="loadOrderIntoCurrent(JSON.parse(decodeURIComponent('${oe}')))">📋 Load</button>
-        <button class="oc-btn oc-print-t" onclick="printFromOrder(JSON.parse(decodeURIComponent('${oe}')),'thermal')">🖨 Thermal</button>
-        <button class="oc-btn oc-print-c" onclick="printFromOrder(JSON.parse(decodeURIComponent('${oe}')),'card')">🖨 Card</button>
-        <button class="oc-btn oc-wa" onclick="sendWhatsAppFromOrder(JSON.parse(decodeURIComponent('${oe}')))">💬 WA</button>
+        <button class="oc-btn oc-load" onclick="loadLoggedOrder('${o.id}')">📋 Load</button>
+        <button class="oc-btn oc-print-t" onclick="printLoggedOrder('${o.id}','thermal')">🖨 Thermal</button>
+        <button class="oc-btn oc-print-c" onclick="printLoggedOrder('${o.id}','card')">🖨 Card</button>
+        <button class="oc-btn oc-wa" onclick="sendWhatsAppLoggedOrder('${o.id}')">💬 WA</button>
       </div>
     </div>`;
   }).join('');
@@ -1457,6 +1490,41 @@ function calcChange(){
 // ═══════════════════════════════════════════════════
 // WHATSAPP
 // ═══════════════════════════════════════════════════
+  function doWhatsApp(o){
+  const typeLabels = {
+    dinein: 'Dine In',
+    takeaway: 'Takeaway',
+    delivery: 'Delivery'
+  };
+
+  let msg = '🛒 *Le Kiosk Order*\n';
+  msg += '━━━━━━━━━━━━━━━━━━\n';
+  msg += `Order: ${o.id || 'POS'}\n`;
+  msg += `Name: ${o.name || ''}\n`;
+  if(o.phone) msg += `Phone: +961 ${o.phone}\n`;
+  msg += `Type: ${typeLabels[o.orderType] || o.orderType || ''}\n`;
+  if(o.deliveryZone) msg += `Zone: ${o.deliveryZone}\n`;
+  if(o.note) msg += `Note: ${o.note}\n`;
+  msg += '━━━━━━━━━━━━━━━━━━\n';
+
+  (o.items || []).forEach(it => {
+    msg += `• ${it.name} x${it.qty} — $${(it.price * it.qty).toFixed(2)}\n`;
+    if(it.flavor) msg += `  ↳ Flavor: ${it.flavor}\n`;
+    (it.addons || []).forEach(a => {
+      msg += `  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;
+    });
+  });
+
+  if(o.deliveryFee > 0) {
+    msg += `• Delivery — $${o.deliveryFee.toFixed(2)}\n`;
+  }
+
+  msg += '━━━━━━━━━━━━━━━━━━\n';
+  msg += `Total: $${(o.total || 0).toFixed(2)}\n`;
+
+  const phone = o.phone ? `961${o.phone}` : WA_NUMBER;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
 function sendWhatsAppFromOrder(o){doWhatsApp(o);}
 
 // ═══════════════════════════════════════════════════
