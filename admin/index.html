@@ -744,22 +744,33 @@ async function setTestingMode(enabled){
 }
 async function saveMenu(){
   collectAll();
-  const clean=menuData.map(sec=>{const s={...sec};delete s._hasFlav;return s;});
+
+  const clean=menuData.map(sec=>{
+    const s={...sec};
+    delete s._hasFlav;
+    return s;
+  });
+
   showLoading('Saving…');
+
   try{
-    const res=await fetch(`${WORKER_URL}/gh?file=menu.json`,{
+    const res=await fetch(`${WORKER_URL}/supabase/menu`,{
       method:'PUT',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({data:clean,message:'Update menu via Admin CMS',sha:fileSha})
+      body:JSON.stringify({data:clean})
     });
-    if(!res.ok){const e=await res.json();throw new Error(e.error||res.status);}
-    const saved=await res.json();
-    fileSha=saved.sha;
+
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      throw new Error(e.error||res.status);
+    }
+
     markSaved();
-    showToast('Saved! Live in ~30s ✓','success');
+    showToast('Saved to Supabase ✓','success');
   }catch(e){
     showToast('Save failed: '+e.message,'error');
   }
+
   hideLoading();
 }
 
