@@ -1034,10 +1034,11 @@ function updateInboxBadge(count){
   badge.textContent=count;badge.classList.toggle('show',count>0);
 }
 async function confirmInboxOrder(id){
-  const order=inboxData.find(o=>o.id===id);if(!order) return;
-  document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
-  order.status='confirmed';
-  updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
+    const order=inboxData.find(o=>o.id===id);if(!order) return;
+    document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
+    order.status='confirmed';
+    if(order.phone) knownCustomers.add(order.phone);   // ← ADD THIS LINE
+    updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
   renderInboxList();
   inboxWritePending=true;
   try{
