@@ -573,6 +573,26 @@ document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')
   const l=getLockout();renderDots(l.a||0);
   if(l.u>Date.now()){enableLogin(false);startLockCountdown();}
 })();
+let knownCustomers = new Set();
+let customersSha = null;
+
+async function loadKnownCustomers(){
+    try{
+        const {data,sha}=await ghRead('customers.json');
+        knownCustomers=new Set((data||[]).map(c=>c.phone));
+        customersSha=sha;
+    }catch(_){ knownCustomers=new Set(); customersSha=null; }
+}
+async function recordCustomer(phone){
+  try{
+    const list = await ghRead('customers.json').catch(()=>[]);
+    if(!list.find(c=>c.phone===phone)){
+      list.push({phone, firstSeen: Date.now()});
+      await ghWrite('customers.json', list, `Record customer ${phone}`);
+    }
+  }catch(e){ console.warn('recordCustomer failed', e); }
+}
+
 
 // ═══════════════════════════════════════════════════
 // SESSION
@@ -599,6 +619,7 @@ async function bootPOS(){
   await pollInbox(false);
   hideLoading();
   inboxPollInterval=setInterval(()=>pollInbox(false),15000);
+  await loadKnownCustomers();
 }
 
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
@@ -996,6 +1017,7 @@ async function confirmInboxOrder(id){
   inboxWritePending=true;
   try{
     await ghWrite(INBOX_PATH,inboxData,`Confirm order ${id}`);
+    if(order.phone) await recordCustomer(order.phone);
   }catch(e){
     order.status='pending';
     renderInboxList();
@@ -1007,6 +1029,7 @@ async function confirmInboxOrder(id){
   loadOrderIntoCurrent(order);
   document.getElementById('inbox-tab-btn').classList.remove('has-new');
 }
+
 async function declineInboxOrder(id){
   const order=inboxData.find(o=>o.id===id);if(!order) return;
   document.querySelectorAll('.inbox-confirm-btn,.inbox-decline-btn').forEach(b=>b.disabled=true);
@@ -1026,6 +1049,7 @@ async function declineInboxOrder(id){
   renderInboxList();
   updateInboxBadge(inboxData.filter(o=>o.status==='pending').length);
 }
+
 function renderInboxList(){
   const list=document.getElementById('inbox-list');
   const pending=inboxData.filter(o=>o.status==='pending');
@@ -1038,20 +1062,39 @@ function renderInboxList(){
     const itemsHtml=(o.items||[]).map(it=>`<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`).join('');
     const gpsHtml=o.gps?`<div class="inbox-gps-row">📍 <a href="https://maps.google.com/?q=${o.gps.lat},${o.gps.lng}" target="_blank" style="color:var(--green-d);text-decoration:underline">View on Maps</a></div>`:'';
     const addrHtml=o.address?`<div style="font-size:11px;color:var(--g600);padding:0 14px 8px">🏠 ${o.address}</div>`:'';
+
+    // Phone + first-time logic
+    const phone=o.phone||'';
+    const isFirstTime = phone && !knownCustomers.has(phone);
+    const phoneHtml = phone ? `
+        <div style="font-size:12px;color:var(--g700);padding:4px 14px 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            📞 <a href="tel:+961${phone}" style="color:var(--a800);font-weight:700;text-decoration:none">+961 ${phone}</a>
+            <a href="https://wa.me/961${phone}" target="_blank" style="background:#22c55e;color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;text-decoration:none">WhatsApp</a>
+            ${isFirstTime?`<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;border:1px solid #fde68a">🆕 FIRST-TIME</span>`:`<span style="font-size:10px;color:var(--g400);font-weight:600">↻ Returning</span>`}
+        </div>` : `<div style="font-size:11px;color:var(--red-d);padding:4px 14px 8px;font-weight:600">⚠️ No phone provided</div>`;
+
+    const firstTimeWarning = isFirstTime ? `
+        <div style="background:#fef3c7;border-top:1px solid #fde68a;border-bottom:1px solid #fde68a;padding:8px 14px;font-size:11px;color:#92400e;font-weight:600;display:flex;align-items:center;gap:6px">
+            ⚠️ First-time customer — call on WhatsApp to verify before confirming
+        </div>` : '';
+
     return`<div class="inbox-card">
       <div class="inbox-card-header">
-        <div><div class="inbox-oc-name">${o.name}</div><div class="inbox-oc-meta">${metaStr}</div><div class="inbox-oc-time">🕐 ${ts}</div></div>
+        <div><div class="inbox-oc-name">${o.name||'(no name)'}</div><div class="inbox-oc-meta">${metaStr}</div><div class="inbox-oc-time">🕐 ${ts}</div></div>
         <span class="new-badge">NEW</span>
       </div>
+      ${phoneHtml}
+      ${firstTimeWarning}
       <div class="oc-items" style="border-top:1px solid #dcfce7">${itemsHtml}</div>
       ${gpsHtml}${addrHtml}
       <div class="oc-total"><span>Total</span><span>$${(o.total||0).toFixed(2)}</span></div>
       <div class="inbox-actions">
-        <button class="inbox-confirm-btn" onclick="confirmInboxOrder('${o.id}')">✅ Confirm &amp; Load</button>
+        ${isFirstTime && phone ? `<a href="https://wa.me/961${phone}?text=${encodeURIComponent('Hi '+(o.name||'')+', this is Le Kiosk confirming your order 🙏')}" target="_blank" class="inbox-confirm-btn" style="background:#3b82f6;text-decoration:none;flex:1;text-align:center;padding:9px 18px;border-radius:10px;color:#fff;font-size:12px;font-weight:800;text-transform:uppercase">📞 Verify on WA</a>` : ''}
+        <button class="inbox-confirm-btn" onclick="confirmInboxOrder('${o.id}')">✅ Confirm</button>
         <button class="inbox-decline-btn" onclick="declineInboxOrder('${o.id}')">✕ Decline</button>
       </div>
     </div>`;
-  }).join('');
+}).join('');
 }
 
 // ═══════════════════════════════════════════════════
