@@ -415,6 +415,7 @@ input,textarea,select{font-family:var(--font);outline:none}
         📥 Incoming
         <span class="inbox-badge" id="inbox-badge">0</span>
       </button>
+      <button class="topbar-btn tb-orders" id="customers-tab-btn" onclick="toggleCustomersView()">👥 Customers</button>
       <button class="topbar-btn tb-orders" id="orders-tab-btn" onclick="toggleOrdersView()">📋 Orders Log</button>
       <button class="topbar-btn tb-logout" onclick="logout()">Logout</button>
     </div>
@@ -444,7 +445,14 @@ input,textarea,select{font-family:var(--font);outline:none}
         <div class="inbox-empty"><div class="inbox-empty-icon">📭</div><div>No incoming orders yet</div></div>
       </div>
     </div>
-
+      <div id="customers-view" style="display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden">
+        <div style="padding:14px 20px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:12px;flex-shrink:0">
+          <h2 style="font-family:var(--brand);font-size:20px;font-weight:700;color:var(--a950);flex:1">👥 Customers</h2>
+          <input id="cust-search-pos" type="text" placeholder="Search name or phone…" oninput="filterCustomersPOS()"
+            style="padding:7px 12px;border:2px solid var(--a200);border-radius:8px;font-size:12px;width:200px">
+        </div>
+        <div id="customers-list-pos" style="flex:1;overflow-y:auto;padding:14px 20px"></div>
+      </div>
     <!-- ORDER PANEL -->
     <div class="order-panel">
       <div class="order-header">
@@ -652,7 +660,38 @@ async function bootPOS(){
   hideLoading();
   inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
+let showingCustomers = false;
 
+function toggleCustomersView() {
+  if(showingOrders) toggleOrdersView();
+  if(showingInbox) toggleInboxView();
+  showingCustomers = !showingCustomers;
+  document.getElementById('cat-sidebar').style.display = showingCustomers ? 'none' : 'flex';
+  document.getElementById('menu-panel').style.display = showingCustomers ? 'none' : 'block';
+  document.getElementById('customers-view').style.display = showingCustomers ? 'flex' : 'none';
+  document.getElementById('customers-tab-btn').classList.toggle('active', showingCustomers);
+  if(showingCustomers) renderCustomersPOS(customersData);
+}
+
+function filterCustomersPOS() {
+  const q = document.getElementById('cust-search-pos').value.toLowerCase();
+  const filtered = customersData.filter(c =>
+    (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q)
+  );
+  renderCustomersPOS(filtered);
+}
+
+function renderCustomersPOS(list) {
+  const el = document.getElementById('customers-list-pos');
+  if(!list.length){ el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--g400)">No customers found.</div>'; return; }
+  el.innerHTML = list.map(c => `
+    <div style="background:#fff;border:2px solid var(--g200);border-radius:12px;padding:12px 14px;margin-bottom:8px">
+      <div style="font-size:14px;font-weight:800;color:var(--a950)">${c.name||'(no name)'}</div>
+      <div style="font-size:12px;color:var(--g500);margin-top:2px">📞 +961 ${c.phone} · ${c.totalOrders||0} visits · $${(c.totalSpent||0).toFixed(2)} spent</div>
+      ${c.favoriteItems?.length ? `<div style="font-size:11px;color:var(--a700);margin-top:3px">🍽️ Usually: ${c.favoriteItems.join(', ')}</div>` : ''}
+      ${c.note ? `<div style="font-size:11px;color:var(--g500);margin-top:2px">📝 ${c.note}</div>` : ''}
+    </div>`).join('');
+}
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 
 async function ghRead(path){
