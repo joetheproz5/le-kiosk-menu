@@ -202,7 +202,6 @@
 
 <script>
 // ━━━━━━━━━━━━━━━━━
-    ━━━━━━━━━━━━━━━━━━━━━━━━
 let TESTING_MODE = false;
 // load from config
 fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', { cache: 'no-store' })
@@ -315,15 +314,26 @@ function showInboxToast(msg, type='') {
 }
 
 async function dispatchOrder(order) {
-    const res = await fetch(WORKER_URL + '/order', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(order)
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Worker error ' + res.status);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+        const res = await fetch(WORKER_URL + '/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(order),
+            signal: controller.signal
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Worker error ' + res.status);
+        }
+
+        return res.json();
+    } finally {
+        clearTimeout(timeout);
     }
-    return res.json();
 }
 
 // ORDER MODE
