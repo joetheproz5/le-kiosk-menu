@@ -193,6 +193,7 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
     </div>
     <div class="header-actions">
       <span class="session-badge" id="session-timer"></span>
+      <button class="btn btn-sm btn-ghost" onclick="openBlockList()" style="color:var(--a950)">🚫 Block List</button>
       <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
       <button class="btn btn-save" id="save-btn" onclick="saveMenu()">💾 Save</button>
       <button class="btn btn-logout" onclick="logout()">Logout</button>
@@ -211,6 +212,22 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
     <button class="preview-close" onclick="togglePreview()">✕</button>
   </div>
   <div class="preview-body" id="preview-body"></div>
+</div>
+  <div id="blocklist-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:301;align-items:center;justify-content:center;padding:20px">
+  <div class="modal" style="max-width:520px">
+    <h3>🚫 Customer Block List</h3>
+    <p>Phone numbers in this list cannot place orders. 8-digit Lebanese format (no +961).</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input id="bl-phone" class="inp" type="tel" placeholder="76840244" maxlength="8" style="margin-bottom:0;flex:1">
+      <input id="bl-reason" class="inp" type="text" placeholder="Reason (optional)" style="margin-bottom:0;flex:1.2">
+      <button class="btn btn-add" onclick="addBlockEntry()">＋ Block</button>
+    </div>
+    <div id="bl-list" style="max-height:320px;overflow-y:auto;border:1px solid var(--a200);border-radius:10px"></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn btn-ghost btn-sm" onclick="closeBlockList()">Close</button>
+      <button class="btn btn-save btn-sm" id="bl-save-btn" onclick="saveBlockList()">💾 Save</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -331,6 +348,70 @@ function logout(){
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pw-input').value='';
   document.getElementById('pw-input').focus();
+}
+// ── BLOCK LIST ─────────────────────────────────────────
+let blockList=[], blockSha=null, blockDirty=false;
+
+async function openBlockList(){
+    showLoading('Loading block list…');
+    try{
+        const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`);
+        if(res.ok){const j=await res.json(); blockList=j.data||[]; blockSha=j.sha;}
+        else { blockList=[]; blockSha=null; }
+    }catch(_){ blockList=[]; blockSha=null; }
+    blockDirty=false;
+    renderBlockList();
+    document.getElementById('blocklist-overlay').style.display='flex';
+    hideLoading();
+}
+function closeBlockList(){
+    if(blockDirty && !confirm('Discard unsaved changes?')) return;
+    document.getElementById('blocklist-overlay').style.display='none';
+}
+function renderBlockList(){
+    const list=document.getElementById('bl-list');
+    if(!blockList.length){list.innerHTML='<div style="padding:24px;text-align:center;color:var(--g400);font-size:13px">No blocked numbers.</div>';return;}
+    list.innerHTML=blockList.map((b,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--a100)">
+            <div style="flex:1">
+                <div style="font-weight:700;color:var(--a950);font-size:13px">📞 ${b.phone}</div>
+                <div style="font-size:11px;color:var(--g500)">${b.reason||'No reason'} · ${new Date(b.blockedAt).toLocaleDateString()}</div>
+            </div>
+            <button class="btn-danger" onclick="removeBlockEntry(${i})">Unblock</button>
+        </div>`).join('');
+}
+function addBlockEntry(){
+    const raw=document.getElementById('bl-phone').value.trim();
+    const reason=document.getElementById('bl-reason').value.trim();
+    const d=raw.replace(/\D/g,'');
+    let phone=null;
+    if(d.length===8) phone=d;
+    else if(d.length===11 && d.startsWith('961')) phone=d.slice(3);
+    if(!phone){showToast('Invalid phone — must be 8 digits','error');return;}
+    if(blockList.some(b=>b.phone===phone)){showToast('Already blocked','error');return;}
+    blockList.unshift({phone,reason,blockedAt:new Date().toISOString()});
+    blockDirty=true;
+    document.getElementById('bl-phone').value='';
+    document.getElementById('bl-reason').value='';
+    renderBlockList();
+}
+function removeBlockEntry(i){
+    blockList.splice(i,1); blockDirty=true; renderBlockList();
+}
+async function saveBlockList(){
+    const btn=document.getElementById('bl-save-btn'); btn.disabled=true;
+    showLoading('Saving block list…');
+    try{
+        const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`,{
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({data:blockList,message:'Update block list',sha:blockSha})
+        });
+        if(!res.ok){const e=await res.json();throw new Error(e.error||res.status);}
+        const saved=await res.json(); blockSha=saved.sha; blockDirty=false;
+        showToast('Block list saved ✓','success');
+    }catch(e){showToast('Save failed: '+e.message,'error');}
+    btn.disabled=false; hideLoading();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────
