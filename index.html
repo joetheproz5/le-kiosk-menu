@@ -86,38 +86,33 @@
         #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
         #send-order-btn:hover { background: #16a34a; }
         #send-order-btn:disabled { background: #9ca3af; cursor: not-allowed; }
-        /* Inbox status toast */
         #inbox-toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1c0f00; color: #fef3c7; padding: 10px 20px; border-radius: 100px; font-size: 12px; font-weight: 700; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         #inbox-toast.show { transform: translateX(-50%) translateY(0); }
         #inbox-toast.ok  { background: #166534; }
         #inbox-toast.err { background: #dc2626; }
 
-        /* ── OPEN / CLOSED STATUS BADGE (top-right) ── */
-        /* ── OPEN / CLOSED STATUS BADGE (top-right) ── */
-            #status-badge { position: fixed; top: 12px; right: 12px; z-index: 60; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; background: #fef3c7; border: 1px solid #fde68a; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: opacity 0.25s ease, transform 0.25s ease; }
-            #status-badge.hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
-            #status-badge.open   { color: #166534; }
-            #status-badge.closed { color: #991b1b; }
-            #status-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-            #status-badge.open .dot   { background: #22c55e; animation: statusPulse 2s infinite; }
-            #status-badge.closed .dot { background: #ef4444; }
-            @keyframes statusPulse {
-                0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.7); }
-                70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
-                100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-            }
-
+        /* OPEN / CLOSED STATUS BADGE */
+        #status-badge { position: fixed; top: 12px; right: 12px; z-index: 60; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; background: #fef3c7; border: 1px solid #fde68a; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: opacity 0.25s ease, transform 0.25s ease; }
+        #status-badge.hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
+        #status-badge.open   { color: #166534; }
+        #status-badge.closed { color: #991b1b; }
+        #status-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        #status-badge.open .dot   { background: #22c55e; animation: statusPulse 2s infinite; }
+        #status-badge.closed .dot { background: #ef4444; }
+        @keyframes statusPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.7); }
+            70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
     </style>
 </head>
 <body class="pb-32">
 
-<!-- Open / Closed badge -->
 <div id="status-badge" class="closed" aria-live="polite">
     <span class="dot"></span>
     <span id="status-text">…</span>
 </div>
 
-<!-- Inbox status indicator -->
 <div id="inbox-toast"></div>
 
 <header class="text-center pt-8 pb-6 px-4 max-w-md mx-auto">
@@ -163,7 +158,6 @@
     </div>
 </section>
 
-<!-- FLOATING CHECKOUT PILL -->
 <div id="checkout-pill">
     <div class="pill-inner" id="checkout-pill-inner">
         <span class="pill-count" id="pill-count">0 items</span>
@@ -172,7 +166,6 @@
     </div>
 </div>
 
-<!-- CHECKOUT BOTTOM SHEET -->
 <div id="checkout-sheet">
     <div id="sheet-backdrop"></div>
     <div id="sheet-body">
@@ -187,7 +180,6 @@
     </div>
 </div>
 
-<!-- BOTTOM BAR -->
 <div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
     <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
         <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
@@ -210,10 +202,7 @@
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// TESTING MODE — set false to re-enable 6PM-12AM time lock
 const TESTING_MODE = true;
-
-// ── CLOUDFLARE WORKER CONFIG ─────────────────────────────
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -228,7 +217,6 @@ const PILL_COLORS = {
     dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // DELIVERY ZONES
 const CENTER_LAT = 33.821091538427524;
 const CENTER_LNG = 35.56496110422372;
@@ -241,7 +229,6 @@ const ZONE_C_POLYGON = [
     [33.797,35.502],[33.816,35.490],[33.835,35.492],
     [33.843,35.542],[33.858,35.542],[33.864,35.538],
 ];
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 function distKm(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 function inEllipse(la,ln,cL,cN,lS,nS){return((la-cL)/lS)**2+((ln-cN)/nS)**2<=1;}
@@ -254,9 +241,27 @@ function getDeliveryZone(lat,lng){
     return{zone:'none',fee:0,label:'Outside delivery area',feeLabel:'$0.00',cls:'no-del',emoji:'🚫',canDeliver:false};
 }
 
-// ── STATE ──────────────────────────────────────────────────
+// PHONE HELPERS
+function normalizePhone(raw){
+    const d=(raw||'').replace(/\D/g,'');
+    if(d.length===8) return d;
+    if(d.length===11 && d.startsWith('961')) return d.slice(3);
+    return null;
+}
+async function isPhoneBlocked(phone){
+    try{
+        const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`,{cache:'no-store'});
+        if(!res.ok) return false;
+        const j=await res.json();
+        const data=j.data||[];
+        return Array.isArray(data) && data.some(b=>b.phone===phone);
+    }catch(_){ return false; }
+}
+
+// STATE
 let orderMode=false,cart={},addonSel={},shishaSel={},itemMeta={};
 let selectedType=null,detectedZone=null,userGPS=null,deliveryAddress='',changeFor='';
+let customerName='',customerPhone='';
 let _addonMap=[];
 
 function isOpen(){
@@ -265,19 +270,19 @@ function isOpen(){
     return Math.floor(lbMin/60)>=18;
 }
 
-// ── OPEN/CLOSED BADGE ─────────────────────────────────────
+// OPEN/CLOSED BADGE
 function updateStatusBadge(){
-    const badge = document.getElementById('status-badge');
-    const text  = document.getElementById('status-text');
-    if(!badge || !text) return;
-    const open = isOpen();
-    badge.classList.toggle('open', open);
-    badge.classList.toggle('closed', !open);
-    text.textContent = open ? 'Open' : 'Closed';
-    badge.title = open ? 'We are open — 6 PM to 12 AM' : 'Currently closed — opens 6 PM';
+    const badge=document.getElementById('status-badge');
+    const text=document.getElementById('status-text');
+    if(!badge||!text) return;
+    const open=isOpen();
+    badge.classList.toggle('open',open);
+    badge.classList.toggle('closed',!open);
+    text.textContent=open?'Open':'Closed';
+    badge.title=open?'We are open — 6 PM to 12 AM':'Currently closed — opens 6 PM';
 }
 
-// ── INBOX TOAST ───────────────────────────────────────────
+// INBOX TOAST
 let _toastTimer;
 function showInboxToast(msg, type='') {
     const t = document.getElementById('inbox-toast');
@@ -286,12 +291,10 @@ function showInboxToast(msg, type='') {
     _toastTimer = setTimeout(() => { t.className = ''; }, 4000);
 }
 
-// ── SEND ORDER TO POS via Cloudflare Worker ──────────────
 async function dispatchOrder(order) {
     const res = await fetch(WORKER_URL + '/order', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(order)
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(order)
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -300,7 +303,7 @@ async function dispatchOrder(order) {
     return res.json();
 }
 
-// ── ORDER MODE ────────────────────────────────────────────
+// ORDER MODE
 function toggleOrderMode(){
     if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
     orderMode=!orderMode;
@@ -335,7 +338,6 @@ function getItemsSubtotal(){
 function getDeliveryFee(){return selectedType==='delivery'&&detectedZone&&detectedZone.canDeliver?detectedZone.fee:0;}
 function getGrandTotal(){return getItemsSubtotal()+getDeliveryFee();}
 
-// ── PILL ──────────────────────────────────────────────────
 function updatePill(){
     const count=getTotalItems();
     document.getElementById('checkout-pill').classList.toggle('show',count>0&&orderMode);
@@ -345,17 +347,22 @@ function updatePill(){
     }
 }
 
-// ── SHEET ─────────────────────────────────────────────────
+// SHEET
 function openSheet(){renderSheet();document.getElementById('checkout-sheet').classList.add('open');document.body.style.overflow='hidden';}
 function closeSheet(){document.getElementById('checkout-sheet').classList.remove('open');document.body.style.overflow='';}
 
 function renderSheet(){
     _addonMap=[];
+    // Preserve user inputs across re-renders
     const addrEl=document.getElementById('delivery-address-ta');
     if(addrEl) deliveryAddress=addrEl.value;
     const changeEl=document.getElementById('sheet-change');
     if(changeEl) changeFor=changeEl.value;
-    const existingName=(document.getElementById('sheet-name')||{}).value||'';
+    const nameElPrev=document.getElementById('sheet-name');
+    if(nameElPrev) customerName=nameElPrev.value;
+    const phoneElPrev=document.getElementById('sheet-phone');
+    if(phoneElPrev) customerPhone=phoneElPrev.value;
+
     const entries=Object.entries(cart).filter(([,v])=>v>0);
     if(!entries.length) return;
 
@@ -383,10 +390,14 @@ function renderSheet(){
 
     html+=`<div class="sheet-divider"></div>
     <div class="sheet-section-title">👤 Your Details</div>
+    <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Phone Number *</label>
+        <input id="sheet-phone" type="tel" inputmode="tel" class="sheet-input" style="margin-top:6px" placeholder="03 123 456" value="${customerPhone}" autocomplete="tel">
+        <div class="err-text" id="err-phone">Please enter a valid Lebanese phone number (8 digits).</div>
+    </div>
     <div style="margin-bottom:12px">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
-        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Elie" value="${existingName}" autocomplete="off">
-        <div class="err-text" id="err-name">Please enter your name.</div>
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name <span style="opacity:.6;font-weight:500;text-transform:none">(optional)</span></label>
+        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Elie" value="${customerName}" autocomplete="name">
     </div>
     <div style="margin-bottom:4px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
@@ -427,7 +438,16 @@ function renderLocationBox(){
     }
     if(!detectedZone.canDeliver){
         const mu=userGPS?`https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}`:'';
-        return`<div class="location-detect-box no-delivery"><div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div><div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>You're welcome to <strong>dine in</strong> or <strong>take away</strong>!</div><div class="zone-badge no-del" style="margin-top:8px">🚫 No delivery available</div>${mu?`<div style="margin-top:8px"><a href="${mu}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}<button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button></div>`;
+        return`<div class="location-detect-box no-delivery">
+            <div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div>
+            <div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>But you can still order — pick one:</div>
+            <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
+                <button type="button" class="locate-main-btn" style="background:#f59e0b;font-size:11px;margin-top:0" data-select-type="dinein">🪑 Dine In</button>
+                <button type="button" class="locate-main-btn" style="background:#22c55e;color:#fff;font-size:11px;margin-top:0" data-select-type="takeaway">🥡 Takeaway</button>
+            </div>
+            ${mu?`<div style="margin-top:10px"><a href="${mu}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}
+            <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button>
+        </div>`;
     }
     const mu=userGPS?`https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}`:'';
     return`<div class="location-detect-box detected"><div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div><div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong></div>${mu?`<div style="margin-top:8px"><a href="${mu}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}<button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Change location</button><div style="margin-top:10px;text-align:left"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label><textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea></div></div>`;
@@ -462,12 +482,27 @@ function resetLocation(){
     userGPS=null;detectedZone=null;renderSheet();
 }
 
-// ── SEND ORDER ────────────────────────────────────────────
+// SEND ORDER
 async function sendOrder(){
     const nameEl=document.getElementById('sheet-name');
+    const phoneEl=document.getElementById('sheet-phone');
     const name=nameEl?nameEl.value.trim():'';
+    const rawPhone=phoneEl?phoneEl.value.trim():'';
+    const phone=normalizePhone(rawPhone);
     let valid=true;
 
+    // Phone (mandatory)
+    const phoneErr=document.getElementById('err-phone');
+    if(!phone){
+        if(phoneErr) phoneErr.classList.add('show');
+        if(phoneEl) phoneEl.classList.add('error');
+        valid=false;
+    } else {
+        if(phoneErr) phoneErr.classList.remove('show');
+        if(phoneEl) phoneEl.classList.remove('error');
+    }
+
+    // Flavors (mandatory if applicable)
     const flavorErrors=[];
     Object.entries(cart).filter(([,v])=>v>0).forEach(([key])=>{
         const meta=itemMeta[key];
@@ -487,13 +522,6 @@ async function sendOrder(){
         });
     }
 
-    if(!name){
-        const e=document.getElementById('err-name');if(e)e.classList.add('show');
-        if(nameEl)nameEl.classList.add('error');valid=false;
-    } else {
-        const e=document.getElementById('err-name');if(e)e.classList.remove('show');
-        if(nameEl)nameEl.classList.remove('error');
-    }
     if(!selectedType){
         const e=document.getElementById('err-type');if(e)e.classList.add('show');valid=false;
     } else {
@@ -510,7 +538,16 @@ async function sendOrder(){
     if(!valid) return;
 
     const sendBtn=document.getElementById('send-order-btn');
-    if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Sending…';}
+    if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Checking…';}
+
+    // Block list check
+    if(await isPhoneBlocked(phone)){
+        if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Send Order on WhatsApp';}
+        showInboxToast('🚫 This number is blocked. Please contact us directly.','err');
+        return;
+    }
+
+    if(sendBtn){sendBtn.textContent='⏳ Sending…';}
 
     const entries=Object.entries(cart).filter(([,v])=>v>0);
     const timeStr=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
@@ -537,7 +574,9 @@ async function sendOrder(){
         status:'pending',
         timestamp:new Date().toISOString(),
         source:'menu',
-        name,orderType:selectedType,
+        name: name || '(no name)',
+        phone,
+        orderType:selectedType,
         deliveryZone:(selectedType==='delivery'&&detectedZone)?detectedZone.label:null,
         deliveryFee:fee,
         gps:userGPS||null,
@@ -559,7 +598,8 @@ async function sendOrder(){
     }
 
     let msg='🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
-    msg+=`👤 *Name:* ${name}\n`;
+    msg+=`👤 *Name:* ${name || '(no name)'}\n`;
+    msg+=`📞 *Phone:* +961 ${phone}\n`;
     msg+=`📦 *Type:* ${typeNames[selectedType]}\n`;
     msg+=`🕐 *Time:* ${timeStr}\n`;
     if(selectedType==='delivery'){
@@ -583,7 +623,7 @@ async function sendOrder(){
     closeSheet();
 }
 
-// ── DELEGATED CLICKS ──────────────────────────────────────
+// DELEGATED CLICKS
 document.addEventListener('click',function(e){
     if(e.target.closest('#order-mode-btn')){toggleOrderMode();return;}
     if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
@@ -617,7 +657,7 @@ document.addEventListener('click',function(e){
     document.getElementById('sheet-scroll').scrollTop=scrollTop;
 });
 
-// ── MENU RENDER ───────────────────────────────────────────
+// MENU RENDER
 function renderPills(item){
     if(!item.flavors||!item.flavors.length) return '';
     const pc=PILL_COLORS[item.flavorColor]||PILL_COLORS.amber;
@@ -668,17 +708,13 @@ ctoggle.addEventListener('click',()=>{bubbleOpen=!bubbleOpen;bubble.classList.to
 document.addEventListener('click',e=>{if(bubbleOpen&&!bubble.contains(e.target)&&e.target!==ctoggle&&!ctoggle.contains(e.target)){bubbleOpen=false;bubble.classList.remove('open');}});
 
 // Boot
-// Boot
 updateStatusBadge();
 setInterval(updateStatusBadge, 60000);
 
-// Hide status badge once user scrolls past the header (so it doesn't sit above the sticky nav)
 (function(){
     const badge = document.getElementById('status-badge');
     if(!badge) return;
-    function onScroll(){
-        badge.classList.toggle('hidden', window.scrollY > 60);
-    }
+    function onScroll(){ badge.classList.toggle('hidden', window.scrollY > 60); }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 })();
@@ -688,7 +724,6 @@ loadMenu().then(data=>{
     initMenu(data);initScrollSpy(data);
     itemMeta={};
     data.forEach(cat=>{if(cat.type==='addons')return;(cat.items||[]).filter(item=>item.active!==false).forEach(item=>{itemMeta[`${cat.key}|${item.name}|${item.price}`]=item;});});});
-
 </script>
 </body>
 </html>
