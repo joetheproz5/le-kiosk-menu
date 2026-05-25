@@ -1,1 +1,22 @@
-
+[
+  {
+    "phone": "81345836",
+    "name": "joe ghaoui",
+    "note": "",
+    "firstSeen": "2026-05-25T11:33:13.395Z",
+    "lastSeen": "2026-05-25T11:33:13.395Z",
+    "totalOrders": 1,
+    "totalSpent": 13,
+    "orderIds": [
+      "ORD-1779708791670"
+    ],
+    "itemFreq": {
+      "Loaded Fries": 1,
+      "Chicken Wings (8pcs)": 1
+    },
+    "favoriteItems": [
+      "Loaded Fries",
+      "Chicken Wings (8pcs)"
+    ]
+  }
+]
