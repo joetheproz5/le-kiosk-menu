@@ -1,5 +1,38 @@
 [
   {
+    "id": "MENU-1779699590964",
+    "status": "pending",
+    "timestamp": "2026-05-25T08:59:50.964Z",
+    "source": "menu",
+    "name": "Jie",
+    "phone": "81345836",
+    "orderType": "dinein",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "gps": null,
+    "address": null,
+    "changeFor": null,
+    "items": [
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      },
+      {
+        "name": "Loaded Fries",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "total": 12
+  },
+  {
     "id": "MENU-1779699459693",
     "status": "confirmed",
     "timestamp": "2026-05-25T08:57:39.693Z",
