@@ -695,7 +695,10 @@ async function initAdmin(){
   if(cfgRes.ok){
     const j=await cfgRes.json();
     document.getElementById('testing-toggle').checked = !!(j.data && j.data.testingMode);
-document.getElementById('loyalty-toggle').checked = !!(j.data && j.data.loyaltyEnabled);
+document.getElementById('loyalty-toggle').checked =
+  j.data && typeof j.data.loyaltyEnabled === 'boolean'
+    ? j.data.loyaltyEnabled
+    : true;
   }
 }catch(_){}
     renderAll();
