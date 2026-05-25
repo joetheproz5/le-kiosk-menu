@@ -213,7 +213,8 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
   </div>
   <div class="preview-body" id="preview-body"></div>
 </div>
-  <div id="blocklist-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:301;align-items:center;justify-content:center;padding:20px">
+
+<div id="blocklist-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:301;align-items:center;justify-content:center;padding:20px">
   <div class="modal" style="max-width:520px">
     <h3>🚫 Customer Block List</h3>
     <p>Phone numbers in this list cannot place orders. 8-digit Lebanese format (no +961).</p>
@@ -349,7 +350,8 @@ function logout(){
   document.getElementById('pw-input').value='';
   document.getElementById('pw-input').focus();
 }
-// ── BLOCK LIST ─────────────────────────────────────────
+
+// ── BLOCK LIST ─────────────────────────────────────────────────────────
 let blockList=[], blockSha=null, blockDirty=false;
 
 async function openBlockList(){
@@ -398,16 +400,25 @@ function addBlockEntry(){
 function removeBlockEntry(i){
     blockList.splice(i,1); blockDirty=true; renderBlockList();
 }
+
+// ── FIX: Always fetch fresh SHA before writing — handles new file (sha=null) and existing ──
 async function saveBlockList(){
     const btn=document.getElementById('bl-save-btn'); btn.disabled=true;
     showLoading('Saving block list…');
     try{
+        // Fetch latest SHA fresh each time — solves "SHA not supplied" for new files
+        // and "SHA mismatch" if someone else wrote in between
+        let latestSha=null;
+        try{
+            const r=await fetch(`${WORKER_URL}/gh?file=blocklist.json`);
+            if(r.ok){ const j=await r.json(); latestSha=j.sha||null; }
+        }catch(_){}
         const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`,{
             method:'PUT',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({data:blockList,message:'Update block list',sha:blockSha})
+            body:JSON.stringify({data:blockList,message:'Update block list',sha:latestSha})
         });
-        if(!res.ok){const e=await res.json();throw new Error(e.error||res.status);}
+        if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
         const saved=await res.json(); blockSha=saved.sha; blockDirty=false;
         showToast('Block list saved ✓','success');
     }catch(e){showToast('Save failed: '+e.message,'error');}
