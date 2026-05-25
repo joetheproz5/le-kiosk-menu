@@ -439,12 +439,16 @@ async function saveBlockList(){
 // ── INIT ──────────────────────────────────────────────────────────────
 async function initAdmin(){
   showLoading('Loading menu…');
-  try{await fetchMenu();renderAll();}
-  catch(e){
-    hideLoading();
-    document.getElementById('editor-root').innerHTML=`<div style="text-align:center;padding:48px 24px;background:#fff;border-radius:16px;border:1px solid #fde68a"><div style="font-size:32px;margin-bottom:12px">⚠️</div><div style="font-family:var(--brand);font-size:20px;font-weight:700;color:#78350f;margin-bottom:8px">Could not load menu</div><div style="font-size:13px;color:#6b7280;margin-bottom:20px;max-width:340px;margin-left:auto;margin-right:auto">${e.message}</div><button class="btn btn-save" onclick="retryLoad()" style="margin:0 auto">🔄 Retry Load</button></div>`;
-    showToast(e.message,'error');return;
+  try{
+    await fetchMenu();
+    // ← ADD THIS: load current testing mode
+    try{
+      const cfgRes = await fetch(`${WORKER_URL}/gh?file=config.json`);
+      if(cfgRes.ok){ const j = await cfgRes.json(); document.getElementById('testing-toggle').checked = !!(j.data&&j.data.testingMode); }
+    }catch(_){}
+    renderAll();
   }
+  catch(e){ /* ... existing error handling ... */ }
   hideLoading();
 }
 async function retryLoad(){
