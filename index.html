@@ -204,10 +204,28 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let TESTING_MODE = false;
 // load from config
-fetch('config.json?v='+Date.now())
-  .then(r=>r.ok?r.json():null)
-  .then(cfg=>{ if(cfg&&cfg.testingMode!==undefined) TESTING_MODE=!!cfg.testingMode; })
-  .catch(()=>{});const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
+fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', { cache: 'no-store' })
+  .then(r => r.ok ? r.json() : null)
+  .then(j => {
+    if(j && j.data && j.data.testingMode !== undefined) TESTING_MODE = !!j.data.testingMode;
+  })
+  .catch(() => {})
+  .finally(() => {
+    updateStatusBadge();
+    setInterval(updateStatusBadge, 60000);
+
+    loadMenu().then(data => {
+      if(!data) return;
+      initMenu(data); initScrollSpy(data);
+      itemMeta = {};
+      data.forEach(cat => {
+        if(cat.type==='addons') return;
+        (cat.items||[]).filter(item => item.active!==false).forEach(item => {
+          itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
+        });
+      });
+    });
+  });
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const PILL_COLORS = {
