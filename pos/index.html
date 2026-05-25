@@ -562,6 +562,12 @@ const LOCKOUT_MS   = 2 * 60 * 1000;
 const SESSION_MS   = 4 * 60 * 60 * 1000;
 const WA_NUMBER    = '96176840244';
 const ZONE_FEES    = { A: 0.50, B: 1.00, C: 1.50 };
+const LOYALTY_TARGET = 10;
+const LOYALTY_REWARD_OPTIONS = [
+  { type:'soft_drink', label:'Free Soft Drink' },
+  { type:'discount_10', label:'10% Discount' },
+  { type:'ice_cream_cup', label:'Free Ice Cream Cup' }
+];
 const CAT_ICONS    = {
   appetizers:'🍟', sandwiches:'🥪', burgers:'🍔', sajj:'🫓',
   desserts:'🍨', shisha:'💨', beverages:'🥤', sweet:'🍫', savory:'🧀'
@@ -577,6 +583,7 @@ let sessionExpiry=0,sessionTimer=null,sessionTick=null,sessionListenersAttached=
 let pendingModalFn=null,inboxPollInterval=null,activeCatKey=null;
 let lastInboxCount=0,inboxWritePending=false;
 let loadedInboxOrderId=null;
+let selectedRewardType = null;
 
 // ── Customer profile state ──
 let customersData = [];   // full array loaded from customers.json
