@@ -1,5 +1,79 @@
 [
   {
+    "id": "MENU-1779714996563",
+    "status": "pending",
+    "timestamp": "2026-05-25T13:16:36.563Z",
+    "source": "menu",
+    "name": "Joe",
+    "phone": "81345836",
+    "orderType": "delivery",
+    "deliveryZone": "Zone C",
+    "deliveryFee": 1.5,
+    "gps": {
+      "lat": 33.8081788,
+      "lng": 35.5385327
+    },
+    "address": null,
+    "changeFor": 30,
+    "items": [
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Melted Cheddar",
+            "price": 1
+          },
+          {
+            "label": "Buffalo Sauce",
+            "price": 0.6
+          }
+        ]
+      },
+      {
+        "name": "Mini Pancakes (15pcs)",
+        "price": 7,
+        "priceStr": "$7",
+        "qty": 1,
+        "flavor": null,
+        "addons": [
+          {
+            "label": "Hershey's Chocolate",
+            "price": 2
+          },
+          {
+            "label": "Lotus",
+            "price": 2
+          },
+          {
+            "label": "Pink Chocolate",
+            "price": 2
+          },
+          {
+            "label": "Kinder",
+            "price": 2
+          },
+          {
+            "label": "Oreo",
+            "price": 2
+          },
+          {
+            "label": "Strawberry",
+            "price": 1
+          },
+          {
+            "label": "Banana",
+            "price": 1
+          }
+        ]
+      }
+    ],
+    "total": 27.1
+  },
+  {
     "id": "MENU-1779714650041",
     "status": "confirmed",
     "timestamp": "2026-05-25T13:10:50.041Z",
