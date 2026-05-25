@@ -197,6 +197,10 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
         <input type="checkbox" id="testing-toggle" style="width:15px;height:15px;cursor:pointer;accent-color:var(--a400)">
         Test Mode
       </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--a200)">
+  <input type="checkbox" id="loyalty-toggle" style="width:15px;height:15px;cursor:pointer;accent-color:var(--a400)">
+  Loyalty
+</label>
       <button class="btn btn-sm btn-ghost" onclick="openBlockList()" style="color:var(--a950)">🚫 Block List</button>
       <button class="btn btn-sm btn-ghost" onclick="openCustomersAdmin()" style="color:var(--a950)">👥 Customers</button>
       <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
@@ -341,6 +345,9 @@ document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='E
 
 document.getElementById('testing-toggle').addEventListener('change', function(){
   setTestingMode(this.checked);
+});
+  document.getElementById('loyalty-toggle').addEventListener('change', function(){
+  setLoyaltyMode(this.checked);
 });
 // ── SESSION ───────────────────────────────────────────────────────────
 function startSession(){
@@ -687,7 +694,8 @@ async function initAdmin(){
   const cfgRes=await fetch(`${WORKER_URL}/supabase/config`,{cache:'no-store'});
   if(cfgRes.ok){
     const j=await cfgRes.json();
-    document.getElementById('testing-toggle').checked=!!(j.data&&j.data.testingMode);
+    document.getElementById('testing-toggle').checked = !!(j.data && j.data.testingMode);
+document.getElementById('loyalty-toggle').checked = !!(j.data && j.data.loyaltyEnabled);
   }
 }catch(_){}
     renderAll();
@@ -762,6 +770,39 @@ async function setTestingMode(enabled){
   }catch(e){
     showToast('Failed: '+e.message,'error');
     document.getElementById('testing-toggle').checked=!enabled;
+  }
+
+  hideLoading();
+}
+  async function setLoyaltyMode(enabled){
+  showLoading(enabled ? 'Enabling loyalty…' : 'Disabling loyalty…');
+
+  try{
+    const cfgRes = await fetch(`${WORKER_URL}/supabase/config`, { cache:'no-store' });
+    let cfg = {};
+
+    if(cfgRes.ok){
+      const j = await cfgRes.json();
+      cfg = j.data || {};
+    }
+
+    cfg.loyaltyEnabled = enabled;
+
+    const saveRes = await fetch(`${WORKER_URL}/supabase/config`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ data: cfg })
+    });
+
+    if(!saveRes.ok){
+      const e = await saveRes.json().catch(()=>({}));
+      throw new Error(e.error || saveRes.status);
+    }
+
+    showToast(enabled ? 'Loyalty enabled' : 'Loyalty disabled', 'success');
+  }catch(e){
+    showToast('Failed: ' + e.message, 'error');
+    document.getElementById('loyalty-toggle').checked = !enabled;
   }
 
   hideLoading();
