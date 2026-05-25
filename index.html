@@ -736,26 +736,15 @@ function initScrollSpy(menuData){
 }
 
 // Contact bubble
-const bubble=document.getElementById('contact-bubble'),ctoggle=document.getElementById('contact-toggle');
-let bubbleOpen=false;
-ctoggle.addEventListener('click',()=>{bubbleOpen=!bubbleOpen;bubble.classList.toggle('open',bubbleOpen);});
-document.addEventListener('click',e=>{if(bubbleOpen&&!bubble.contains(e.target)&&e.target!==ctoggle&&!ctoggle.contains(e.target)){bubbleOpen=false;bubble.classList.remove('open');}});
-
-// Boot
-// Boot
-updateStatusBadge();
-setInterval(updateStatusBadge, 60000);
-
-// Boot — wait for config before showing status or loading menu
-// Contact bubble
-const bubble=document.getElementById('contact-bubble'),ctoggle=document.getElementById('contact-toggle');
-let bubbleOpen=false;
-ctoggle.addEventListener('click',()=>{bubbleOpen=!bubbleOpen;bubble.classList.toggle('open',bubbleOpen);});
-document.addEventListener('click',e=>{if(bubbleOpen&&!bubble.contains(e.target)&&e.target!==ctoggle&&!ctoggle.contains(e.target)){bubbleOpen=false;bubble.classList.remove('open');}});
+const bubble = document.getElementById('contact-bubble');
+const ctoggle = document.getElementById('contact-toggle');
+let bubbleOpen = false;
+ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
+document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); } });
 
 // Scroll spy for status badge
 (function(){
-    const badge=document.getElementById('status-badge');
+    const badge = document.getElementById('status-badge');
     if(!badge) return;
     function onScroll(){ badge.classList.toggle('hidden', window.scrollY > 60); }
     window.addEventListener('scroll', onScroll, { passive: true });
