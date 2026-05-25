@@ -1,5 +1,30 @@
 [
   {
+    "id": "MENU-1779699771537",
+    "status": "pending",
+    "timestamp": "2026-05-25T09:02:51.537Z",
+    "source": "menu",
+    "name": "(no name)",
+    "phone": "81345836",
+    "orderType": "dinein",
+    "deliveryZone": null,
+    "deliveryFee": 0,
+    "gps": null,
+    "address": null,
+    "changeFor": null,
+    "items": [
+      {
+        "name": "Fries Box",
+        "price": 5,
+        "priceStr": "$5",
+        "qty": 1,
+        "flavor": null,
+        "addons": []
+      }
+    ],
+    "total": 5
+  },
+  {
     "id": "MENU-1779699590964",
     "status": "declined",
     "timestamp": "2026-05-25T08:59:50.964Z",
