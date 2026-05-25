@@ -315,8 +315,15 @@ async function tryLogin(){
   }
 }
 document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
-(function initDots(){const l=getLockout();renderAttemptDots(l.attempts||0);if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}})();
+(function initDots(){
+  const l=getLockout();
+  renderAttemptDots(l.attempts||0);
+  if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}
+})();
 
+document.getElementById('testing-toggle').addEventListener('change', function(){
+  setTestingMode(this.checked);
+});
 // ── SESSION ───────────────────────────────────────────────────────────
 function startSession(){
   resetSessionTimer();
@@ -458,7 +465,33 @@ async function fetchMenu(){
   const {data,sha}=await res.json();
   fileSha=sha; menuData=data;
 }
-
+async function setTestingMode(enabled){
+  showLoading(enabled?'Enabling test mode…':'Disabling test mode…');
+  try{
+    const res=await fetch(`${WORKER_URL}/gh?file=menu.json`);
+    if(!res.ok) throw new Error('Could not read menu');
+    const {data,sha}=await res.json();
+    // data is an array (the menu categories); wrap it with a flag
+    // But menu.json is a flat array — store flag as a special object at index 0
+    // Instead write to a separate config.json
+    const cfgRes=await fetch(`${WORKER_URL}/gh?file=config.json`);
+    let cfgSha=null;
+    let cfg={};
+    if(cfgRes.ok){const j=await cfgRes.json();cfg=j.data||{};cfgSha=j.sha;}
+    cfg.testingMode=enabled;
+    const saveRes=await fetch(`${WORKER_URL}/gh?file=config.json`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:cfg,message:(enabled?'Enable':'Disable')+' testing mode',sha:cfgSha})
+    });
+    if(!saveRes.ok){const e=await saveRes.json();throw new Error(e.error||saveRes.status);}
+    showToast(enabled?'🧪 Test mode ON — live in ~30s':'✅ Test mode OFF — live in ~30s','success');
+  }catch(e){
+    showToast('Failed: '+e.message,'error');
+    document.getElementById('testing-toggle').checked=!enabled;
+  }
+  hideLoading();
+}
 async function saveMenu(){
   collectAll();
   const clean=menuData.map(sec=>{const s={...sec};delete s._hasFlav;return s;});
