@@ -742,12 +742,29 @@ async function ghWrite(path,data,message){
 // MENU LOAD
 // ═══════════════════════════════════════════════════
 async function loadMenu(){
-  const res=await fetch('../menu.json?v='+Date.now());
-  if(!res.ok) throw new Error('Could not load menu.json');
-  const all=await res.json();
+  let all = null;
+
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/menu`, { cache:'no-store' });
+    if(!res.ok) throw new Error('Supabase menu failed');
+
+    const j = await res.json();
+    all = Array.isArray(j.data) ? j.data : [];
+
+    if(!all.length) throw new Error('Empty Supabase menu');
+  }catch(e){
+    console.warn('Using menu.json fallback:', e);
+
+    const res=await fetch('../menu.json?v='+Date.now());
+    if(!res.ok) throw new Error('Could not load menu.json');
+    all=await res.json();
+  }
+
   menuData=all.filter(c=>c.type!=='addons').map(cat=>({
-    ...cat,items:(cat.items||[]).filter(item=>item.active!==false)
+    ...cat,
+    items:(cat.items||[]).filter(item=>item.active!==false)
   }));
+
   if(menuData.length) activeCatKey=menuData[0].key;
 }
 
