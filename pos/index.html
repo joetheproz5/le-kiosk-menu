@@ -1516,8 +1516,8 @@ function renderOrdersList(){
   const typeEmoji={dinein:'🪑',takeaway:'🥡',delivery:'🛵'};
   list.innerHTML=filtered.map(o=>{
     const dt=new Date(o.timestamp),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-    const sbCls=o.status==='done'?'sb-done':o.status==='cancelled'?'sb-cancelled':'sb-pending';
-    let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType}`;
+    const normalizedStatus = o.status === 'confirmed' ? 'pending' : o.status;
+    const sbCls = normalizedStatus==='done'?'sb-done':normalizedStatus==='cancelled'?'sb-cancelled':'sb-pending';    let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType}`;
     if(o.deliveryZone) metaStr+=` · ${o.deliveryZone} ($${o.deliveryFee?.toFixed(2)||'0.00'})`;
     if(o.note) metaStr+=` · "${o.note}"`;
 
@@ -1532,9 +1532,9 @@ function renderOrdersList(){
       (it.addons||[]).forEach(a=>{itemRows+=`<div class="oc-item-row addon-row"><span>↳ ${a.label}</span><span>+$${a.price.toFixed(2)}</span></div>`;});
     });
     if(o.deliveryFee>0) itemRows+=`<div class="oc-item-row"><span>🛵 Delivery</span><span>+$${o.deliveryFee.toFixed(2)}</span></div>`;
-    const canDone=o.status!=='done',canCancel=o.status!=='cancelled';
+    const canDone=normalizedStatus!=='done',canCancel=normalizedStatus!=='cancelled';
     return`<div class="order-card status-${o.status}">
-      <div class="oc-header"><div><div class="oc-num">${o.id} · ${ts}</div><div class="oc-name">${o.name}${visitStr}</div><div class="oc-meta">${metaStr}</div></div><span class="status-badge ${sbCls}">${o.status}</span></div>
+      <div class="oc-header"><div><div class="oc-num">${o.id} · ${ts}</div><div class="oc-name">${o.name}${visitStr}</div><div class="oc-meta">${metaStr}</div></div><span class="status-badge ${sbCls}">${normalizedStatus}</span></div>
       <div class="oc-items">${itemRows}</div>
       <div class="oc-total"><span>Total</span><span>$${o.total.toFixed(2)}</span></div>
       <div class="oc-actions">
