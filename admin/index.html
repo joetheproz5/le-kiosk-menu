@@ -416,7 +416,7 @@ async function saveBlockList(){
         const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`,{
             method:'PUT',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({data:blockList,message:'Update block list',sha:latestSha})
+            body:JSON.stringify(latestSha?{data:blockList,message:'Update block list',sha:latestSha}:{data:blockList,message:'Update block list'})
         });
         if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
         const saved=await res.json(); blockSha=saved.sha; blockDirty=false;
