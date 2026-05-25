@@ -667,6 +667,29 @@ function printLoggedOrder(id, format){
     : type === 'delivery' ? 'Delivery'
     : (type || '');
 }
+  function getRewardLabel(type){
+  return type === 'soft_drink' ? 'Free Soft Drink'
+    : type === 'discount_10' ? '10% Discount'
+    : type === 'ice_cream_cup' ? 'Free Ice Cream Cup'
+    : '';
+}
+
+function getRewardDiscount(subtotal, type){
+  if(type === 'discount_10') return subtotal * 0.10;
+  if(type === 'soft_drink') return 2.00;
+  if(type === 'ice_cream_cup') return 3.00;
+  return 0;
+}
+
+function getCurrentRewardDiscount(){
+  if(!currentCustomerProfile?.loyaltyRewardReady || !selectedRewardType) return 0;
+  return getRewardDiscount(getItemsTotal(), selectedRewardType);
+}
+
+function selectReward(type){
+  selectedRewardType = selectedRewardType === type ? null : type;
+  renderOrderPanel();
+}
 function sendWhatsAppLoggedOrder(id){
   const order = getLoggedOrder(id);
   if(!order){ showToast('Order not found', 'error'); return; }
@@ -894,6 +917,7 @@ function clearOrder(){
   });
   hideCustomerProfileCard();
   currentCustomerProfile = null;
+  selectedRewardType = null;
 loadedInboxOrderId = null;
 renderOrderPanel();
 }
@@ -937,13 +961,26 @@ function selZone(z){
 }
 function getItemsTotal(){return orderLines.reduce((s,l)=>s+l.price*l.qty+l.addons.reduce((a,x)=>a+x.price,0),0);}
 function getDeliveryFee(){return(orderType==='delivery'&&deliveryZone)?(ZONE_FEES[deliveryZone]||0):0;}
-function getGrandTotal(){return getItemsTotal()+getDeliveryFee();}
+function getGrandTotal(){
+  return Math.max(0, getItemsTotal() + getDeliveryFee() - getCurrentRewardDiscount());
+}
 function updateTotal(){
   const fee=getDeliveryFee(),total=getGrandTotal();
-  document.getElementById('total-display').textContent='$'+total.toFixed(2);
-  const fl=document.getElementById('delivery-fee-label');
-  if(fee>0){fl.style.display='block';fl.textContent=`Items $${getItemsTotal().toFixed(2)} + delivery $${fee.toFixed(2)}`;}
-  else fl.style.display='none';
+const itemsTotal = getItemsTotal();
+const rewardDiscount = getCurrentRewardDiscount();
+
+document.getElementById('total-display').textContent='$'+total.toFixed(2);
+
+const fl=document.getElementById('delivery-fee-label');
+if(rewardDiscount > 0){
+  fl.style.display='block';
+  fl.textContent=`Items $${itemsTotal.toFixed(2)}${fee>0 ? ` + delivery $${fee.toFixed(2)}` : ''} - reward $${rewardDiscount.toFixed(2)}`;
+}else if(fee>0){
+  fl.style.display='block';
+  fl.textContent=`Items $${itemsTotal.toFixed(2)} + delivery $${fee.toFixed(2)}`;
+}else{
+  fl.style.display='none';
+}
   calcChange();
   const mini=document.getElementById('total-display-mini');if(mini)mini.textContent='$'+total.toFixed(2);
 }
@@ -1103,9 +1140,11 @@ function showCustomerProfileCard(profile, isNew){
   } else {
     // Returning customer
     const visits = profile.totalOrders || 0;
-    const spent  = profile.totalSpent || 0;
-    const faves  = (profile.favoriteItems || []).slice(0,2).join(', ');
-    const note   = profile.note || '';
+const spent  = profile.totalSpent || 0;
+const faves  = (profile.favoriteItems || []).slice(0,2).join(', ');
+const note   = profile.note || '';
+const stamps = Number(profile.loyaltyStamps || 0);
+const rewardReady = !!profile.loyaltyRewardReady;
 
     // Milestone message
     let tagline = `${visits} visit${visits!==1?'s':''} · $${spent.toFixed(2)} total`;
@@ -1131,10 +1170,18 @@ function showCustomerProfileCard(profile, isNew){
       <div class="cpc-stats">
         <div class="cpc-stat"><div class="cpc-stat-val">${visits}</div><div class="cpc-stat-key">Visits</div></div>
         <div class="cpc-stat"><div class="cpc-stat-val">$${spent.toFixed(0)}</div><div class="cpc-stat-key">Spent</div></div>
-        <div class="cpc-stat"><div class="cpc-stat-val">${profile.memberSince ? new Date(profile.firstSeen||profile.memberSince).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}) : '—'}</div><div class="cpc-stat-key">Since</div></div>
+        <div class="cpc-stat"><div class="cpc-stat-val">${profile.firstSeen ? new Date(profile.firstSeen).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}) : '—'}</div><div class="cpc-stat-key">Since</div></div>
       </div>
-      ${faves ? `<div class="cpc-fave">🍽️ Usually orders: <strong>${faves}</strong></div>` : ''}
-      ${note ? `<div class="cpc-fave">📝 Note: <strong>${note}</strong></div>` : ''}`;
+      <div class="cpc-fave">🎟 Loyalty: <strong>${stamps} / ${LOYALTY_TARGET}</strong>${rewardReady ? ' · Reward Ready 🎉' : ''}</div>
+${faves ? `<div class="cpc-fave">🍽️ Usually orders: <strong>${faves}</strong></div>` : ''}
+${note ? `<div class="cpc-fave">📝 Note: <strong>${note}</strong></div>` : ''}
+${rewardReady ? `
+  <div style="padding:8px 12px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:6px;flex-wrap:wrap;background:#fff">
+    <button class="oa-chip${selectedRewardType==='soft_drink'?' selected':''}" onclick="selectReward('soft_drink')">Free Soft Drink</button>
+    <button class="oa-chip${selectedRewardType==='discount_10'?' selected':''}" onclick="selectReward('discount_10')">10% Discount</button>
+    <button class="oa-chip${selectedRewardType==='ice_cream_cup'?' selected':''}" onclick="selectReward('ice_cream_cup')">Free Ice Cream Cup</button>
+  </div>
+` : ''}`;
   }
 
   // Force reflow then show
@@ -1205,7 +1252,60 @@ try{
   // Update local cache immediately
   return existing;
 }
+async function applyLoyaltyCompletion(order){
+  if(!order || !order.phone || order.phone === '00000000') return;
+  if(order.loyaltyProcessed) return;
 
+  let customer = findCustomerByPhone(order.phone);
+
+  if(!customer){
+    customer = {
+      phone: order.phone,
+      name: order.name || 'Guest',
+      note: '',
+      firstSeen: new Date().toISOString(),
+      lastSeen: new Date().toISOString(),
+      totalOrders: 0,
+      totalSpent: 0,
+      orderIds: [],
+      itemFreq: {},
+      favoriteItems: [],
+      loyaltyStamps: 0,
+      loyaltyRewardReady: false,
+      loyaltyLastReward: null,
+      loyaltyRewardRedeemedAt: null,
+      loyaltyLifetimeRedemptions: 0
+    };
+    customersData.push(customer);
+  }
+
+  customer.lastSeen = new Date().toISOString();
+
+  if(order.loyaltyReward && order.loyaltyReward.type){
+    customer.loyaltyStamps = 0;
+    customer.loyaltyRewardReady = false;
+    customer.loyaltyLastReward = order.loyaltyReward.type;
+    customer.loyaltyRewardRedeemedAt = new Date().toISOString();
+    customer.loyaltyLifetimeRedemptions = Number(customer.loyaltyLifetimeRedemptions || 0) + 1;
+  } else {
+    customer.loyaltyStamps = Number(customer.loyaltyStamps || 0) + 1;
+    customer.loyaltyRewardReady = customer.loyaltyStamps >= LOYALTY_TARGET;
+  }
+
+  order.loyaltyProcessed = true;
+
+  await fetch(`${WORKER_URL}/supabase/customers`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ data: customersData })
+  });
+
+  await fetch(`${WORKER_URL}/supabase/order`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(order)
+  });
+}
 // ═══════════════════════════════════════════════════
 // VALIDATION & BUILD ORDER
 // ═══════════════════════════════════════════════════
@@ -1275,6 +1375,14 @@ function buildOrderObj(status='pending'){
 
   const fee=getDeliveryFee();
   const total=getGrandTotal();
+  const rewardDiscount = getCurrentRewardDiscount();
+const loyaltyReward = (currentCustomerProfile?.loyaltyRewardReady && selectedRewardType)
+  ? {
+      type: selectedRewardType,
+      label: getRewardLabel(selectedRewardType),
+      discount: rewardDiscount
+    }
+  : null;
   const id=loadedInboxOrderId || 'ORD-'+Date.now();
 
   return {
@@ -1295,7 +1403,9 @@ function buildOrderObj(status='pending'){
       flavor:l.flavor||null,
       addons:l.addons.map(a=>({label:a.label,price:a.price}))
     })),
-    subtotal:getItemsTotal(),
+        subtotal:getItemsTotal(),
+    rewardDiscount,
+    loyaltyReward,
     total
   };
 }
@@ -1401,10 +1511,14 @@ async function loadOrders(showUI){
 }
 async function updateOrderStatus(id,status){
   const order=ordersData.find(o=>o.id===id);
-  if(!order) return;
+if(!order) return;
 
-  order.status=status;
-  showLoading('Updating…');
+order.status=status;
+showLoading('Updating…');
+
+if(status === 'done'){
+  await applyLoyaltyCompletion(order);
+}
 
   try{
     await fetch(`${WORKER_URL}/supabase/order`, {
@@ -1476,8 +1590,6 @@ async function confirmInboxOrder(id){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(order)
     });
-
-    if(order.phone) await upsertCustomer(order);
   }catch(e){
     order.status='pending';
     renderInboxList();
