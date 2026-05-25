@@ -747,24 +747,29 @@ updateStatusBadge();
 setInterval(updateStatusBadge, 60000);
 
 // Boot — wait for config before showing status or loading menu
+// Contact bubble
+const bubble=document.getElementById('contact-bubble'),ctoggle=document.getElementById('contact-toggle');
+let bubbleOpen=false;
+ctoggle.addEventListener('click',()=>{bubbleOpen=!bubbleOpen;bubble.classList.toggle('open',bubbleOpen);});
+document.addEventListener('click',e=>{if(bubbleOpen&&!bubble.contains(e.target)&&e.target!==ctoggle&&!ctoggle.contains(e.target)){bubbleOpen=false;bubble.classList.remove('open');}});
+
+// Scroll spy for status badge
 (function(){
-    const badge = document.getElementById('status-badge');
+    const badge=document.getElementById('status-badge');
     if(!badge) return;
     function onScroll(){ badge.classList.toggle('hidden', window.scrollY > 60); }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 })();
 
-fetch('config.json?v='+Date.now())
+// Boot — fetch config first, then render everything
+fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', { cache: 'no-store' })
   .then(r => r.ok ? r.json() : null)
-  .then(cfg => {
-    if(cfg && cfg.testingMode !== undefined) TESTING_MODE = !!cfg.testingMode;
-  })
+  .then(j => { if(j && j.data && j.data.testingMode !== undefined) TESTING_MODE = !!j.data.testingMode; })
   .catch(() => {})
   .finally(() => {
-    updateStatusBadge();                          // ← now reads correct TESTING_MODE
+    updateStatusBadge();
     setInterval(updateStatusBadge, 60000);
-
     loadMenu().then(data => {
       if(!data) return;
       initMenu(data); initScrollSpy(data);
