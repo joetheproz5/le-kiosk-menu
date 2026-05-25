@@ -461,15 +461,26 @@ let customersAdminDirty = false;
 async function openCustomersAdmin(){
   showLoading('Loading customers…');
   try{
-    const res = await fetch(`${WORKER_URL}/gh?file=customers.json`, { cache:'no-store' });
-    if(res.ok){
-      const j = await res.json();
-      customersAdminData = Array.isArray(j.data) ? j.data : [];
-      customersAdminSha = j.sha || null;
-    } else {
-      customersAdminData = [];
-      customersAdminSha = null;
-    }
+    const res = await fetch(`${WORKER_URL}/supabase/customers`, { cache:'no-store' });
+if(res.ok){
+  const j = await res.json();
+  customersAdminData = Array.isArray(j.data) ? j.data.map(c => ({
+    phone: c.phone || '',
+    name: c.name || '',
+    note: c.note || '',
+    firstSeen: c.first_seen || '',
+    lastSeen: c.last_seen || '',
+    totalOrders: c.total_orders || 0,
+    totalSpent: c.total_spent || 0,
+    orderIds: c.order_ids || [],
+    itemFreq: c.item_freq || {},
+    favoriteItems: c.favorite_items || []
+  })) : [];
+  customersAdminSha = null;
+} else {
+  customersAdminData = [];
+  customersAdminSha = null;
+}
   }catch(_){
     customersAdminData = [];
     customersAdminSha = null;
@@ -611,25 +622,11 @@ async function saveCustomersAdmin(){
       });
     }
 
-    let latestSha = null;
-    try{
-      const r = await fetch(`${WORKER_URL}/gh?file=customers.json`, { cache:'no-store' });
-      if(r.ok){
-        const j = await r.json();
-        latestSha = j.sha || null;
-      }
-    }catch(_){}
-
-    const res = await fetch(`${WORKER_URL}/gh?file=customers.json`, {
+    const res = await fetch(`${WORKER_URL}/supabase/customers`, {
   method: 'PUT',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(
-    latestSha
-      ? { data: clean, message: 'Update customers via Admin CMS', sha: latestSha }
-      : { data: clean, message: 'Update customers via Admin CMS' }
-  )
+  body: JSON.stringify({ data: clean })
 });
-
     if(!res.ok){
       const e = await res.json().catch(()=>({}));
       throw new Error(e.error || res.status);
