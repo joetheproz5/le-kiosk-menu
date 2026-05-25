@@ -1269,7 +1269,7 @@ function buildOrderObj(status='pending'){
     subtotal:getItemsTotal(),
     total
   };
-
+}
 // ═══════════════════════════════════════════════════
 // LOAD INBOX ORDER → CURRENT ORDER
 // ═══════════════════════════════════════════════════
@@ -1277,6 +1277,7 @@ function normalizeZone(zoneVal){
   if(!zoneVal) return null;
   const match=String(zoneVal).match(/\b([ABC])\b/i);
   return match?match[1].toUpperCase():null;
+  
 }
 function loadOrderIntoCurrent(order){
   clearOrder();
