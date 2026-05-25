@@ -204,28 +204,6 @@
 // ━━━━━━━━━━━━━━━━━
 let TESTING_MODE = false;
 // load from config
-fetch('https://lekiosk-order-inbox.lekiosklb.workers.dev/gh?file=config.json', { cache: 'no-store' })
-  .then(r => r.ok ? r.json() : null)
-  .then(j => {
-    if(j && j.data && j.data.testingMode !== undefined) TESTING_MODE = !!j.data.testingMode;
-  })
-  .catch(() => {})
-  .finally(() => {
-    updateStatusBadge();
-    setInterval(updateStatusBadge, 60000);
-
-    loadMenu().then(data => {
-      if(!data) return;
-      initMenu(data); initScrollSpy(data);
-      itemMeta = {};
-      data.forEach(cat => {
-        if(cat.type==='addons') return;
-        (cat.items||[]).filter(item => item.active!==false).forEach(item => {
-          itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
-        });
-      });
-    });
-  });
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const PILL_COLORS = {
@@ -713,8 +691,28 @@ function renderPills(item){
     return'<div class="flex flex-wrap gap-1 mt-2">'+item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('')+'</div>';
 }
 async function loadMenu(){
-    try{const res=await fetch('menu.json?v='+Date.now());if(!res.ok) throw new Error();return await res.json();}
-    catch(e){document.getElementById('menu-container').innerHTML='<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';return null;}
+    try{
+        const res = await fetch(`${WORKER_URL}/supabase/menu`, { cache:'no-store' });
+        if(!res.ok) throw new Error('Supabase menu failed');
+
+        const j = await res.json();
+        const data = Array.isArray(j.data) ? j.data : [];
+
+        if(!data.length) throw new Error('Empty Supabase menu');
+        return data;
+    }catch(e){
+        console.warn('Using menu.json fallback:', e);
+
+        try{
+            const res = await fetch('menu.json?v=' + Date.now());
+            if(!res.ok) throw new Error();
+            return await res.json();
+        }catch(_){
+            document.getElementById('menu-container').innerHTML =
+              '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
+            return null;
+        }
+    }
 }
 function renderAddonSection(category){
     let html=`<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
