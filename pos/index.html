@@ -654,6 +654,12 @@ function printLoggedOrder(id, format){
   printFromOrder(order, format);
 }
 
+  function formatOrderType(type){
+  return type === 'dinein' ? 'Dine In'
+    : type === 'takeaway' ? 'Takeaway'
+    : type === 'delivery' ? 'Delivery'
+    : (type || '');
+}
 function sendWhatsAppLoggedOrder(id){
   const order = getLoggedOrder(id);
   if(!order){ showToast('Order not found', 'error'); return; }
@@ -1505,7 +1511,7 @@ function renderInboxList(){
   list.innerHTML=pending.map(o=>{
     const dt=new Date(o.timestamp),ts=dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
     const zoneDisplay=o.deliveryZone?` · ${o.deliveryZone}`:'';
-    const metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType||''}${zoneDisplay}`;
+    const metaStr=`${typeEmoji[o.orderType]||''} ${formatOrderType(o.orderType)}${zoneDisplay}`;
     const itemsHtml=(o.items||[]).map(it=>`<div class="oc-item-row"><span>${it.name} x${it.qty}</span><span>$${(it.price*it.qty).toFixed(2)}</span></div>`).join('');
     const gpsHtml=o.gps?`<div class="inbox-gps-row">📍 <a href="https://maps.google.com/?q=${o.gps.lat},${o.gps.lng}" target="_blank" style="color:var(--green-d);text-decoration:underline">View on Maps</a></div>`:'';
     const addrHtml=o.address?`<div style="font-size:11px;color:var(--g600);padding:0 14px 8px">🏠 ${o.address}</div>`:'';
@@ -1581,7 +1587,7 @@ function renderOrdersList(){
   list.innerHTML=filtered.map(o=>{
     const dt=new Date(o.timestamp),ts=dt.toLocaleDateString('en-GB')+' '+dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
     const normalizedStatus = o.status === 'confirmed' ? 'pending' : o.status;
-    const sbCls = normalizedStatus==='done'?'sb-done':normalizedStatus==='cancelled'?'sb-cancelled':'sb-pending';    let metaStr=`${typeEmoji[o.orderType]||''} ${o.orderType}`;
+    const sbCls = normalizedStatus==='done'?'sb-done':normalizedStatus==='cancelled'?'sb-cancelled':'sb-pending';    let metaStr=`${typeEmoji[o.orderType]||''} ${formatOrderType(o.orderType)}`;
     if(o.deliveryZone) metaStr+=` · ${o.deliveryZone} ($${o.deliveryFee?.toFixed(2)||'0.00'})`;
     if(o.note) metaStr+=` · "${o.note}"`;
 
