@@ -488,7 +488,7 @@ input,textarea,select{font-family:var(--font);outline:none}
           <!-- Phone first so lookup fires before name -->
           <label class="form-label">Phone Number *</label>
           <div class="phone-lookup-wrap">
-            <input id="cust-phone" type="tel" class="form-input" placeholder="76 840 244"
+            <input id="cust-phone" type="tel" class="form-input" placeholder="00000000" value="00000000"
               maxlength="11" autocomplete="off" inputmode="numeric"
               oninput="onPhoneInput(this.value)"
               style="padding-right:32px;margin-bottom:0">
@@ -680,6 +680,7 @@ async function bootPOS(){
   try{await loadMenu();renderCatSidebar();renderMenuPanel();}
   catch(e){showToast('Menu load failed: '+e.message,'error');}
   renderOrderPanel();
+  ensureDefaultWalkInPhone();
   loadOrders(false).catch(()=>{});
   await pollInbox(false);
   await loadCustomers();  // load full customer list on boot
@@ -867,7 +868,7 @@ function clearOrder(){
   const prev=[...orderLines];
   orderLines=[];orderType=null;deliveryZone=null;
   document.getElementById('cust-name').value='';
-  document.getElementById('cust-phone').value='';
+  document.getElementById('cust-phone').value='00000000';
   document.getElementById('order-note').value='';
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('sel'));
   document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('sel'));
@@ -1182,35 +1183,97 @@ try{
 // ═══════════════════════════════════════════════════
 function validateOrder(){
   let ok=true;
-  const name=document.getElementById('cust-name').value.trim();
-  if(!name){document.getElementById('err-name').classList.add('show');document.getElementById('cust-name').classList.add('error');ok=false;}
-  else{document.getElementById('err-name').classList.remove('show');document.getElementById('cust-name').classList.remove('error');}
-  const phoneRaw=document.getElementById('cust-phone').value.trim();
+
+  const name=(document.getElementById('cust-name').value || '').trim() || 'Walk-in Customer';
+  document.getElementById('cust-name').value = name;
+
+  if(!name){
+    document.getElementById('err-name').classList.add('show');
+    document.getElementById('cust-name').classList.add('error');
+    ok=false;
+  }else{
+    document.getElementById('err-name').classList.remove('show');
+    document.getElementById('cust-name').classList.remove('error');
+  }
+
+  let phoneRaw=(document.getElementById('cust-phone').value || '').trim();
+  if(!phoneRaw) phoneRaw='00000000';
+
   const phoneDigits=phoneRaw.replace(/\D/g,'');
   let phone=null;
   if(phoneDigits.length===8) phone=phoneDigits;
-  else if(phoneDigits.length===11&&phoneDigits.startsWith('961')) phone=phoneDigits.slice(3);
-  if(!phone){document.getElementById('err-phone').classList.add('show');document.getElementById('cust-phone').classList.add('error');ok=false;}
-  else{document.getElementById('err-phone').classList.remove('show');document.getElementById('cust-phone').classList.remove('error');}
-  if(!orderType){document.getElementById('err-type').classList.add('show');ok=false;}
-  else document.getElementById('err-type').classList.remove('show');
-  if(orderType==='delivery'&&!deliveryZone){document.getElementById('err-zone').classList.add('show');ok=false;}
-  else document.getElementById('err-zone').classList.remove('show');
-  if(!orderLines.length){showToast('Add items to the order first','error');ok=false;}
+  else if(phoneDigits.length===11 && phoneDigits.startsWith('961')) phone=phoneDigits.slice(3);
+
+  if(!phone) phone='00000000';
+  document.getElementById('cust-phone').value = phone;
+
+  document.getElementById('err-phone').classList.remove('show');
+  document.getElementById('cust-phone').classList.remove('error');
+
+  if(!orderType){
+    document.getElementById('err-type').classList.add('show');
+    ok=false;
+  }else{
+    document.getElementById('err-type').classList.remove('show');
+  }
+
+  if(orderType==='delivery' && !deliveryZone){
+    document.getElementById('err-zone').classList.add('show');
+    ok=false;
+  }else{
+    document.getElementById('err-zone').classList.remove('show');
+  }
+
+  if(!orderLines.length){
+    showToast('Add items to the order first','error');
+    ok=false;
+  }
+
   return ok;
 }
 
 function buildOrderObj(status='pending'){
-  const name=document.getElementById('cust-name').value.trim();
+  const name=(document.getElementById('cust-name').value || '').trim() || 'Walk-in Customer';
   const note=document.getElementById('order-note').value.trim();
-  const phoneRaw=document.getElementById('cust-phone').value.trim().replace(/\D/g,'');
-  const phone=phoneRaw.length===11&&phoneRaw.startsWith('961')?phoneRaw.slice(3):phoneRaw;
-  const fee=getDeliveryFee(),total=getGrandTotal(),id=loadedInboxOrderId||'ORD-'+Date.now();  return{id,status,timestamp:new Date().toISOString(),name,phone,note,orderType,
-    deliveryZone:orderType==='delivery'?deliveryZone:null,
+
+  let phoneRaw=(document.getElementById('cust-phone').value || '').trim();
+  if(!phoneRaw) phoneRaw='00000000';
+
+  const phoneDigits=phoneRaw.replace(/\D/g,'');
+  let phone=null;
+  if(phoneDigits.length===8) phone=phoneDigits;
+  else if(phoneDigits.length===11 && phoneDigits.startsWith('961')) phone=phoneDigits.slice(3);
+  if(!phone) phone='00000000';
+
+  const fee=getDeliveryFee();
+  const total=getGrandTotal();
+  const id=loadedInboxOrderId || 'ORD-'+Date.now();
+
+  return {
+    id,
+    status,
+    timestamp:new Date().toISOString(),
+    name,
+    phone,
+    note,
+    orderType,
+    deliveryZone:orderType==='delivery' ? deliveryZone : null,
     deliveryFee:fee,
-    items:orderLines.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,
-      flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),
-    subtotal:getItemsTotal(),total};
+    items:orderLines.map(l=>({
+      name:l.name,
+      price:l.price,
+      priceStr:l.priceStr,
+      qty:l.qty,
+      flavor:l.flavor||null,
+      addons:l.addons.map(a=>({label:a.label,price:a.price}))
+    })),
+    subtotal:getItemsTotal(),
+    total
+  };
+}
+  function ensureDefaultWalkInPhone(){
+  const el = document.getElementById('cust-phone');
+  if(el && !el.value) el.value = '00000000';
 }
 
 // ═══════════════════════════════════════════════════
