@@ -386,10 +386,23 @@ let blockList=[], blockSha=null, blockDirty=false;
 async function openBlockList(){
     showLoading('Loading block list…');
     try{
-        const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`);
-        if(res.ok){const j=await res.json(); blockList=j.data||[]; blockSha=j.sha;}
-        else { blockList=[]; blockSha=null; }
-    }catch(_){ blockList=[]; blockSha=null; }
+        const res=await fetch(`${WORKER_URL}/supabase/blocklist`, { cache:'no-store' });
+        if(res.ok){
+            const j=await res.json();
+            blockList=(j.data||[]).map(b=>({
+                phone:b.phone||'',
+                reason:b.reason||'',
+                blockedAt:b.blocked_at||b.blockedAt||new Date().toISOString()
+            }));
+            blockSha=null;
+        } else {
+            blockList=[];
+            blockSha=null;
+        }
+    }catch(_){
+        blockList=[];
+        blockSha=null;
+    }
     blockDirty=false;
     renderBlockList();
     document.getElementById('blocklist-overlay').style.display='flex';
@@ -432,26 +445,30 @@ function removeBlockEntry(i){
 
 // ── FIX: Always fetch fresh SHA before writing — handles new file (sha=null) and existing ──
 async function saveBlockList(){
-    const btn=document.getElementById('bl-save-btn'); btn.disabled=true;
+    const btn=document.getElementById('bl-save-btn');
+    btn.disabled=true;
     showLoading('Saving block list…');
+
     try{
-        // Fetch latest SHA fresh each time — solves "SHA not supplied" for new files
-        // and "SHA mismatch" if someone else wrote in between
-        let latestSha=null;
-        try{
-            const r=await fetch(`${WORKER_URL}/gh?file=blocklist.json`);
-            if(r.ok){ const j=await r.json(); latestSha=j.sha||null; }
-        }catch(_){}
-        const res=await fetch(`${WORKER_URL}/gh?file=blocklist.json`,{
+        const res=await fetch(`${WORKER_URL}/supabase/blocklist`,{
             method:'PUT',
             headers:{'Content-Type':'application/json'},
-            body:JSON.stringify(latestSha?{data:blockList,message:'Update block list',sha:latestSha}:{data:blockList,message:'Update block list'})
+            body:JSON.stringify({data:blockList})
         });
-        if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
-        const saved=await res.json(); blockSha=saved.sha; blockDirty=false;
+
+        if(!res.ok){
+            const e=await res.json().catch(()=>({}));
+            throw new Error(e.error||res.status);
+        }
+
+        blockDirty=false;
         showToast('Block list saved ✓','success');
-    }catch(e){showToast('Save failed: '+e.message,'error');}
-    btn.disabled=false; hideLoading();
+    }catch(e){
+        showToast('Save failed: '+e.message,'error');
+    }
+
+    btn.disabled=false;
+    hideLoading();
 }
 // ── CUSTOMERS ADMIN ───────────────────────────────────────────────────
 let customersAdminData = [];
