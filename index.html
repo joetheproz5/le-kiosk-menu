@@ -202,8 +202,12 @@
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const TESTING_MODE = true;
-const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
+let TESTING_MODE = false;
+// load from config
+fetch('config.json?v='+Date.now())
+  .then(r=>r.ok?r.json():null)
+  .then(cfg=>{ if(cfg&&cfg.testingMode!==undefined) TESTING_MODE=!!cfg.testingMode; })
+  .catch(()=>{});const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const PILL_COLORS = {
