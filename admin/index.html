@@ -482,17 +482,22 @@ async function openCustomersAdmin(){
 if(res.ok){
   const j = await res.json();
   customersAdminData = Array.isArray(j.data) ? j.data.map(c => ({
-    phone: c.phone || '',
-    name: c.name || '',
-    note: c.note || '',
-    firstSeen: c.first_seen || '',
-    lastSeen: c.last_seen || '',
-    totalOrders: c.total_orders || 0,
-    totalSpent: c.total_spent || 0,
-    orderIds: c.order_ids || [],
-    itemFreq: c.item_freq || {},
-    favoriteItems: c.favorite_items || []
-  })) : [];
+  phone: c.phone || '',
+  name: c.name || '',
+  note: c.note || '',
+  firstSeen: c.first_seen || '',
+  lastSeen: c.last_seen || '',
+  totalOrders: c.total_orders || 0,
+  totalSpent: c.total_spent || 0,
+  orderIds: c.order_ids || [],
+  itemFreq: c.item_freq || {},
+  favoriteItems: c.favorite_items || [],
+  loyaltyStamps: c.loyalty_stamps || 0,
+  loyaltyRewardReady: !!c.loyalty_reward_ready,
+  loyaltyLastReward: c.loyalty_last_reward || null,
+  loyaltyRewardRedeemedAt: c.loyalty_reward_redeemed_at || null,
+  loyaltyLifetimeRedemptions: c.loyalty_lifetime_redemptions || 0
+})) : [];
   customersAdminSha = null;
 } else {
   customersAdminData = [];
@@ -588,7 +593,7 @@ function editCustomerField(i, field, value){
 }
 
 function addCustomerAdmin(){
-  customersAdminData.unshift({
+    customersAdminData.unshift({
     phone:'',
     name:'New Customer',
     note:'',
@@ -598,7 +603,12 @@ function addCustomerAdmin(){
     totalSpent:0,
     orderIds:[],
     itemFreq:{},
-    favoriteItems:[]
+    favoriteItems:[],
+    loyaltyStamps:0,
+    loyaltyRewardReady:false,
+    loyaltyLastReward:null,
+    loyaltyRewardRedeemedAt:null,
+    loyaltyLifetimeRedemptions:0
   });
   customersAdminDirty = true;
   renderCustomersAdmin();
@@ -629,13 +639,18 @@ async function saveCustomersAdmin(){
       if(seen.has(phone)) continue;
       seen.add(phone);
 
-      clean.push({
+            clean.push({
         ...c,
         phone,
         name: String(c.name || '').trim(),
         note: String(c.note || '').trim(),
         totalOrders: Math.max(0, Number(c.totalOrders || 0)),
-        totalSpent: Math.max(0, Number(c.totalSpent || 0))
+        totalSpent: Math.max(0, Number(c.totalSpent || 0)),
+        loyaltyStamps: Math.max(0, Number(c.loyaltyStamps || 0)),
+        loyaltyRewardReady: !!c.loyaltyRewardReady,
+        loyaltyLastReward: c.loyaltyLastReward || null,
+        loyaltyRewardRedeemedAt: c.loyaltyRewardRedeemedAt || null,
+        loyaltyLifetimeRedemptions: Math.max(0, Number(c.loyaltyLifetimeRedemptions || 0))
       });
     }
 
