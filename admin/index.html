@@ -193,6 +193,10 @@ textarea.field-input{resize:vertical;min-height:58px;line-height:1.5}
     </div>
     <div class="header-actions">
       <span class="session-badge" id="session-timer"></span>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--a200)">
+        <input type="checkbox" id="testing-toggle" style="width:15px;height:15px;cursor:pointer;accent-color:var(--a400)">
+        Test Mode
+      </label>
       <button class="btn btn-sm btn-ghost" onclick="openBlockList()" style="color:var(--a950)">🚫 Block List</button>
       <button class="btn btn-sm btn-ghost" onclick="togglePreview()" style="color:var(--a950)">👁 Preview</button>
       <button class="btn btn-save" id="save-btn" onclick="saveMenu()">💾 Save</button>
