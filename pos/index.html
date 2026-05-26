@@ -1073,7 +1073,7 @@ border:1.5px solid #fde68a;
 background:#fffbeb;
 border-radius:9px;
 padding:10px;
-margin-bottom:10px}
+margin-top:10px}
 .profile-card.show{
 display:block}
 .profile-title{
@@ -1636,7 +1636,7 @@ margin-left:auto}
 <header class="topbar">
 <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
 <button class="top-inbox" id="top-inbox-alert" onclick="toggleTopInbox()" aria-label="Incoming orders">
-<span>Inbox</span>
+<span id="top-inbox-label">Inbox</span>
 <span class="top-inbox-count" id="top-inbox-count">0</span>
 </button>
 <div class="page-title" id="page-title">Menu</div>
@@ -1717,8 +1717,6 @@ margin-left:auto}
 </div>
 <div class="checkout" id="checkout-section">
 <button class="quick-btn" onclick="hideCheckoutDetails()" style="width:100%;margin-bottom:10px">Back to Order</button>
-<div class="profile-card" id="profile-card">
-</div>
 <div class="order-mode-card">
 <label class="field-label">Order Type</label>
 <div class="mode-strip">
@@ -1763,6 +1761,8 @@ margin-left:auto}
 <input class="input" id="cash-input" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcChange()">
 <span id="change-display">Change: --</span>
 </div>
+</div>
+<div class="profile-card" id="profile-card">
 </div>
 </div>
 </aside>
@@ -2061,10 +2061,19 @@ $('page-title').textContent={menu:'Menu',inbox:'Incoming',orders:'Orders Log',cu
 if(view==='orders')loadOrders(true);
 if(view==='inbox'){$('nav-inbox').classList.remove('has-new');renderInboxList()}
 if(view==='customers')renderCustomers();
+updateTopInboxButton();
 closeSidebar();
 }
 function toggleTopInbox(){
 switchView(currentView==='inbox'?'menu':'inbox');
+}
+function updateTopInboxButton(){
+const label=$('top-inbox-label'),count=$('top-inbox-count'),btn=$('top-inbox-alert');
+if(!label||!count||!btn)return;
+const inInbox=currentView==='inbox';
+label.textContent=inInbox?'Back':'Inbox';
+btn.setAttribute('aria-label',inInbox?'Back to menu':'Incoming orders');
+count.classList.toggle('hidden',inInbox);
 }
 function handleSearch(){searchQuery=$('search-input').value.trim().toLowerCase();if(currentView==='menu')renderItems();if(currentView==='orders')renderOrdersList();if(currentView==='customers')renderCustomers();}
 function renderCategoryChips(){
@@ -2428,6 +2437,7 @@ $('inbox-badge').classList.toggle('show',count>0);
 const topAlert=$('top-inbox-alert'),topCount=$('top-inbox-count');
 if(topCount)topCount.textContent=count;
 if(topAlert)topAlert.classList.toggle('has-orders',count>0);
+updateTopInboxButton();
 lastInboxCount=count;
 if(!count)$('nav-inbox').classList.remove('has-new');
 }
