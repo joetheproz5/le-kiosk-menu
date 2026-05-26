@@ -67,6 +67,19 @@ select{outline:none}
 .topbar{height:74px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;flex-shrink:0}
 .page-kicker{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 .page-title{font-family:var(--brandfont);font-size:25px;font-weight:700;color:var(--brand-dark);margin-top:2px}
+.mega-search{position:relative;flex:1;max-width:520px;min-width:280px}
+.mega-input{width:100%;height:42px;border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:0 14px 0 38px;font-size:13px;font-weight:700;color:var(--ink);outline:none}
+.mega-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+.mega-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);font-weight:900}
+.mega-results{display:none;position:absolute;top:48px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 45px rgba(17,24,39,.18);overflow:hidden;z-index:50;max-height:380px;overflow-y:auto}
+.mega-results.show{display:block}
+.mega-result{width:100%;display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;padding:11px 12px;background:#fff;border-bottom:1px solid var(--line);text-align:left}
+.mega-result:last-child{border-bottom:0}
+.mega-result:hover,.mega-result.active{background:#fffbeb}
+.mega-type{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:999px;padding:4px 7px;text-align:center;height:max-content}
+.mega-title{font-size:12px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mega-meta{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mega-empty{padding:16px;text-align:center;font-size:12px;font-weight:800;color:var(--muted)}
 .top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;padding:9px 13px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;transition:background .12s,border-color .12s,color .12s,opacity .12s;white-space:nowrap}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -193,13 +206,8 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .chart-title{font-size:13px;font-weight:900;color:var(--ink)}
 .chart-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
 .chart-total{font-size:24px;font-weight:900;color:var(--brand-dark);line-height:1;text-align:right}
-.chart-bars{height:132px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end}
-.chart-col{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
-.chart-track{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;background:var(--soft);border-radius:8px;padding:4px}
-.chart-fill{width:100%;max-width:28px;min-height:4px;border-radius:6px;background:var(--accent)}
-.chart-fill.orders{background:var(--brand)}
-.chart-label{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase}
-.chart-number{font-size:10px;font-weight:900;color:var(--ink-2)}
+.chart-canvas{width:100%;height:180px;display:block}
+.chart-foot{display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
@@ -283,6 +291,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .side-nav{display:grid;grid-template-columns:repeat(4,1fr)}
   .side-footer{display:none}
   .topbar{height:auto;align-items:flex-start;padding:16px;flex-direction:column}
+  .mega-search{width:100%;max-width:none;min-width:0}
   .content{padding:16px 14px 80px}
   .grid-menu,.settings-grid{grid-template-columns:1fr}
   .dash-grid,.feature-grid,.loyalty-grid,.chart-grid{grid-template-columns:1fr}
@@ -358,6 +367,11 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
           <div class="page-kicker" id="page-kicker">Control Center</div>
           <div class="page-title" id="page-title">Dashboard</div>
         </div>
+        <div class="mega-search">
+          <span class="mega-icon">Q</span>
+          <input class="mega-input" id="mega-search" type="text" placeholder="Search menu, categories, customers, orders..." autocomplete="off" oninput="renderMegaSearch()" onkeydown="handleMegaSearchKey(event)" onfocus="renderMegaSearch()">
+          <div class="mega-results" id="mega-results"></div>
+        </div>
         <div class="top-actions">
           <button class="btn btn-soft" onclick="togglePreview()">Preview</button>
           <button class="btn btn-add" onclick="addCategory()">Add Category</button>
@@ -369,44 +383,6 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
         <div class="view active" id="view-dashboard">
           <div class="dash-grid" id="dashboard-stats"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
-          <div class="feature-grid">
-            <button class="feature-card" onclick="switchView('menu')">
-              <span class="feature-icon">E</span>
-              <span class="feature-title">Menu Editor</span>
-              <span class="feature-copy">Edit the active category, upload item images, manage prices, descriptions, pills, and item add-ons.</span>
-              <span class="btn btn-soft btn-sm">Open Editor</span>
-            </button>
-            <button class="feature-card" onclick="switchView('categories')">
-              <span class="feature-icon">G</span>
-              <span class="feature-title">Categories</span>
-              <span class="feature-copy">Review every category, reorder the menu, create new groups, and jump directly into the editor.</span>
-              <span class="btn btn-soft btn-sm">Manage Categories</span>
-            </button>
-            <button class="feature-card" onclick="switchView('items')">
-              <span class="feature-icon">I</span>
-              <span class="feature-title">Menu Items</span>
-              <span class="feature-copy">Browse all active and inactive items in one place, then open the right category for detailed editing.</span>
-              <span class="btn btn-soft btn-sm">Browse Items</span>
-            </button>
-            <button class="feature-card" onclick="switchView('loyalty')">
-              <span class="feature-icon">L</span>
-              <span class="feature-title">Loyalty</span>
-              <span class="feature-copy">Control the loyalty toggle, inspect ready rewards, and edit customer stamps from the customer records.</span>
-              <span class="btn btn-soft btn-sm">Open Loyalty</span>
-            </button>
-            <button class="feature-card" onclick="switchView('customers')">
-              <span class="feature-icon">C</span>
-              <span class="feature-title">Customers</span>
-              <span class="feature-copy">Edit profiles, phone numbers, notes, visits, spend, favorites, and loyalty values.</span>
-              <span class="btn btn-soft btn-sm">Open Customers</span>
-            </button>
-            <button class="feature-card" onclick="switchView('blocklist')">
-              <span class="feature-icon">B</span>
-              <span class="feature-title">Block List</span>
-              <span class="feature-copy">Add blocked phone numbers with reasons and keep risky orders away from the website inbox.</span>
-              <span class="btn btn-soft btn-sm">Open Block List</span>
-            </button>
-          </div>
         </div>
 
         <div class="view" id="view-menu">
@@ -963,6 +939,7 @@ function renderAll(){
   renderCategoryList();
   renderEditor();
   renderDashboard();
+  renderMegaSearch();
   renderCategoriesHub();
   renderItemsHub();
   renderAddonsHub();
@@ -1025,15 +1002,6 @@ function orderStatDate(row){
   const p=row.payload||{};
   return parseStatDate(p.timestamp||p.createdAt||p.created_at||row.createdAt);
 }
-function isMenuOrder(row){
-  const p=row.payload||{},status=row.status||p.status||'';
-  const source=String(p.source||p.channel||p.origin||'').toLowerCase();
-  return ['inbox','confirmed','declined'].includes(status)
-    || ['menu','website','online','web'].includes(source)
-    || !!p.gps
-    || !!p.address
-    || !!p.customerAddress;
-}
 function dailySeries(items,dateGetter){
   const days=dashboardDays(),counts=Object.fromEntries(days.map(d=>[d.key,0]));
   items.forEach(item=>{
@@ -1044,34 +1012,115 @@ function dailySeries(items,dateGetter){
   });
   return days.map(d=>({...d,value:counts[d.key]}));
 }
-function chartMarkup(title,sub,total,series,type){
-  const max=Math.max(1,...series.map(d=>d.value));
+function chartMarkup(id,title,sub,total,series){
   return `<div class="chart-card">
     <div class="chart-head">
       <div><div class="chart-title">${title}</div><div class="chart-sub">${sub}</div></div>
       <div class="chart-total">${total}</div>
     </div>
-    <div class="chart-bars">
-      ${series.map(d=>`<div class="chart-col" title="${d.label}: ${d.value}">
-        <div class="chart-number">${d.value}</div>
-        <div class="chart-track"><div class="chart-fill ${type}" style="height:${Math.max(4,Math.round((d.value/max)*100))}%"></div></div>
-        <div class="chart-label">${d.label}</div>
-      </div>`).join('')}
-    </div>
+    <canvas class="chart-canvas" id="${id}" width="640" height="220"></canvas>
+    <div class="chart-foot">${series.map(d=>`<span>${d.label}</span>`).join('')}</div>
   </div>`;
 }
 function renderDashboardCharts(){
   const el=document.getElementById('dashboard-charts');
   if(!el)return;
   const visitors=dailySeries(customersAdminData,c=>parseStatDate(c.firstSeen));
-  const menuOrders=dashboardOrdersData.filter(isMenuOrder);
-  const orderSeries=dailySeries(menuOrders,orderStatDate);
+  const orderSeries=dailySeries(dashboardOrdersData,orderStatDate);
   const visitorTotal=customersAdminData.length;
-  const menuTotal=menuOrders.length;
+  const orderTotal=dashboardOrdersData.length;
   el.innerHTML=
-    chartMarkup('Visitors','New customer profiles, last 7 days',visitorTotal,visitors,'visitors')+
-    chartMarkup('Menu Orders','Website/menu orders, last 7 days',menuTotal,orderSeries,'orders');
+    chartMarkup('visitors-chart','Visitors','New customer profiles, last 7 days',visitorTotal,visitors)+
+    chartMarkup('orders-chart','All Orders','POS + menu orders, last 7 days',orderTotal,orderSeries);
+  requestAnimationFrame(()=>{
+    drawLineChart('visitors-chart',visitors,'#f59e0b');
+    drawLineChart('orders-chart',orderSeries,'#78350f');
+  });
 }
+function drawLineChart(id,series,color){
+  const canvas=document.getElementById(id);
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,pad=28;
+  ctx.clearRect(0,0,w,h);
+  const max=Math.max(1,...series.map(d=>d.value));
+  ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;
+  for(let i=0;i<4;i++){
+    const y=pad+(i*(h-pad*2)/3);
+    ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();
+  }
+  const pts=series.map((d,i)=>({
+    x:pad+(i*((w-pad*2)/Math.max(1,series.length-1))),
+    y:h-pad-((d.value/max)*(h-pad*2)),
+    value:d.value
+  }));
+  const fill=ctx.createLinearGradient(0,pad,0,h-pad);
+  fill.addColorStop(0,color+'44');fill.addColorStop(1,color+'00');
+  ctx.beginPath();
+  pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+  ctx.lineTo(pts[pts.length-1].x,h-pad);ctx.lineTo(pts[0].x,h-pad);ctx.closePath();
+  ctx.fillStyle=fill;ctx.fill();
+  ctx.beginPath();
+  pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+  ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  pts.forEach(p=>{
+    ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=color;ctx.stroke();
+    ctx.fillStyle='#374151';ctx.font='700 11px Poppins, sans-serif';ctx.textAlign='center';ctx.fillText(String(p.value),p.x,Math.max(14,p.y-10));
+  });
+}
+function buildMegaSearchResults(){
+  const results=[];
+  menuData.forEach((sec,si)=>{
+    results.push({type:sec.type==='addons'?'Add-ons':'Category',title:sec.title||sec.key||'Untitled',meta:`${sec.key||'no-key'} · ${(sec.items||sec.addonGroups||[]).length} entries`,text:`${sec.title||''} ${sec.key||''}`,action:()=>openCategory(si)});
+    if(sec.type!=='addons'){
+      (sec.items||[]).forEach((item,ii)=>{
+        results.push({type:'Item',title:item.name||'Untitled item',meta:`${sec.title||sec.key} · ${item.price||'no price'}${item.active===false?' · inactive':''}`,text:`${item.name||''} ${item.price||''} ${sec.title||''} ${sec.key||''}`,action:()=>{activeTab=si;switchView('menu');renderCategoryList();renderEditor();setTimeout(()=>document.getElementById(`item-${ii}`)?.scrollIntoView({behavior:'smooth',block:'center'}),80);}});
+      });
+    }
+  });
+  customersAdminData.forEach((c,i)=>{
+    results.push({type:'Customer',title:c.name||c.phone||'Unnamed customer',meta:`+961 ${c.phone||''} · ${Number(c.totalOrders||0)} visits · $${Number(c.totalSpent||0).toFixed(2)}`,text:`${c.name||''} ${c.phone||''} ${c.note||''}`,action:()=>{switchView('customers');setTimeout(()=>{const input=document.getElementById('cust-admin-search');if(input){input.value=c.phone||c.name||'';renderCustomersAdmin();}},80);}});
+  });
+  dashboardOrdersData.forEach(row=>{
+    const p=row.payload||{},dt=orderStatDate(row),name=p.name||p.customerName||'Guest';
+    results.push({type:'Order',title:row.id||p.id||'Order',meta:`${name} · ${p.orderType||'order'} · $${Number(p.total||0).toFixed(2)}${dt?' · '+dt.toLocaleDateString('en-GB'):''}`,text:`${row.id||''} ${p.id||''} ${name} ${p.phone||''} ${p.orderType||''} ${row.status||''}`,action:()=>{switchView('dashboard');showToast(`Order ${row.id||p.id||''} · ${name} · $${Number(p.total||0).toFixed(2)}`,'success');}});
+  });
+  return results;
+}
+function renderMegaSearch(){
+  const input=document.getElementById('mega-search'),box=document.getElementById('mega-results');
+  if(!input||!box)return;
+  const q=input.value.trim().toLowerCase();
+  if(!q){box.classList.remove('show');box.innerHTML='';return;}
+  const rows=buildMegaSearchResults().filter(r=>r.text.toLowerCase().includes(q)||r.title.toLowerCase().includes(q)||r.meta.toLowerCase().includes(q)).slice(0,12);
+  if(!rows.length){box.innerHTML='<div class="mega-empty">No results found.</div>';box.classList.add('show');return;}
+  box.innerHTML=rows.map((r,i)=>`<button class="mega-result${i===0?' active':''}" onclick="selectMegaSearch(${i})">
+    <span class="mega-type">${esc(r.type)}</span>
+    <span><span class="mega-title">${esc(r.title)}</span><span class="mega-meta">${esc(r.meta)}</span></span>
+  </button>`).join('');
+  box._rows=rows;
+  box.classList.add('show');
+}
+function selectMegaSearch(i){
+  const box=document.getElementById('mega-results'),input=document.getElementById('mega-search');
+  const row=box?._rows?.[i];
+  if(!row)return;
+  if(input)input.value='';
+  if(box){box.classList.remove('show');box.innerHTML='';}
+  row.action();
+}
+function handleMegaSearchKey(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    selectMegaSearch(0);
+  }else if(e.key==='Escape'){
+    document.getElementById('mega-results')?.classList.remove('show');
+    e.currentTarget.value='';
+  }
+}
+document.addEventListener('click',e=>{
+  const wrap=document.querySelector('.mega-search');
+  if(wrap&&!wrap.contains(e.target))document.getElementById('mega-results')?.classList.remove('show');
+});
 function renderCategoriesHub(){
   const el=document.getElementById('categories-hub');
   if(!el)return;
@@ -1267,7 +1316,7 @@ function renderItems(sec){
 function renderItem(item,i){
   const color=item.flavorColor||'amber',pc=PILL_PRESETS.find(p=>p.id===color)||PILL_PRESETS[0];
   const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
-  return `<div class="item-card${item.active===false?' inactive':''}">
+  return `<div class="item-card${item.active===false?' inactive':''}" id="item-${i}">
     <div>
       <div class="img-drop-zone" onclick="triggerUpload(${i})">
         ${img?`<img src="${img}" alt=""><div class="img-drop-overlay">Change</div>`:`<div class="img-drop-label">Upload<br>Image</div>`}
