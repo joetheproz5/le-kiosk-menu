@@ -662,7 +662,8 @@ color:#9ca3af}
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(122px,1fr));
 gap:8px;
-align-content:start}
+align-content:start;
+height:100%}
 .item-grid.category-board.tight{
 grid-template-columns:repeat(auto-fill,minmax(112px,1fr));
 gap:7px}
@@ -707,7 +708,8 @@ font-size:9px}
 .category-items{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
-gap:6px}
+gap:6px;
+grid-auto-rows:1fr}
 .compact-group .category-items{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(122px,1fr));
@@ -2073,9 +2075,16 @@ $('item-grid').innerHTML=groups.map(g=>`<section class="category-section" id="po
 function fitMenuBoard(){
 requestAnimationFrame(()=>{
 const grid=$('item-grid'),scroll=grid.closest('.grid-scroll');
-if(!grid||!scroll||(!grid.classList.contains('board')&&!grid.classList.contains('category-board')))return;
+if(!grid||!scroll||!grid.classList.contains('category-board'))return;
 grid.classList.remove('tight','ultra');
-if(scroll.scrollHeight>scroll.clientHeight+2)grid.classList.add('tight');
+const sections=grid.querySelectorAll('.category-section');
+const totalItems=[...sections].reduce((s,sec)=>s+sec.querySelectorAll('.item-card').length,0);
+const availH=scroll.clientHeight-20;
+const cols=Math.max(2,Math.floor(scroll.clientWidth/130));
+const totalRows=[...sections].reduce((s,sec)=>s+Math.ceil(sec.querySelectorAll('.item-card').length/cols),0)+sections.length;
+const neededH=totalRows*56+sections.length*28;
+if(neededH>availH)grid.classList.add('tight');
+if(neededH*0.85>availH)grid.classList.add('ultra');
 });
 }
 function priceNum(p){return parseFloat(String(p||'0').replace(/[^0-9.]/g,''))||0}
