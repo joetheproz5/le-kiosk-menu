@@ -1555,7 +1555,8 @@ margin-left:auto}
 <script>
 const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
-const MAX_ATTEMPTS=5,LOCKOUT_MS=2*60*1000,SESSION_MS=4*60*60*1000;
+const MAX_ATTEMPTS=5,LOCKOUT_MS=2*60*1000,SESSION_MS=6*60*60*1000;
+const AUTH_STORAGE_KEY='lk_pos_auth';
 const WA_NUMBER='96176840244';
 const ZONE_FEES={
 A:.5,B:1,C:1.5}
@@ -1640,6 +1641,37 @@ const data=await res.json().catch(()=>({}));
 if(!res.ok)throw new Error(data.error||'Login failed');
 return data;
 }
+function authExpiryMs(){
+const local=Number(authSession?.localExpiresAt||0);
+const server=Date.parse(authSession?.expiresAt||'');
+const vals=[local,server].filter(v=>Number.isFinite(v)&&v>Date.now());
+return vals.length?Math.min(...vals):0;
+}
+function saveAuthSession(){
+if(!authSession)return;
+authSession.localExpiresAt=Date.now()+SESSION_MS;
+localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+}
+function clearAuthSession(){
+authSession=null;
+localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+function restoreAuthSession(){
+try{
+const saved=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||'null');
+if(!saved?.token)return false;
+authSession=saved;
+if(!authExpiryMs()){clearAuthSession();return false}
+$('login-screen').style.display='none';
+$('app').classList.add('show');
+startSession();
+bootPOS();
+return true;
+}catch(_){
+clearAuthSession();
+return false;
+}
+}
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('pos_lock')||'{"a":0,"u":0}')}catch{return{a:0,u:0}}}
 function setLockout(d){sessionStorage.setItem('pos_lock',JSON.stringify(d))}
 function resetLockout(){sessionStorage.removeItem('pos_lock')}
@@ -1664,6 +1696,7 @@ const pw=$('pw').value;if(!username||!pw)return;
 loginEnabled(false);
 try{
 authSession=await loginWithDatabase(username,pw);
+saveAuthSession();
 resetLockout();$('login-screen').style.display='none';$('app').classList.add('show');startSession();bootPOS();
 }catch(e){
 const a=(l.a||0)+1,u=a>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;setLockout({a,u});renderDots(a);
@@ -1676,10 +1709,11 @@ function showLoginError(msg){$('login-error').textContent=msg;$('login-error').c
 $('pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
 $('user').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
 (function(){const l=getLockout();renderDots(l.a||0);if(l.u>Date.now()){loginEnabled(false);startLockCountdown()}})();
-function startSession(){resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000);['mousemove','keydown','click','touchstart'].forEach(ev=>document.addEventListener(ev,resetSession,{passive:true,once:false}))}
-function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},SESSION_MS)}
+restoreAuthSession();
+function startSession(){sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000)}
+function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);const rem=Math.max(0,sessionExpiry-Date.now());updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},rem)}
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
-function logout(){authSession=null;clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
+function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
 async function bootPOS(){
 showLoading('Loading POS...');
 await Promise.all([loadMenu(),loadCustomers(),loadConfig()]).catch(e=>showToast(e.message,'error'));
