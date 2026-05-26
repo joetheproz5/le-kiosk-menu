@@ -659,34 +659,25 @@ text-transform:uppercase;
 letter-spacing:.08em;
 color:#9ca3af}
 .item-grid.category-board{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(122px,1fr));
-gap:8px;
-align-content:start;
 display:flex;
-flex-direction:row;
+align-items:stretch;
 gap:12px;
-align-items:flex-start}
-height:100%}
+height:100%;
+min-height:0}
 .item-grid.category-board.tight{
-grid-template-columns:repeat(auto-fill,minmax(112px,1fr));
-gap:7px}
+gap:9px}
 .category-section{
 min-width:0}
 .category-section.compact-group{
-grid-column:1/-1;
-display:block;
-padding:6px 0 10px;
-border-bottom:1px solid var(--line)}
+flex:1 1 0;
+min-width:0;
 display:flex;
 flex-direction:column;
-flex-shrink:0;
-min-width:140px;
-padding:0;
-border-right:1px solid var(--line);
-padding-right:12px}
+padding:0 10px 0 0;
+border-right:1px solid var(--line)}
 .category-section.compact-group:last-child{
-border-bottom:0}
+border-right:0;
+padding-right:0}
 .category-head{
 display:flex;
 align-items:center;
@@ -700,10 +691,11 @@ font-weight:900;
 color:var(--brand-dark)}
 .compact-group .category-head{
 margin:0;
-padding:3px 1px 6px}
+padding:3px 1px 8px;
+flex-shrink:0}
 .compact-group .category-title{
 font-family:var(--font);
-font-size:10px;
+font-size:11px;
 font-weight:900;
 letter-spacing:.09em;
 text-transform:uppercase;
@@ -717,17 +709,16 @@ letter-spacing:.06em}
 .compact-group .category-count{
 font-size:9px}
 .category-items{
-display:flex;
-flex-direction:column;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
 gap:6px}
-grid-auto-rows:1fr}
 .compact-group .category-items{
 display:flex;
 flex-direction:column;
-gap:6px}
+gap:7px;
+min-height:0}
 .category-board.tight .compact-group .category-items{
-grid-template-columns:repeat(auto-fill,minmax(112px,1fr));
-gap:7px}
+gap:5px}
 .item-card{
 background:#fff;
 border:1.5px solid var(--line);
@@ -738,15 +729,17 @@ box-shadow:0 2px 10px rgba(17,24,39,.04);
 transition:.14s transform,.14s box-shadow,.14s border-color;
 position:relative}
 .item-card.compact{
-min-height:68px;
+min-height:62px;
 display:flex;
 align-items:center;
-padding:9px 10px;
+gap:8px;
+padding:7px 8px;
 box-shadow:0 1px 5px rgba(17,24,39,.04)}
 .item-grid.board.tight .item-card.compact,
 .category-board.tight .item-card.compact{
-min-height:62px;
-padding:8px 9px}
+min-height:54px;
+gap:6px;
+padding:6px 7px}
 .item-card:hover{
 transform:translateY(-2px);
 box-shadow:0 10px 26px rgba(17,24,39,.08);
@@ -758,6 +751,16 @@ width:100%;
 aspect-ratio:2.45/1;
 object-fit:cover;
 background:#f3f4f6}
+.item-card.compact .item-img{
+width:44px;
+height:44px;
+aspect-ratio:auto;
+border-radius:7px;
+object-fit:cover;
+flex-shrink:0}
+.category-board.tight .item-card.compact .item-img{
+width:36px;
+height:36px}
 .item-img[src='']{
 display:none}
 .item-info{
@@ -773,27 +776,27 @@ line-height:1.18;
 color:var(--ink);
 min-height:0}
 .item-card.compact .item-name{
-font-size:11px;
-line-height:1.18;
+font-size:10.5px;
+line-height:1.15;
 display:-webkit-box;
 -webkit-line-clamp:2;
 -webkit-box-orient:vertical;
 overflow:hidden}
 .item-grid.board.tight .item-card.compact .item-name,
 .category-board.tight .item-card.compact .item-name{
-font-size:10px}
+font-size:9.5px}
 .item-price{
 font-size:13px;
 font-weight:900;
 color:#92400e;
 margin-top:2px}
 .item-card.compact .item-price{
-font-size:13px;
-margin-top:3px}
-.item-grid.board.tight .item-card.compact .item-price,
-.category-board.tight .item-card.compact .item-price{
 font-size:12px;
 margin-top:2px}
+.item-grid.board.tight .item-card.compact .item-price,
+.category-board.tight .item-card.compact .item-price{
+font-size:11px;
+margin-top:1px}
 .item-tag{
 display:block;
 font-size:8px;
@@ -2052,7 +2055,7 @@ qty?' has-qty':''}
 " onclick="addToCart('${esc(x.cat.key)}',${
 x.idx}
 )">
-<span class="qty-badge">${qty}</span>${!compact&&img?`<img class="item-img" src="${
+<span class="qty-badge">${qty}</span>${img?`<img class="item-img" src="${
 esc(img)}
 " alt="${
 esc(x.item.name)}
@@ -2086,16 +2089,9 @@ $('item-grid').innerHTML=groups.map(g=>`<section class="category-section" id="po
 function fitMenuBoard(){
 requestAnimationFrame(()=>{
 const grid=$('item-grid'),scroll=grid.closest('.grid-scroll');
-if(!grid||!scroll||!grid.classList.contains('category-board'))return;
+if(!grid||!scroll||(!grid.classList.contains('board')&&!grid.classList.contains('category-board')))return;
 grid.classList.remove('tight','ultra');
-const sections=grid.querySelectorAll('.category-section');
-const totalItems=[...sections].reduce((s,sec)=>s+sec.querySelectorAll('.item-card').length,0);
-const availH=scroll.clientHeight-20;
-const cols=Math.max(2,Math.floor(scroll.clientWidth/130));
-const totalRows=[...sections].reduce((s,sec)=>s+Math.ceil(sec.querySelectorAll('.item-card').length/cols),0)+sections.length;
-const neededH=totalRows*56+sections.length*28;
-if(neededH>availH)grid.classList.add('tight');
-if(neededH*0.85>availH)grid.classList.add('ultra');
+if(scroll.scrollHeight>scroll.clientHeight+2)grid.classList.add('tight');
 });
 }
 function priceNum(p){return parseFloat(String(p||'0').replace(/[^0-9.]/g,''))||0}
