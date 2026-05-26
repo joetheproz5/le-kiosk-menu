@@ -616,7 +616,8 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const IMG_FOLDER='menupictures';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
-const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=20*60*1000;
+const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=6*60*60*1000;
+const AUTH_STORAGE_KEY='lk_admin_auth';
 const PILL_PRESETS=[
   {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
   {id:'red',bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
@@ -659,6 +660,37 @@ async function loginWithDatabase(username,password){
   if(!res.ok)throw new Error(data.error||'Login failed');
   return data;
 }
+function authExpiryMs(){
+  const local=Number(authSession?.localExpiresAt||0);
+  const server=Date.parse(authSession?.expiresAt||'');
+  const vals=[local,server].filter(v=>Number.isFinite(v)&&v>Date.now());
+  return vals.length?Math.min(...vals):0;
+}
+function saveAuthSession(){
+  if(!authSession)return;
+  authSession.localExpiresAt=Date.now()+SESSION_MS;
+  localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+}
+function clearAuthSession(){
+  authSession=null;
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+function restoreAuthSession(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||'null');
+    if(!saved?.token)return false;
+    authSession=saved;
+    if(!authExpiryMs()){clearAuthSession();return false;}
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('admin-screen').style.display='block';
+    startSession();
+    initAdmin();
+    return true;
+  }catch(_){
+    clearAuthSession();
+    return false;
+  }
+}
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('lk_lockout')||'{"attempts":0,"until":0}');}catch(_){return{attempts:0,until:0};}}
 function setLockout(d){sessionStorage.setItem('lk_lockout',JSON.stringify(d));}
 function resetLockout(){sessionStorage.removeItem('lk_lockout');}
@@ -685,6 +717,7 @@ async function tryLogin(){
   enableLoginForm(false);
   try{
     authSession=await loginWithDatabase(username,pw);
+    saveAuthSession();
     resetLockout();hideLockoutBar();document.getElementById('login-error').classList.remove('show');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('admin-screen').style.display='block';
@@ -701,23 +734,26 @@ async function tryLogin(){
 document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
 document.getElementById('user-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
 (function(){const l=getLockout();renderAttemptDots(l.attempts||0);if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}})();
+restoreAuthSession();
 
 function startSession(){
+  sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;
   resetSessionTimer();clearInterval(sessionTick);sessionTick=setInterval(tickSession,30000);
-  if(!sessionListenersAttached){['mousemove','keydown','click','touchstart'].forEach(ev=>document.addEventListener(ev,resetSessionTimer,{passive:true}));sessionListenersAttached=true;}
 }
 function resetSessionTimer(){
   if(document.getElementById('admin-screen').style.display==='none')return;
-  clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();
-  sessionTimer=setTimeout(()=>{showToast('Session expired - logged out','error');logout();},SESSION_MS);
+  clearTimeout(sessionTimer);
+  const rem=Math.max(0,sessionExpiry-Date.now());
+  updateSessionBadge();
+  sessionTimer=setTimeout(()=>{showToast('Session expired - logged out','error');logout();},rem);
 }
-function tickSession(){if(document.getElementById('admin-screen').style.display!=='none')updateSessionBadge();}
+function tickSession(){if(document.getElementById('admin-screen').style.display!=='none'){if(sessionExpiry<=Date.now())logout();else updateSessionBadge();}}
 function updateSessionBadge(){
-  const rem=Math.max(0,sessionExpiry-Date.now()),mins=Math.floor(rem/60000);
-  document.getElementById('session-timer').textContent=`Session: ${mins}m`;
+  const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);
+  document.getElementById('session-timer').textContent=`Session: ${h?h+'h ':''}${m}m`;
 }
 function logout(){
-  authSession=null;
+  clearAuthSession();
   clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
