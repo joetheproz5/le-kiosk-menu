@@ -203,6 +203,7 @@
 <script>
 // ━━━━━━━━━━━━━━━━━
 let TESTING_MODE = false;
+let MENU_ORDERING_ENABLED = true;
 // load from config
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
@@ -358,6 +359,7 @@ async function dispatchOrder(order) {
 
 // ORDER MODE
 function toggleOrderMode(){
+    if(!MENU_ORDERING_ENABLED) return;
     if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
     orderMode=!orderMode;
     document.body.classList.toggle('order-mode',orderMode);
@@ -536,6 +538,20 @@ function resetLocation(){
     userGPS=null;detectedZone=null;renderSheet();
 }
 
+    function syncMenuOrderingUI(){
+  const btn = document.getElementById('order-mode-btn');
+  if(btn) btn.style.display = MENU_ORDERING_ENABLED ? '' : 'none';
+
+  if(!MENU_ORDERING_ENABLED){
+    orderMode = false;
+    cart = {};
+    addonSel = {};
+    shishaSel = {};
+    document.body.classList.remove('order-mode');
+    updatePill();
+    closeSheet();
+  }
+}
 // SEND ORDER
 async function sendOrder(){
     const nameEl=document.getElementById('sheet-name');
@@ -806,11 +822,17 @@ document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.ta
 fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
   .then(r => r.ok ? r.json() : null)
   .then(j => {
-    if(j && j.data && j.data.testingMode !== undefined) {
+  if(j && j.data) {
+    if(j.data.testingMode !== undefined) {
       TESTING_MODE = !!j.data.testingMode;
     }
-  })
+    if(j.data.menuOrderingEnabled !== undefined) {
+      MENU_ORDERING_ENABLED = !!j.data.menuOrderingEnabled;
+    }
+  }
+})
   .catch(() => {})
+  syncMenuOrderingUI();
   .finally(() => {
     updateStatusBadge();
     setInterval(updateStatusBadge, 60000);
