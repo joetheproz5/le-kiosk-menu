@@ -857,5 +857,282 @@ fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
     });
   });
 </script>
+    <!-- Le Kiosk Basketball Popup
+Paste this near the end of the public menu page, after WORKER_URL is defined.
+It reads config.basketballEnabled and config.basketballMatches from /supabase/config.
+-->
+
+<style>
+  #basketball-bubble {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 61;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: #1c0f00;
+    color: #fef3c7;
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 16px rgba(0,0,0,.22);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  #basketball-bubble.show { display: flex; }
+
+  #basketball-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 180;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(28, 15, 0, .54);
+    backdrop-filter: blur(3px);
+  }
+  #basketball-popup.open { display: flex; }
+
+  .basketball-card {
+    width: min(430px, 82vw);
+    max-height: 80vh;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 2px solid #f59e0b;
+    background: #fffaf0;
+    box-shadow: 0 24px 70px rgba(0,0,0,.36);
+    position: relative;
+  }
+  .basketball-top {
+    background:
+      radial-gradient(circle at 18% 10%, rgba(251,191,36,.45), transparent 25%),
+      linear-gradient(135deg, #1c0f00, #78350f 55%, #f59e0b);
+    color: #fff7ed;
+    padding: 18px 18px 16px;
+    position: relative;
+  }
+  .basketball-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 25px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: .02em;
+  }
+  .basketball-sub {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: #fde68a;
+    margin-top: 7px;
+  }
+  .basketball-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,.14);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .basketball-list {
+    max-height: 56vh;
+    overflow-y: auto;
+    padding: 14px;
+  }
+  .basketball-match {
+    border: 1.5px solid #fde68a;
+    background: #fff;
+    border-radius: 15px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .basketball-match.featured {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+  }
+  .basketball-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 9px;
+    background: #1c0f00;
+    color: #fde68a;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+  .basketball-teams {
+    font-size: 15px;
+    font-weight: 900;
+    color: #451a03;
+    margin-top: 9px;
+    line-height: 1.25;
+  }
+  .basketball-meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: #92400e;
+    margin-top: 5px;
+    line-height: 1.35;
+  }
+  .basketball-reserve {
+    margin-top: 10px;
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    background: #22c55e;
+    color: #fff;
+    padding: 11px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    cursor: pointer;
+  }
+  .basketball-empty {
+    padding: 22px 14px;
+    text-align: center;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 800;
+  }
+</style>
+
+<button id="basketball-bubble" type="button" aria-label="Today's basketball games">🏀</button>
+
+<div id="basketball-popup" aria-hidden="true">
+  <div class="basketball-card" role="dialog" aria-modal="true" aria-labelledby="basketball-title">
+    <div class="basketball-top">
+      <button class="basketball-close" type="button" id="basketball-close-btn" aria-label="Close">×</button>
+      <div class="basketball-title" id="basketball-title">Tonight’s Games</div>
+      <div class="basketball-sub" id="basketball-date-label">Lebanese Basketball at Le Kiosk</div>
+    </div>
+    <div class="basketball-list" id="basketball-match-list"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const WA_NUMBER = '96176840244';
+  let todaysMatches = [];
+
+  function beirutDateKey(d = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Beirut',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(d);
+    const get = t => parts.find(p => p.type === t)?.value || '';
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
+  }
+
+  function reserveMessage(m) {
+    return m.waMessage || `Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. Name: ___ People: ___`;
+  }
+
+  function openReserve(m) {
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(reserveMessage(m))}`, '_blank');
+  }
+
+  function renderMatches() {
+    const list = document.getElementById('basketball-match-list');
+    if (!list) return;
+
+    if (!todaysMatches.length) {
+      list.innerHTML = '<div class="basketball-empty">No Lebanese basketball games today.</div>';
+      return;
+    }
+
+    list.innerHTML = todaysMatches.map((m, i) => `
+      <div class="basketball-match${m.featured ? ' featured' : ''}">
+        <span class="basketball-time">🏀 ${esc(m.time)}</span>
+        <div class="basketball-teams">${esc(m.home)} <span style="color:#f59e0b">vs</span> ${esc(m.away)}</div>
+        <div class="basketball-meta">${esc(m.league || 'Lebanon FLB')}${m.venue ? ' · ' + esc(m.venue) : ''}</div>
+        ${m.note ? `<div class="basketball-meta">${esc(m.note)}</div>` : ''}
+        ${m.reserveEnabled !== false ? `<button class="basketball-reserve" type="button" data-match="${i}">Reserve Table</button>` : ''}
+      </div>
+    `).join('');
+
+    list.querySelectorAll('[data-match]').forEach(btn => {
+      btn.addEventListener('click', () => openReserve(todaysMatches[Number(btn.dataset.match)]));
+    });
+  }
+
+  function openPopup() {
+    const popup = document.getElementById('basketball-popup');
+    if (!popup) return;
+    renderMatches();
+    popup.classList.add('open');
+    popup.setAttribute('aria-hidden', 'false');
+  }
+
+  function closePopup() {
+    const popup = document.getElementById('basketball-popup');
+    const bubble = document.getElementById('basketball-bubble');
+    if (popup) {
+      popup.classList.remove('open');
+      popup.setAttribute('aria-hidden', 'true');
+    }
+    if (bubble && todaysMatches.length) bubble.classList.add('show');
+  }
+
+  async function loadBasketballMatches() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      const res = await fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const j = await res.json();
+      const cfg = j.data || {};
+      if (cfg.basketballEnabled === false) return;
+
+      const today = beirutDateKey();
+      todaysMatches = (Array.isArray(cfg.basketballMatches) ? cfg.basketballMatches : [])
+        .filter(m => m && m.active !== false && m.date === today)
+        .sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+
+      const bubble = document.getElementById('basketball-bubble');
+      const dateLabel = document.getElementById('basketball-date-label');
+      if (dateLabel) dateLabel.textContent = `Lebanese Basketball · ${today}`;
+
+      if (todaysMatches.length) {
+        if (bubble) bubble.classList.add('show');
+        setTimeout(openPopup, 650);
+      }
+    } catch (_) {}
+  }
+
+  document.getElementById('basketball-bubble')?.addEventListener('click', openPopup);
+  document.getElementById('basketball-close-btn')?.addEventListener('click', closePopup);
+  document.getElementById('basketball-popup')?.addEventListener('click', e => {
+    if (e.target.id === 'basketball-popup') closePopup();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePopup();
+  });
+
+  loadBasketballMatches();
+})();
+</script>
+
 </body>
 </html>
