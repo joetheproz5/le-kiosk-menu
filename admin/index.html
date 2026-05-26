@@ -578,6 +578,14 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
             </div>
             <div class="setting-card">
+              <div class="setting-title">Menu Ordering</div>
+              <div class="setting-copy">Show or hide the public menu Order button. When off, customers can browse the menu but cannot start checkout.</div>
+              <div class="switch-row">
+                <span class="field-label">Status</span>
+                <label class="switch"><input type="checkbox" id="menu-ordering-toggle" onchange="setMenuOrderingMode(this.checked)"><span class="slider"></span></label>
+              </div>
+            </div>
+            <div class="setting-card">
               <div class="setting-title">Loyalty System</div>
               <div class="setting-copy">Controls whether POS shows rewards, applies discounts, and awards stamps on completed orders.</div>
               <div class="switch-row">
@@ -645,7 +653,7 @@ let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
 let dashboardOrdersData=[],menuVisitorData=[];
-let configData={testingMode:false,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
+let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
@@ -794,6 +802,7 @@ async function fetchConfig(){
       const j=await res.json();
       configData=j.data||{};
       if(typeof configData.loyaltyEnabled!=='boolean')configData.loyaltyEnabled=true;
+      if(typeof configData.menuOrderingEnabled!=='boolean')configData.menuOrderingEnabled=true;
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
       normalizeLoyaltyRewards();
     }
@@ -807,8 +816,9 @@ function renderStatus(){
   const test=document.getElementById('status-test'),loy=document.getElementById('status-loyalty');
   test.textContent=configData.testingMode?'Test On':'Test Off';test.className='status-pill '+(configData.testingMode?'warn':'');
   loy.textContent=configData.loyaltyEnabled?'Loyalty On':'Loyalty Off';loy.className='status-pill '+(configData.loyaltyEnabled?'on':'');
-  const t=document.getElementById('testing-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main');
+  const t=document.getElementById('testing-toggle'),mo=document.getElementById('menu-ordering-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main');
   if(t)t.checked=!!configData.testingMode;
+  if(mo)mo.checked=configData.menuOrderingEnabled!==false;
   if(l)l.checked=!!configData.loyaltyEnabled;
   if(lm)lm.checked=!!configData.loyaltyEnabled;
   renderRewardEditor();
@@ -817,6 +827,12 @@ async function setTestingMode(enabled){
   showLoading(enabled?'Enabling test mode...':'Disabling test mode...');
   try{configData.testingMode=enabled;await saveConfig();clearRewardsDirty();renderStatus();showToast(enabled?'Test mode ON':'Test mode OFF','success');}
   catch(e){configData.testingMode=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
+  hideLoading();
+}
+async function setMenuOrderingMode(enabled){
+  showLoading(enabled?'Enabling menu orders...':'Disabling menu orders...');
+  try{configData.menuOrderingEnabled=enabled;await saveConfig();renderStatus();renderSettings();showToast(enabled?'Menu ordering enabled':'Menu ordering disabled','success');}
+  catch(e){configData.menuOrderingEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
 }
 async function setLoyaltyMode(enabled){
