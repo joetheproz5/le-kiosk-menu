@@ -1589,6 +1589,7 @@ let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loya
 ));
 let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map();
 let authSession=null;
+let audioCtx=null,lastIncomingSoundAt=0;
 const $=id=>document.getElementById(id);
 const nativeFetch=window.fetch.bind(window);
 window.fetch=(input,options={})=>{
@@ -1628,7 +1629,34 @@ $('menu-tools')?.classList.toggle('open');
 function closeCategories(){
 $('menu-tools')?.classList.remove('open');
 }
+function ensureAudio(){
+try{
+if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+if(audioCtx.state==='suspended')audioCtx.resume();
+}catch(_){}
+}
+function playIncomingSound(){
+ensureAudio();
+if(!audioCtx)return;
+const now=Date.now();
+if(now-lastIncomingSoundAt<1500)return;
+lastIncomingSoundAt=now;
+const start=audioCtx.currentTime+.02;
+[0,0.16,0.32].forEach((offset,i)=>{
+const osc=audioCtx.createOscillator();
+const gain=audioCtx.createGain();
+osc.type='sine';
+osc.frequency.value=[880,1174,1568][i];
+gain.gain.setValueAtTime(0.0001,start+offset);
+gain.gain.exponentialRampToValueAtTime(0.22,start+offset+.025);
+gain.gain.exponentialRampToValueAtTime(0.0001,start+offset+.14);
+osc.connect(gain).connect(audioCtx.destination);
+osc.start(start+offset);
+osc.stop(start+offset+.16);
+});
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSidebar();closeCategories();}});
+document.addEventListener('pointerdown',ensureAudio,{once:true,passive:true});
 async function sha256(str){
 if(!window.crypto?.subtle)throw new Error('HTTPS required');
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
@@ -2132,11 +2160,14 @@ WORKER_URL}
 /supabase/orders?status=inbox`,{cache:'no-store'});if(!res.ok)throw new Error('Inbox read '+res.status);
 const j=await res.json();inboxData=(j.data||[]).filter(r=>!handledInboxIds.has(r.id)).map(r=>({...r.payload,id:r.id,status:'pending'}));
 const count=inboxData.length;
-if(count>lastInboxCount&&currentView!=='inbox')showToast(`${
+if(count>lastInboxCount){
+playIncomingSound();
+if(currentView!=='inbox')showToast(`${
 count-lastInboxCount}
 new incoming order${
 count-lastInboxCount===1?'':'s'}
 `,'success');
+}
 syncInboxBadge();renderInboxList();
 }catch(_){}
 }
