@@ -418,6 +418,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
         <button class="nav-btn" id="nav-items" onclick="switchView('items')"><span class="nav-icon">I</span>Menu Items</button>
         <button class="nav-btn" id="nav-addons" onclick="switchView('addons')"><span class="nav-icon">A</span>Add-ons</button>
         <button class="nav-btn" id="nav-loyalty" onclick="switchView('loyalty')"><span class="nav-icon">L</span>Loyalty</button>
+        <button class="nav-btn" id="nav-basketball" onclick="switchView('basketball')"><span class="nav-icon">K</span>Basketball</button>
         <button class="nav-btn" id="nav-customers" onclick="switchView('customers')"><span class="nav-icon">C</span>Customers</button>
         <button class="nav-btn" id="nav-blocklist" onclick="switchView('blocklist')"><span class="nav-icon">B</span>Block List</button>
         <button class="nav-btn" id="nav-settings" onclick="switchView('settings')"><span class="nav-icon">S</span>Settings</button>
@@ -620,6 +621,30 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
           </div>
         </div>
 
+        <div class="view" id="view-basketball">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Basketball Match Manager</div>
+                <div class="panel-sub">Schedule games, control reservations, and choose what appears on the public menu</div>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn btn-add btn-sm" onclick="addBasketballMatch()">Add Match</button>
+                <button class="btn btn-save btn-sm" onclick="saveBasketballMatches()">Save Matches</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="today-bar" id="basketball-summary"></div>
+              <div class="table-toolbar">
+                <input class="search-input" id="basketball-search" type="text" placeholder="Search team, venue, note..." oninput="renderBasketballManager()">
+                <button class="btn btn-soft" onclick="addBasketballToday()">Add Today</button>
+                <button class="btn btn-ghost" onclick="sortBasketballMatches()">Sort by Date</button>
+              </div>
+              <div class="mini-list" id="basketball-list"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="view" id="view-settings">
           <div class="settings-grid">
             <div class="setting-card">
@@ -646,14 +671,16 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
             </div>
             <div class="setting-card">
-              <div class="setting-title">Basketball Matches</div>
-              <div class="setting-copy">Paste this week’s Lebanese basketball games. One match per line: date | time | home | away.</div>
-              <textarea id="basketball-matches-input" class="mega-input" rows="7" style="height:auto;padding-top:10px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px" placeholder="2026-05-28 | 9:45 PM | Riyadi | Beirut"></textarea>
-              <div class="setting-stat" id="basketball-matches-count" style="margin-top:10px">0 matches configured</div>
-              <div class="setting-note" id="basketball-matches-note">The public menu will show only today’s matches.</div>
+              <div class="setting-title">Basketball Popup</div>
+              <div class="setting-copy">Show or hide the basketball match popup and floating bubble on the public menu.</div>
+              <div class="switch-row">
+                <span class="field-label">Status</span>
+                <label class="switch"><input type="checkbox" id="basketball-toggle" onchange="setBasketballMode(this.checked)"><span class="slider"></span></label>
+              </div>
+              <div class="setting-stat" id="basketball-matches-count">0 matches configured</div>
+              <div class="setting-note" id="basketball-matches-note">Manage games from the Basketball sidebar.</div>
               <div class="setting-actions">
-                <button class="btn btn-dark" onclick="saveBasketballMatchesFromSettings()">Save Matches</button>
-                <button class="btn btn-ghost" onclick="insertBasketballMatchExample()">Example</button>
+                <button class="btn btn-dark" onclick="switchView('basketball')">Manage Matches</button>
               </div>
             </div>
             <div class="setting-card">
@@ -725,7 +752,7 @@ let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
 let dashboardOrdersData=[],menuVisitorData=[];
-let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[]};
+let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,basketballEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
@@ -891,6 +918,7 @@ async function fetchConfig(){
       if(typeof configData.loyaltyEnabled!=='boolean')configData.loyaltyEnabled=true;
       if(typeof configData.menuOrderingEnabled!=='boolean')configData.menuOrderingEnabled=true;
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
+      if(typeof configData.basketballEnabled!=='boolean')configData.basketballEnabled=true;
       normalizeBasketballMatches();
       normalizeLoyaltyRewards();
     }
@@ -904,11 +932,12 @@ function renderStatus(){
   const test=document.getElementById('status-test'),loy=document.getElementById('status-loyalty');
   test.textContent=configData.testingMode?'Test On':'Test Off';test.className='status-pill '+(configData.testingMode?'warn':'');
   loy.textContent=configData.loyaltyEnabled?'Loyalty On':'Loyalty Off';loy.className='status-pill '+(configData.loyaltyEnabled?'on':'');
-  const t=document.getElementById('testing-toggle'),mo=document.getElementById('menu-ordering-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main');
+  const t=document.getElementById('testing-toggle'),mo=document.getElementById('menu-ordering-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main'),bt=document.getElementById('basketball-toggle');
   if(t)t.checked=!!configData.testingMode;
   if(mo)mo.checked=configData.menuOrderingEnabled!==false;
   if(l)l.checked=!!configData.loyaltyEnabled;
   if(lm)lm.checked=!!configData.loyaltyEnabled;
+  if(bt)bt.checked=configData.basketballEnabled!==false;
   renderRewardEditor();
 }
 async function setTestingMode(enabled){
@@ -921,6 +950,12 @@ async function setMenuOrderingMode(enabled){
   showLoading(enabled?'Enabling menu orders...':'Disabling menu orders...');
   try{configData.menuOrderingEnabled=enabled;await saveConfig();renderStatus();renderSettings();showToast(enabled?'Menu ordering enabled':'Menu ordering disabled','success');}
   catch(e){configData.menuOrderingEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
+  hideLoading();
+}
+async function setBasketballMode(enabled){
+  showLoading(enabled?'Enabling basketball popup...':'Disabling basketball popup...');
+  try{configData.basketballEnabled=enabled;await saveConfig();renderStatus();renderSettings();showToast(enabled?'Basketball popup enabled':'Basketball popup disabled','success');}
+  catch(e){configData.basketballEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
 }
 async function setLoyaltyMode(enabled){
@@ -942,7 +977,13 @@ function normalizeBasketballMatches(){
     time:String(m.time||'').trim(),
     home:String(m.home||'').trim(),
     away:String(m.away||'').trim(),
-    league:String(m.league||'Lebanon FLB').trim()
+    league:String(m.league||'Lebanon FLB').trim(),
+    venue:String(m.venue||'Le Kiosk').trim(),
+    note:String(m.note||'').trim(),
+    active:m.active!==false,
+    featured:!!m.featured,
+    reserveEnabled:m.reserveEnabled!==false,
+    waMessage:String(m.waMessage||'').trim()
   })).filter(m=>m.date&&m.time&&m.home&&m.away);
 }
 function basketballMatchesToText(){
@@ -972,6 +1013,81 @@ function insertBasketballMatchExample(){
   const input=document.getElementById('basketball-matches-input');
   if(!input)return;
   input.value=`${todayBeirutKey()} | 9:45 PM | Riyadi | Beirut\n${todayBeirutKey()} | 7:00 PM | Sagesse | Hoops`;
+}
+function basketballMessage(m){
+  return m.waMessage||`Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. Name: ___ People: ___`;
+}
+function addBasketballMatch(match={}){
+  normalizeBasketballMatches();
+  configData.basketballMatches.push({
+    id:`match_${Date.now()}`,
+    date:match.date||todayBeirutKey(),
+    time:match.time||'9:00 PM',
+    home:match.home||'Home Team',
+    away:match.away||'Away Team',
+    league:match.league||'Lebanon FLB',
+    venue:match.venue||'Le Kiosk',
+    note:match.note||'',
+    active:match.active!==false,
+    featured:!!match.featured,
+    reserveEnabled:match.reserveEnabled!==false,
+    waMessage:match.waMessage||''
+  });
+  renderBasketballManager();
+}
+function addBasketballToday(){addBasketballMatch({date:todayBeirutKey()});}
+function updateBasketballMatch(i,field,value){
+  const m=configData.basketballMatches[i];if(!m)return;
+  if(['active','featured','reserveEnabled'].includes(field))m[field]=!!value;
+  else m[field]=String(value||'');
+  renderBasketballManager();
+}
+function deleteBasketballMatch(i){
+  configData.basketballMatches.splice(i,1);
+  renderBasketballManager();
+}
+function sortBasketballMatches(){
+  normalizeBasketballMatches();
+  configData.basketballMatches.sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+  renderBasketballManager();
+}
+async function saveBasketballMatches(){
+  showLoading('Saving matches...');
+  try{normalizeBasketballMatches();await saveConfig();renderBasketballManager();renderSettings();showToast('Basketball matches saved','success');}
+  catch(e){showToast('Save failed: '+e.message,'error');}
+  hideLoading();
+}
+function renderBasketballManager(){
+  normalizeBasketballMatches();
+  const today=todayBeirutKey(),q=(document.getElementById('basketball-search')?.value||'').toLowerCase();
+  const todayMatches=configData.basketballMatches.filter(m=>m.date===today&&m.active);
+  const upcoming=configData.basketballMatches.filter(m=>m.date>=today&&m.active).length;
+  const summary=document.getElementById('basketball-summary');
+  if(summary)summary.innerHTML=`
+    <div class="today-card"><div><div class="today-label">Today</div><div class="today-value">${todayMatches.length}</div><div class="today-note">${today}</div></div><div class="today-icon">B</div></div>
+    <div class="today-card"><div><div class="today-label">Upcoming Active</div><div class="today-value">${upcoming}</div><div class="today-note">Shown by date</div></div><div class="today-icon">7</div></div>
+    <div class="today-card"><div><div class="today-label">Popup</div><div class="today-value">${configData.basketballEnabled!==false?'On':'Off'}</div><div class="today-note">Settings toggle</div></div><div class="today-icon">S</div></div>`;
+  const list=document.getElementById('basketball-list');if(!list)return;
+  const rows=configData.basketballMatches.map((m,i)=>({m,i})).filter(({m})=>!q||`${m.date} ${m.time} ${m.home} ${m.away} ${m.venue} ${m.note}`.toLowerCase().includes(q));
+  if(!rows.length){list.innerHTML='<div class="empty-state">No matches yet. Add the first game.</div>';return;}
+  list.innerHTML=rows.map(({m,i})=>`<div class="reward-row">
+    <div class="reward-fields-grid">
+      <div><label class="field-label">Date</label><input class="inp" type="date" value="${esc(m.date)}" onchange="updateBasketballMatch(${i},'date',this.value)"></div>
+      <div><label class="field-label">Time</label><input class="inp" type="text" value="${esc(m.time)}" placeholder="9:45 PM" onchange="updateBasketballMatch(${i},'time',this.value)"></div>
+      <div><label class="field-label">Home</label><input class="inp" value="${esc(m.home)}" onchange="updateBasketballMatch(${i},'home',this.value)"></div>
+      <div><label class="field-label">Away</label><input class="inp" value="${esc(m.away)}" onchange="updateBasketballMatch(${i},'away',this.value)"></div>
+      <div><label class="field-label">Venue</label><input class="inp" value="${esc(m.venue)}" onchange="updateBasketballMatch(${i},'venue',this.value)"></div>
+      <div><label class="field-label">League</label><input class="inp" value="${esc(m.league)}" onchange="updateBasketballMatch(${i},'league',this.value)"></div>
+    </div>
+    <div class="note-row"><label class="field-label">Note</label><input class="inp" value="${esc(m.note)}" placeholder="Final, derby, offer..." onchange="updateBasketballMatch(${i},'note',this.value)"></div>
+    <div class="note-row"><label class="field-label">WhatsApp Message</label><textarea class="inp" style="height:64px;padding-top:9px;resize:vertical" onchange="updateBasketballMatch(${i},'waMessage',this.value)">${esc(basketballMessage(m))}</textarea></div>
+    <div class="hub-actions">
+      <label class="reward-toggle"><input type="checkbox" ${m.active?'checked':''} onchange="updateBasketballMatch(${i},'active',this.checked)">Active</label>
+      <label class="reward-toggle"><input type="checkbox" ${m.featured?'checked':''} onchange="updateBasketballMatch(${i},'featured',this.checked)">Featured</label>
+      <label class="reward-toggle"><input type="checkbox" ${m.reserveEnabled?'checked':''} onchange="updateBasketballMatch(${i},'reserveEnabled',this.checked)">Reserve</label>
+      <button class="btn btn-ghost btn-sm" onclick="deleteBasketballMatch(${i})">Delete</button>
+    </div>
+  </div>`).join('');
 }
 function makeRewardId(label){
   const base=String(label||'custom_reward').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'custom_reward';
@@ -1155,6 +1271,7 @@ function switchView(view){
     items:['Catalog','Menu Items'],
     addons:['Options','Add-ons'],
     loyalty:['Rewards','Loyalty'],
+    basketball:['Game Nights','Basketball'],
     customers:['Customer CRM','Customers'],
     blocklist:['Risk Control','Block List'],
     settings:['System Config','Settings']
@@ -1167,9 +1284,11 @@ function switchView(view){
   renderItemsHub();
   renderAddonsHub();
   renderLoyaltyHub();
+  renderBasketballManager();
   if(view==='customers')openCustomersAdmin();
   if(view==='loyalty')openCustomersAdmin();
   if(view==='blocklist')openBlockList();
+  if(view==='basketball')renderBasketballManager();
   if(view==='settings')renderSettings();
 }
 function renderAll(){
@@ -1181,6 +1300,7 @@ function renderAll(){
   renderItemsHub();
   renderAddonsHub();
   renderLoyaltyHub();
+  renderBasketballManager();
   renderPreview();
   renderStatus();
   markSaved();
@@ -1891,8 +2011,6 @@ function renderSettings(){
   normalizeBasketballMatches();
   const s=menuStats();
   const rewards=configData.loyaltyRewards||[];
-  const matchInput=document.getElementById('basketball-matches-input');
-  if(matchInput)matchInput.value=basketballMatchesToText();
   const matchCount=document.getElementById('basketball-matches-count');
   if(matchCount)matchCount.textContent=`${configData.basketballMatches.length} match${configData.basketballMatches.length===1?'':'es'} configured`;
   const matchNote=document.getElementById('basketball-matches-note');
