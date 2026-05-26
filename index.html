@@ -857,7 +857,7 @@ fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
     });
   });
 </script>
-   <!-- Le Kiosk Basketball Popup
+  <!-- Le Kiosk Basketball Popup
 Paste this near the end of the public menu page, after WORKER_URL is defined.
 It reads config.basketballEnabled and config.basketballMatches from /supabase/config.
 -->
@@ -881,8 +881,16 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .25s ease, transform .25s ease;
   }
   #basketball-bubble.show { display: flex; }
+  #basketball-bubble.hidden {
+    opacity: 0;
+    transform: translateY(-12px);
+    pointer-events: none;
+  }
 
   #basketball-popup {
     position: fixed;
@@ -1118,7 +1126,7 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   }
 
   function reserveMessage(m) {
-    return m.waMessage || `Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. Name: ___ People: ___`;
+    return m.waMessage || `Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. People: ___`;
   }
 
   function openReserve(m) {
@@ -1234,6 +1242,11 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closePopup();
   });
+
+  window.addEventListener('scroll', () => {
+    const bubble = document.getElementById('basketball-bubble');
+    if (bubble) bubble.classList.toggle('hidden', window.scrollY > 60);
+  }, { passive: true });
 
   loadBasketballMatches();
 })();
