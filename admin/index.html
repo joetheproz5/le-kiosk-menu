@@ -29,6 +29,10 @@ select{outline:none}
 .inp{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;transition:border-color .15s,box-shadow .15s}
 .inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.14)}
 .inp:disabled{opacity:.55;cursor:not-allowed}
+.password-wrap{position:relative}
+.password-wrap .inp{padding-right:72px}
+.show-pw-btn{position:absolute;right:7px;top:50%;transform:translateY(-50%);height:30px;border-radius:8px;background:var(--soft);color:var(--brand);padding:0 10px;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.show-pw-btn:hover{background:#e5e7eb}
 .login-btn{width:100%;margin-top:14px;background:var(--brand);color:#fff7ed;border-radius:10px;padding:13px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:background .15s}
 .login-btn:hover:not(:disabled){background:var(--brand-dark)}
 .login-btn:disabled{opacity:.55;cursor:not-allowed}
@@ -334,7 +338,10 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
     <label class="lbl" for="user-input">Account</label>
     <input class="inp" type="text" id="user-input" value="admin" placeholder="admin" autocomplete="username" style="margin-bottom:12px">
     <label class="lbl" for="pw-input">Password</label>
-    <input class="inp" type="password" id="pw-input" placeholder="Enter admin password" autocomplete="current-password">
+    <div class="password-wrap">
+      <input class="inp" type="password" id="pw-input" placeholder="Enter admin password" autocomplete="current-password">
+      <button class="show-pw-btn" type="button" id="show-pw-btn" onclick="togglePassword()">Show</button>
+    </div>
     <button class="login-btn" id="login-btn" onclick="tryLogin()">Sign In</button>
     <div class="login-error" id="login-error">Wrong password. Try again.</div>
     <div class="lockout-bar" id="lockout-bar"></div>
@@ -758,6 +765,13 @@ function logout(){
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
+}
+function togglePassword(){
+  const input=document.getElementById('pw-input');
+  const btn=document.getElementById('show-pw-btn');
+  const show=input.type==='password';
+  input.type=show?'text':'password';
+  btn.textContent=show?'Hide':'Show';
 }
 
 async function initAdmin(){
