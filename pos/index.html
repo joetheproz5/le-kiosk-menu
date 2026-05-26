@@ -104,6 +104,26 @@ box-shadow:0 0 0 3px rgba(245,158,11,.12)}
 .input.error{
 border-color:var(--red);
 background:#fff5f5}
+.password-wrap{
+position:relative}
+.password-wrap .input{
+padding-right:72px}
+.show-pw-btn{
+position:absolute;
+right:6px;
+top:50%;
+transform:translateY(-50%);
+height:30px;
+border-radius:8px;
+background:#f3f4f6;
+color:#78350f;
+padding:0 10px;
+font-size:10px;
+font-weight:900;
+letter-spacing:.06em;
+text-transform:uppercase}
+.show-pw-btn:hover{
+background:#e5e7eb}
 .login-btn{
 width:100%;
 height:44px;
@@ -480,26 +500,12 @@ max-height:0;
 opacity:0;
 margin-top:-7px;
 pointer-events:none}
-.cat-arrow{
-width:34px;
-height:34px;
-border-radius:17px;
-background:#111827;
-color:#fff;
-font-size:18px;
-font-weight:900;
-display:flex;
-align-items:center;
-justify-content:center;
-flex-shrink:0}
-.cat-arrow:hover{
-background:#000}
 .chip-row{
 display:flex;
 gap:8px;
 overflow-x:auto;
 flex:1;
-min-width:240px;
+min-width:0;
 padding-bottom:2px}
 .chip-row::-webkit-scrollbar{
 display:none}
@@ -1365,7 +1371,10 @@ margin-left:auto}
 <label class="field-label">Account</label>
 <input class="input" id="user" type="text" value="pos" placeholder="pos" autocomplete="username" style="margin-bottom:12px">
 <label class="field-label">Password</label>
+<div class="password-wrap">
 <input class="input" id="pw" type="password" placeholder="Enter POS password" autocomplete="current-password">
+<button class="show-pw-btn" type="button" id="show-pw-btn" onclick="togglePassword()">Show</button>
+</div>
 <button class="login-btn" id="login-btn" onclick="tryLogin()">Sign In</button>
 <div class="login-error" id="login-error">
 </div>
@@ -1436,10 +1445,8 @@ margin-left:auto}
 <span class="toggle-arrow" id="category-toggle-arrow">⌄</span>
 </button>
 <div class="category-drawer">
-<button class="cat-arrow" onclick="scrollCategories(-1)" aria-label="Previous categories">‹</button>
 <div class="chip-row" id="category-chips">
 </div>
-<button class="cat-arrow" onclick="scrollCategories(1)" aria-label="Next categories">›</button>
 </div>
 </div>
 <div class="grid-scroll">
@@ -1606,10 +1613,6 @@ function toggleSidebar(){
 if(document.body.classList.contains('sidebar-open'))closeSidebar();
 else openSidebar();
 }
-function scrollCategories(dir){
-const row=$('category-chips');
-if(row)row.scrollBy({left:dir*260,behavior:'smooth'});
-}
 function categoryLabel(){
 if(activeCat==='all')return 'All';
 const cat=menuData.find(c=>c.key===activeCat);
@@ -1714,6 +1717,11 @@ function startSession(){sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;rese
 function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);const rem=Math.max(0,sessionExpiry-Date.now());updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},rem)}
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
 function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
+function togglePassword(){
+const input=$('pw'),btn=$('show-pw-btn'),show=input.type==='password';
+input.type=show?'text':'password';
+btn.textContent=show?'Hide':'Show';
+}
 async function bootPOS(){
 showLoading('Loading POS...');
 await Promise.all([loadMenu(),loadCustomers(),loadConfig()]).catch(e=>showToast(e.message,'error'));
