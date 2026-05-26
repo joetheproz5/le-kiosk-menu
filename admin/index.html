@@ -646,6 +646,17 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
             </div>
             <div class="setting-card">
+              <div class="setting-title">Basketball Matches</div>
+              <div class="setting-copy">Paste this week’s Lebanese basketball games. One match per line: date | time | home | away.</div>
+              <textarea id="basketball-matches-input" class="mega-input" rows="7" style="height:auto;padding-top:10px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px" placeholder="2026-05-28 | 9:45 PM | Riyadi | Beirut"></textarea>
+              <div class="setting-stat" id="basketball-matches-count" style="margin-top:10px">0 matches configured</div>
+              <div class="setting-note" id="basketball-matches-note">The public menu will show only today’s matches.</div>
+              <div class="setting-actions">
+                <button class="btn btn-dark" onclick="saveBasketballMatchesFromSettings()">Save Matches</button>
+                <button class="btn btn-ghost" onclick="insertBasketballMatchExample()">Example</button>
+              </div>
+            </div>
+            <div class="setting-card">
               <div class="setting-title">Loyalty System</div>
               <div class="setting-copy">Controls whether POS shows rewards, applies discounts, and awards stamps on completed orders.</div>
               <div class="switch-row">
@@ -714,7 +725,7 @@ let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
 let dashboardOrdersData=[],menuVisitorData=[];
-let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
+let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
@@ -880,9 +891,10 @@ async function fetchConfig(){
       if(typeof configData.loyaltyEnabled!=='boolean')configData.loyaltyEnabled=true;
       if(typeof configData.menuOrderingEnabled!=='boolean')configData.menuOrderingEnabled=true;
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
+      normalizeBasketballMatches();
       normalizeLoyaltyRewards();
     }
-  }catch(_){normalizeLoyaltyRewards();}
+  }catch(_){normalizeBasketballMatches();normalizeLoyaltyRewards();}
 }
 async function saveConfig(){
   const res=await fetch(`${WORKER_URL}/supabase/config`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:configData})});
@@ -916,6 +928,50 @@ async function setLoyaltyMode(enabled){
   try{configData.loyaltyEnabled=enabled;await saveConfig();clearRewardsDirty();renderStatus();showToast(enabled?'Loyalty enabled':'Loyalty disabled','success');}
   catch(e){configData.loyaltyEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
+}
+function todayBeirutKey(){
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const get=t=>parts.find(p=>p.type===t)?.value||'';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+function normalizeBasketballMatches(){
+  const rows=Array.isArray(configData.basketballMatches)?configData.basketballMatches:[];
+  configData.basketballMatches=rows.map((m,i)=>({
+    id:m.id||`match_${i}_${Date.now()}`,
+    date:String(m.date||'').trim(),
+    time:String(m.time||'').trim(),
+    home:String(m.home||'').trim(),
+    away:String(m.away||'').trim(),
+    league:String(m.league||'Lebanon FLB').trim()
+  })).filter(m=>m.date&&m.time&&m.home&&m.away);
+}
+function basketballMatchesToText(){
+  normalizeBasketballMatches();
+  return configData.basketballMatches.map(m=>`${m.date} | ${m.time} | ${m.home} | ${m.away}`).join('\n');
+}
+function parseBasketballMatchesText(text){
+  return String(text||'').split(/\n+/).map((line,i)=>({line:line.trim(),i:i+1})).filter(x=>x.line&&!x.line.startsWith('#')).map(({line,i})=>{
+    const parts=line.split('|').map(s=>s.trim());
+    if(parts.length<4||parts.some((p,idx)=>idx<4&&!p))throw new Error(`Line ${i}: use date | time | home | away`);
+    return {id:`match_${Date.now()}_${i}`,date:parts[0],time:parts[1],home:parts[2],away:parts[3],league:'Lebanon FLB'};
+  });
+}
+async function saveBasketballMatchesFromSettings(){
+  const input=document.getElementById('basketball-matches-input');
+  if(!input)return;
+  showLoading('Saving matches...');
+  try{
+    configData.basketballMatches=parseBasketballMatchesText(input.value);
+    await saveConfig();
+    renderSettings();
+    showToast('Basketball matches saved','success');
+  }catch(e){showToast(e.message,'error');}
+  hideLoading();
+}
+function insertBasketballMatchExample(){
+  const input=document.getElementById('basketball-matches-input');
+  if(!input)return;
+  input.value=`${todayBeirutKey()} | 9:45 PM | Riyadi | Beirut\n${todayBeirutKey()} | 7:00 PM | Sagesse | Hoops`;
 }
 function makeRewardId(label){
   const base=String(label||'custom_reward').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'custom_reward';
@@ -1832,8 +1888,19 @@ async function saveCustomersAdmin(){
 function renderSettings(){
   renderStatus();
   normalizeLoyaltyRewards();
+  normalizeBasketballMatches();
   const s=menuStats();
   const rewards=configData.loyaltyRewards||[];
+  const matchInput=document.getElementById('basketball-matches-input');
+  if(matchInput)matchInput.value=basketballMatchesToText();
+  const matchCount=document.getElementById('basketball-matches-count');
+  if(matchCount)matchCount.textContent=`${configData.basketballMatches.length} match${configData.basketballMatches.length===1?'':'es'} configured`;
+  const matchNote=document.getElementById('basketball-matches-note');
+  if(matchNote){
+    const today=todayBeirutKey();
+    const todayCount=configData.basketballMatches.filter(m=>m.date===today).length;
+    matchNote.textContent=todayCount?`${todayCount} match${todayCount===1?'':'es'} will show today (${today}).`:`No matches will show today (${today}).`;
+  }
   const rewardCount=document.getElementById('settings-reward-count');
   if(rewardCount)rewardCount.textContent=`${rewards.length} reward${rewards.length===1?'':'s'} configured`;
   const rewardNote=document.getElementById('settings-reward-note');
