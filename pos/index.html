@@ -1375,7 +1375,7 @@ margin-left:auto}
 <input class="input" id="pw" type="password" placeholder="Enter POS password" autocomplete="current-password">
 <button class="show-pw-btn" type="button" id="show-pw-btn" onclick="togglePassword()">Show</button>
 </div>
-<button class="login-btn" id="login-btn" onclick="tryLogin()">Sign In</button>
+<button class="login-btn" id="login-btn" onpointerdown="primeAudio()" onclick="tryLogin()">Sign In</button>
 <div class="login-error" id="login-error">
 </div>
 <div class="lockout" id="lockout">
@@ -1632,7 +1632,7 @@ $('menu-tools')?.classList.remove('open');
 function ensureAudio(){
 try{
 if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-if(audioCtx.state==='suspended')audioCtx.resume();
+if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
 }catch(_){}
 }
 function primeAudio(){
@@ -1640,15 +1640,18 @@ ensureAudio();
 if(!audioCtx)return;
 const osc=audioCtx.createOscillator();
 const gain=audioCtx.createGain();
-osc.frequency.value=1;
-gain.gain.value=0.0001;
+osc.frequency.value=440;
+gain.gain.setValueAtTime(0.0001,audioCtx.currentTime);
+gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+.01);
+gain.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+.04);
 osc.connect(gain).connect(audioCtx.destination);
 osc.start();
-osc.stop(audioCtx.currentTime+.01);
+osc.stop(audioCtx.currentTime+.05);
 }
 function playIncomingSound(){
 ensureAudio();
 if(!audioCtx)return;
+if(audioCtx.state!=='running')return;
 const now=Date.now();
 if(now-lastIncomingSoundAt<1500)return;
 lastIncomingSoundAt=now;
@@ -1667,7 +1670,7 @@ osc.stop(start+offset+.16);
 });
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSidebar();closeCategories();}});
-document.addEventListener('pointerdown',ensureAudio,{once:true,passive:true});
+document.addEventListener('pointerdown',primeAudio,{once:true,passive:true});
 async function sha256(str){
 if(!window.crypto?.subtle)throw new Error('HTTPS required');
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
@@ -1969,7 +1972,7 @@ money(change)}
 function toggleCart(){$('cart-panel').classList.toggle('open')}
 function showCartOnMobile(){if(matchMedia('(max-width:900px)').matches)$('cart-panel').classList.add('open')}
 function normalizePhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d||'00000000'}
-function findCustomer(phone){return customersData.find(c=>c.phone===phone)||null}
+function findCustomer(phone){const normalized=normalizePhone(phone);return customersData.find(c=>normalizePhone(c.phone)===normalized)||null}
 let phoneTimer=null;
 function onPhoneInput(raw){
 clearTimeout(phoneTimer);currentCustomerProfile=null;selectedRewardType=null;$('profile-card').classList.remove('show');
@@ -1977,7 +1980,12 @@ const digits=String(raw||'').replace(/\D/g,'');
 if(digits&&digits!=='00000000'&&$('cust-name').value.trim()==='Guest')$('cust-name').value='';
 if(!digits&&!$('cust-name').value.trim())$('cust-name').value='Guest';
 const phone=normalizePhone(raw);if(phone==='00000000'||phone.length!==8){updateTotals();return}
-phoneTimer=setTimeout(()=>{const p=findCustomer(phone);currentCustomerProfile=p;showCustomerProfile(p,phone);updateTotals()},250);
+phoneTimer=setTimeout(()=>hydrateCustomerFromPhone(phone),250);
+}
+function hydrateCustomerFromPhone(raw){
+clearTimeout(phoneTimer);currentCustomerProfile=null;selectedRewardType=null;$('profile-card').classList.remove('show');
+const phone=normalizePhone(raw);if(phone==='00000000'||phone.length!==8){updateTotals();return}
+const p=findCustomer(phone);currentCustomerProfile=p;showCustomerProfile(p,phone);updateTotals();
 }
 function showCustomerProfile(profile,phone){
 const card=$('profile-card');
@@ -2141,10 +2149,11 @@ WORKER_URL}
 }
 function loadOrder(id){const o=getLoggedOrder(id);if(o)loadOrderIntoCurrent(o)}
 function loadOrderIntoCurrent(o){
-clearOrder();loadedInboxOrderId=o.id||null;$('cust-name').value=o.name||'Guest';$('cust-phone').value=o.phone||'';$('order-note').value=o.note||o.address||'';setOrderType(o.orderType||'takeaway',false);
+const phone=normalizePhone(o.phone);
+clearOrder();loadedInboxOrderId=o.id||null;$('cust-name').value=o.name||'Guest';$('cust-phone').value=phone==='00000000'?'':phone;$('order-note').value=o.note||o.address||'';setOrderType(o.orderType||'takeaway',false);
 const zoneMatch=o.deliveryZone?String(o.deliveryZone).match(/[ABC]/i):null;if(zoneMatch)setZone(zoneMatch[0].toUpperCase());
 (o.items||[]).forEach(it=>{let found=null;menuData.forEach(c=>(c.items||[]).forEach((mi,idx)=>{if(mi.name===it.name)found={cat:c,idx,item:mi}}));cart.push({id:uid(),catKey:found?.cat?.key||'',itemIdx:found?.idx??-1,name:it.name,price:Number(it.price||0),priceStr:it.priceStr||money(it.price),qty:it.qty||1,flavor:it.flavor||null,addons:(it.addons||[]).map(a=>({label:a.label,price:Number(a.price||0)})),optionsOpen:false,meta:found?.item||{}})});
-const p=findCustomer(o.phone);if(p){currentCustomerProfile=p;showCustomerProfile(p,o.phone)}renderCart();renderItems();switchView('menu');showCartOnMobile();showToast('Order loaded','success');
+hydrateCustomerFromPhone(phone);renderCart();renderItems();switchView('menu');showCartOnMobile();showToast('Order loaded','success');
 }
 function pruneHandledInbox(){
 const now=Date.now();
