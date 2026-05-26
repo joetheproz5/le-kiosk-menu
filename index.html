@@ -206,6 +206,43 @@ let TESTING_MODE = false;
 // load from config
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
+    function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getVisitorId(){
+  const key = 'lk_menu_visitor_id';
+  let id = localStorage.getItem(key);
+  if(!id){
+    id = crypto?.randomUUID?.() || ('v-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
+async function trackMenuVisit(){
+  const day = todayKey();
+  const seenKey = 'lk_menu_visit_' + day;
+  if(localStorage.getItem(seenKey) === '1') return;
+
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/menu-visit`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        visitorId: getVisitorId(),
+        visitDate: day,
+        path: location.pathname,
+        referrer: document.referrer || ''
+      })
+    });
+
+    if(res.ok) localStorage.setItem(seenKey, '1');
+  }catch(_){}
+}
+
+trackMenuVisit();
 const STORAGE_PUBLIC_BASE = 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
 const PILL_COLORS = {
     amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
