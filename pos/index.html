@@ -529,11 +529,10 @@ overflow:hidden}
 .menu-tools{
 background:#fff;
 border-bottom:1px solid var(--line);
-padding:7px 18px;
+padding:9px 18px;
 display:flex;
-align-items:stretch;
-gap:7px;
-flex-direction:column}
+align-items:center;
+gap:10px}
 .category-toggle{
 height:34px;
 border-radius:10px;
@@ -563,22 +562,22 @@ transform:rotate(180deg)}
 display:flex;
 align-items:center;
 gap:10px;
-max-height:42px;
+width:100%;
+max-height:none;
 opacity:1;
-overflow:hidden;
-transition:max-height .18s ease,opacity .14s ease,margin .18s ease}
+overflow:hidden}
 .menu-tools:not(.open) .category-drawer{
-max-height:0;
-opacity:0;
-margin-top:-7px;
-pointer-events:none}
+max-height:none;
+opacity:1;
+margin-top:0;
+pointer-events:auto}
 .chip-row{
 display:flex;
 gap:8px;
 overflow-x:auto;
 flex:1;
 min-width:0;
-padding-bottom:2px}
+padding:1px 0 2px}
 .chip-row::-webkit-scrollbar{
 display:none}
 .cat-chip,.filter-chip{
@@ -592,7 +591,8 @@ font-weight:900;
 white-space:nowrap}
 .cat-chip.active,.filter-chip.active{
 background:var(--brand);
-color:#111827}
+color:#111827;
+box-shadow:0 0 0 3px rgba(245,158,11,.16)}
 .mode-strip{
 display:flex;
 gap:6px;
@@ -1625,7 +1625,7 @@ margin-left:auto}
 <section class="workspace">
 <header class="topbar">
 <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
-<button class="top-inbox" id="top-inbox-alert" onclick="switchView('inbox')" aria-label="Incoming orders">
+<button class="top-inbox" id="top-inbox-alert" onclick="toggleTopInbox()" aria-label="Incoming orders">
 <span>Inbox</span>
 <span class="top-inbox-count" id="top-inbox-count">0</span>
 </button>
@@ -1644,10 +1644,6 @@ margin-left:auto}
 <section class="content">
 <div id="menu-view" class="content-view">
 <div class="menu-tools" id="menu-tools">
-<button class="category-toggle" onclick="toggleCategories()" aria-label="Show categories">
-<span id="category-toggle-text">Categories: All</span>
-<span class="toggle-arrow" id="category-toggle-arrow">⌄</span>
-</button>
 <div class="category-drawer">
 <div class="chip-row" id="category-chips">
 </div>
@@ -2050,6 +2046,9 @@ if(view==='inbox'){$('nav-inbox').classList.remove('has-new');renderInboxList()}
 if(view==='customers')renderCustomers();
 closeSidebar();
 }
+function toggleTopInbox(){
+switchView(currentView==='inbox'?'menu':'inbox');
+}
 function handleSearch(){searchQuery=$('search-input').value.trim().toLowerCase();if(currentView==='menu')renderItems();if(currentView==='orders')renderOrdersList();if(currentView==='customers')renderCustomers();}
 function renderCategoryChips(){
 $('category-chips').innerHTML=`<button class="cat-chip${
@@ -2059,6 +2058,8 @@ menuData.map(c=>`<button class="cat-chip${
 activeCat===c.key?' active':''}
 " onclick="setCategory('${esc(c.key)}')">${esc(CAT_ICONS[c.key]||c.title||c.key)}</button>`).join('');
 updateCategoryToggle();
+const activeChip=$('category-chips').querySelector('.cat-chip.active');
+if(activeChip)activeChip.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
 }
 function setCategory(key){activeCat=key;renderCategoryChips();renderItems();closeCategories()}
 function renderMenuItemCard(x,compact=false){
