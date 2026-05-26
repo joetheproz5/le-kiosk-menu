@@ -323,6 +323,52 @@ font-weight:900;
 flex-shrink:0}
 .menu-toggle:hover{
 background:#000}
+.top-inbox{
+height:42px;
+min-width:42px;
+border-radius:10px;
+background:#f3f4f6;
+color:#374151;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:7px;
+padding:0 11px;
+font-size:11px;
+font-weight:900;
+text-transform:uppercase;
+flex-shrink:0;
+position:relative}
+.top-inbox:hover{
+background:#e5e7eb}
+.top-inbox.has-orders{
+background:#fef2f2;
+color:#991b1b;
+box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+.top-inbox.has-orders::after{
+content:'';
+position:absolute;
+right:-2px;
+top:-2px;
+width:10px;
+height:10px;
+border-radius:50%;
+background:#ef4444;
+box-shadow:0 0 0 4px rgba(239,68,68,.14)}
+.top-inbox-count{
+display:none;
+min-width:20px;
+height:20px;
+border-radius:10px;
+background:#ef4444;
+color:#fff;
+align-items:center;
+justify-content:center;
+padding:0 6px;
+font-size:10px;
+font-weight:900}
+.top-inbox.has-orders .top-inbox-count{
+display:flex}
 .page-title{
 font-family:var(--brand-font);
 font-size:24px;
@@ -1365,6 +1411,10 @@ margin-left:auto}
 <section class="workspace">
 <header class="topbar">
 <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
+<button class="top-inbox" id="top-inbox-alert" onclick="switchView('inbox')" aria-label="Incoming orders">
+<span>Inbox</span>
+<span class="top-inbox-count" id="top-inbox-count">0</span>
+</button>
 <div class="page-title" id="page-title">Menu</div>
 <div class="search-wrap">
 <input class="search" id="search-input" placeholder="Search menu, orders, or customers..." oninput="handleSearch()">
@@ -2004,6 +2054,9 @@ function syncInboxBadge(){
 const count=inboxData.filter(o=>o.status==='pending').length;
 $('inbox-badge').textContent=count;
 $('inbox-badge').classList.toggle('show',count>0);
+const topAlert=$('top-inbox-alert'),topCount=$('top-inbox-count');
+if(topCount)topCount.textContent=count;
+if(topAlert)topAlert.classList.toggle('has-orders',count>0);
 lastInboxCount=count;
 if(!count)$('nav-inbox').classList.remove('has-new');
 }
