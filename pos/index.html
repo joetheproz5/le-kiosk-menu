@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Le Kiosk - POS</title>
+<title>Le Kiosk - POS Redesign</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{
@@ -152,18 +152,41 @@ height:100vh;
 display:none;
 overflow:hidden}
 #app.show{
-display:grid;
-grid-template-columns:var(--side-w) minmax(0,1fr)}
+display:block}
 .sidebar{
 background:var(--side);
 color:#d1d5db;
 display:flex;
 flex-direction:column;
 min-height:0;
-border-right:1px solid rgba(255,255,255,.08)}
+border-right:1px solid rgba(255,255,255,.08);
+position:fixed;
+left:0;
+top:0;
+bottom:0;
+width:var(--side-w);
+z-index:90;
+transform:translateX(-105%);
+transition:transform .2s ease;
+box-shadow:18px 0 46px rgba(17,24,39,.22)}
+.sidebar.open{
+transform:translateX(0)}
+.side-backdrop{
+display:none;
+position:fixed;
+inset:0;
+z-index:80;
+background:rgba(17,24,39,.48);
+backdrop-filter:blur(2px)}
+body.sidebar-open .side-backdrop{
+display:block}
 .brand{
 padding:24px 20px 20px;
-border-bottom:1px solid rgba(255,255,255,.08)}
+border-bottom:1px solid rgba(255,255,255,.08);
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:12px}
 .brand-name{
 font-family:var(--brand-font);
 font-size:28px;
@@ -177,6 +200,17 @@ letter-spacing:.14em;
 text-transform:uppercase;
 color:var(--brand-2);
 margin-top:2px}
+.side-close{
+width:34px;
+height:34px;
+border-radius:9px;
+background:rgba(255,255,255,.08);
+color:#f9fafb;
+font-size:18px;
+font-weight:900;
+flex-shrink:0}
+.side-close:hover{
+background:rgba(255,255,255,.14)}
 .nav{
 padding:16px 12px;
 display:flex;
@@ -275,6 +309,20 @@ display:flex;
 align-items:center;
 gap:12px;
 padding:0 18px}
+.menu-toggle{
+width:42px;
+height:42px;
+border-radius:10px;
+background:#111827;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:20px;
+font-weight:900;
+flex-shrink:0}
+.menu-toggle:hover{
+background:#000}
 .page-title{
 font-family:var(--brand-font);
 font-size:24px;
@@ -348,6 +396,20 @@ display:flex;
 align-items:center;
 gap:12px;
 flex-wrap:wrap}
+.cat-arrow{
+width:34px;
+height:34px;
+border-radius:17px;
+background:#111827;
+color:#fff;
+font-size:18px;
+font-weight:900;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-shrink:0}
+.cat-arrow:hover{
+background:#000}
 .chip-row{
 display:flex;
 gap:8px;
@@ -419,7 +481,7 @@ justify-content:space-between;
 gap:10px;
 margin-bottom:8px}
 .category-title{
-font-family:var(--brand);
+font-family:var(--brand-font);
 font-size:17px;
 font-weight:900;
 color:var(--brand-dark)}
@@ -431,7 +493,7 @@ text-transform:uppercase;
 letter-spacing:.06em}
 .category-items{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
 gap:10px}
 .item-card{
 background:#fff;
@@ -1106,34 +1168,30 @@ font-weight:700;
 color:#9ca3af}
 @media(max-width:1180px){
 :root{
---side-w:86px;
 --cart-w:340px}
 .brand{
-padding:20px 12px}
+padding:24px 20px 20px}
 .brand-name{
-font-size:18px}
+font-size:28px}
 .brand-sub,.nav-label,.side-footer .session{
-display:none}
+display:block}
 .nav-btn{
-justify-content:center;
-padding:0}
+justify-content:flex-start;
+padding:0 14px}
 .nav-key{
-width:28px;
-height:28px}
+width:22px;
+height:22px}
 .nav-badge{
-position:absolute;
-margin-left:36px}
+position:static;
+margin-left:auto}
 .sidebar{
-position:relative}
+position:fixed}
 }
 @media(max-width:900px){
 #app.show{
-display:flex}
-.sidebar{
-width:74px;
-flex-shrink:0}
+display:block}
 .workspace{
-flex:1;
+width:100%;
 min-width:0}
 .main{
 grid-template-columns:1fr}
@@ -1164,7 +1222,8 @@ grid-template-columns:repeat(auto-fill,minmax(136px,1fr))}
 :root{
 --top-h:58px}
 .sidebar{
-display:none}
+display:flex;
+width:min(280px,86vw)}
 .topbar{
 height:auto;
 min-height:var(--top-h);
@@ -1233,8 +1292,11 @@ margin-left:auto}
 <div id="app">
 <aside class="sidebar">
 <div class="brand">
+<div>
 <div class="brand-name">Le Kiosk</div>
 <div class="brand-sub">POS Terminal</div>
+</div>
+<button class="side-close" onclick="closeSidebar()" aria-label="Close navigation">x</button>
 </div>
 <nav class="nav">
 <button class="nav-btn active" id="nav-menu" onclick="switchView('menu')">
@@ -1261,8 +1323,10 @@ margin-left:auto}
 <button class="logout" onclick="logout()">Logout</button>
 </div>
 </aside>
+<div class="side-backdrop" onclick="closeSidebar()"></div>
 <section class="workspace">
 <header class="topbar">
+<button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open navigation">☰</button>
 <div class="page-title" id="page-title">Menu</div>
 <div class="search-wrap">
 <input class="search" id="search-input" placeholder="Search menu, orders, or customers..." oninput="handleSearch()">
@@ -1277,8 +1341,10 @@ margin-left:auto}
 <section class="content">
 <div id="menu-view" class="content-view">
 <div class="menu-tools">
+<button class="cat-arrow" onclick="scrollCategories(-1)" aria-label="Previous categories">‹</button>
 <div class="chip-row" id="category-chips">
 </div>
+<button class="cat-arrow" onclick="scrollCategories(1)" aria-label="Next categories">›</button>
 </div>
 <div class="grid-scroll">
 <div class="item-grid" id="item-grid">
@@ -1424,6 +1490,23 @@ const money=n=>'$'+(Number(n)||0).toFixed(2);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const uid=()=>Date.now()+Math.random();
 function imageUrl(src){if(!src)return '';return /^https?:|^data:/.test(src)?src:`${STORAGE_PUBLIC_BASE}/${src}`;}
+function openSidebar(){
+document.querySelector('.sidebar')?.classList.add('open');
+document.body.classList.add('sidebar-open');
+}
+function closeSidebar(){
+document.querySelector('.sidebar')?.classList.remove('open');
+document.body.classList.remove('sidebar-open');
+}
+function toggleSidebar(){
+if(document.body.classList.contains('sidebar-open'))closeSidebar();
+else openSidebar();
+}
+function scrollCategories(dir){
+const row=$('category-chips');
+if(row)row.scrollBy({left:dir*260,behavior:'smooth'});
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
 async function sha256(str){
 if(!window.crypto?.subtle)throw new Error('HTTPS required');
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
@@ -1530,6 +1613,7 @@ $('page-title').textContent={menu:'Menu',inbox:'Incoming',orders:'Orders Log',cu
 if(view==='orders')loadOrders(true);
 if(view==='inbox'){$('nav-inbox').classList.remove('has-new');renderInboxList()}
 if(view==='customers')renderCustomers();
+closeSidebar();
 }
 function handleSearch(){searchQuery=$('search-input').value.trim().toLowerCase();if(currentView==='menu')renderItems();if(currentView==='orders')renderOrdersList();if(currentView==='customers')renderCustomers();}
 function renderCategoryChips(){
