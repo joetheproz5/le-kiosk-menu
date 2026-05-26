@@ -624,7 +624,7 @@ const DEFAULT_LOYALTY_REWARDS=[
 let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null;
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
-let dashboardOrdersData=[];
+let dashboardOrdersData=[],menuVisitorData=[];
 let configData={testingMode:false,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
@@ -699,7 +699,7 @@ async function initAdmin(){
   showLoading('Loading admin...');
   try{
     await fetchConfig();
-    await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders()]);
+    await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders(),fetchMenuVisitors()]);
     renderStatus();
     renderAll();
   }catch(e){
@@ -904,6 +904,16 @@ async function fetchDashboardOrders(){
     dashboardOrdersData=[];
   }
 }
+async function fetchMenuVisitors(){
+  try{
+    const res=await fetch(`${WORKER_URL}/supabase/menu-visits`,{cache:'no-store'});
+    if(!res.ok)throw new Error('Visitors read '+res.status);
+    const j=await res.json();
+    menuVisitorData=Array.isArray(j.data)?j.data:[];
+  }catch(_){
+    menuVisitorData=[];
+  }
+}
 
 function switchView(view){
   currentView=view;
@@ -1002,6 +1012,9 @@ function orderStatDate(row){
   const p=row.payload||{};
   return parseStatDate(p.timestamp||p.createdAt||p.created_at||row.createdAt);
 }
+function visitorStatDate(row){
+  return parseStatDate(row.visit_date||row.visitDate||row.date||row.created_at||row.createdAt);
+}
 function dailySeries(items,dateGetter){
   const days=dashboardDays(),counts=Object.fromEntries(days.map(d=>[d.key,0]));
   items.forEach(item=>{
@@ -1009,6 +1022,17 @@ function dailySeries(items,dateGetter){
     if(!d)return;
     const key=dateKey(d);
     if(key in counts)counts[key]++;
+  });
+  return days.map(d=>({...d,value:counts[d.key]}));
+}
+function visitorDailySeries(){
+  const days=dashboardDays(),counts=Object.fromEntries(days.map(d=>[d.key,0]));
+  menuVisitorData.forEach(row=>{
+    const d=visitorStatDate(row);
+    if(!d)return;
+    const key=dateKey(d);
+    if(!(key in counts))return;
+    counts[key]+=Number(row.visits||row.count||row.total||1)||1;
   });
   return days.map(d=>({...d,value:counts[d.key]}));
 }
@@ -1025,12 +1049,12 @@ function chartMarkup(id,title,sub,total,series){
 function renderDashboardCharts(){
   const el=document.getElementById('dashboard-charts');
   if(!el)return;
-  const visitors=dailySeries(customersAdminData,c=>parseStatDate(c.firstSeen));
+  const visitors=visitorDailySeries();
   const orderSeries=dailySeries(dashboardOrdersData,orderStatDate);
-  const visitorTotal=customersAdminData.length;
+  const visitorTotal=menuVisitorData.reduce((sum,row)=>sum+(Number(row.visits||row.count||row.total||1)||1),0);
   const orderTotal=dashboardOrdersData.length;
   el.innerHTML=
-    chartMarkup('visitors-chart','Visitors','New customer profiles, last 7 days',visitorTotal,visitors)+
+    chartMarkup('visitors-chart','Menu Visitors','Unique menu visits by browser/day',visitorTotal,visitors)+
     chartMarkup('orders-chart','All Orders','POS + menu orders, last 7 days',orderTotal,orderSeries);
   requestAnimationFrame(()=>{
     drawLineChart('visitors-chart',visitors,'#f59e0b');
