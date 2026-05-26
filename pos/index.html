@@ -391,11 +391,49 @@ overflow:hidden}
 .menu-tools{
 background:#fff;
 border-bottom:1px solid var(--line);
-padding:10px 18px;
+padding:7px 18px;
+display:flex;
+align-items:stretch;
+gap:7px;
+flex-direction:column}
+.category-toggle{
+height:34px;
+border-radius:10px;
+background:#fff7ed;
+border:1.5px solid #fde68a;
+color:#78350f;
 display:flex;
 align-items:center;
+justify-content:space-between;
 gap:12px;
-flex-wrap:wrap}
+padding:0 12px;
+font-size:11px;
+font-weight:900;
+letter-spacing:.06em;
+text-transform:uppercase}
+.category-toggle span:first-child{
+min-width:0;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap}
+.category-toggle .toggle-arrow{
+font-size:15px;
+transition:transform .16s}
+.menu-tools.open .category-toggle .toggle-arrow{
+transform:rotate(180deg)}
+.category-drawer{
+display:flex;
+align-items:center;
+gap:10px;
+max-height:42px;
+opacity:1;
+overflow:hidden;
+transition:max-height .18s ease,opacity .14s ease,margin .18s ease}
+.menu-tools:not(.open) .category-drawer{
+max-height:0;
+opacity:0;
+margin-top:-7px;
+pointer-events:none}
 .cat-arrow{
 width:34px;
 height:34px;
@@ -494,11 +532,11 @@ letter-spacing:.06em}
 .category-items{
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-gap:10px}
+gap:8px}
 .item-card{
 background:#fff;
 border:1.5px solid var(--line);
-border-radius:10px;
+border-radius:9px;
 overflow:hidden;
 text-align:left;
 box-shadow:0 2px 10px rgba(17,24,39,.04);
@@ -512,21 +550,21 @@ border-color:#fcd34d}
 transform:scale(.98)}
 .item-img{
 width:100%;
-aspect-ratio:2/1;
+aspect-ratio:2.45/1;
 object-fit:cover;
 background:#f3f4f6}
 .item-img[src='']{
 display:none}
 .item-info{
-padding:8px 10px 9px}
+padding:6px 9px 7px}
 .item-name{
-font-size:12px;
+font-size:11px;
 font-weight:900;
-line-height:1.25;
+line-height:1.18;
 color:var(--ink);
 min-height:0}
 .item-price{
-font-size:14px;
+font-size:13px;
 font-weight:900;
 color:#92400e;
 margin-top:2px}
@@ -1246,7 +1284,7 @@ gap:9px}
 grid-template-columns:repeat(2,minmax(0,1fr));
 gap:9px}
 .item-img{
-aspect-ratio:5/3}
+aspect-ratio:2.1/1}
 .item-name{
 font-size:12px}
 .top-actions{
@@ -1340,11 +1378,17 @@ margin-left:auto}
 <main class="main">
 <section class="content">
 <div id="menu-view" class="content-view">
-<div class="menu-tools">
+<div class="menu-tools" id="menu-tools">
+<button class="category-toggle" onclick="toggleCategories()" aria-label="Show categories">
+<span id="category-toggle-text">Categories: All</span>
+<span class="toggle-arrow" id="category-toggle-arrow">⌄</span>
+</button>
+<div class="category-drawer">
 <button class="cat-arrow" onclick="scrollCategories(-1)" aria-label="Previous categories">‹</button>
 <div class="chip-row" id="category-chips">
 </div>
 <button class="cat-arrow" onclick="scrollCategories(1)" aria-label="Next categories">›</button>
+</div>
 </div>
 <div class="grid-scroll">
 <div class="item-grid" id="item-grid">
@@ -1506,7 +1550,22 @@ function scrollCategories(dir){
 const row=$('category-chips');
 if(row)row.scrollBy({left:dir*260,behavior:'smooth'});
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
+function categoryLabel(){
+if(activeCat==='all')return 'All';
+const cat=menuData.find(c=>c.key===activeCat);
+return cat?(CAT_ICONS[cat.key]||cat.title||cat.key):'All';
+}
+function updateCategoryToggle(){
+const text=$('category-toggle-text');
+if(text)text.textContent='Categories: '+categoryLabel();
+}
+function toggleCategories(){
+$('menu-tools')?.classList.toggle('open');
+}
+function closeCategories(){
+$('menu-tools')?.classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSidebar();closeCategories();}});
 async function sha256(str){
 if(!window.crypto?.subtle)throw new Error('HTTPS required');
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
@@ -1623,8 +1682,9 @@ activeCat==='all'?' active':''}
 menuData.map(c=>`<button class="cat-chip${
 activeCat===c.key?' active':''}
 " onclick="setCategory('${esc(c.key)}')">${esc(CAT_ICONS[c.key]||c.title||c.key)}</button>`).join('');
+updateCategoryToggle();
 }
-function setCategory(key){activeCat=key;renderCategoryChips();renderItems()}
+function setCategory(key){activeCat=key;renderCategoryChips();renderItems();closeCategories()}
 function renderMenuItemCard(x){
 const qty=getQtyForItem(x.cat.key,x.idx),img=imageUrl(x.item.image||'');
 return `<button class="item-card${
