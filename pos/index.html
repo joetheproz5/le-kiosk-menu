@@ -1798,7 +1798,7 @@ let ordersData=[],customersData=[],inboxData=[],ordersFilter='all',currentView='
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
 ...r}
 ));
-let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map();
+let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
 let lastHydratedPhone='',lastAutoName='';
 let authSession=null;
 let audioCtx=null,lastIncomingSoundAt=0;
@@ -1881,8 +1881,10 @@ if(!audioCtx)return;
 const now=Date.now();
 if(now-lastIncomingSoundAt<2500)return;
 lastIncomingSoundAt=now;
+let played=false;
 const ring=()=>{
-if(!audioCtx||audioCtx.state!=='running')return;
+if(played||!audioCtx||audioCtx.state!=='running')return;
+played=true;
 const start=audioCtx.currentTime+.02;
 [0,0.62].forEach(ringOffset=>{
 [0,0.16,0.32].forEach((noteOffset,i)=>{
@@ -1901,7 +1903,10 @@ osc.stop(t+.16);
 });
 };
 ring();
-setTimeout(ring,80);
+setTimeout(ring,120);
+setTimeout(ring,450);
+setTimeout(ring,900);
+if(navigator.vibrate)navigator.vibrate([180,70,180]);
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSidebar();closeCategories();}});
 document.addEventListener('pointerdown',primeAudio,{passive:true});
@@ -2465,14 +2470,18 @@ WORKER_URL}
 /supabase/orders?status=inbox`,{cache:'no-store'});if(!res.ok)throw new Error('Inbox read '+res.status);
 const j=await res.json();inboxData=(j.data||[]).filter(r=>!handledInboxIds.has(r.id)).map(r=>({...r.payload,id:r.id,status:'pending'}));
 const count=inboxData.length;
-if(count>lastInboxCount){
+const currentIds=new Set(inboxData.map(o=>String(o.id)));
+const newIds=inboxData.filter(o=>!knownInboxIds.has(String(o.id))).map(o=>String(o.id));
+if(inboxIdsReady&&newIds.length){
 playIncomingSound();
 if(currentView!=='inbox')showToast(`${
-count-lastInboxCount}
+newIds.length}
 new incoming order${
-count-lastInboxCount===1?'':'s'}
+newIds.length===1?'':'s'}
 `,'success');
 }
+knownInboxIds=currentIds;
+inboxIdsReady=true;
 syncInboxBadge();renderInboxList();
 }catch(_){}
 }
