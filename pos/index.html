@@ -1635,6 +1635,17 @@ if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 if(audioCtx.state==='suspended')audioCtx.resume();
 }catch(_){}
 }
+function primeAudio(){
+ensureAudio();
+if(!audioCtx)return;
+const osc=audioCtx.createOscillator();
+const gain=audioCtx.createGain();
+osc.frequency.value=1;
+gain.gain.value=0.0001;
+osc.connect(gain).connect(audioCtx.destination);
+osc.start();
+osc.stop(audioCtx.currentTime+.01);
+}
 function playIncomingSound(){
 ensureAudio();
 if(!audioCtx)return;
@@ -1724,11 +1735,11 @@ const l=getLockout();
 if(l.u>Date.now()){loginEnabled(false);startLockCountdown();return}
 const username=$('user').value.trim();
 const pw=$('pw').value;if(!username||!pw)return;
+primeAudio();
 loginEnabled(false);
 try{
 authSession=await loginWithDatabase(username,pw);
 saveAuthSession();
-ensureAudio();
 resetLockout();$('login-screen').style.display='none';$('app').classList.add('show');startSession();bootPOS();
 }catch(e){
 const a=(l.a||0)+1,u=a>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;setLockout({a,u});renderDots(a);
