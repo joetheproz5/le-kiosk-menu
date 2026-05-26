@@ -98,6 +98,58 @@ select{outline:none}
 .btn-blue{background:var(--blue);color:#fff}
 .btn-blue:hover{background:#1d4ed8}
 .btn-sm{padding:6px 10px;font-size:10px;border-radius:7px}
+.theme-btn{min-width:42px;padding:9px 11px;font-size:13px;letter-spacing:0;text-transform:none}
+body.theme-dark{
+  --brand:#f59e0b;--brand-dark:#fcd34d;--brand-mid:#fbbf24;--brand-soft:#2c1d07;--brand-line:#78350f;--accent:#f59e0b;
+  --bg:#0f141d;--panel:#171d27;--panel-2:#111827;--line:#283241;--muted:#9ca3af;--soft:#222b38;
+  --ink:#f8fafc;--ink-2:#d1d5db;--green:#22c55e;--green-soft:#10351f;--red:#f87171;--red-soft:#3b1717;
+  --blue:#60a5fa;--blue-soft:#12233f;--purple:#a78bfa;--purple-soft:#241d3d;
+}
+body.theme-dark #login-screen{background:linear-gradient(135deg,#120904,#2b1706)}
+body.theme-dark .login-card,
+body.theme-dark .topbar,
+body.theme-dark .panel,
+body.theme-dark .setting-card,
+body.theme-dark .dash-card,
+body.theme-dark .chart-card,
+body.theme-dark .feature-card,
+body.theme-dark .hub-card,
+body.theme-dark .customer-card,
+body.theme-dark .block-card,
+body.theme-dark .item-card,
+body.theme-dark .addon-group-card,
+body.theme-dark .reward-row,
+body.theme-dark .mini-row,
+body.theme-dark #preview-panel,
+body.theme-dark .modal{background:var(--panel);color:var(--ink);border-color:var(--line)}
+body.theme-dark .inp,
+body.theme-dark .field-input,
+body.theme-dark .search-input,
+body.theme-dark .mega-input,
+body.theme-dark .addon-input,
+body.theme-dark .emoji-input,
+body.theme-dark textarea{background:#101722;color:var(--ink);border-color:var(--line)}
+body.theme-dark .mega-results,
+body.theme-dark .mega-result,
+body.theme-dark .segment,
+body.theme-dark .segment button,
+body.theme-dark .chip-btn,
+body.theme-dark .pills-area,
+body.theme-dark .addons-editor,
+body.theme-dark .active-box,
+body.theme-dark .banner-box,
+body.theme-dark .img-drop-zone{background:#101722;color:var(--ink);border-color:var(--line)}
+body.theme-dark .mega-result:hover,
+body.theme-dark .mega-result.active,
+body.theme-dark .cat-row:hover{background:#1f2937}
+body.theme-dark .cat-row{background:var(--panel);color:var(--ink)}
+body.theme-dark .cat-row.active{background:#2c1d07;border-color:#78350f}
+body.theme-dark .btn-soft,
+body.theme-dark .show-pw-btn,
+body.theme-dark .icon-btn{background:#222b38;color:var(--ink-2);border-color:var(--line)}
+body.theme-dark .btn-add{background:#f59e0b;color:#111827}
+body.theme-dark .preview-close{background:#222b38;color:var(--ink)}
+body.theme-dark .chart-canvas{background:transparent}
 
 .content{flex:1;overflow:auto;padding:22px 24px 80px}
 .view{display:none}
@@ -392,6 +444,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
           <div class="mega-results" id="mega-results"></div>
         </div>
         <div class="top-actions">
+          <button class="btn btn-soft theme-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
           <button class="btn btn-soft" onclick="togglePreview()">Preview</button>
           <button class="btn btn-add" onclick="addCategory()">Add Category</button>
           <button class="btn btn-save" id="save-btn" onclick="saveMenu()">Save Menu</button>
@@ -578,6 +631,13 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
             </div>
             <div class="setting-card">
+              <div class="setting-title">Appearance</div>
+              <div class="setting-copy">Switch this device between light and dark theme. New devices follow their system theme by default.</div>
+              <div class="setting-actions">
+                <button class="btn btn-soft" data-theme-toggle onclick="toggleTheme()">Light</button>
+              </div>
+            </div>
+            <div class="setting-card">
               <div class="setting-title">Menu Ordering</div>
               <div class="setting-copy">Show or hide the public menu Order button. When off, customers can browse the menu but cannot start checkout.</div>
               <div class="switch-row">
@@ -633,6 +693,7 @@ const IMG_FOLDER='menupictures';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
 const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=6*60*60*1000;
 const AUTH_STORAGE_KEY='lk_admin_auth';
+const THEME_STORAGE_KEY='lk_admin_theme';
 const PILL_PRESETS=[
   {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
   {id:'red',bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
@@ -657,6 +718,21 @@ let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,l
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
+function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
+function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
+function activeTheme(){return savedTheme()||systemTheme()}
+function applyTheme(){
+  const theme=activeTheme();
+  document.body.classList.toggle('theme-dark',theme==='dark');
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.textContent=theme==='dark'?'Dark':'Light'});
+}
+function toggleTheme(){
+  const next=activeTheme()==='dark'?'light':'dark';
+  localStorage.setItem(THEME_STORAGE_KEY,next);
+  applyTheme();
+}
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!savedTheme())applyTheme()});
 const nativeFetch=window.fetch.bind(window);
 window.fetch=(input,options={})=>{
   const url=typeof input==='string'?input:(input&&input.url)||'';
