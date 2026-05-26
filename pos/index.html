@@ -565,6 +565,36 @@ color:var(--red-d);
 font-size:12px;
 font-weight:900;
 margin-left:6px}
+.option-toggle{
+width:28px;
+height:28px;
+border-radius:8px;
+background:#fffbeb;
+border:1.5px solid #fde68a;
+color:#92400e;
+font-size:13px;
+font-weight:900;
+display:flex;
+align-items:center;
+justify-content:center;
+margin-left:6px}
+.option-toggle.open{
+background:var(--brand);
+border-color:var(--brand);
+color:#111827}
+.option-toggle .arrow{
+display:block;
+line-height:1;
+transition:transform .14s ease}
+.option-toggle.open .arrow{
+transform:rotate(180deg)}
+.option-count{
+font-size:9px;
+font-weight:900;
+color:#b45309;
+margin-top:5px;
+text-transform:uppercase;
+letter-spacing:.04em}
 .addons{
 padding:0 10px 10px}
 .addon-label{
@@ -1363,7 +1393,7 @@ let ordersData=[],customersData=[],inboxData=[],ordersFilter='all',currentView='
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
 ...r}
 ));
-let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false;
+let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map();
 const $=id=>document.getElementById(id);
 const money=n=>'$'+(Number(n)||0).toFixed(2);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -1512,13 +1542,14 @@ function addToCart(catKey,idx){
 const found=findMenuItem(catKey,idx);if(!found||!found.item)return;
 const existing=cart.find(l=>l.catKey===catKey&&l.itemIdx===idx);
 if(existing)existing.qty++;
-else cart.push({id:uid(),catKey,itemIdx:idx,name:found.item.name,price:priceNum(found.item.price),priceStr:found.item.price,qty:1,addons:[],flavor:null,meta:found.item});
+else cart.push({id:uid(),catKey,itemIdx:idx,name:found.item.name,price:priceNum(found.item.price),priceStr:found.item.price,qty:1,addons:[],flavor:null,optionsOpen:false,meta:found.item});
 renderCart();renderItems();showCartOnMobile();
 }
 function changeQty(id,delta){const l=cart.find(x=>x.id===id);if(!l)return;l.qty+=delta;if(l.qty<=0)cart=cart.filter(x=>x.id!==id);renderCart();renderItems()}
 function removeLine(id){cart=cart.filter(x=>x.id!==id);renderCart();renderItems()}
 function toggleAddon(id,label,price){const l=cart.find(x=>x.id===id);if(!l)return;const i=l.addons.findIndex(a=>a.label===label);if(i>-1)l.addons.splice(i,1);else l.addons.push({label,price});renderCart()}
 function toggleFlavor(id,flavor){const l=cart.find(x=>x.id===id);if(!l)return;l.flavor=l.flavor===flavor?null:flavor;renderCart()}
+function toggleLineOptions(id){const l=cart.find(x=>x.id===id);if(!l)return;l.optionsOpen=!l.optionsOpen;renderCart()}
 function clearOrder(){
 cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;currentCustomerProfile=null;selectedRewardType=null;checkoutOpen=false;
 $('cust-name').value='Guest';$('cust-phone').value='';$('order-note').value='';$('cash-input').value='';$('profile-card').classList.remove('show');
@@ -1543,16 +1574,18 @@ $('cart-count-mini').textContent=cart.reduce((s,l)=>s+l.qty,0);
 if(!cart.length){checkoutOpen=false;syncCheckoutVisibility();$('cart-lines').innerHTML='<div class="empty">Tap menu items to build an order.</div>';updateTotals();return}
 $('cart-lines').innerHTML=cart.map(l=>{
 const addonSum=l.addons.reduce((s,a)=>s+a.price,0),lineTotal=(l.price+addonSum)*l.qty;
+const flavorCount=l.meta?.flavors?.length||0,addonCount=l.meta?.addons?.length||0,hasOptions=flavorCount+addonCount>0,selectedCount=(l.flavor?1:0)+(l.addons?.length||0);
 let html=`<div class="line"><div class="line-main"><div class="line-name">${esc(l.name)}
+${hasOptions?`<div class="option-count">${selectedCount?`${selectedCount} selected`:`${flavorCount+addonCount} option${flavorCount+addonCount===1?'':'s'}`}</div>`:''}
 <div class="qty-row"><button class="qty-btn minus" onclick="changeQty(${
 l.id}
 ,-1)">-</button><div class="qty-num">${l.qty}</div><button class="qty-btn plus" onclick="changeQty(${
 l.id}
 ,1)">+</button><button class="del-btn" onclick="removeLine(${
 l.id}
-)">x</button></div>
+)">x</button>${hasOptions?`<button class="option-toggle${l.optionsOpen?' open':''}" onclick="toggleLineOptions(${l.id})" aria-label="Toggle add-ons for ${esc(l.name)}"><span class="arrow">⌄</span></button>`:''}</div>
 </div><div class="line-price">${money(lineTotal)}</div></div>`;
-if(l.meta?.flavors?.length){
+if(hasOptions&&l.optionsOpen&&l.meta?.flavors?.length){
 html+=`<div class="addons"><div class="addon-label">Flavor</div><div class="addon-chips">`+
 l.meta.flavors.map(f=>`<button class="addon-chip${
 l.flavor===f?' selected':''}
@@ -1561,7 +1594,7 @@ l.id}
 ,'${esc(String(f).replace(/'/g,"\\'"))}
 ')">${esc(f)}</button>`).join('')+`</div></div>`;
 }
-if(l.meta?.addons?.length){
+if(hasOptions&&l.optionsOpen&&l.meta?.addons?.length){
 html+=`<div class="addons"><div class="addon-label">Add-ons</div><div class="addon-chips">`+
 l.meta.addons.map(a=>{const label=a.label||a.name||a,price=typeof a.price==='number'?a.price:priceNum(a.price),sel=l.addons.some(x=>x.label===label);return `<button class="addon-chip${sel?' selected':''}" onclick="toggleAddon(${l.id},'${
 esc(String(label).replace(/'/g,"\\'"))}',${price})">${
@@ -1782,23 +1815,38 @@ function loadOrder(id){const o=getLoggedOrder(id);if(o)loadOrderIntoCurrent(o)}
 function loadOrderIntoCurrent(o){
 clearOrder();loadedInboxOrderId=o.id||null;$('cust-name').value=o.name||'Guest';$('cust-phone').value=o.phone||'';$('order-note').value=o.note||o.address||'';setOrderType(o.orderType||'takeaway',false);
 const zoneMatch=o.deliveryZone?String(o.deliveryZone).match(/[ABC]/i):null;if(zoneMatch)setZone(zoneMatch[0].toUpperCase());
-(o.items||[]).forEach(it=>{let found=null;menuData.forEach(c=>(c.items||[]).forEach((mi,idx)=>{if(mi.name===it.name)found={cat:c,idx,item:mi}}));cart.push({id:uid(),catKey:found?.cat?.key||'',itemIdx:found?.idx??-1,name:it.name,price:Number(it.price||0),priceStr:it.priceStr||money(it.price),qty:it.qty||1,flavor:it.flavor||null,addons:(it.addons||[]).map(a=>({label:a.label,price:Number(a.price||0)})),meta:found?.item||{}})});
+(o.items||[]).forEach(it=>{let found=null;menuData.forEach(c=>(c.items||[]).forEach((mi,idx)=>{if(mi.name===it.name)found={cat:c,idx,item:mi}}));cart.push({id:uid(),catKey:found?.cat?.key||'',itemIdx:found?.idx??-1,name:it.name,price:Number(it.price||0),priceStr:it.priceStr||money(it.price),qty:it.qty||1,flavor:it.flavor||null,addons:(it.addons||[]).map(a=>({label:a.label,price:Number(a.price||0)})),optionsOpen:false,meta:found?.item||{}})});
 const p=findCustomer(o.phone);if(p){currentCustomerProfile=p;showCustomerProfile(p,o.phone)}renderCart();renderItems();switchView('menu');showCartOnMobile();showToast('Order loaded','success');
+}
+function pruneHandledInbox(){
+const now=Date.now();
+handledInboxIds.forEach((expires,id)=>{if(expires<=now)handledInboxIds.delete(id)});
+}
+function rememberHandledInbox(id){
+if(id)handledInboxIds.set(id,Date.now()+15000);
+}
+function syncInboxBadge(){
+const count=inboxData.filter(o=>o.status==='pending').length;
+$('inbox-badge').textContent=count;
+$('inbox-badge').classList.toggle('show',count>0);
+lastInboxCount=count;
+if(!count)$('nav-inbox').classList.remove('has-new');
 }
 async function pollInbox(force=false){
 if(inboxWritePending&&!force)return;
 try{
+pruneHandledInbox();
 const res=await fetch(`${
 WORKER_URL}
 /supabase/orders?status=inbox`,{cache:'no-store'});if(!res.ok)throw new Error('Inbox read '+res.status);
-const j=await res.json();inboxData=(j.data||[]).map(r=>({...r.payload,id:r.id,status:'pending'}));
-const count=inboxData.length;$('inbox-badge').textContent=count;$('inbox-badge').classList.toggle('show',count>0);
+const j=await res.json();inboxData=(j.data||[]).filter(r=>!handledInboxIds.has(r.id)).map(r=>({...r.payload,id:r.id,status:'pending'}));
+const count=inboxData.length;
 if(count>lastInboxCount&&currentView!=='inbox')showToast(`${
 count-lastInboxCount}
 new incoming order${
 count-lastInboxCount===1?'':'s'}
 `,'success');
-lastInboxCount=count;renderInboxList();
+syncInboxBadge();renderInboxList();
 }catch(_){}
 }
 function renderInboxList(){
@@ -1845,10 +1893,10 @@ o.phone?`<button class="small-btn blue" onclick="window.open('https://wa.me/961$
 }
 async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;try{await fetch(`${
 WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});inboxData=inboxData.filter(x=>x.id!==id);loadOrderIntoCurrent(o);pollInbox(true)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
+/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
 async function declineInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='declined';inboxWritePending=true;try{await fetch(`${
 WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});inboxData=inboxData.filter(x=>x.id!==id);renderInboxList();showToast('Order declined')}catch(e){showToast('Decline failed: '+e.message,'error')}inboxWritePending=false}
+/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();showToast('Order declined');setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Decline failed: '+e.message,'error')}inboxWritePending=false}
 function renderCustomers(){
 const q=searchQuery,rows=customersData.filter(c=>!q||String(c.name+' '+c.phone).toLowerCase().includes(q));
 if(!rows.length){$('customers-list').innerHTML='<div class="empty">No customers found.</div>';return}
