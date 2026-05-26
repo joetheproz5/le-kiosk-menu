@@ -638,7 +638,18 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               <div class="table-toolbar">
                 <input class="search-input" id="basketball-search" type="text" placeholder="Search team, venue, note..." oninput="renderBasketballManager()">
                 <button class="btn btn-soft" onclick="addBasketballToday()">Add Today</button>
+                <button class="btn btn-soft" onclick="toggleBasketballBulk()">Bulk Add</button>
                 <button class="btn btn-ghost" onclick="sortBasketballMatches()">Sort by Date</button>
+              </div>
+              <div class="setting-card" id="basketball-bulk-card" style="display:none;margin-bottom:12px">
+                <div class="setting-title">Bulk Add Matches</div>
+                <div class="setting-copy">Paste many games at once. Format: date | time | home | away. Optional: venue | note.</div>
+                <textarea id="basketball-bulk-input" class="mega-input" rows="7" style="height:auto;padding-top:10px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px" placeholder="2026-05-28 | 9:45 PM | Riyadi | Beirut | Le Kiosk | Derby night"></textarea>
+                <div class="setting-actions">
+                  <button class="btn btn-dark" onclick="importBasketballBulk(false)">Import Add</button>
+                  <button class="btn btn-ghost" onclick="importBasketballBulk(true)">Replace All</button>
+                  <button class="btn btn-soft" onclick="insertBasketballBulkExample()">Example</button>
+                </div>
               </div>
               <div class="mini-list" id="basketball-list"></div>
             </div>
@@ -994,7 +1005,20 @@ function parseBasketballMatchesText(text){
   return String(text||'').split(/\n+/).map((line,i)=>({line:line.trim(),i:i+1})).filter(x=>x.line&&!x.line.startsWith('#')).map(({line,i})=>{
     const parts=line.split('|').map(s=>s.trim());
     if(parts.length<4||parts.some((p,idx)=>idx<4&&!p))throw new Error(`Line ${i}: use date | time | home | away`);
-    return {id:`match_${Date.now()}_${i}`,date:parts[0],time:parts[1],home:parts[2],away:parts[3],league:'Lebanon FLB'};
+    return {
+      id:`match_${Date.now()}_${i}`,
+      date:parts[0],
+      time:parts[1],
+      home:parts[2],
+      away:parts[3],
+      league:'Lebanon FLB',
+      venue:parts[4]||'Le Kiosk',
+      note:parts[5]||'',
+      active:true,
+      featured:false,
+      reserveEnabled:true,
+      waMessage:''
+    };
   });
 }
 async function saveBasketballMatchesFromSettings(){
@@ -1013,6 +1037,30 @@ function insertBasketballMatchExample(){
   const input=document.getElementById('basketball-matches-input');
   if(!input)return;
   input.value=`${todayBeirutKey()} | 9:45 PM | Riyadi | Beirut\n${todayBeirutKey()} | 7:00 PM | Sagesse | Hoops`;
+}
+function toggleBasketballBulk(){
+  const card=document.getElementById('basketball-bulk-card');
+  if(card)card.style.display=card.style.display==='none'?'block':'none';
+}
+function insertBasketballBulkExample(){
+  const input=document.getElementById('basketball-bulk-input');
+  if(!input)return;
+  input.value=`${todayBeirutKey()} | 9:45 PM | Riyadi | Beirut | Le Kiosk | Derby night\n${todayBeirutKey()} | 7:00 PM | Sagesse | Hoops | Le Kiosk | Reserve early`;
+}
+function importBasketballBulk(replace=false){
+  const input=document.getElementById('basketball-bulk-input');
+  if(!input)return;
+  try{
+    const imported=parseBasketballMatchesText(input.value);
+    if(!imported.length){showToast('Paste at least one match','error');return;}
+    normalizeBasketballMatches();
+    configData.basketballMatches=replace?imported:configData.basketballMatches.concat(imported);
+    sortBasketballMatches();
+    input.value='';
+    const card=document.getElementById('basketball-bulk-card');
+    if(card)card.style.display='none';
+    showToast(`${imported.length} match${imported.length===1?'':'es'} imported`,'success');
+  }catch(e){showToast(e.message,'error');}
 }
 function basketballMessage(m){
   return m.waMessage||`Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. Name: ___ People: ___`;
