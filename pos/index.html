@@ -41,6 +41,78 @@ font-family:var(--font);
 background:#eef1f5;
 color:var(--ink);
 -webkit-tap-highlight-color:transparent}
+body.theme-dark{
+--ink:#f8fafc;
+--side:#0b101a;
+--side-2:#070b12;
+--muted:#9ca3af;
+--soft:#1f2937;
+--line:#2b3545;
+--brand:#f59e0b;
+--brand-2:#fbbf24;
+--brand-dark:#fcd34d;
+--brand-soft:#2a1d08;
+--white:#151c27;
+background:#0f141d;
+color:var(--ink)}
+body.theme-dark #login-screen{background:radial-gradient(circle at 20% 0,#2b1706,#120904 55%,#05070b)}
+body.theme-dark .login-card,
+body.theme-dark .topbar,
+body.theme-dark .menu-tools,
+body.theme-dark .cart,
+body.theme-dark .cart-head,
+body.theme-dark .line,
+body.theme-dark .panel-card,
+body.theme-dark .order-mode-card,
+body.theme-dark .proceed-bar,
+body.theme-dark .checkout,
+body.theme-dark .modal,
+body.theme-dark .receipt-preview{background:#151c27;color:var(--ink);border-color:var(--line)}
+body.theme-dark .input,
+body.theme-dark .search,
+body.theme-dark textarea,
+body.theme-dark select{background:#101722;color:var(--ink);border-color:var(--line)}
+body.theme-dark .quick-btn,
+body.theme-dark .top-inbox,
+body.theme-dark .cat-chip,
+body.theme-dark .filter-chip,
+body.theme-dark .mode-strip,
+body.theme-dark .qty-btn,
+body.theme-dark .show-pw-btn{background:#222b38;color:#e5e7eb}
+body.theme-dark .quick-btn:hover,
+body.theme-dark .top-inbox:hover{background:#2b3545}
+body.theme-dark .menu-toggle,
+body.theme-dark .quick-btn.primary,
+body.theme-dark .action-btn.print{background:#f59e0b;color:#111827}
+body.theme-dark .category-toggle,
+body.theme-dark .profile-card,
+body.theme-dark .addon-chip,
+body.theme-dark .option-toggle{background:#2a1d08;color:#fcd34d;border-color:#78350f}
+body.theme-dark .mode-btn.active,
+body.theme-dark .item-card,
+body.theme-dark .cash-row,
+body.theme-dark .card-receipt{background:#151c27;color:var(--ink);border-color:var(--line)}
+body.theme-dark .item-img{background:#101722}
+body.theme-dark .item-card:hover{border-color:#b45309;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+body.theme-dark .proceed-summary,
+body.theme-dark .total-box{background:#2a1d08}
+body.theme-dark .row,
+body.theme-dark .panel-name,
+body.theme-dark .line-name,
+body.theme-dark .item-name{color:var(--ink)}
+body.theme-dark .panel-meta,
+body.theme-dark .empty,
+body.theme-dark .category-count{color:#9ca3af}
+body.theme-dark .item-price,
+body.theme-dark .line-price,
+body.theme-dark .profile-meta,
+body.theme-dark .type-label,
+body.theme-dark .total-label,
+body.theme-dark .total-sub,
+body.theme-dark .total-amt,
+body.theme-dark .proceed-kicker,
+body.theme-dark .proceed-note,
+body.theme-dark .proceed-total{color:#fbbf24}
 button,input,textarea,select{
 font-family:inherit;
 outline:none}
@@ -1431,6 +1503,7 @@ margin-left:auto}
 <input class="search" id="search-input" placeholder="Search menu, orders, or customers..." oninput="handleSearch()">
 </div>
 <div class="top-actions">
+<button class="quick-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
 <button class="quick-btn hide-mobile" onclick="loadOrders(true)">Refresh</button>
 <button class="quick-btn primary" onclick="toggleCart()">Cart <span id="cart-count-mini">0</span>
 </button>
@@ -1564,6 +1637,7 @@ const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
 const MAX_ATTEMPTS=5,LOCKOUT_MS=2*60*1000,SESSION_MS=6*60*60*1000;
 const AUTH_STORAGE_KEY='lk_pos_auth';
+const THEME_STORAGE_KEY='lk_pos_theme';
 const WA_NUMBER='96176840244';
 const ZONE_FEES={
 A:.5,B:1,C:1.5}
@@ -1591,6 +1665,21 @@ let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,la
 let authSession=null;
 let audioCtx=null,lastIncomingSoundAt=0;
 const $=id=>document.getElementById(id);
+function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
+function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
+function activeTheme(){return savedTheme()||systemTheme()}
+function applyTheme(){
+const theme=activeTheme();
+document.body.classList.toggle('theme-dark',theme==='dark');
+document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.textContent=theme==='dark'?'Dark':'Light'});
+}
+function toggleTheme(){
+const next=activeTheme()==='dark'?'light':'dark';
+localStorage.setItem(THEME_STORAGE_KEY,next);
+applyTheme();
+}
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!savedTheme())applyTheme()});
 const nativeFetch=window.fetch.bind(window);
 window.fetch=(input,options={})=>{
 const url=typeof input==='string'?input:(input&&input.url)||'';
