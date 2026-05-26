@@ -1799,6 +1799,7 @@ let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loya
 ...r}
 ));
 let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map();
+let lastHydratedPhone='',lastAutoName='';
 let authSession=null;
 let audioCtx=null,lastIncomingSoundAt=0;
 const $=id=>document.getElementById(id);
@@ -2153,6 +2154,7 @@ function toggleFlavor(id,flavor){const l=cart.find(x=>x.id===id);if(!l)return;l.
 function toggleLineOptions(id){const l=cart.find(x=>x.id===id);if(!l)return;l.optionsOpen=!l.optionsOpen;renderCart()}
 function clearOrder(){
 cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;currentCustomerProfile=null;selectedRewardType=null;checkoutOpen=false;
+lastHydratedPhone='';lastAutoName='';
 $('cust-name').value='Guest';$('cust-phone').value='';$('order-note').value='';$('cash-input').value='';$('profile-card').classList.remove('show');
 setOrderType('takeaway',false);syncCheckoutVisibility();renderCart();renderItems();
 }
@@ -2245,22 +2247,35 @@ let phoneTimer=null;
 function onPhoneInput(raw){
 clearTimeout(phoneTimer);currentCustomerProfile=null;selectedRewardType=null;$('profile-card').classList.remove('show');
 const digits=String(raw||'').replace(/\D/g,'');
+const phone=normalizePhone(raw);
+if(phone!==lastHydratedPhone&&$('cust-name').value.trim()&&$('cust-name').value.trim()===lastAutoName)$('cust-name').value='';
 if(digits&&digits!=='00000000'&&$('cust-name').value.trim()==='Guest')$('cust-name').value='';
 if(!digits&&!$('cust-name').value.trim())$('cust-name').value='Guest';
-const phone=normalizePhone(raw);if(phone==='00000000'||phone.length!==8){updateTotals();return}
+if(phone==='00000000'||phone.length!==8){updateTotals();return}
 phoneTimer=setTimeout(()=>hydrateCustomerFromPhone(phone),250);
 }
 function hydrateCustomerFromPhone(raw){
 clearTimeout(phoneTimer);currentCustomerProfile=null;selectedRewardType=null;$('profile-card').classList.remove('show');
 const phone=normalizePhone(raw);if(phone==='00000000'||phone.length!==8){updateTotals();return}
-const p=findCustomer(phone);currentCustomerProfile=p;showCustomerProfile(p,phone);updateTotals();
+const p=findCustomer(phone);
+currentCustomerProfile=p;
+if(p){
+$('cust-name').value=p.name||$('cust-name').value.trim()||'Guest';
+lastAutoName=$('cust-name').value.trim();
+}else{
+const currentName=$('cust-name').value.trim();
+if(!currentName||currentName==='Guest'||currentName===lastAutoName)$('cust-name').value='';
+lastAutoName=$('cust-name').value.trim();
+}
+lastHydratedPhone=phone;
+showCustomerProfile(p,phone);updateTotals();
 }
 function showCustomerProfile(profile,phone){
 const card=$('profile-card');
 if(!profile){card.innerHTML=`<div class="profile-title">New Customer</div><div class="profile-meta">+961 ${
 esc(phone)}
 - profile will be created after save.</div>`;card.classList.add('show');return}
-if(!$('cust-name').value.trim())$('cust-name').value=profile.name||'';
+if(profile.name&&$('cust-name').value.trim()!==profile.name)$('cust-name').value=profile.name;
 const rewardReady=loyaltyEnabled&&profile.loyaltyRewardReady;
 const loyaltyMeta=loyaltyEnabled?` · loyalty ${profile.loyaltyStamps||0}/${LOYALTY_TARGET}${rewardReady?' · reward ready':''}`:'';
 card.innerHTML=`<div class="profile-title">Welcome back, ${
