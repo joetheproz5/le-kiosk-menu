@@ -187,6 +187,19 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;min-width:0}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.chart-title{font-size:13px;font-weight:900;color:var(--ink)}
+.chart-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.chart-total{font-size:24px;font-weight:900;color:var(--brand-dark);line-height:1;text-align:right}
+.chart-bars{height:132px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:end}
+.chart-col{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+.chart-track{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;background:var(--soft);border-radius:8px;padding:4px}
+.chart-fill{width:100%;max-width:28px;min-height:4px;border-radius:6px;background:var(--accent)}
+.chart-fill.orders{background:var(--brand)}
+.chart-label{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase}
+.chart-number{font-size:10px;font-weight:900;color:var(--ink-2)}
 .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
@@ -272,7 +285,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .topbar{height:auto;align-items:flex-start;padding:16px;flex-direction:column}
   .content{padding:16px 14px 80px}
   .grid-menu,.settings-grid{grid-template-columns:1fr}
-  .dash-grid,.feature-grid,.loyalty-grid{grid-template-columns:1fr}
+  .dash-grid,.feature-grid,.loyalty-grid,.chart-grid{grid-template-columns:1fr}
   .customer-grid{grid-template-columns:1fr 1fr}
   .loyalty-customer{grid-template-columns:1fr 1fr}
   .reward-fields-grid,.reward-value-grid{grid-template-columns:1fr}
@@ -355,6 +368,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
       <section class="content">
         <div class="view active" id="view-dashboard">
           <div class="dash-grid" id="dashboard-stats"></div>
+          <div class="chart-grid" id="dashboard-charts"></div>
           <div class="feature-grid">
             <button class="feature-card" onclick="switchView('menu')">
               <span class="feature-icon">E</span>
@@ -634,6 +648,7 @@ const DEFAULT_LOYALTY_REWARDS=[
 let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null;
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
+let dashboardOrdersData=[];
 let configData={testingMode:false,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
@@ -708,7 +723,7 @@ async function initAdmin(){
   showLoading('Loading admin...');
   try{
     await fetchConfig();
-    await fetchMenu();
+    await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders()]);
     renderStatus();
     renderAll();
   }catch(e){
@@ -898,6 +913,22 @@ async function saveMenu(){
   hideLoading();
 }
 
+async function fetchDashboardOrders(){
+  try{
+    const res=await fetch(`${WORKER_URL}/supabase/orders`,{cache:'no-store'});
+    if(!res.ok)throw new Error('Orders read '+res.status);
+    const j=await res.json();
+    dashboardOrdersData=(j.data||[]).map(row=>({
+      id:row.id,
+      status:row.status,
+      createdAt:row.created_at||row.createdAt||row.inserted_at||row.insertedAt||'',
+      payload:row.payload||{}
+    }));
+  }catch(_){
+    dashboardOrdersData=[];
+  }
+}
+
 function switchView(view){
   currentView=view;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -972,6 +1003,74 @@ function renderDashboard(){
     <div class="dash-card"><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} item extras · ${s.globalGroups} group options</div></div>
     <div class="dash-card"><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty is enabled':'Loyalty is disabled'}</div></div>
   `;
+  renderDashboardCharts();
+}
+function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function shortDay(d){return d.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3);}
+function dashboardDays(){
+  const today=new Date();
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(today);
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate()-(6-i));
+    return {date:d,key:dateKey(d),label:shortDay(d)};
+  });
+}
+function parseStatDate(v){
+  if(!v)return null;
+  const d=new Date(v);
+  return Number.isNaN(d.getTime())?null:d;
+}
+function orderStatDate(row){
+  const p=row.payload||{};
+  return parseStatDate(p.timestamp||p.createdAt||p.created_at||row.createdAt);
+}
+function isMenuOrder(row){
+  const p=row.payload||{},status=row.status||p.status||'';
+  const source=String(p.source||p.channel||p.origin||'').toLowerCase();
+  return ['inbox','confirmed','declined'].includes(status)
+    || ['menu','website','online','web'].includes(source)
+    || !!p.gps
+    || !!p.address
+    || !!p.customerAddress;
+}
+function dailySeries(items,dateGetter){
+  const days=dashboardDays(),counts=Object.fromEntries(days.map(d=>[d.key,0]));
+  items.forEach(item=>{
+    const d=dateGetter(item);
+    if(!d)return;
+    const key=dateKey(d);
+    if(key in counts)counts[key]++;
+  });
+  return days.map(d=>({...d,value:counts[d.key]}));
+}
+function chartMarkup(title,sub,total,series,type){
+  const max=Math.max(1,...series.map(d=>d.value));
+  return `<div class="chart-card">
+    <div class="chart-head">
+      <div><div class="chart-title">${title}</div><div class="chart-sub">${sub}</div></div>
+      <div class="chart-total">${total}</div>
+    </div>
+    <div class="chart-bars">
+      ${series.map(d=>`<div class="chart-col" title="${d.label}: ${d.value}">
+        <div class="chart-number">${d.value}</div>
+        <div class="chart-track"><div class="chart-fill ${type}" style="height:${Math.max(4,Math.round((d.value/max)*100))}%"></div></div>
+        <div class="chart-label">${d.label}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function renderDashboardCharts(){
+  const el=document.getElementById('dashboard-charts');
+  if(!el)return;
+  const visitors=dailySeries(customersAdminData,c=>parseStatDate(c.firstSeen));
+  const menuOrders=dashboardOrdersData.filter(isMenuOrder);
+  const orderSeries=dailySeries(menuOrders,orderStatDate);
+  const visitorTotal=customersAdminData.length;
+  const menuTotal=menuOrders.length;
+  el.innerHTML=
+    chartMarkup('Visitors','New customer profiles, last 7 days',visitorTotal,visitors,'visitors')+
+    chartMarkup('Menu Orders','Website/menu orders, last 7 days',menuTotal,orderSeries,'orders');
 }
 function renderCategoriesHub(){
   const el=document.getElementById('categories-hub');
@@ -1306,8 +1405,8 @@ async function saveBlockList(){
   hideLoading();
 }
 
-async function openCustomersAdmin(){
-  showLoading('Loading customers...');
+async function fetchCustomersAdmin(showUI=false){
+  if(showUI)showLoading('Loading customers...');
   try{
     const res=await fetch(`${WORKER_URL}/supabase/customers`,{cache:'no-store'});
     if(res.ok){
@@ -1321,7 +1420,10 @@ async function openCustomersAdmin(){
     }else customersAdminData=[];
     customersAdminDirty=false;renderCustomersAdmin();renderLoyaltyHub();renderDashboard();
   }catch(_){customersAdminData=[];renderCustomersAdmin();renderLoyaltyHub();renderDashboard();}
-  hideLoading();
+  if(showUI)hideLoading();
+}
+async function openCustomersAdmin(){
+  await fetchCustomersAdmin(true);
 }
 function normalizeCustomerPhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d;}
 function renderCustomersAdmin(){
