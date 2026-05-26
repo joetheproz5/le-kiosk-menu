@@ -1801,7 +1801,7 @@ let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loya
 let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
 let lastHydratedPhone='',lastAutoName='';
 let authSession=null;
-let audioCtx=null,lastIncomingSoundAt=0;
+let audioCtx=null,alarmAudio=null,lastIncomingSoundAt=0;
 const $=id=>document.getElementById(id);
 function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
 function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
@@ -1862,8 +1862,43 @@ if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
 }catch(_){}
 }
+function makeAlarmUrl(){
+const sampleRate=16000,duration=1.55,total=sampleRate*duration|0,samples=new Int16Array(total);
+function addTone(start,dur,freq,vol=.36){
+const from=Math.max(0,start*sampleRate|0),to=Math.min(total,(start+dur)*sampleRate|0);
+for(let i=from;i<to;i++){
+const p=(i-from)/(to-from),env=Math.sin(Math.PI*p),v=Math.sin(2*Math.PI*freq*i/sampleRate)*env*vol;
+samples[i]=Math.max(-32768,Math.min(32767,samples[i]+v*32767));
+}
+}
+[0,0.66].forEach(base=>{addTone(base,.15,880);addTone(base+.17,.15,1174);addTone(base+.34,.17,1568);});
+const buffer=new ArrayBuffer(44+samples.length*2),view=new DataView(buffer);
+function text(offset,str){for(let i=0;i<str.length;i++)view.setUint8(offset+i,str.charCodeAt(i));}
+text(0,'RIFF');view.setUint32(4,36+samples.length*2,true);text(8,'WAVE');text(12,'fmt ');
+view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,sampleRate,true);
+view.setUint32(28,sampleRate*2,true);view.setUint16(32,2,true);view.setUint16(34,16,true);text(36,'data');view.setUint32(40,samples.length*2,true);
+for(let i=0;i<samples.length;i++)view.setInt16(44+i*2,samples[i],true);
+return URL.createObjectURL(new Blob([view],{type:'audio/wav'}));
+}
+function getAlarmAudio(){
+if(!alarmAudio){
+alarmAudio=new Audio(makeAlarmUrl());
+alarmAudio.preload='auto';
+alarmAudio.volume=1;
+}
+return alarmAudio;
+}
 function primeAudio(){
 ensureAudio();
+try{
+const a=getAlarmAudio();
+const prevVol=a.volume;
+a.volume=0;
+a.currentTime=0;
+const p=a.play();
+if(p&&p.then)p.then(()=>{a.pause();a.currentTime=0;a.volume=prevVol;}).catch(()=>{a.volume=prevVol;});
+else a.volume=prevVol;
+}catch(_){}
 if(!audioCtx)return;
 const osc=audioCtx.createOscillator();
 const gain=audioCtx.createGain();
@@ -1875,16 +1910,18 @@ osc.connect(gain).connect(audioCtx.destination);
 osc.start();
 osc.stop(audioCtx.currentTime+.05);
 }
-function playIncomingSound(){
+function playAlarmElement(){
+try{
+const base=getAlarmAudio();
+const a=base.cloneNode(true);
+a.volume=1;
+a.play().catch(()=>{});
+}catch(_){}
+}
+function playWebAudioAlarm(){
 ensureAudio();
 if(!audioCtx)return;
-const now=Date.now();
-if(now-lastIncomingSoundAt<2500)return;
-lastIncomingSoundAt=now;
-let played=false;
-const ring=()=>{
-if(played||!audioCtx||audioCtx.state!=='running')return;
-played=true;
+if(audioCtx.state!=='running')return;
 const start=audioCtx.currentTime+.02;
 [0,0.62].forEach(ringOffset=>{
 [0,0.16,0.32].forEach((noteOffset,i)=>{
@@ -1901,15 +1938,22 @@ osc.start(t);
 osc.stop(t+.16);
 });
 });
-};
-ring();
-setTimeout(ring,120);
-setTimeout(ring,450);
-setTimeout(ring,900);
+}
+function playIncomingSound(){
+const now=Date.now();
+if(now-lastIncomingSoundAt<2200)return;
+lastIncomingSoundAt=now;
+primeAudio();
+playAlarmElement();
+playWebAudioAlarm();
+setTimeout(()=>{playAlarmElement();playWebAudioAlarm();},180);
+setTimeout(playWebAudioAlarm,650);
 if(navigator.vibrate)navigator.vibrate([180,70,180]);
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSidebar();closeCategories();}});
 document.addEventListener('pointerdown',primeAudio,{passive:true});
+document.addEventListener('keydown',primeAudio,{passive:true});
+document.addEventListener('touchstart',primeAudio,{passive:true});
 async function sha256(str){
 if(!window.crypto?.subtle)throw new Error('HTTPS required');
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
@@ -2472,12 +2516,13 @@ const j=await res.json();inboxData=(j.data||[]).filter(r=>!handledInboxIds.has(r
 const count=inboxData.length;
 const currentIds=new Set(inboxData.map(o=>String(o.id)));
 const newIds=inboxData.filter(o=>!knownInboxIds.has(String(o.id))).map(o=>String(o.id));
-if(inboxIdsReady&&newIds.length){
+const shouldRing=inboxIdsReady&&(newIds.length||count>lastInboxCount);
+if(shouldRing){
 playIncomingSound();
 if(currentView!=='inbox')showToast(`${
-newIds.length}
+Math.max(newIds.length,count-lastInboxCount)}
 new incoming order${
-newIds.length===1?'':'s'}
+Math.max(newIds.length,count-lastInboxCount)===1?'':'s'}
 `,'success');
 }
 knownInboxIds=currentIds;
