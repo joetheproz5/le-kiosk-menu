@@ -331,6 +331,8 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   <div class="login-card">
     <div class="login-logo">Le Kiosk</div>
     <div class="login-sub">Admin Panel</div>
+    <label class="lbl" for="user-input">Account</label>
+    <input class="inp" type="text" id="user-input" value="admin" placeholder="admin" autocomplete="username" style="margin-bottom:12px">
     <label class="lbl" for="pw-input">Password</label>
     <input class="inp" type="password" id="pw-input" placeholder="Enter admin password" autocomplete="current-password">
     <button class="login-btn" id="login-btn" onclick="tryLogin()">Sign In</button>
@@ -611,7 +613,6 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 </div>
 
 <script>
-const ADMIN_HASH='b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
 const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const IMG_FOLDER='menupictures';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
@@ -639,11 +640,24 @@ let dashboardOrdersData=[],menuVisitorData=[];
 let configData={testingMode:false,loyaltyEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r}))};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
+let authSession=null;
+const nativeFetch=window.fetch.bind(window);
+window.fetch=(input,options={})=>{
+  const url=typeof input==='string'?input:(input&&input.url)||'';
+  const headers={...(options.headers||{})};
+  if(authSession?.token&&url.startsWith(WORKER_URL))headers.Authorization=`Bearer ${authSession.token}`;
+  return nativeFetch(input,{...options,headers});
+};
 
-async function hashPassword(pw){
-  if(!window.crypto||!window.crypto.subtle) throw new Error('HTTPS_REQUIRED');
-  const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));
-  return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function loginWithDatabase(username,password){
+  const res=await nativeFetch(`${WORKER_URL}/auth/login`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username,password,role:'admin'}),
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.error||'Login failed');
+  return data;
 }
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('lk_lockout')||'{"attempts":0,"until":0}');}catch(_){return{attempts:0,until:0};}}
 function setLockout(d){sessionStorage.setItem('lk_lockout',JSON.stringify(d));}
@@ -651,7 +665,7 @@ function resetLockout(){sessionStorage.removeItem('lk_lockout');}
 function renderAttemptDots(a){document.getElementById('attempt-dots').innerHTML=Array.from({length:MAX_ATTEMPTS},(_,i)=>`<div class="dot${i<a?' used':''}"></div>`).join('');}
 function showLockoutBar(m){const b=document.getElementById('lockout-bar');b.textContent=m;b.classList.add('show');}
 function hideLockoutBar(){document.getElementById('lockout-bar').classList.remove('show');}
-function enableLoginForm(e){document.getElementById('pw-input').disabled=!e;document.getElementById('login-btn').disabled=!e;}
+function enableLoginForm(e){document.getElementById('user-input').disabled=!e;document.getElementById('pw-input').disabled=!e;document.getElementById('login-btn').disabled=!e;}
 let lockoutCountdown=null;
 function startLockoutCountdown(){
   clearInterval(lockoutCountdown);
@@ -664,25 +678,28 @@ function startLockoutCountdown(){
 function checkLockout(){const l=getLockout();if(l.until>Date.now()){showLockoutBar(`Too many failed attempts. Try again in ${Math.ceil((l.until-Date.now())/1000)}s.`);return true;}return false;}
 async function tryLogin(){
   if(checkLockout()){enableLoginForm(false);startLockoutCountdown();return;}
-  const pw=document.getElementById('pw-input').value;if(!pw)return;
-  let h;
-  try{h=await hashPassword(pw);}
-  catch(e){document.getElementById('login-error').textContent=e.message==='HTTPS_REQUIRED'?'Admin must be opened over HTTPS.':'Login error: '+e.message;document.getElementById('login-error').classList.add('show');return;}
+  const username=document.getElementById('user-input').value.trim();
+  const pw=document.getElementById('pw-input').value;
+  if(!username||!pw)return;
   const lock=getLockout();
-  if(h===ADMIN_HASH){
+  enableLoginForm(false);
+  try{
+    authSession=await loginWithDatabase(username,pw);
     resetLockout();hideLockoutBar();document.getElementById('login-error').classList.remove('show');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('admin-screen').style.display='block';
+    document.getElementById('pw-input').value='';
     startSession();initAdmin();
-  }else{
+  }catch(e){
     const na=(lock.attempts||0)+1,nu=na>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;
     setLockout({attempts:na,until:nu});renderAttemptDots(na);
     if(na>=MAX_ATTEMPTS){enableLoginForm(false);startLockoutCountdown();document.getElementById('login-error').classList.remove('show');}
-    else{const r=MAX_ATTEMPTS-na;document.getElementById('login-error').textContent=`Wrong password. ${r} attempt${r===1?'':'s'} remaining before lockout.`;document.getElementById('login-error').classList.add('show');}
+    else{const r=MAX_ATTEMPTS-na;document.getElementById('login-error').textContent=`Login failed. ${r} attempt${r===1?'':'s'} remaining before lockout.`;document.getElementById('login-error').classList.add('show');enableLoginForm(true);}
     document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
   }
 }
 document.getElementById('pw-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+document.getElementById('user-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
 (function(){const l=getLockout();renderAttemptDots(l.attempts||0);if(l.until>Date.now()){enableLoginForm(false);startLockoutCountdown();}})();
 
 function startSession(){
@@ -700,6 +717,7 @@ function updateSessionBadge(){
   document.getElementById('session-timer').textContent=`Session: ${mins}m`;
 }
 function logout(){
+  authSession=null;
   clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
