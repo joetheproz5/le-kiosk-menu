@@ -1362,6 +1362,8 @@ margin-left:auto}
 <div class="login-card">
 <div class="login-logo">Le Kiosk</div>
 <div class="login-kicker">Point of Sale</div>
+<label class="field-label">Account</label>
+<input class="input" id="user" type="text" value="pos" placeholder="pos" autocomplete="username" style="margin-bottom:12px">
 <label class="field-label">Password</label>
 <input class="input" id="pw" type="password" placeholder="Enter POS password" autocomplete="current-password">
 <button class="login-btn" id="login-btn" onclick="tryLogin()">Sign In</button>
@@ -1551,7 +1553,6 @@ margin-left:auto}
 </section>
 </div>
 <script>
-const ADMIN_HASH='b7b9015697bcd58174d56b92494c51d011bb26840f1368e41dbf6fdcf17fcc0d';
 const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
 const MAX_ATTEMPTS=5,LOCKOUT_MS=2*60*1000,SESSION_MS=4*60*60*1000;
@@ -1579,7 +1580,15 @@ let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loya
 ...r}
 ));
 let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map();
+let authSession=null;
 const $=id=>document.getElementById(id);
+const nativeFetch=window.fetch.bind(window);
+window.fetch=(input,options={})=>{
+const url=typeof input==='string'?input:(input&&input.url)||'';
+const headers={...(options.headers||{})};
+if(authSession?.token&&url.startsWith(WORKER_URL))headers.Authorization=`Bearer ${authSession.token}`;
+return nativeFetch(input,{...options,headers});
+};
 const money=n=>'$'+(Number(n)||0).toFixed(2);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const uid=()=>Date.now()+Math.random();
@@ -1621,13 +1630,23 @@ if(!window.crypto?.subtle)throw new Error('HTTPS required');
 const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
 return [...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
+async function loginWithDatabase(username,password){
+const res=await nativeFetch(`${WORKER_URL}/auth/login`,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({username,password,role:'pos'})
+});
+const data=await res.json().catch(()=>({}));
+if(!res.ok)throw new Error(data.error||'Login failed');
+return data;
+}
 function getLockout(){try{return JSON.parse(sessionStorage.getItem('pos_lock')||'{"a":0,"u":0}')}catch{return{a:0,u:0}}}
 function setLockout(d){sessionStorage.setItem('pos_lock',JSON.stringify(d))}
 function resetLockout(){sessionStorage.removeItem('pos_lock')}
 function renderDots(n){$('attempts').innerHTML=Array.from({length:MAX_ATTEMPTS},(_,i)=>`<span class="dot${
 i<n?' used':''}
 "></span>`).join('')}
-function loginEnabled(v){$('pw').disabled=!v;$('login-btn').disabled=!v}
+function loginEnabled(v){$('user').disabled=!v;$('pw').disabled=!v;$('login-btn').disabled=!v}
 let lockCountdown=null;
 function startLockCountdown(){
 clearInterval(lockCountdown);
@@ -1640,25 +1659,27 @@ else{$('lockout').textContent=`Too many attempts. Retry in ${Math.ceil((l.u-Date
 async function tryLogin(){
 const l=getLockout();
 if(l.u>Date.now()){loginEnabled(false);startLockCountdown();return}
-const pw=$('pw').value;if(!pw)return;
-let hash;
-try{hash=await sha256(pw)}catch(e){showLoginError(e.message==='HTTPS required'?'Open POS over HTTPS.':e.message);return}
-if(hash===ADMIN_HASH){
+const username=$('user').value.trim();
+const pw=$('pw').value;if(!username||!pw)return;
+loginEnabled(false);
+try{
+authSession=await loginWithDatabase(username,pw);
 resetLockout();$('login-screen').style.display='none';$('app').classList.add('show');startSession();bootPOS();
-}else{
+}catch(e){
 const a=(l.a||0)+1,u=a>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;setLockout({a,u});renderDots(a);
 if(a>=MAX_ATTEMPTS){$('login-error').classList.remove('show');loginEnabled(false);startLockCountdown()}
-else showLoginError(`Wrong password. ${MAX_ATTEMPTS-a} attempt${MAX_ATTEMPTS-a===1?'':'s'} left.`);
+else{showLoginError(`Login failed. ${MAX_ATTEMPTS-a} attempt${MAX_ATTEMPTS-a===1?'':'s'} left.`);loginEnabled(true)}
 $('pw').value='';$('pw').focus();
 }
 }
 function showLoginError(msg){$('login-error').textContent=msg;$('login-error').classList.add('show')}
 $('pw').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
+$('user').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
 (function(){const l=getLockout();renderDots(l.a||0);if(l.u>Date.now()){loginEnabled(false);startLockCountdown()}})();
 function startSession(){resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000);['mousemove','keydown','click','touchstart'].forEach(ev=>document.addEventListener(ev,resetSession,{passive:true,once:false}))}
 function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);sessionExpiry=Date.now()+SESSION_MS;updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},SESSION_MS)}
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
-function logout(){clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
+function logout(){authSession=null;clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
 async function bootPOS(){
 showLoading('Loading POS...');
 await Promise.all([loadMenu(),loadCustomers(),loadConfig()]).catch(e=>showToast(e.message,'error'));
