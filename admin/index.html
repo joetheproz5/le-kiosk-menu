@@ -221,7 +221,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .chart-total{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1}
 .chart-delta{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:5px}
 .chart-canvas{width:100%;height:238px;display:block;border-radius:8px;background:linear-gradient(180deg,#fffbeb 0%,#fff 72%)}
-.chart-foot{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;text-align:center}
+.chart-foot{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:3px;margin-top:10px;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;text-align:center}
 .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
@@ -1072,7 +1072,7 @@ function renderDashboard(){
   renderTodayBar();
   renderDashboardCharts();
 }
-const DASHBOARD_DAYS=14;
+const DASHBOARD_DAYS=20;
 function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function shortDay(d){return d.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3);}
 function shortDate(d){return `${d.getMonth()+1}/${d.getDate()}`;}
@@ -1201,7 +1201,7 @@ function chartMarkup(id,title,sub,total,series){
       <div class="chart-total-wrap"><div class="chart-total">${total}</div><div class="chart-delta">${avg.toFixed(1)} daily avg</div></div>
     </div>
     <canvas class="chart-canvas" id="${id}" width="760" height="280"></canvas>
-    <div class="chart-foot">${series.map((d,i)=>`<span>${i%2===0||i===series.length-1?d.label:''}</span>`).join('')}</div>
+    <div class="chart-foot">${series.map((d,i)=>`<span>${i%3===0||i===series.length-1?d.label:''}</span>`).join('')}</div>
   </div>`;
 }
 function renderDashboardCharts(){
@@ -1220,14 +1220,14 @@ function renderDashboardCharts(){
     return d&&chartKeys.has(dateKey(d));
   }).length;
   el.innerHTML=
-    chartMarkup('visitors-chart','Menu Visitors','Unique menu visits by browser/day, last 14 days',visitorTotal,visitors)+
-    chartMarkup('orders-chart','All Orders','POS + menu orders, last 14 days',orderTotal,orderSeries);
+    chartMarkup('visitors-chart','Menu Visitors','Unique menu visits by browser/day, last 20 days',visitorTotal,visitors)+
+    chartMarkup('orders-chart','All Orders','POS + menu orders, last 20 days',orderTotal,orderSeries);
   requestAnimationFrame(()=>{
-    drawLineChart('visitors-chart',visitors,'#f59e0b');
-    drawLineChart('orders-chart',orderSeries,'#78350f');
+    drawBarChart('visitors-chart',visitors,'#f59e0b');
+    drawBarChart('orders-chart',orderSeries,'#78350f');
   });
 }
-function drawLineChart(id,series,color){
+function drawBarChart(id,series,color){
   const canvas=document.getElementById(id);
   if(!canvas)return;
   const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,padX=42,padTop=26,padBottom=36;
@@ -1241,26 +1241,32 @@ function drawLineChart(id,series,color){
     ctx.beginPath();ctx.moveTo(padX,y);ctx.lineTo(w-padX,y);ctx.stroke();
     ctx.fillText(String(value),padX-10,y+4);
   }
-  const pts=series.map((d,i)=>({
-    x:padX+(i*((w-padX*2)/Math.max(1,series.length-1))),
-    y:h-padBottom-((d.value/max)*chartH),
-    value:d.value
-  }));
+  const innerW=w-padX*2;
+  const gap=6;
+  const barW=Math.max(8,(innerW-(series.length-1)*gap)/series.length);
   const fill=ctx.createLinearGradient(0,padTop,0,h-padBottom);
-  fill.addColorStop(0,color+'38');fill.addColorStop(.72,color+'08');fill.addColorStop(1,color+'00');
-  ctx.beginPath();
-  pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.lineTo(pts[pts.length-1].x,h-padBottom);ctx.lineTo(pts[0].x,h-padBottom);ctx.closePath();
-  ctx.fillStyle=fill;ctx.fill();
-  ctx.shadowColor=color+'33';ctx.shadowBlur=10;ctx.shadowOffsetY=5;
-  ctx.beginPath();
-  pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.strokeStyle=color;ctx.lineWidth=4;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
-  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-  pts.forEach(p=>{
-    ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=color;ctx.stroke();
-    if(p.value>0){
-      ctx.fillStyle='#374151';ctx.font='800 11px Poppins, sans-serif';ctx.textAlign='center';ctx.fillText(String(p.value),p.x,Math.max(15,p.y-11));
+  fill.addColorStop(0,color);
+  fill.addColorStop(1,color+'88');
+  series.forEach((d,i)=>{
+    const x=padX+i*(barW+gap);
+    const barH=Math.max(d.value>0?4:2,(d.value/max)*chartH);
+    const y=h-padBottom-barH;
+    const r=Math.min(6,barW/2);
+    ctx.shadowColor=color+'22';ctx.shadowBlur=8;ctx.shadowOffsetY=4;
+    ctx.fillStyle=d.value>0?fill:'#e5e7eb';
+    ctx.beginPath();
+    ctx.moveTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.lineTo(x+barW-r,y);
+    ctx.quadraticCurveTo(x+barW,y,x+barW,y+r);
+    ctx.lineTo(x+barW,h-padBottom);
+    ctx.lineTo(x,h-padBottom);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    if(d.value>0){
+      ctx.fillStyle='#374151';ctx.font='800 10px Poppins, sans-serif';ctx.textAlign='center';
+      ctx.fillText(String(d.value),x+barW/2,Math.max(14,y-7));
     }
   });
 }
