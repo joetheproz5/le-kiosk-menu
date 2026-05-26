@@ -1728,6 +1728,7 @@ loginEnabled(false);
 try{
 authSession=await loginWithDatabase(username,pw);
 saveAuthSession();
+ensureAudio();
 resetLockout();$('login-screen').style.display='none';$('app').classList.add('show');startSession();bootPOS();
 }catch(e){
 const a=(l.a||0)+1,u=a>=MAX_ATTEMPTS?Date.now()+LOCKOUT_MS:0;setLockout({a,u});renderDots(a);
