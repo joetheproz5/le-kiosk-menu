@@ -1457,6 +1457,7 @@ const res=await fetch(`${WORKER_URL}/supabase/config`,{cache:'no-store'});
 if(!res.ok)throw new Error('Config read failed');
 const j=await res.json(),cfg=j.data||{};
 loyaltyEnabled=typeof cfg.loyaltyEnabled==='boolean'?cfg.loyaltyEnabled:true;
+if(!loyaltyEnabled)selectedRewardType=null;
 loyaltyRewards=Array.isArray(cfg.loyaltyRewards)&&cfg.loyaltyRewards.length?cfg.loyaltyRewards.map(normalizeReward):DEFAULT_REWARDS.map(r=>({...r}));
 }catch(_){loyaltyEnabled=true;loyaltyRewards=DEFAULT_REWARDS.map(r=>({...r}))}
 $('loyalty-pill').textContent=loyaltyEnabled?'Loyalty On':'Loyalty Off';
@@ -1655,6 +1656,7 @@ esc(phone)}
 - profile will be created after save.</div>`;card.classList.add('show');return}
 if(!$('cust-name').value.trim())$('cust-name').value=profile.name||'';
 const rewardReady=loyaltyEnabled&&profile.loyaltyRewardReady;
+const loyaltyMeta=loyaltyEnabled?` · loyalty ${profile.loyaltyStamps||0}/${LOYALTY_TARGET}${rewardReady?' · reward ready':''}`:'';
 card.innerHTML=`<div class="profile-title">Welcome back, ${
 esc(profile.name||'Customer')}
 </div>
@@ -1662,12 +1664,8 @@ esc(profile.name||'Customer')}
 profile.totalOrders||0}
 visits · ${
 money(profile.totalSpent||0)}
-spent · loyalty ${
-profile.loyaltyStamps||0}
-/${
-LOYALTY_TARGET}
-${
-rewardReady?' · reward ready':''}
+spent${
+loyaltyMeta}
 </div>
 ${
 profile.favoriteItems?.length?`<div class="profile-meta">Usually: ${esc(profile.favoriteItems.slice(0,2).join(', '))}</div>`:''}
@@ -1909,7 +1907,7 @@ c.totalOrders||0}
 visits · ${
 money(c.totalSpent||0)}
 spent</div></div>${
-c.loyaltyRewardReady?'<span class="badge ready">Ready</span>':''}
+loyaltyEnabled&&c.loyaltyRewardReady?'<span class="badge ready">Ready</span>':''}
 </div>${
 c.favoriteItems?.length?`<div class="panel-body"><div class="row"><span>Usually</span><span>${esc(c.favoriteItems.slice(0,2).join(', '))}</span></div></div>`:''}
 </div>`).join('');
