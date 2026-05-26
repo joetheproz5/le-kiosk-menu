@@ -407,8 +407,31 @@ padding:14px 18px 18px;
 overscroll-behavior:contain;
 -webkit-overflow-scrolling:touch}
 .item-grid{
+display:flex;
+flex-direction:column;
+gap:16px}
+.category-section{
+min-width:0}
+.category-head{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-bottom:8px}
+.category-title{
+font-family:var(--brand);
+font-size:17px;
+font-weight:900;
+color:var(--brand-dark)}
+.category-count{
+font-size:10px;
+font-weight:900;
+color:#9ca3af;
+text-transform:uppercase;
+letter-spacing:.06em}
+.category-items{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(138px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
 gap:10px}
 .item-card{
 background:#fff;
@@ -427,24 +450,24 @@ border-color:#fcd34d}
 transform:scale(.98)}
 .item-img{
 width:100%;
-aspect-ratio:16/9;
+aspect-ratio:2/1;
 object-fit:cover;
 background:#f3f4f6}
 .item-img[src='']{
 display:none}
 .item-info{
-padding:9px 10px 10px}
+padding:8px 10px 9px}
 .item-name{
 font-size:12px;
 font-weight:900;
 line-height:1.25;
 color:var(--ink);
-min-height:30px}
+min-height:0}
 .item-price{
 font-size:14px;
 font-weight:900;
 color:#92400e;
-margin-top:5px}
+margin-top:2px}
 .qty-badge{
 position:absolute;
 top:8px;
@@ -1134,8 +1157,8 @@ min-width:0}
 padding:0 10px}
 .quick-btn.hide-mobile{
 display:none}
-.item-grid{
-grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.category-items{
+grid-template-columns:repeat(auto-fill,minmax(136px,1fr))}
 }
 @media(max-width:620px){
 :root{
@@ -1159,6 +1182,8 @@ padding:10px}
 .customer-grid{
 grid-template-columns:1fr}
 .item-grid{
+gap:9px}
+.category-items{
 grid-template-columns:repeat(2,minmax(0,1fr));
 gap:9px}
 .item-img{
@@ -1516,11 +1541,7 @@ activeCat===c.key?' active':''}
 " onclick="setCategory('${esc(c.key)}')">${esc(CAT_ICONS[c.key]||c.title||c.key)}</button>`).join('');
 }
 function setCategory(key){activeCat=key;renderCategoryChips();renderItems()}
-function renderItems(){
-const q=searchQuery;
-const rows=flatItems.filter(x=>(activeCat==='all'||x.cat.key===activeCat)&&(!q||String(x.item.name||'').toLowerCase().includes(q)||String(x.item.desc||'').toLowerCase().includes(q)));
-if(!rows.length){$('item-grid').innerHTML='<div class="empty" style="grid-column:1/-1">No menu items found.</div>';return}
-$('item-grid').innerHTML=rows.map(x=>{
+function renderMenuItemCard(x){
 const qty=getQtyForItem(x.cat.key,x.idx),img=imageUrl(x.item.image||'');
 return `<button class="item-card${
 qty?' has-qty':''}
@@ -1534,7 +1555,19 @@ esc(x.item.name)}
 " onerror="this.style.display='none'">`:''}
 <div class="item-info"><div class="item-name">${esc(x.item.name)}</div><div class="item-price">${esc(x.item.price)}</div></div>
 </button>`;
-}).join('');
+}
+function renderItems(){
+const q=searchQuery;
+const rows=flatItems.filter(x=>(activeCat==='all'||x.cat.key===activeCat)&&(!q||String(x.item.name||'').toLowerCase().includes(q)||String(x.item.desc||'').toLowerCase().includes(q)));
+if(!rows.length){$('item-grid').innerHTML='<div class="empty" style="grid-column:1/-1">No menu items found.</div>';return}
+const groups=menuData.map(cat=>({
+cat,
+items:rows.filter(x=>x.cat.key===cat.key)}
+)).filter(g=>g.items.length);
+$('item-grid').innerHTML=groups.map(g=>`<section class="category-section" id="pos-cat-${esc(g.cat.key)}">
+<div class="category-head"><div class="category-title">${esc(CAT_ICONS[g.cat.key]||g.cat.title||g.cat.key)}</div><div class="category-count">${g.items.length} item${g.items.length===1?'':'s'}</div></div>
+<div class="category-items">${g.items.map(renderMenuItemCard).join('')}</div>
+</section>`).join('');
 }
 function priceNum(p){return parseFloat(String(p||'0').replace(/[^0-9.]/g,''))||0}
 function getQtyForItem(catKey,idx){const l=cart.find(x=>x.catKey===catKey&&x.itemIdx===idx);return l?l.qty:0}
