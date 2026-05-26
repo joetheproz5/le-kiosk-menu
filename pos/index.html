@@ -2231,8 +2231,16 @@ o.address?`<div class="row addon"><span>Address: ${esc(o.address)}</span><span><
 money(o.total)}
 </span></div>
 <div class="panel-actions"><button class="small-btn green" onclick="confirmInbox('${esc(o.id)}')">Confirm & Load</button><button class="small-btn red" onclick="declineInbox('${esc(o.id)}')">Decline</button>${
-o.phone?`<button class="small-btn blue" onclick="window.open('https://wa.me/961${esc(o.phone)}','_blank')">WA</button>`:''}
+o.phone?`<button class="small-btn blue" onclick="sendInboxConfirmation('${esc(o.id)}')">WA</button>`:''}
 </div></div>`;
+}
+function sendInboxConfirmation(id){
+const o=inboxData.find(x=>x.id===id);
+if(!o||!o.phone)return;
+const phone=normalizePhone(o.phone);
+if(phone==='00000000'||phone.length!==8){showToast('No valid phone for WhatsApp','error');return}
+const msg=`Hello ${o.name||'there'}, your order is confirmed. We are preparing it now. Thank you - Le Kiosk`;
+window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;try{await fetch(`${
 WORKER_URL}
