@@ -659,8 +659,9 @@ text-transform:uppercase;
 letter-spacing:.08em;
 color:#9ca3af}
 .item-grid.category-board{
-display:flex;
-align-items:flex-start;
+display:grid;
+grid-template-columns:repeat(var(--pos-category-count,1),minmax(0,1fr));
+align-items:start;
 gap:12px;
 width:100%;
 min-height:0}
@@ -669,7 +670,6 @@ gap:12px}
 .category-section{
 min-width:0}
 .category-section.compact-group{
-flex:1 1 0;
 min-width:0;
 display:flex;
 flex-direction:column;
@@ -2074,6 +2074,7 @@ items:rows.filter(x=>x.cat.key===cat.key)}
 )).filter(g=>g.items.length);
 if(activeCat==='all'){
 $('item-grid').className='item-grid category-board';
+$('item-grid').style.setProperty('--pos-category-count', groups.length);
 $('item-grid').innerHTML=groups.map(g=>`<section class="category-section compact-group" id="pos-cat-${esc(g.cat.key)}">
 <div class="category-head"><div class="category-title">${esc(CAT_ICONS[g.cat.key]||g.cat.title||g.cat.key)}</div><div class="category-count">${g.items.length}</div></div>
 <div class="category-items">${g.items.map(x=>renderMenuItemCard(x,true)).join('')}</div>
@@ -2082,6 +2083,7 @@ fitMenuBoard();
 return;
 }
 $('item-grid').className='item-grid';
+$('item-grid').style.removeProperty('--pos-category-count');
 $('item-grid').innerHTML=groups.map(g=>`<section class="category-section" id="pos-cat-${esc(g.cat.key)}">
 <div class="category-head"><div class="category-title">${esc(CAT_ICONS[g.cat.key]||g.cat.title||g.cat.key)}</div><div class="category-count">${g.items.length} item${g.items.length===1?'':'s'}</div></div>
 <div class="category-items">${g.items.map(renderMenuItemCard).join('')}</div>
