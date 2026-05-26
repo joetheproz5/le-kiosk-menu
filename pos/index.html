@@ -30,7 +30,7 @@ padding:0}
 --font:'Poppins',sans-serif;
 --brand-font:'Fredoka',sans-serif;
 --side-w:244px;
---cart-w:370px;
+--cart-w:340px;
 --top-h:68px;
 }
 html,body{
@@ -399,8 +399,8 @@ background:#fff;
 border-bottom:1px solid var(--line);
 display:flex;
 align-items:center;
-gap:12px;
-padding:0 18px}
+gap:9px;
+padding:0 12px}
 .menu-toggle{
 width:42px;
 height:42px;
@@ -466,7 +466,7 @@ font-family:var(--brand-font);
 font-size:24px;
 font-weight:800;
 color:var(--brand-dark);
-min-width:170px}
+min-width:118px}
 .search-wrap{
 flex:1;
 min-width:170px;
@@ -627,13 +627,37 @@ min-height:0;
 height:100%;
 overflow-y:auto;
 overflow-x:hidden;
-padding:14px 18px 18px;
+padding:9px 12px 12px;
 overscroll-behavior:contain;
 -webkit-overflow-scrolling:touch}
 .item-grid{
 display:flex;
 flex-direction:column;
-gap:16px}
+gap:11px}
+.item-grid.board{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(104px,1fr));
+grid-auto-rows:minmax(56px,auto);
+gap:6px}
+.item-grid.board.tight{
+grid-template-columns:repeat(auto-fill,minmax(88px,1fr));
+grid-auto-rows:minmax(50px,auto);
+gap:5px}
+.item-grid.board.ultra{
+grid-template-columns:repeat(auto-fill,minmax(74px,1fr));
+grid-auto-rows:minmax(44px,auto);
+gap:4px}
+.menu-board-head{
+grid-column:1/-1;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:2px 2px 4px;
+font-size:10px;
+font-weight:900;
+text-transform:uppercase;
+letter-spacing:.08em;
+color:#9ca3af}
 .category-section{
 min-width:0}
 .category-head{
@@ -641,10 +665,10 @@ display:flex;
 align-items:center;
 justify-content:space-between;
 gap:10px;
-margin-bottom:8px}
+margin-bottom:6px}
 .category-title{
 font-family:var(--brand-font);
-font-size:17px;
+font-size:15px;
 font-weight:900;
 color:var(--brand-dark)}
 .category-count{
@@ -655,8 +679,8 @@ text-transform:uppercase;
 letter-spacing:.06em}
 .category-items{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-gap:8px}
+grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
+gap:6px}
 .item-card{
 background:#fff;
 border:1.5px solid var(--line);
@@ -666,6 +690,18 @@ text-align:left;
 box-shadow:0 2px 10px rgba(17,24,39,.04);
 transition:.14s transform,.14s box-shadow,.14s border-color;
 position:relative}
+.item-card.compact{
+min-height:58px;
+display:flex;
+align-items:center;
+padding:8px 9px;
+box-shadow:0 1px 5px rgba(17,24,39,.04)}
+.item-grid.board.tight .item-card.compact{
+min-height:50px;
+padding:6px 7px}
+.item-grid.board.ultra .item-card.compact{
+min-height:44px;
+padding:5px 6px}
 .item-card:hover{
 transform:translateY(-2px);
 box-shadow:0 10px 26px rgba(17,24,39,.08);
@@ -681,17 +717,55 @@ background:#f3f4f6}
 display:none}
 .item-info{
 padding:6px 9px 7px}
+.item-card.compact .item-info{
+width:100%;
+min-width:0;
+padding:0}
 .item-name{
 font-size:11px;
 font-weight:900;
 line-height:1.18;
 color:var(--ink);
 min-height:0}
+.item-card.compact .item-name{
+font-size:10px;
+line-height:1.12;
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden}
+.item-grid.board.tight .item-card.compact .item-name{
+font-size:9px}
+.item-grid.board.ultra .item-card.compact .item-name{
+font-size:8.5px;
+-webkit-line-clamp:2}
 .item-price{
 font-size:13px;
 font-weight:900;
 color:#92400e;
 margin-top:2px}
+.item-card.compact .item-price{
+font-size:12px;
+margin-top:3px}
+.item-grid.board.tight .item-card.compact .item-price{
+font-size:11px;
+margin-top:2px}
+.item-grid.board.ultra .item-card.compact .item-price{
+font-size:10px;
+margin-top:1px}
+.item-tag{
+display:block;
+font-size:8px;
+font-weight:900;
+letter-spacing:.07em;
+text-transform:uppercase;
+color:#9ca3af;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+margin-top:3px}
+.item-grid.board.ultra .item-tag{
+display:none}
 .qty-badge{
 position:absolute;
 top:8px;
@@ -1330,7 +1404,7 @@ font-weight:700;
 color:#9ca3af}
 @media(max-width:1180px){
 :root{
---cart-w:340px}
+--cart-w:320px}
 .brand{
 padding:24px 20px 20px}
 .brand-name{
@@ -1930,25 +2004,32 @@ activeCat===c.key?' active':''}
 updateCategoryToggle();
 }
 function setCategory(key){activeCat=key;renderCategoryChips();renderItems();closeCategories()}
-function renderMenuItemCard(x){
+function renderMenuItemCard(x,compact=false){
 const qty=getQtyForItem(x.cat.key,x.idx),img=imageUrl(x.item.image||'');
-return `<button class="item-card${
+return `<button class="item-card${compact?' compact':''}${
 qty?' has-qty':''}
 " onclick="addToCart('${esc(x.cat.key)}',${
 x.idx}
 )">
-<span class="qty-badge">${qty}</span>${img?`<img class="item-img" src="${
+<span class="qty-badge">${qty}</span>${!compact&&img?`<img class="item-img" src="${
 esc(img)}
 " alt="${
 esc(x.item.name)}
 " onerror="this.style.display='none'">`:''}
-<div class="item-info"><div class="item-name">${esc(x.item.name)}</div><div class="item-price">${esc(x.item.price)}</div></div>
+<div class="item-info"><div class="item-name">${esc(x.item.name)}</div><div class="item-price">${esc(x.item.price)}</div>${compact?`<span class="item-tag">${esc(CAT_ICONS[x.cat.key]||x.cat.title||x.cat.key)}</span>`:''}</div>
 </button>`;
 }
 function renderItems(){
 const q=searchQuery;
 const rows=flatItems.filter(x=>(activeCat==='all'||x.cat.key===activeCat)&&(!q||String(x.item.name||'').toLowerCase().includes(q)||String(x.item.desc||'').toLowerCase().includes(q)));
-if(!rows.length){$('item-grid').innerHTML='<div class="empty" style="grid-column:1/-1">No menu items found.</div>';return}
+if(!rows.length){$('item-grid').className='item-grid board';$('item-grid').innerHTML='<div class="empty" style="grid-column:1/-1">No menu items found.</div>';return}
+if(activeCat==='all'){
+$('item-grid').className='item-grid board';
+$('item-grid').innerHTML=`<div class="menu-board-head"><span>All menu items</span><span>${rows.length} items</span></div>`+rows.map(x=>renderMenuItemCard(x,true)).join('');
+fitMenuBoard();
+return;
+}
+$('item-grid').className='item-grid';
 const groups=menuData.map(cat=>({
 cat,
 items:rows.filter(x=>x.cat.key===cat.key)}
@@ -1957,6 +2038,17 @@ $('item-grid').innerHTML=groups.map(g=>`<section class="category-section" id="po
 <div class="category-head"><div class="category-title">${esc(CAT_ICONS[g.cat.key]||g.cat.title||g.cat.key)}</div><div class="category-count">${g.items.length} item${g.items.length===1?'':'s'}</div></div>
 <div class="category-items">${g.items.map(renderMenuItemCard).join('')}</div>
 </section>`).join('');
+}
+function fitMenuBoard(){
+requestAnimationFrame(()=>{
+const grid=$('item-grid'),scroll=grid.closest('.grid-scroll');
+if(!grid||!scroll||!grid.classList.contains('board'))return;
+grid.classList.remove('tight','ultra');
+if(scroll.scrollHeight>scroll.clientHeight+2)grid.classList.add('tight');
+requestAnimationFrame(()=>{
+if(scroll.scrollHeight>scroll.clientHeight+2)grid.classList.add('ultra');
+});
+});
 }
 function priceNum(p){return parseFloat(String(p||'0').replace(/[^0-9.]/g,''))||0}
 function getQtyForItem(catKey,idx){const l=cart.find(x=>x.catKey===catKey&&x.itemIdx===idx);return l?l.qty:0}
