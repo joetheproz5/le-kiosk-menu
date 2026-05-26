@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le Kiosk - Admin panel</title>
+<title>Le Kiosk - Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -200,14 +200,24 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
+.today-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-4px 0 18px}
+.today-card{background:#111827;color:#f9fafb;border:1px solid #0f172a;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.08)}
+.today-card:nth-child(2){background:var(--brand-dark);border-color:var(--brand)}
+.today-card:nth-child(3){background:#0f3d2e;border-color:#14532d}
+.today-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.68)}
+.today-value{font-size:28px;font-weight:900;line-height:1;margin-top:7px;color:#fff}
+.today-note{font-size:11px;font-weight:700;color:rgba(255,255,255,.66);margin-top:6px}
+.today-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fbbf24;flex-shrink:0}
 .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.chart-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;min-width:0}
-.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0;box-shadow:0 8px 24px rgba(17,24,39,.05);overflow:hidden}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .chart-title{font-size:13px;font-weight:900;color:var(--ink)}
 .chart-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
-.chart-total{font-size:24px;font-weight:900;color:var(--brand-dark);line-height:1;text-align:right}
-.chart-canvas{width:100%;height:180px;display:block}
-.chart-foot{display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.chart-total-wrap{text-align:right;min-width:86px}
+.chart-total{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1}
+.chart-delta{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.chart-canvas{width:100%;height:238px;display:block;border-radius:8px;background:linear-gradient(180deg,#fffbeb 0%,#fff 72%)}
+.chart-foot{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;text-align:center}
 .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
@@ -294,7 +304,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .mega-search{width:100%;max-width:none;min-width:0}
   .content{padding:16px 14px 80px}
   .grid-menu,.settings-grid{grid-template-columns:1fr}
-  .dash-grid,.feature-grid,.loyalty-grid,.chart-grid{grid-template-columns:1fr}
+  .dash-grid,.today-bar,.feature-grid,.loyalty-grid,.chart-grid{grid-template-columns:1fr}
   .customer-grid{grid-template-columns:1fr 1fr}
   .loyalty-customer{grid-template-columns:1fr 1fr}
   .reward-fields-grid,.reward-value-grid{grid-template-columns:1fr}
@@ -382,6 +392,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
       <section class="content">
         <div class="view active" id="view-dashboard">
           <div class="dash-grid" id="dashboard-stats"></div>
+          <div class="today-bar" id="dashboard-today"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
         </div>
 
@@ -990,17 +1001,20 @@ function renderDashboard(){
     <div class="dash-card"><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} item extras · ${s.globalGroups} group options</div></div>
     <div class="dash-card"><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty is enabled':'Loyalty is disabled'}</div></div>
   `;
+  renderTodayBar();
   renderDashboardCharts();
 }
+const DASHBOARD_DAYS=14;
 function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function shortDay(d){return d.toLocaleDateString('en-US',{weekday:'short'}).slice(0,3);}
+function shortDate(d){return `${d.getMonth()+1}/${d.getDate()}`;}
 function dashboardDays(){
   const today=new Date();
-  return Array.from({length:7},(_,i)=>{
+  return Array.from({length:DASHBOARD_DAYS},(_,i)=>{
     const d=new Date(today);
     d.setHours(0,0,0,0);
-    d.setDate(d.getDate()-(6-i));
-    return {date:d,key:dateKey(d),label:shortDay(d)};
+    d.setDate(d.getDate()-(DASHBOARD_DAYS-1-i));
+    return {date:d,key:dateKey(d),label:shortDate(d),day:shortDay(d)};
   });
 }
 function parseStatDate(v){
@@ -1011,6 +1025,81 @@ function parseStatDate(v){
 function orderStatDate(row){
   const p=row.payload||{};
   return parseStatDate(p.timestamp||p.createdAt||p.created_at||row.createdAt);
+}
+function isActiveOrder(row){
+  const p=row.payload||{};
+  const status=String(row.status||p.status||'').toLowerCase();
+  return !['cancelled','canceled','declined','rejected','void','refunded'].includes(status);
+}
+function moneyValue(v){
+  if(v===null||v===undefined||v==='')return null;
+  const n=Number(String(v).replace(/[^0-9.-]/g,''));
+  return Number.isFinite(n)?n:null;
+}
+function orderTotalValue(row){
+  const p=row.payload||{};
+  const candidates=[p.total,p.grandTotal,p.grand_total,p.totalDue,p.total_due,p.amount,p.subtotal];
+  for(const candidate of candidates){
+    const n=moneyValue(candidate);
+    if(n!==null)return n;
+  }
+  if(Array.isArray(p.items)){
+    return p.items.reduce((sum,it)=>{
+      const line=moneyValue(it.total??it.lineTotal??it.line_total);
+      if(line!==null)return sum+line;
+      const price=moneyValue(it.price??it.priceStr)??0;
+      const qty=Number(it.qty??it.quantity??1)||1;
+      return sum+(price*qty);
+    },0);
+  }
+  return 0;
+}
+function orderSource(row){
+  const p=row.payload||{};
+  const id=String(row.id||p.id||'').toLowerCase();
+  const source=String(p.source||p.channel||row.source||'').toLowerCase();
+  if(source.includes('menu')||id.startsWith('menu-'))return 'menu';
+  return 'pos';
+}
+function orderCustomerKey(row){
+  const p=row.payload||{};
+  const phone=p.phone||p.customerPhone||p.customer_phone||p.customer?.phone;
+  if(phone)return 'phone:'+String(phone).replace(/\D/g,'');
+  const name=p.name||p.customerName||p.customer_name||p.customer?.name;
+  if(name)return 'name:'+String(name).trim().toLowerCase();
+  return row.id||p.id||'';
+}
+function todayDashboardStats(){
+  const today=dateKey(new Date());
+  const todayOrders=dashboardOrdersData.filter(row=>{
+    const d=orderStatDate(row);
+    return d&&dateKey(d)===today&&isActiveOrder(row);
+  });
+  const menuOrders=todayOrders.filter(row=>orderSource(row)==='menu').length;
+  const posOrders=todayOrders.length-menuOrders;
+  const sales=todayOrders.reduce((sum,row)=>sum+orderTotalValue(row),0);
+  const customerKeys=new Set(todayOrders.map(orderCustomerKey).filter(Boolean));
+  const newCustomers=customersAdminData.filter(c=>{
+    const d=parseStatDate(c.firstSeen||c.first_seen);
+    return d&&dateKey(d)===today;
+  }).length;
+  return {
+    orders:todayOrders.length,
+    sales,
+    customers:customerKeys.size||newCustomers,
+    menuOrders,
+    posOrders
+  };
+}
+function renderTodayBar(){
+  const el=document.getElementById('dashboard-today');
+  if(!el)return;
+  const t=todayDashboardStats();
+  el.innerHTML=`
+    <div class="today-card"><div><div class="today-label">Today's Orders</div><div class="today-value">${t.orders}</div><div class="today-note">${t.posOrders} POS · ${t.menuOrders} menu</div></div><div class="today-icon">O</div></div>
+    <div class="today-card"><div><div class="today-label">Today's Sales</div><div class="today-value">$${t.sales.toFixed(2)}</div><div class="today-note">From active POS and menu orders</div></div><div class="today-icon">$</div></div>
+    <div class="today-card"><div><div class="today-label">Today's Customers</div><div class="today-value">${t.customers}</div><div class="today-note">Unique names or phones today</div></div><div class="today-icon">C</div></div>
+  `;
 }
 function visitorStatDate(row){
   return parseStatDate(row.visit_date||row.visitDate||row.date||row.created_at||row.createdAt);
@@ -1037,25 +1126,34 @@ function visitorDailySeries(){
   return days.map(d=>({...d,value:counts[d.key]}));
 }
 function chartMarkup(id,title,sub,total,series){
+  const avg=series.length?series.reduce((sum,d)=>sum+d.value,0)/series.length:0;
   return `<div class="chart-card">
     <div class="chart-head">
       <div><div class="chart-title">${title}</div><div class="chart-sub">${sub}</div></div>
-      <div class="chart-total">${total}</div>
+      <div class="chart-total-wrap"><div class="chart-total">${total}</div><div class="chart-delta">${avg.toFixed(1)} daily avg</div></div>
     </div>
-    <canvas class="chart-canvas" id="${id}" width="640" height="220"></canvas>
-    <div class="chart-foot">${series.map(d=>`<span>${d.label}</span>`).join('')}</div>
+    <canvas class="chart-canvas" id="${id}" width="760" height="280"></canvas>
+    <div class="chart-foot">${series.map((d,i)=>`<span>${i%2===0||i===series.length-1?d.label:''}</span>`).join('')}</div>
   </div>`;
 }
 function renderDashboardCharts(){
   const el=document.getElementById('dashboard-charts');
   if(!el)return;
   const visitors=visitorDailySeries();
-  const orderSeries=dailySeries(dashboardOrdersData,orderStatDate);
-  const visitorTotal=menuVisitorData.reduce((sum,row)=>sum+(Number(row.visits||row.count||row.total||1)||1),0);
-  const orderTotal=dashboardOrdersData.length;
+  const activeOrders=dashboardOrdersData.filter(isActiveOrder);
+  const orderSeries=dailySeries(activeOrders,orderStatDate);
+  const chartKeys=new Set(dashboardDays().map(d=>d.key));
+  const visitorTotal=menuVisitorData.reduce((sum,row)=>{
+    const d=visitorStatDate(row);
+    return d&&chartKeys.has(dateKey(d))?sum+(Number(row.visits||row.count||row.total||1)||1):sum;
+  },0);
+  const orderTotal=activeOrders.filter(row=>{
+    const d=orderStatDate(row);
+    return d&&chartKeys.has(dateKey(d));
+  }).length;
   el.innerHTML=
-    chartMarkup('visitors-chart','Menu Visitors','Unique menu visits by browser/day',visitorTotal,visitors)+
-    chartMarkup('orders-chart','All Orders','POS + menu orders, last 7 days',orderTotal,orderSeries);
+    chartMarkup('visitors-chart','Menu Visitors','Unique menu visits by browser/day, last 14 days',visitorTotal,visitors)+
+    chartMarkup('orders-chart','All Orders','POS + menu orders, last 14 days',orderTotal,orderSeries);
   requestAnimationFrame(()=>{
     drawLineChart('visitors-chart',visitors,'#f59e0b');
     drawLineChart('orders-chart',orderSeries,'#78350f');
@@ -1064,31 +1162,38 @@ function renderDashboardCharts(){
 function drawLineChart(id,series,color){
   const canvas=document.getElementById(id);
   if(!canvas)return;
-  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,pad=28;
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,padX=42,padTop=26,padBottom=36;
   ctx.clearRect(0,0,w,h);
   const max=Math.max(1,...series.map(d=>d.value));
-  ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;
-  for(let i=0;i<4;i++){
-    const y=pad+(i*(h-pad*2)/3);
-    ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();
+  const chartH=h-padTop-padBottom;
+  ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;ctx.font='700 10px Poppins, sans-serif';ctx.fillStyle='#9ca3af';ctx.textAlign='right';
+  for(let i=0;i<5;i++){
+    const value=Math.round(max-(i*max/4));
+    const y=padTop+(i*chartH/4);
+    ctx.beginPath();ctx.moveTo(padX,y);ctx.lineTo(w-padX,y);ctx.stroke();
+    ctx.fillText(String(value),padX-10,y+4);
   }
   const pts=series.map((d,i)=>({
-    x:pad+(i*((w-pad*2)/Math.max(1,series.length-1))),
-    y:h-pad-((d.value/max)*(h-pad*2)),
+    x:padX+(i*((w-padX*2)/Math.max(1,series.length-1))),
+    y:h-padBottom-((d.value/max)*chartH),
     value:d.value
   }));
-  const fill=ctx.createLinearGradient(0,pad,0,h-pad);
-  fill.addColorStop(0,color+'44');fill.addColorStop(1,color+'00');
+  const fill=ctx.createLinearGradient(0,padTop,0,h-padBottom);
+  fill.addColorStop(0,color+'38');fill.addColorStop(.72,color+'08');fill.addColorStop(1,color+'00');
   ctx.beginPath();
   pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.lineTo(pts[pts.length-1].x,h-pad);ctx.lineTo(pts[0].x,h-pad);ctx.closePath();
+  ctx.lineTo(pts[pts.length-1].x,h-padBottom);ctx.lineTo(pts[0].x,h-padBottom);ctx.closePath();
   ctx.fillStyle=fill;ctx.fill();
+  ctx.shadowColor=color+'33';ctx.shadowBlur=10;ctx.shadowOffsetY=5;
   ctx.beginPath();
   pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  ctx.strokeStyle=color;ctx.lineWidth=4;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
   pts.forEach(p=>{
     ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=color;ctx.stroke();
-    ctx.fillStyle='#374151';ctx.font='700 11px Poppins, sans-serif';ctx.textAlign='center';ctx.fillText(String(p.value),p.x,Math.max(14,p.y-10));
+    if(p.value>0){
+      ctx.fillStyle='#374151';ctx.font='800 11px Poppins, sans-serif';ctx.textAlign='center';ctx.fillText(String(p.value),p.x,Math.max(15,p.y-11));
+    }
   });
 }
 function buildMegaSearchResults(){
