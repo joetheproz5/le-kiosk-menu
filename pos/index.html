@@ -659,6 +659,10 @@ text-transform:uppercase;
 letter-spacing:.08em;
 color:#9ca3af}
 .item-grid.category-board{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(122px,1fr));
+gap:8px;
+align-content:start;
 display:flex;
 flex-direction:row;
 gap:12px;
@@ -670,6 +674,10 @@ gap:7px}
 .category-section{
 min-width:0}
 .category-section.compact-group{
+grid-column:1/-1;
+display:block;
+padding:6px 0 10px;
+border-bottom:1px solid var(--line)}
 display:flex;
 flex-direction:column;
 flex-shrink:0;
@@ -747,7 +755,7 @@ border-color:#fcd34d}
 transform:scale(.98)}
 .item-img{
 width:100%;
-height:60px;
+aspect-ratio:2.45/1;
 object-fit:cover;
 background:#f3f4f6}
 .item-img[src='']{
@@ -2044,7 +2052,7 @@ qty?' has-qty':''}
 " onclick="addToCart('${esc(x.cat.key)}',${
 x.idx}
 )">
-<span class="qty-badge">${qty}</span>${img?`<img class="item-img" src="${
+<span class="qty-badge">${qty}</span>${!compact&&img?`<img class="item-img" src="${
 esc(img)}
 " alt="${
 esc(x.item.name)}
