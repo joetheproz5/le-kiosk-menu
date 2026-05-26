@@ -980,6 +980,34 @@ function todayBeirutKey(){
   const get=t=>parts.find(p=>p.type===t)?.value||'';
   return `${get('year')}-${get('month')}-${get('day')}`;
 }
+const BASKETBALL_TEAM_LOGOS={
+  riyadi:'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+  alriyadi:'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+  sportingalriyadi:'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+  sagesse:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+  hekmeh:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+  alhekmeh:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+  beirut:'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
+  beirutclub:'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
+  homenetmen:'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
+  hmentmen:'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
+  champville:'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+  maristes:'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+  csmaristes:'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+  antranik:'https://en.wikipedia.org/wiki/Special:Redirect/file/Antranik%20logo.png?width=160',
+  central:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+  clubcentral:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+  clubcentraljounieh:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+  tadamonzouk:'https://en.wikipedia.org/wiki/Special:Redirect/file/Tadamoun%20Zouk%20logo.png?width=160',
+  federation:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160',
+  flb:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160'
+};
+function basketballTeamLogoKey(name){
+  return String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');
+}
+function basketballLogoForTeam(name){
+  return BASKETBALL_TEAM_LOGOS[basketballTeamLogoKey(name)]||'';
+}
 function normalizeBasketballMatches(){
   const rows=Array.isArray(configData.basketballMatches)?configData.basketballMatches:[];
   configData.basketballMatches=rows.map((m,i)=>({
@@ -988,6 +1016,8 @@ function normalizeBasketballMatches(){
     time:String(m.time||'').trim(),
     home:String(m.home||'').trim(),
     away:String(m.away||'').trim(),
+    homeLogo:String(m.homeLogo||basketballLogoForTeam(m.home)||'').trim(),
+    awayLogo:String(m.awayLogo||basketballLogoForTeam(m.away)||'').trim(),
     league:String(m.league||'Lebanon FLB').trim(),
     venue:String(m.venue||'Le Kiosk').trim(),
     note:String(m.note||'').trim(),
@@ -1014,6 +1044,8 @@ function parseBasketballMatchesText(text){
       league:'Lebanon FLB',
       venue:parts[4]||'Le Kiosk',
       note:parts[5]||'',
+      homeLogo:parts[6]||basketballLogoForTeam(parts[2]),
+      awayLogo:parts[7]||basketballLogoForTeam(parts[3]),
       active:true,
       featured:false,
       reserveEnabled:true,
@@ -1045,7 +1077,7 @@ function toggleBasketballBulk(){
 function insertBasketballBulkExample(){
   const input=document.getElementById('basketball-bulk-input');
   if(!input)return;
-  input.value=`${todayBeirutKey()} | 9:45 PM | Riyadi | Beirut | Le Kiosk | Derby night\n${todayBeirutKey()} | 7:00 PM | Sagesse | Hoops | Le Kiosk | Reserve early`;
+  input.value=`${todayBeirutKey()} | 9:45 PM | Riyadi | Beirut | Le Kiosk | Derby night | menupictures/teams/riyadi.png | menupictures/teams/beirut.png\n${todayBeirutKey()} | 7:00 PM | Sagesse | Hoops | Le Kiosk | Reserve early | menupictures/teams/sagesse.png | menupictures/teams/hoops.png`;
 }
 function importBasketballBulk(replace=false){
   const input=document.getElementById('basketball-bulk-input');
@@ -1073,6 +1105,8 @@ function addBasketballMatch(match={}){
     time:match.time||'9:00 PM',
     home:match.home||'Home Team',
     away:match.away||'Away Team',
+    homeLogo:match.homeLogo||'',
+    awayLogo:match.awayLogo||'',
     league:match.league||'Lebanon FLB',
     venue:match.venue||'Le Kiosk',
     note:match.note||'',
@@ -1086,8 +1120,11 @@ function addBasketballMatch(match={}){
 function addBasketballToday(){addBasketballMatch({date:todayBeirutKey()});}
 function updateBasketballMatch(i,field,value){
   const m=configData.basketballMatches[i];if(!m)return;
+  const oldHomeLogo=basketballLogoForTeam(m.home),oldAwayLogo=basketballLogoForTeam(m.away);
   if(['active','featured','reserveEnabled'].includes(field))m[field]=!!value;
   else m[field]=String(value||'');
+  if(field==='home'&&(!m.homeLogo||m.homeLogo===oldHomeLogo))m.homeLogo=basketballLogoForTeam(m.home);
+  if(field==='away'&&(!m.awayLogo||m.awayLogo===oldAwayLogo))m.awayLogo=basketballLogoForTeam(m.away);
   renderBasketballManager();
 }
 function deleteBasketballMatch(i){
@@ -1116,7 +1153,7 @@ function renderBasketballManager(){
     <div class="today-card"><div><div class="today-label">Upcoming Active</div><div class="today-value">${upcoming}</div><div class="today-note">Shown by date</div></div><div class="today-icon">7</div></div>
     <div class="today-card"><div><div class="today-label">Popup</div><div class="today-value">${configData.basketballEnabled!==false?'On':'Off'}</div><div class="today-note">Settings toggle</div></div><div class="today-icon">S</div></div>`;
   const list=document.getElementById('basketball-list');if(!list)return;
-  const rows=configData.basketballMatches.map((m,i)=>({m,i})).filter(({m})=>!q||`${m.date} ${m.time} ${m.home} ${m.away} ${m.venue} ${m.note}`.toLowerCase().includes(q));
+  const rows=configData.basketballMatches.map((m,i)=>({m,i})).filter(({m})=>!q||`${m.date} ${m.time} ${m.home} ${m.away} ${m.venue} ${m.note} ${m.homeLogo} ${m.awayLogo}`.toLowerCase().includes(q));
   if(!rows.length){list.innerHTML='<div class="empty-state">No matches yet. Add the first game.</div>';return;}
   list.innerHTML=rows.map(({m,i})=>`<div class="reward-row">
     <div class="reward-fields-grid">
@@ -1124,6 +1161,8 @@ function renderBasketballManager(){
       <div><label class="field-label">Time</label><input class="inp" type="text" value="${esc(m.time)}" placeholder="9:45 PM" onchange="updateBasketballMatch(${i},'time',this.value)"></div>
       <div><label class="field-label">Home</label><input class="inp" value="${esc(m.home)}" onchange="updateBasketballMatch(${i},'home',this.value)"></div>
       <div><label class="field-label">Away</label><input class="inp" value="${esc(m.away)}" onchange="updateBasketballMatch(${i},'away',this.value)"></div>
+      <div><label class="field-label">Home Logo</label><input class="inp" value="${esc(m.homeLogo)}" placeholder="menupictures/teams/home.png" onchange="updateBasketballMatch(${i},'homeLogo',this.value)"></div>
+      <div><label class="field-label">Away Logo</label><input class="inp" value="${esc(m.awayLogo)}" placeholder="menupictures/teams/away.png" onchange="updateBasketballMatch(${i},'awayLogo',this.value)"></div>
       <div><label class="field-label">Venue</label><input class="inp" value="${esc(m.venue)}" onchange="updateBasketballMatch(${i},'venue',this.value)"></div>
       <div><label class="field-label">League</label><input class="inp" value="${esc(m.league)}" onchange="updateBasketballMatch(${i},'league',this.value)"></div>
     </div>
