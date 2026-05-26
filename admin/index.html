@@ -1095,7 +1095,7 @@ function importBasketballBulk(replace=false){
   }catch(e){showToast(e.message,'error');}
 }
 function basketballMessage(m){
-  return m.waMessage||`Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. Name: ___ People: ___`;
+  return m.waMessage||`Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. People: ___`;
 }
 function addBasketballMatch(match={}){
   normalizeBasketballMatches();
