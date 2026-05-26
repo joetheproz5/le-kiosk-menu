@@ -597,7 +597,52 @@ flex:0 0 auto;
 max-height:58vh;
 overflow-y:auto;
 overscroll-behavior:contain;
+box-shadow:0 -10px 24px rgba(17,24,39,.06);
+display:none}
+.checkout.open{
+display:block}
+.proceed-bar{
+border-top:1px solid var(--line);
+padding:12px;
+flex:0 0 auto;
+background:#fff;
 box-shadow:0 -10px 24px rgba(17,24,39,.06)}
+.proceed-summary{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:var(--brand-soft);
+border-radius:10px;
+padding:11px 13px;
+margin-bottom:9px}
+.proceed-kicker{
+font-size:10px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#92400e}
+.proceed-note{
+font-size:10px;
+font-weight:700;
+color:#b45309;
+margin-top:2px}
+.proceed-total{
+font-size:24px;
+font-weight:900;
+color:#92400e}
+.proceed-btn{
+width:100%;
+height:42px;
+border-radius:10px;
+background:var(--green);
+color:#fff;
+font-size:12px;
+font-weight:900;
+letter-spacing:.05em;
+text-transform:uppercase}
+.proceed-btn:disabled{
+opacity:.45;
+cursor:not-allowed}
 .order-mode-card{
 border:1px solid var(--line);
 background:#fff;
@@ -1226,7 +1271,18 @@ margin-left:auto}
 </div>
 <div class="cart-lines" id="cart-lines">
 </div>
-<div class="checkout">
+<div class="proceed-bar" id="proceed-bar">
+<div class="proceed-summary">
+<div>
+<div class="proceed-kicker">Order Total</div>
+<div class="proceed-note" id="proceed-note">Add items to start</div>
+</div>
+<div class="proceed-total" id="proceed-total">$0.00</div>
+</div>
+<button class="proceed-btn" id="proceed-btn" onclick="showCheckoutDetails()" disabled>Proceed</button>
+</div>
+<div class="checkout" id="checkout-section">
+<button class="quick-btn" onclick="hideCheckoutDetails()" style="width:100%;margin-bottom:10px">Back to Order</button>
 <div class="profile-card" id="profile-card">
 </div>
 <div class="order-mode-card">
@@ -1307,7 +1363,7 @@ let ordersData=[],customersData=[],inboxData=[],ordersFilter='all',currentView='
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
 ...r}
 ));
-let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null;
+let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false;
 const $=id=>document.getElementById(id);
 const money=n=>'$'+(Number(n)||0).toFixed(2);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -1464,13 +1520,27 @@ function removeLine(id){cart=cart.filter(x=>x.id!==id);renderCart();renderItems(
 function toggleAddon(id,label,price){const l=cart.find(x=>x.id===id);if(!l)return;const i=l.addons.findIndex(a=>a.label===label);if(i>-1)l.addons.splice(i,1);else l.addons.push({label,price});renderCart()}
 function toggleFlavor(id,flavor){const l=cart.find(x=>x.id===id);if(!l)return;l.flavor=l.flavor===flavor?null:flavor;renderCart()}
 function clearOrder(){
-cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;currentCustomerProfile=null;selectedRewardType=null;
+cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;currentCustomerProfile=null;selectedRewardType=null;checkoutOpen=false;
 $('cust-name').value='Guest';$('cust-phone').value='';$('order-note').value='';$('cash-input').value='';$('profile-card').classList.remove('show');
-setOrderType('takeaway',false);renderCart();renderItems();
+setOrderType('takeaway',false);syncCheckoutVisibility();renderCart();renderItems();
+}
+function showCheckoutDetails(){
+if(!cart.length){showToast('Add items first','error');return}
+checkoutOpen=true;
+syncCheckoutVisibility();
+setTimeout(()=>{$('cust-phone').focus()},50);
+}
+function hideCheckoutDetails(){
+checkoutOpen=false;
+syncCheckoutVisibility();
+}
+function syncCheckoutVisibility(){
+$('checkout-section').classList.toggle('open',checkoutOpen);
+$('proceed-bar').classList.toggle('hidden',checkoutOpen);
 }
 function renderCart(){
 $('cart-count-mini').textContent=cart.reduce((s,l)=>s+l.qty,0);
-if(!cart.length){$('cart-lines').innerHTML='<div class="empty">Tap menu items to build an order.</div>';updateTotals();return}
+if(!cart.length){checkoutOpen=false;syncCheckoutVisibility();$('cart-lines').innerHTML='<div class="empty">Tap menu items to build an order.</div>';updateTotals();return}
 $('cart-lines').innerHTML=cart.map(l=>{
 const addonSum=l.addons.reduce((s,a)=>s+a.price,0),lineTotal=(l.price+addonSum)*l.qty;
 let html=`<div class="line"><div class="line-main"><div class="line-name">${esc(l.name)}
@@ -1513,6 +1583,10 @@ function rewardDiscount(){if(!loyaltyEnabled||!currentCustomerProfile?.loyaltyRe
 function grandTotal(){return Math.max(0,itemsTotal()+deliveryFee()-rewardDiscount())}
 function updateTotals(){
 const total=grandTotal(),fee=deliveryFee(),disc=rewardDiscount(),sub=itemsTotal();
+$('proceed-total').textContent=money(total);
+const proceedQty=cart.reduce((s,l)=>s+l.qty,0);
+$('proceed-note').textContent=!proceedQty?'Add items to start':`${proceedQty} item${proceedQty===1?'':'s'} selected`;
+$('proceed-btn').disabled=!proceedQty;
 $('total-amt').textContent=money(total);
 $('total-sub').textContent=!cart.length?'No items yet':`${
 money(sub)}
