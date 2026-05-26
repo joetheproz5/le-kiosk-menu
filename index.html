@@ -857,7 +857,7 @@ fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
     });
   });
 </script>
-    <!-- Le Kiosk Basketball Popup
+   <!-- Le Kiosk Basketball Popup
 Paste this near the end of the public menu page, after WORKER_URL is defined.
 It reads config.basketballEnabled and config.basketballMatches from /supabase/config.
 -->
@@ -980,6 +980,55 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     margin-top: 9px;
     line-height: 1.25;
   }
+  .basketball-scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .basketball-team {
+    min-width: 0;
+    text-align: center;
+  }
+  .basketball-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid #fde68a;
+    background: #fff7ed;
+    object-fit: contain;
+    padding: 5px;
+    margin: 0 auto 6px;
+    box-shadow: 0 4px 12px rgba(69,26,3,.12);
+  }
+  .basketball-logo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #92400e;
+    font-size: 18px;
+    font-weight: 900;
+  }
+  .basketball-team-name {
+    font-size: 13px;
+    font-weight: 900;
+    color: #451a03;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+  .basketball-vs {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f59e0b;
+    color: #1c0f00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 900;
+  }
   .basketball-meta {
     font-size: 11px;
     font-weight: 700;
@@ -1027,6 +1076,28 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
 <script>
 (function(){
   const WA_NUMBER = '96176840244';
+  const TEAM_LOGOS = {
+    riyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+    alriyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+    sportingalriyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+    sagesse: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+    hekmeh: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+    alhekmeh: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+    beirut: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
+    beirutclub: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
+    homenetmen: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
+    hmentmen: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
+    champville: 'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+    maristes: 'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+    csmaristes: 'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+    antranik: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Antranik%20logo.png?width=160',
+    central: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    clubcentral: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    clubcentraljounieh: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    tadamonzouk: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Tadamoun%20Zouk%20logo.png?width=160',
+    federation: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160',
+    flb: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160'
+  };
   let todaysMatches = [];
 
   function beirutDateKey(d = new Date()) {
@@ -1054,6 +1125,30 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(reserveMessage(m))}`, '_blank');
   }
 
+  function teamInitial(name) {
+    return String(name || '?').trim().slice(0, 1).toUpperCase() || '?';
+  }
+
+  function teamLogoKey(name) {
+    return String(name || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '');
+  }
+
+  function teamLogo(name) {
+    return TEAM_LOGOS[teamLogoKey(name)] || '';
+  }
+
+  function logoHtml(src, name) {
+    const finalSrc = src || teamLogo(name);
+    if (finalSrc) {
+      return `<img class="basketball-logo" src="${esc(finalSrc)}" alt="${esc(name)} logo" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'basketball-logo basketball-logo-fallback',textContent:'${esc(teamInitial(name))}'}))">`;
+    }
+    return `<div class="basketball-logo basketball-logo-fallback">${esc(teamInitial(name))}</div>`;
+  }
+
   function renderMatches() {
     const list = document.getElementById('basketball-match-list');
     if (!list) return;
@@ -1066,7 +1161,17 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     list.innerHTML = todaysMatches.map((m, i) => `
       <div class="basketball-match${m.featured ? ' featured' : ''}">
         <span class="basketball-time">🏀 ${esc(m.time)}</span>
-        <div class="basketball-teams">${esc(m.home)} <span style="color:#f59e0b">vs</span> ${esc(m.away)}</div>
+        <div class="basketball-scoreboard">
+          <div class="basketball-team">
+            ${logoHtml(m.homeLogo, m.home)}
+            <div class="basketball-team-name">${esc(m.home)}</div>
+          </div>
+          <div class="basketball-vs">VS</div>
+          <div class="basketball-team">
+            ${logoHtml(m.awayLogo, m.away)}
+            <div class="basketball-team-name">${esc(m.away)}</div>
+          </div>
+        </div>
         <div class="basketball-meta">${esc(m.league || 'Lebanon FLB')}${m.venue ? ' · ' + esc(m.venue) : ''}</div>
         ${m.note ? `<div class="basketball-meta">${esc(m.note)}</div>` : ''}
         ${m.reserveEnabled !== false ? `<button class="basketball-reserve" type="button" data-match="${i}">Reserve Table</button>` : ''}
@@ -1133,6 +1238,5 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   loadBasketballMatches();
 })();
 </script>
-
 </body>
 </html>
