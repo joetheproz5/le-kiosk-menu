@@ -1270,7 +1270,10 @@ async function generateBasketballStory(i){
     const ctx=canvas.getContext('2d');
     const homeLogo=basketballLogoForTeam(m.home)||m.homeLogo;
     const awayLogo=basketballLogoForTeam(m.away)||m.awayLogo;
-    const [homeImg,awayImg]=await Promise.all([loadPosterImage(homeLogo),loadPosterImage(awayLogo)]);
+    const brandLogo=`${STORAGE_PUBLIC_BASE}/logo.png`;
+    const brandLogoAlt=`${STORAGE_PUBLIC_BASE}/menupictures/logo.png`;
+    const [homeImg,awayImg,brandImgRoot,brandImgAlt]=await Promise.all([loadPosterImage(homeLogo),loadPosterImage(awayLogo),loadPosterImage(brandLogo),loadPosterImage(brandLogoAlt)]);
+    const brandImg=brandImgRoot||brandImgAlt;
 
     const grad=ctx.createLinearGradient(0,0,0,1920);
     grad.addColorStop(0,'#f8fafc');
@@ -1291,11 +1294,11 @@ async function generateBasketballStory(i){
     ctx.moveTo(110,890);
     ctx.quadraticCurveTo(540,760,970,890);
     ctx.stroke();
-    ctx.fillStyle='rgba(245,158,11,.12)';
+    ctx.fillStyle='rgba(37,99,235,.10)';
     ctx.beginPath();
     ctx.arc(540,900,330,0,Math.PI*2);
     ctx.fill();
-    ctx.fillStyle='rgba(22,101,52,.08)';
+    ctx.fillStyle='rgba(14,165,233,.08)';
     ctx.beginPath();
     ctx.arc(905,330,190,0,Math.PI*2);
     ctx.fill();
@@ -1305,27 +1308,25 @@ async function generateBasketballStory(i){
     ctx.font='900 88px Fredoka, Poppins, sans-serif';
     ctx.fillText('Le Kiosk',540,132);
     ctx.font='900 25px Poppins, sans-serif';
-    ctx.fillStyle='#166534';
+    ctx.fillStyle='#1d4ed8';
     ctx.fillText('BASKETBALL WATCH NIGHT',540,178);
     ctx.fillStyle='#64748b';
     ctx.font='800 20px Poppins, sans-serif';
     ctx.fillText('WADI CHAHROUR',540,212);
 
     const matchRows=[
-      {y:405,color:'#0f4d14',alpha:1},
-      {y:518,color:'#166534',alpha:1},
-      {y:631,color:'#237a21',alpha:.96},
-      {y:744,color:'#2f8f25',alpha:.9},
-      {y:857,color:'#45a92f',alpha:.78},
-      {y:970,color:'#68bd50',alpha:.62},
-      {y:1083,color:'#8fd475',alpha:.48},
-      {y:1196,color:'#b7e7a8',alpha:.34}
+      {y:405,color:'#0f2f75',alpha:1},
+      {y:528,color:'#1d4ed8',alpha:.98},
+      {y:651,color:'#2563eb',alpha:.9},
+      {y:774,color:'#3b82f6',alpha:.78},
+      {y:897,color:'#60a5fa',alpha:.58},
+      {y:1020,color:'#bfdbfe',alpha:.36}
     ];
     ctx.textAlign='center';
     matchRows.forEach(row=>{
       ctx.fillStyle=row.color;
       ctx.globalAlpha=row.alpha;
-      ctx.font='900 146px Impact, Anton, Poppins, sans-serif';
+      ctx.font='900 150px Impact, Anton, Poppins, sans-serif';
       ctx.fillText('NEXT MATCH',540,row.y);
     });
     ctx.globalAlpha=1;
@@ -1334,23 +1335,27 @@ async function generateBasketballStory(i){
     ctx.shadowColor='rgba(17,24,39,.24)';
     ctx.shadowBlur=34;
     ctx.shadowOffsetY=20;
-    ctx.fillStyle='#451a03';
+    ctx.fillStyle='#0f172a';
     ctx.beginPath();
     ctx.arc(540,760,172,0,Math.PI*2);
     ctx.fill();
     ctx.restore();
-    ctx.strokeStyle='#f59e0b';
+    ctx.strokeStyle='#38bdf8';
     ctx.lineWidth=13;
     ctx.beginPath();
     ctx.arc(540,760,164,0,Math.PI*2);
     ctx.stroke();
-    ctx.fillStyle='#fff7ed';
-    ctx.font='900 50px Fredoka, Poppins, sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText('Le Kiosk',540,746);
-    ctx.fillStyle='#fbbf24';
-    ctx.font='900 25px Poppins, sans-serif';
-    ctx.fillText('GAME NIGHT',540,792);
+    if(brandImg){
+      const maxW=218,maxH=138;
+      const scale=Math.min(maxW/brandImg.width,maxH/brandImg.height);
+      const w=brandImg.width*scale,h=brandImg.height*scale;
+      ctx.drawImage(brandImg,540-w/2,760-h/2,w,h);
+    }else{
+      ctx.fillStyle='#fff7ed';
+      ctx.font='900 62px Fredoka, Poppins, sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('LK',540,780);
+    }
 
     ctx.save();
     ctx.shadowColor='rgba(17,24,39,.14)';
@@ -1359,19 +1364,19 @@ async function generateBasketballStory(i){
     ctx.fillStyle='rgba(255,255,255,.94)';
     roundRect(ctx,70,1228,940,238,36,true,false);
     ctx.restore();
-    ctx.strokeStyle='rgba(22,101,52,.2)';
+    ctx.strokeStyle='rgba(37,99,235,.22)';
     ctx.lineWidth=3;
     roundRect(ctx,70,1228,940,238,36,false,true);
 
-    drawPosterLogo(ctx,homeImg,112,1260,132,132,m.home);
-    drawPosterLogo(ctx,awayImg,836,1260,132,132,m.away);
-    drawPosterFitText(ctx,m.home,380,1327,245,52,28,'Impact, Poppins, sans-serif','#374151');
-    ctx.fillStyle='#166534';
-    roundRect(ctx,492,1279,96,66,999,true,false);
+    drawPosterLogo(ctx,homeImg,104,1262,124,124,m.home);
+    drawPosterLogo(ctx,awayImg,852,1262,124,124,m.away);
+    drawPosterFitText(ctx,m.home,352,1326,205,48,25,'Impact, Poppins, sans-serif','#334155');
+    ctx.fillStyle='#1d4ed8';
+    roundRect(ctx,492,1280,96,66,999,true,false);
     ctx.fillStyle='#fff';
     ctx.font='900 34px Poppins, sans-serif';
     ctx.fillText('VS',540,1324);
-    drawPosterFitText(ctx,m.away,700,1327,245,52,28,'Impact, Poppins, sans-serif','#374151');
+    drawPosterFitText(ctx,m.away,728,1326,205,48,25,'Impact, Poppins, sans-serif','#334155');
 
     ctx.fillStyle='#111827';
     ctx.font='900 30px Poppins, sans-serif';
@@ -1387,7 +1392,7 @@ async function generateBasketballStory(i){
     ctx.font='900 43px Impact, Poppins, sans-serif';
     drawPosterText(ctx,offer,540,1682,860,50,2);
 
-    ctx.fillStyle='#166534';
+    ctx.fillStyle='#1d4ed8';
     roundRect(ctx,155,1794,770,92,999,true,false);
     ctx.fillStyle='#fff';
     ctx.font='900 34px Poppins, sans-serif';
