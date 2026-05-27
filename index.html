@@ -249,7 +249,15 @@ Recommended placement: below the nav and above <main id="menu-container">.
     font-size: 15px;
     font-weight: 900;
   }
-  .ai-combo-try {
+  .ai-combo-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .ai-combo-try,
+  .ai-combo-add {
     border: 0;
     background: #fff;
     color: #78350f;
@@ -259,6 +267,10 @@ Recommended placement: below the nav and above <main id="menu-container">.
     font-weight: 900;
     text-transform: uppercase;
     cursor: pointer;
+  }
+  .ai-combo-add {
+    background: #16a34a;
+    color: #fff;
   }
   .ai-combo-error {
     display: none;
@@ -291,6 +303,7 @@ Recommended placement: below the nav and above <main id="menu-container">.
   const btn = document.getElementById('ai-combo-btn');
   const result = document.getElementById('ai-combo-result');
   const error = document.getElementById('ai-combo-error');
+  let activeCombo = null;
 
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, m => ({
@@ -308,7 +321,75 @@ Recommended placement: below the nav and above <main id="menu-container">.
     error.classList.remove('show');
   }
 
+  function norm(s) {
+    return String(s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function findCartKey(itemName) {
+    const metaMap = typeof itemMeta !== 'undefined' ? itemMeta : window.itemMeta;
+    if (!metaMap) return '';
+    const wanted = norm(itemName);
+    return Object.keys(metaMap).find(key => {
+      const meta = metaMap[key] || {};
+      return norm(meta.name) === wanted;
+    }) || Object.keys(metaMap).find(key => {
+      const meta = metaMap[key] || {};
+      return wanted && norm(meta.name).includes(wanted);
+    }) || '';
+  }
+
+  function addComboToCart() {
+    const items = Array.isArray(activeCombo?.items) ? activeCombo.items : [];
+    if (!items.length) return;
+
+    if (typeof MENU_ORDERING_ENABLED !== 'undefined' && !MENU_ORDERING_ENABLED) {
+      showError('Ordering is currently turned off.');
+      return;
+    }
+
+    if (typeof orderMode !== 'undefined' && !orderMode) {
+      if (typeof toggleOrderMode === 'function') {
+        toggleOrderMode();
+      } else {
+        orderMode = true;
+        document.body.classList.add('order-mode');
+      }
+    }
+
+    let added = 0;
+    items.forEach(name => {
+      const key = findCartKey(name);
+      if (!key) return;
+      if (typeof cart !== 'undefined') {
+        cart[key] = Math.max(0, Number(cart[key] || 0)) + 1;
+      } else {
+        window.cart = window.cart || {};
+        window.cart[key] = Math.max(0, Number(window.cart[key] || 0)) + 1;
+      }
+      added++;
+    });
+
+    if (!added) {
+      showError('Could not add this combo. Try adding the items manually.');
+      return;
+    }
+
+    if (typeof updatePill === 'function') updatePill();
+    document.body.classList.add('order-mode');
+    const addBtn = document.getElementById('ai-combo-add');
+    if (addBtn) {
+      addBtn.textContent = 'Added';
+      setTimeout(() => { addBtn.textContent = 'Add Combo'; }, 1400);
+    }
+  }
+
   function renderCombo(combo) {
+    activeCombo = combo;
     const items = Array.isArray(combo.items) ? combo.items : [];
     const total = Number(combo.totalPrice || 0);
     result.innerHTML = `
@@ -319,10 +400,14 @@ Recommended placement: below the nav and above <main id="menu-container">.
       </div>
       <div class="ai-combo-foot">
         <span class="ai-combo-price">$${total.toFixed(2)}</span>
-        <button class="ai-combo-try" type="button" id="ai-combo-try">Try Again</button>
+        <span class="ai-combo-actions">
+          <button class="ai-combo-add" type="button" id="ai-combo-add">Add Combo</button>
+          <button class="ai-combo-try" type="button" id="ai-combo-try">Try Again</button>
+        </span>
       </div>
     `;
     result.classList.add('show');
+    document.getElementById('ai-combo-add')?.addEventListener('click', addComboToCart);
     document.getElementById('ai-combo-try')?.addEventListener('click', buildCombo);
   }
 
