@@ -991,12 +991,12 @@ const BASKETBALL_TEAM_LOGOS={
   beirutclub:'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
   homenetmen:'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
   hmentmen:'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
-  champville:'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
-  maristes:'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
-  csmaristes:'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+  champville:'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+  maristes:'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+  csmaristes:'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
   antranik:'https://en.wikipedia.org/wiki/Special:Redirect/file/Antranik%20logo.png?width=160',
-  hoops:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Hoops%20Club.png?width=160',
-  hoopsclub:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Hoops%20Club.png?width=160',
+  hoops:'https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Hoops_Club.png/250px-Hoops_Club.png',
+  hoopsclub:'https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Hoops_Club.png/250px-Hoops_Club.png',
   antonine:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
   antonin:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
   clubantonin:'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
@@ -1021,6 +1021,241 @@ const BASKETBALL_TEAM_LOGOS={
   federation:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160',
   flb:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160'
 };
+
+function basketballTeamLogoKey(name){
+  return String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');
+}
+
+function basketballLogoForTeam(name){
+  return BASKETBALL_TEAM_LOGOS[basketballTeamLogoKey(name)]||'';
+}
+
+function basketballMessage(m){
+  return m.waMessage||`Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}. People: ___`;
+}
+
+function basketballPosterFilename(m){
+  return `le-kiosk-${m.date}-${m.home}-vs-${m.away}`.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.png';
+}
+
+function basketballPosterLogoUrl(src){
+  const value=String(src||'').trim();
+  if(!value)return '';
+  if(/^https?:|^data:/.test(value))return value;
+  return new URL(value,location.href).href;
+}
+
+function proxiedPosterLogoUrl(url){
+  if(!/^https?:\/\//.test(url))return url;
+  return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''));
+}
+
+function loadPosterImage(src){
+  const rawUrl=basketballPosterLogoUrl(src);
+  const urls=[rawUrl,proxiedPosterLogoUrl(rawUrl)].filter(Boolean);
+  let index=0;
+
+  return new Promise(resolve=>{
+    function tryNext(){
+      const url=urls[index++];
+      if(!url){resolve(null);return;}
+
+      const img=new Image();
+      img.crossOrigin='anonymous';
+      const timer=setTimeout(tryNext,4500);
+
+      img.onload=()=>{clearTimeout(timer);resolve(img);};
+      img.onerror=()=>{clearTimeout(timer);tryNext();};
+      img.src=url;
+    }
+
+    tryNext();
+  });
+}
+
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  const rr=Math.min(r,w/2,h/2);
+  if(ctx.roundRect){
+    ctx.beginPath();
+    ctx.roundRect(x,y,w,h,rr);
+  }else{
+    ctx.beginPath();
+    ctx.moveTo(x+rr,y);
+    ctx.lineTo(x+w-rr,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
+    ctx.lineTo(x+w,y+h-rr);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);
+    ctx.lineTo(x+rr,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-rr);
+    ctx.lineTo(x,y+rr);
+    ctx.quadraticCurveTo(x,y,x+rr,y);
+  }
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+
+function drawPosterRoundImage(ctx,img,x,y,size,fallback){
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x+size/2,y+size/2,size/2,0,Math.PI*2);
+  ctx.clip();
+  ctx.fillStyle='#fff7ed';
+  ctx.fillRect(x,y,size,size);
+
+  if(img){
+    const scale=Math.max(size/img.width,size/img.height);
+    const w=img.width*scale,h=img.height*scale;
+    ctx.drawImage(img,x+(size-w)/2,y+(size-h)/2,w,h);
+  }else{
+    ctx.fillStyle='#451a03';
+    ctx.font='900 118px Fredoka, Poppins, sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(String(fallback||'?').slice(0,1).toUpperCase(),x+size/2,y+size/2+5);
+  }
+
+  ctx.restore();
+  ctx.lineWidth=10;
+  ctx.strokeStyle='#fbbf24';
+  ctx.beginPath();
+  ctx.arc(x+size/2,y+size/2,size/2-5,0,Math.PI*2);
+  ctx.stroke();
+}
+
+function drawPosterText(ctx,text,x,y,maxWidth,lineHeight,maxLines){
+  const words=String(text||'').split(/\s+/).filter(Boolean);
+  let line='',lines=[];
+
+  words.forEach(word=>{
+    const test=line?line+' '+word:word;
+    if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}
+    else line=test;
+  });
+
+  if(line)lines.push(line);
+  lines=lines.slice(0,maxLines||lines.length);
+  lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight));
+  return y+lines.length*lineHeight;
+}
+
+async function generateBasketballStory(i){
+  normalizeBasketballMatches();
+
+  const m=configData.basketballMatches[i];
+  if(!m){showToast('Match not found','error');return;}
+
+  showLoading('Generating story...');
+
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=1080;
+    canvas.height=1920;
+
+    const ctx=canvas.getContext('2d');
+
+    const homeLogo=basketballLogoForTeam(m.home)||m.homeLogo;
+    const awayLogo=basketballLogoForTeam(m.away)||m.awayLogo;
+
+    const [homeImg,awayImg]=await Promise.all([
+      loadPosterImage(homeLogo),
+      loadPosterImage(awayLogo)
+    ]);
+
+    const grad=ctx.createLinearGradient(0,0,1080,1920);
+    grad.addColorStop(0,'#1c0f00');
+    grad.addColorStop(.45,'#78350f');
+    grad.addColorStop(1,'#f59e0b');
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,1080,1920);
+
+    ctx.fillStyle='rgba(255,247,237,.08)';
+    for(let y=0;y<1920;y+=90){
+      ctx.fillRect(0,y,1080,2);
+    }
+
+    ctx.fillStyle='rgba(251,191,36,.18)';
+    ctx.beginPath();
+    ctx.arc(900,190,260,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(140,1710,310,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.textAlign='center';
+
+    ctx.fillStyle='#fff7ed';
+    ctx.font='900 92px Fredoka, Poppins, sans-serif';
+    ctx.fillText('Le Kiosk',540,170);
+
+    ctx.font='800 28px Poppins, sans-serif';
+    ctx.fillStyle='#fde68a';
+    ctx.fillText('GAME NIGHT',540,222);
+
+    ctx.fillStyle='rgba(255,255,255,.12)';
+    roundRect(ctx,80,285,920,1120,46,true,false);
+
+    ctx.strokeStyle='rgba(253,230,138,.55)';
+    ctx.lineWidth=3;
+    roundRect(ctx,80,285,920,1120,46,false,true);
+
+    drawPosterRoundImage(ctx,homeImg,145,430,280,m.home);
+    drawPosterRoundImage(ctx,awayImg,655,430,280,m.away);
+
+    ctx.fillStyle='#fde68a';
+    ctx.font='900 64px Fredoka, Poppins, sans-serif';
+    ctx.fillText('VS',540,610);
+
+    ctx.fillStyle='#fff7ed';
+    ctx.font='900 54px Fredoka, Poppins, sans-serif';
+    drawPosterText(ctx,m.home,285,790,360,64,2);
+    drawPosterText(ctx,m.away,795,790,360,64,2);
+
+    ctx.fillStyle='#fff7ed';
+    ctx.font='900 74px Fredoka, Poppins, sans-serif';
+    ctx.fillText(m.time||'Tonight',540,1035);
+
+    ctx.font='800 34px Poppins, sans-serif';
+    ctx.fillStyle='#fde68a';
+    ctx.fillText(m.date||todayBeirutKey(),540,1092);
+
+    ctx.font='800 30px Poppins, sans-serif';
+    ctx.fillText(m.venue||'Le Kiosk',540,1140);
+
+    if(m.note){
+      ctx.fillStyle='rgba(255,247,237,.92)';
+      ctx.font='800 38px Poppins, sans-serif';
+      drawPosterText(ctx,m.note,540,1235,760,48,2);
+    }
+
+    ctx.fillStyle='#fff7ed';
+    ctx.font='900 58px Fredoka, Poppins, sans-serif';
+    ctx.fillText('Reserve Your Table',540,1530);
+
+    ctx.fillStyle='#22c55e';
+    roundRect(ctx,230,1582,620,106,999,true,false);
+
+    ctx.fillStyle='#fff';
+    ctx.font='900 36px Poppins, sans-serif';
+    ctx.fillText('WhatsApp 76 840 244',540,1648);
+
+    ctx.fillStyle='#fde68a';
+    ctx.font='800 26px Poppins, sans-serif';
+    ctx.fillText('Wadi Chahrour',540,1770);
+
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download=basketballPosterFilename(m);
+    a.click();
+
+    showToast('Story poster downloaded','success');
+  }catch(e){
+    console.error(e);
+    showToast('Poster failed: '+e.message,'error');
+  }
+
+  hideLoading();
+}
 function basketballTeamLogoKey(name){
   return String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');
 }
