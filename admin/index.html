@@ -361,6 +361,13 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .edit-row-actions{display:flex;align-items:center;gap:7px;justify-content:flex-end}
 .edit-badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:var(--soft);color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase}
 .edit-badge.on{background:var(--green-soft);color:var(--green)}
+.theme-swatch-row{display:inline-flex;align-items:center;gap:5px}
+.theme-swatch{width:24px;height:24px;border-radius:999px;border:2px solid rgba(17,24,39,.12);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55);cursor:pointer}
+.theme-swatch:hover,.theme-swatch.active{transform:scale(1.12);border-color:#111827}
+.theme-swatch.blue{background:#2563eb}
+.theme-swatch.red{background:#dc2626}
+.theme-swatch.yellow{background:#f59e0b}
+.theme-swatch.green{background:#16a34a}
 .editor-form{display:flex;flex-direction:column;gap:12px}
 .editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .editor-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -1124,6 +1131,9 @@ function basketballPosterTheme(id){
 function basketballPosterThemeOptions(current){
   return Object.entries(BASKETBALL_POSTER_THEMES).map(([id,t])=>`<option value="${id}" ${current===id?'selected':''}>${t.label}</option>`).join('');
 }
+function basketballPosterThemeButtons(i,current){
+  return `<span class="theme-swatch-row">${Object.entries(BASKETBALL_POSTER_THEMES).map(([id,t])=>`<button class="theme-swatch ${id}${current===id?' active':''}" title="${t.label} story" onclick="generateBasketballStory(${i},'${id}')"></button>`).join('')}</span>`;
+}
 function normalizeBasketballMatches(){
   const rows=Array.isArray(configData.basketballMatches)?configData.basketballMatches:[];
   configData.basketballMatches=rows.map((m,i)=>({
@@ -1246,6 +1256,42 @@ function isPosterImageCanvasSafe(img){
     return false;
   }
 }
+function fetchPosterBlob(url,timeoutMs=3600){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeoutMs);
+  return fetch(url,{mode:'cors',cache:'force-cache',signal:controller.signal})
+    .then(res=>{if(!res.ok)throw new Error('Logo fetch '+res.status);return res.blob();})
+    .finally(()=>clearTimeout(timer));
+}
+function blobToDataUrl(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error('Logo read failed'));
+    reader.readAsDataURL(blob);
+  });
+}
+function loadDataUrlImage(dataUrl){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>reject(new Error('Logo decode failed'));
+    img.src=dataUrl;
+  });
+}
+async function loadPosterImageFromUrl(url){
+  if(/^data:/.test(url)){
+    const img=await loadDataUrlImage(url);
+    if(!isPosterImageCanvasSafe(img))throw new Error('Not canvas safe');
+    return img;
+  }
+  const blob=await fetchPosterBlob(url);
+  if(!/^image\//.test(blob.type||''))throw new Error('Not an image');
+  const dataUrl=await blobToDataUrl(blob);
+  const img=await loadDataUrlImage(dataUrl);
+  if(!isPosterImageCanvasSafe(img))throw new Error('Not canvas safe');
+  return img;
+}
 function loadPosterImage(src){
   return loadPosterImageAny([src]);
 }
@@ -1258,19 +1304,17 @@ function loadPosterImageAny(sources){
       });
     });
   });
-  const limited=urls.slice(0,14);
+  const limited=urls.slice(0,18);
   return new Promise(resolve=>{
     if(!limited.length){resolve(null);return;}
     let settled=false,pending=limited.length;
     const finish=img=>{if(settled)return;settled=true;resolve(img);};
     const done=()=>{pending--;if(pending<=0)finish(null);};
-    const fallback=setTimeout(()=>finish(null),2600);
+    const fallback=setTimeout(()=>finish(null),4800);
     limited.forEach(url=>{
-      const img=new Image();
-      img.crossOrigin='anonymous';
-      img.onload=()=>{if(isPosterImageCanvasSafe(img)){clearTimeout(fallback);finish(img);}else done();};
-      img.onerror=done;
-      img.src=url;
+      loadPosterImageFromUrl(url)
+        .then(img=>{clearTimeout(fallback);finish(img);})
+        .catch(done);
     });
   });
 }
@@ -1385,10 +1429,14 @@ function drawPosterFitText(ctx,text,x,y,maxWidth,maxSize,minSize,fontFamily,colo
   }while(size>minSize);
   ctx.fillText(label,x,y);
 }
-async function generateBasketballStory(i){
+async function generateBasketballStory(i,themeOverride=null){
   normalizeBasketballMatches();
   const m=configData.basketballMatches[i];
   if(!m){showToast('Match not found','error');return;}
+  if(themeOverride&&BASKETBALL_POSTER_THEMES[themeOverride]){
+    m.posterTheme=themeOverride;
+    renderBasketballManager();
+  }
   showLoading('Generating story...');
   try{
     const canvas=document.createElement('canvas');
@@ -1599,6 +1647,7 @@ function renderBasketballManager(){
     <div><div class="edit-row-title">${esc(m.home)} vs ${esc(m.away)}</div><div class="edit-row-meta">${esc(m.date)} · ${esc(m.time)} · ${esc(m.venue)} · ${esc(m.posterTheme||'blue')} theme</div></div>
     <div class="edit-row-actions">
       <span class="edit-badge${m.active?' on':''}">${m.active?'Active':'Hidden'}</span>
+      ${basketballPosterThemeButtons(i,m.posterTheme||'blue')}
       <button class="btn btn-blue btn-sm" onclick="generateBasketballStory(${i})">Story PNG</button>
       <button class="btn btn-soft btn-sm" onclick="openBasketballMatchEditor(${i})">Edit</button>
     </div>
