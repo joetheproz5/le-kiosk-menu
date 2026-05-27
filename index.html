@@ -139,6 +139,10 @@ Recommended placement: below the nav and above <main id="menu-container">.
     max-width: 28rem;
     margin: 18px auto 0;
     padding: 0 16px;
+    display: none;
+  }
+  .ai-combo-box.show {
+    display: block;
   }
   .ai-combo-card {
     background: #fff;
@@ -439,8 +443,10 @@ Recommended placement: below the nav and above <main id="menu-container">.
       if (!res.ok) return;
       const j = await res.json();
       const enabled = j?.data?.aiComboEnabled !== false;
-      box.style.display = enabled ? '' : 'none';
-    } catch (_) {}
+      box.classList.toggle('show', enabled);
+    } catch (_) {
+      box.classList.add('show');
+    }
   }
 
   function addComboToCart() {
@@ -617,6 +623,7 @@ Recommended placement: below the nav and above <main id="menu-container">.
   }
 })();
 </script>
+
 <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
 </main>
