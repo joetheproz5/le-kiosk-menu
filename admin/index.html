@@ -1027,6 +1027,54 @@ function basketballTeamLogoKey(name){
 function basketballLogoForTeam(name){
   return BASKETBALL_TEAM_LOGOS[basketballTeamLogoKey(name)]||'';
 }
+const BASKETBALL_POSTER_THEMES={
+  blue:{
+    label:'Blue',
+    rows:['#0f2f75','#1d4ed8','#2563eb','#3b82f6','#60a5fa','#bfdbfe'],
+    main:'#1d4ed8',
+    dark:'#0f172a',
+    ring:'#38bdf8',
+    wash:'rgba(37,99,235,.10)',
+    spot:'rgba(14,165,233,.08)',
+    stroke:'rgba(37,99,235,.22)'
+  },
+  red:{
+    label:'Red',
+    rows:['#7f1d1d','#b91c1c','#dc2626','#ef4444','#f87171','#fecaca'],
+    main:'#dc2626',
+    dark:'#2b0909',
+    ring:'#f87171',
+    wash:'rgba(220,38,38,.10)',
+    spot:'rgba(248,113,113,.10)',
+    stroke:'rgba(220,38,38,.22)'
+  },
+  yellow:{
+    label:'Yellow',
+    rows:['#713f12','#b45309','#f59e0b','#fbbf24','#fcd34d','#fef3c7'],
+    main:'#f59e0b',
+    dark:'#451a03',
+    ring:'#fcd34d',
+    wash:'rgba(245,158,11,.13)',
+    spot:'rgba(252,211,77,.12)',
+    stroke:'rgba(245,158,11,.24)'
+  },
+  green:{
+    label:'Green',
+    rows:['#0f4d14','#166534','#237a21','#45a92f','#68bd50','#b7e7a8'],
+    main:'#166534',
+    dark:'#052e16',
+    ring:'#86efac',
+    wash:'rgba(22,101,52,.10)',
+    spot:'rgba(34,197,94,.09)',
+    stroke:'rgba(22,101,52,.22)'
+  }
+};
+function basketballPosterTheme(id){
+  return BASKETBALL_POSTER_THEMES[id]||BASKETBALL_POSTER_THEMES.blue;
+}
+function basketballPosterThemeOptions(current){
+  return Object.entries(BASKETBALL_POSTER_THEMES).map(([id,t])=>`<option value="${id}" ${current===id?'selected':''}>${t.label}</option>`).join('');
+}
 function normalizeBasketballMatches(){
   const rows=Array.isArray(configData.basketballMatches)?configData.basketballMatches:[];
   configData.basketballMatches=rows.map((m,i)=>({
@@ -1040,6 +1088,7 @@ function normalizeBasketballMatches(){
     league:String(m.league||'Lebanon FLB').trim(),
     venue:String(m.venue||'Le Kiosk').trim(),
     note:String(m.note||'').trim(),
+    posterTheme:BASKETBALL_POSTER_THEMES[m.posterTheme]?m.posterTheme:'blue',
     active:m.active!==false,
     featured:!!m.featured,
     reserveEnabled:m.reserveEnabled!==false,
@@ -1065,6 +1114,7 @@ function parseBasketballMatchesText(text){
       note:parts[5]||'',
       homeLogo:parts[6]||basketballLogoForTeam(parts[2]),
       awayLogo:parts[7]||basketballLogoForTeam(parts[3]),
+      posterTheme:'blue',
       active:true,
       featured:false,
       reserveEnabled:true,
@@ -1270,6 +1320,7 @@ async function generateBasketballStory(i){
     const ctx=canvas.getContext('2d');
     const homeLogo=basketballLogoForTeam(m.home)||m.homeLogo;
     const awayLogo=basketballLogoForTeam(m.away)||m.awayLogo;
+    const theme=basketballPosterTheme(m.posterTheme);
     const brandLogo=`${STORAGE_PUBLIC_BASE}/logo.png`;
     const brandLogoAlt=`${STORAGE_PUBLIC_BASE}/menupictures/logo.png`;
     const [homeImg,awayImg,brandImgRoot,brandImgAlt]=await Promise.all([loadPosterImage(homeLogo),loadPosterImage(awayLogo),loadPosterImage(brandLogo),loadPosterImage(brandLogoAlt)]);
@@ -1294,11 +1345,11 @@ async function generateBasketballStory(i){
     ctx.moveTo(110,890);
     ctx.quadraticCurveTo(540,760,970,890);
     ctx.stroke();
-    ctx.fillStyle='rgba(37,99,235,.10)';
+    ctx.fillStyle=theme.wash;
     ctx.beginPath();
     ctx.arc(540,900,330,0,Math.PI*2);
     ctx.fill();
-    ctx.fillStyle='rgba(14,165,233,.08)';
+    ctx.fillStyle=theme.spot;
     ctx.beginPath();
     ctx.arc(905,330,190,0,Math.PI*2);
     ctx.fill();
@@ -1308,20 +1359,17 @@ async function generateBasketballStory(i){
     ctx.font='900 88px Fredoka, Poppins, sans-serif';
     ctx.fillText('Le Kiosk',540,132);
     ctx.font='900 25px Poppins, sans-serif';
-    ctx.fillStyle='#1d4ed8';
+    ctx.fillStyle=theme.main;
     ctx.fillText('BASKETBALL WATCH NIGHT',540,178);
     ctx.fillStyle='#64748b';
     ctx.font='800 20px Poppins, sans-serif';
     ctx.fillText('WADI CHAHROUR',540,212);
 
-    const matchRows=[
-      {y:405,color:'#0f2f75',alpha:1},
-      {y:528,color:'#1d4ed8',alpha:.98},
-      {y:651,color:'#2563eb',alpha:.9},
-      {y:774,color:'#3b82f6',alpha:.78},
-      {y:897,color:'#60a5fa',alpha:.58},
-      {y:1020,color:'#bfdbfe',alpha:.36}
-    ];
+    const matchRows=[405,528,651,774,897,1020].map((y,idx)=>({
+      y,
+      color:theme.rows[idx],
+      alpha:[1,.98,.9,.78,.58,.36][idx]
+    }));
     ctx.textAlign='center';
     matchRows.forEach(row=>{
       ctx.fillStyle=row.color;
@@ -1335,12 +1383,12 @@ async function generateBasketballStory(i){
     ctx.shadowColor='rgba(17,24,39,.24)';
     ctx.shadowBlur=34;
     ctx.shadowOffsetY=20;
-    ctx.fillStyle='#0f172a';
+    ctx.fillStyle=theme.dark;
     ctx.beginPath();
     ctx.arc(540,760,172,0,Math.PI*2);
     ctx.fill();
     ctx.restore();
-    ctx.strokeStyle='#38bdf8';
+    ctx.strokeStyle=theme.ring;
     ctx.lineWidth=13;
     ctx.beginPath();
     ctx.arc(540,760,164,0,Math.PI*2);
@@ -1364,14 +1412,14 @@ async function generateBasketballStory(i){
     ctx.fillStyle='rgba(255,255,255,.94)';
     roundRect(ctx,70,1228,940,238,36,true,false);
     ctx.restore();
-    ctx.strokeStyle='rgba(37,99,235,.22)';
+    ctx.strokeStyle=theme.stroke;
     ctx.lineWidth=3;
     roundRect(ctx,70,1228,940,238,36,false,true);
 
     drawPosterLogo(ctx,homeImg,104,1262,124,124,m.home);
     drawPosterLogo(ctx,awayImg,852,1262,124,124,m.away);
     drawPosterFitText(ctx,m.home,352,1326,205,48,25,'Impact, Poppins, sans-serif','#334155');
-    ctx.fillStyle='#1d4ed8';
+    ctx.fillStyle=theme.main;
     roundRect(ctx,492,1280,96,66,999,true,false);
     ctx.fillStyle='#fff';
     ctx.font='900 34px Poppins, sans-serif';
@@ -1392,7 +1440,7 @@ async function generateBasketballStory(i){
     ctx.font='900 43px Impact, Poppins, sans-serif';
     drawPosterText(ctx,offer,540,1682,860,50,2);
 
-    ctx.fillStyle='#1d4ed8';
+    ctx.fillStyle=theme.main;
     roundRect(ctx,155,1794,770,92,999,true,false);
     ctx.fillStyle='#fff';
     ctx.font='900 34px Poppins, sans-serif';
@@ -1422,6 +1470,7 @@ function addBasketballMatch(match={}){
     league:match.league||'Lebanon FLB',
     venue:match.venue||'Le Kiosk',
     note:match.note||'',
+    posterTheme:match.posterTheme||'blue',
     active:match.active!==false,
     featured:!!match.featured,
     reserveEnabled:match.reserveEnabled!==false,
@@ -1477,6 +1526,7 @@ function renderBasketballManager(){
       <div><label class="field-label">Away Logo</label><input class="inp" value="${esc(m.awayLogo)}" placeholder="menupictures/teams/away.png" onchange="updateBasketballMatch(${i},'awayLogo',this.value)"></div>
       <div><label class="field-label">Venue</label><input class="inp" value="${esc(m.venue)}" onchange="updateBasketballMatch(${i},'venue',this.value)"></div>
       <div><label class="field-label">League</label><input class="inp" value="${esc(m.league)}" onchange="updateBasketballMatch(${i},'league',this.value)"></div>
+      <div><label class="field-label">Story Theme</label><select class="inp" onchange="updateBasketballMatch(${i},'posterTheme',this.value)">${basketballPosterThemeOptions(m.posterTheme)}</select></div>
     </div>
     <div class="note-row"><label class="field-label">Note</label><input class="inp" value="${esc(m.note)}" placeholder="Final, derby, offer..." onchange="updateBasketballMatch(${i},'note',this.value)"></div>
     <div class="note-row"><label class="field-label">WhatsApp Message</label><textarea class="inp" style="height:64px;padding-top:9px;resize:vertical" onchange="updateBasketballMatch(${i},'waMessage',this.value)">${esc(basketballMessage(m))}</textarea></div>
