@@ -1246,6 +1246,18 @@ function drawPosterLogo(ctx,img,x,y,w,h,fallback){
   }
   ctx.restore();
 }
+function drawPosterFitText(ctx,text,x,y,maxWidth,maxSize,minSize,fontFamily,color){
+  const label=String(text||'').toUpperCase();
+  let size=maxSize;
+  ctx.fillStyle=color;
+  ctx.textAlign='center';
+  do{
+    ctx.font=`900 ${size}px ${fontFamily}`;
+    if(ctx.measureText(label).width<=maxWidth)break;
+    size-=2;
+  }while(size>minSize);
+  ctx.fillText(label,x,y);
+}
 async function generateBasketballStory(i){
   normalizeBasketballMatches();
   const m=configData.basketballMatches[i];
@@ -1262,116 +1274,124 @@ async function generateBasketballStory(i){
 
     const grad=ctx.createLinearGradient(0,0,0,1920);
     grad.addColorStop(0,'#f8fafc');
-    grad.addColorStop(.5,'#ffffff');
-    grad.addColorStop(1,'#e5e7eb');
+    grad.addColorStop(.44,'#ffffff');
+    grad.addColorStop(1,'#e2e8f0');
     ctx.fillStyle=grad;
     ctx.fillRect(0,0,1080,1920);
 
-    drawPosterDots(ctx,0,310,0.16);
-    drawPosterDots(ctx,770,1080,0.16);
-    ctx.strokeStyle='rgba(17,24,39,.06)';
-    ctx.lineWidth=18;
+    drawPosterDots(ctx,0,320,0.15);
+    drawPosterDots(ctx,760,1080,0.15);
+    ctx.strokeStyle='rgba(17,24,39,.055)';
+    ctx.lineWidth=16;
     ctx.beginPath();
-    ctx.ellipse(540,960,520,850,0,0,Math.PI*2);
+    ctx.ellipse(540,920,520,805,0,0,Math.PI*2);
     ctx.stroke();
-    ctx.lineWidth=8;
+    ctx.lineWidth=7;
     ctx.beginPath();
-    ctx.moveTo(130,930);
-    ctx.quadraticCurveTo(540,820,950,930);
+    ctx.moveTo(110,890);
+    ctx.quadraticCurveTo(540,760,970,890);
     ctx.stroke();
     ctx.fillStyle='rgba(245,158,11,.12)';
     ctx.beginPath();
-    ctx.arc(540,980,280,0,Math.PI*2);
+    ctx.arc(540,900,330,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='rgba(22,101,52,.08)';
+    ctx.beginPath();
+    ctx.arc(905,330,190,0,Math.PI*2);
     ctx.fill();
 
     ctx.textAlign='center';
     ctx.fillStyle='#451a03';
-    ctx.font='900 82px Fredoka, Poppins, sans-serif';
-    ctx.fillText('Le Kiosk',540,145);
-    ctx.font='900 26px Poppins, sans-serif';
+    ctx.font='900 88px Fredoka, Poppins, sans-serif';
+    ctx.fillText('Le Kiosk',540,132);
+    ctx.font='900 25px Poppins, sans-serif';
     ctx.fillStyle='#166534';
-    ctx.fillText('BASKETBALL NIGHT',540,190);
+    ctx.fillText('BASKETBALL WATCH NIGHT',540,178);
+    ctx.fillStyle='#64748b';
+    ctx.font='800 20px Poppins, sans-serif';
+    ctx.fillText('WADI CHAHROUR',540,212);
 
     const matchRows=[
-      {text:'NEXT MATCH',y:610,color:'#166534'},
-      {text:'NEXT MATCH',y:785,color:'#237a21'},
-      {text:'NEXT MATCH',y:960,color:'#45a92f'},
-      {text:'NEXT MATCH',y:1135,color:'#a7e08b'}
+      {y:405,color:'#0f4d14',alpha:1},
+      {y:518,color:'#166534',alpha:1},
+      {y:631,color:'#237a21',alpha:.96},
+      {y:744,color:'#2f8f25',alpha:.9},
+      {y:857,color:'#45a92f',alpha:.78},
+      {y:970,color:'#68bd50',alpha:.62},
+      {y:1083,color:'#8fd475',alpha:.48},
+      {y:1196,color:'#b7e7a8',alpha:.34}
     ];
     ctx.textAlign='center';
     matchRows.forEach(row=>{
       ctx.fillStyle=row.color;
-      ctx.font='900 154px Impact, Anton, Poppins, sans-serif';
-      ctx.fillText(row.text,540,row.y);
+      ctx.globalAlpha=row.alpha;
+      ctx.font='900 146px Impact, Anton, Poppins, sans-serif';
+      ctx.fillText('NEXT MATCH',540,row.y);
     });
+    ctx.globalAlpha=1;
 
     ctx.save();
-    ctx.shadowColor='rgba(17,24,39,.22)';
-    ctx.shadowBlur=30;
-    ctx.shadowOffsetY=18;
-    ctx.fillStyle='#fff7ed';
+    ctx.shadowColor='rgba(17,24,39,.24)';
+    ctx.shadowBlur=34;
+    ctx.shadowOffsetY=20;
+    ctx.fillStyle='#451a03';
     ctx.beginPath();
-    ctx.arc(540,820,176,0,Math.PI*2);
+    ctx.arc(540,760,172,0,Math.PI*2);
     ctx.fill();
     ctx.restore();
     ctx.strokeStyle='#f59e0b';
-    ctx.lineWidth=12;
+    ctx.lineWidth=13;
     ctx.beginPath();
-    ctx.arc(540,820,168,0,Math.PI*2);
+    ctx.arc(540,760,164,0,Math.PI*2);
     ctx.stroke();
-    ctx.strokeStyle='rgba(69,26,3,.22)';
-    ctx.lineWidth=8;
-    ctx.beginPath();
-    ctx.arc(540,820,92,0,Math.PI*2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(540,650);
-    ctx.bezierCurveTo(500,735,500,905,540,990);
-    ctx.moveTo(540,650);
-    ctx.bezierCurveTo(580,735,580,905,540,990);
-    ctx.moveTo(382,820);
-    ctx.lineTo(698,820);
-    ctx.stroke();
-    ctx.fillStyle='#451a03';
-    ctx.font='900 54px Fredoka, Poppins, sans-serif';
+    ctx.fillStyle='#fff7ed';
+    ctx.font='900 50px Fredoka, Poppins, sans-serif';
     ctx.textAlign='center';
-    ctx.fillText('VS',540,842);
+    ctx.fillText('Le Kiosk',540,746);
+    ctx.fillStyle='#fbbf24';
+    ctx.font='900 25px Poppins, sans-serif';
+    ctx.fillText('GAME NIGHT',540,792);
 
-    drawPosterLogo(ctx,homeImg,150,1232,150,150,m.home);
-    drawPosterLogo(ctx,awayImg,780,1232,150,150,m.away);
-    ctx.fillStyle='#374151';
-    ctx.font='900 46px Impact, Poppins, sans-serif';
-    ctx.textAlign='center';
-    drawPosterText(ctx,m.home,405,1300,250,50,2);
-    ctx.fillStyle='#111827';
-    ctx.font='900 48px Poppins, sans-serif';
-    ctx.fillText('VS',540,1328);
-    ctx.fillStyle='#374151';
-    ctx.font='900 46px Impact, Poppins, sans-serif';
-    drawPosterText(ctx,m.away,675,1300,250,50,2);
+    ctx.save();
+    ctx.shadowColor='rgba(17,24,39,.14)';
+    ctx.shadowBlur=20;
+    ctx.shadowOffsetY=10;
+    ctx.fillStyle='rgba(255,255,255,.94)';
+    roundRect(ctx,70,1228,940,238,36,true,false);
+    ctx.restore();
+    ctx.strokeStyle='rgba(22,101,52,.2)';
+    ctx.lineWidth=3;
+    roundRect(ctx,70,1228,940,238,36,false,true);
+
+    drawPosterLogo(ctx,homeImg,112,1260,132,132,m.home);
+    drawPosterLogo(ctx,awayImg,836,1260,132,132,m.away);
+    drawPosterFitText(ctx,m.home,380,1327,245,52,28,'Impact, Poppins, sans-serif','#374151');
+    ctx.fillStyle='#166534';
+    roundRect(ctx,492,1279,96,66,999,true,false);
+    ctx.fillStyle='#fff';
+    ctx.font='900 34px Poppins, sans-serif';
+    ctx.fillText('VS',540,1324);
+    drawPosterFitText(ctx,m.away,700,1327,245,52,28,'Impact, Poppins, sans-serif','#374151');
 
     ctx.fillStyle='#111827';
-    ctx.font='800 28px Poppins, sans-serif';
-    ctx.fillText(formatPosterDate(m.date),540,1446);
-    ctx.font='900 32px Poppins, sans-serif';
-    ctx.fillText(`START AT ${String(m.time||'TONIGHT').toUpperCase()}`,540,1492);
-    ctx.font='800 25px Poppins, sans-serif';
+    ctx.font='900 30px Poppins, sans-serif';
+    ctx.fillText(formatPosterDate(m.date),540,1518);
+    ctx.font='900 38px Poppins, sans-serif';
+    ctx.fillText(`START AT ${String(m.time||'TONIGHT').toUpperCase()}`,540,1566);
+    ctx.font='800 24px Poppins, sans-serif';
     ctx.fillStyle='#6b7280';
-    ctx.fillText(String(m.venue||'Le Kiosk').toUpperCase(),540,1535);
+    ctx.fillText(String(m.venue||'Le Kiosk').toUpperCase(),540,1608);
 
     const offer=String(m.note||'WATCH THE GAME AT LE KIOSK').toUpperCase();
     ctx.fillStyle='#374151';
-    ctx.font='900 42px Impact, Poppins, sans-serif';
-    drawPosterText(ctx,offer,540,1627,850,52,2);
+    ctx.font='900 43px Impact, Poppins, sans-serif';
+    drawPosterText(ctx,offer,540,1682,860,50,2);
 
     ctx.fillStyle='#166534';
-    roundRect(ctx,175,1730,730,92,999,true,false);
+    roundRect(ctx,155,1794,770,92,999,true,false);
     ctx.fillStyle='#fff';
-    ctx.font='900 32px Poppins, sans-serif';
-    ctx.fillText('VISIT OUR WEBSITE TO BOOK',540,1787);
-    ctx.fillStyle='#6b7280';
-    ctx.font='800 23px Poppins, sans-serif';
-    ctx.fillText('ADD INSTAGRAM LINK STICKER OVER THE GREEN BUTTON',540,1850);
+    ctx.font='900 34px Poppins, sans-serif';
+    ctx.fillText('VISIT OUR WEBSITE TO BOOK',540,1852);
 
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
