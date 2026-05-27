@@ -1169,19 +1169,30 @@ function basketballMessage(m){
 function basketballPosterFilename(m){
   return `le-kiosk-${m.date}-${m.home}-vs-${m.away}`.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.png';
 }
-function basketballPosterLogoUrl(src){
+function basketballPosterLogoUrls(src){
   const value=String(src||'').trim();
-  if(!value)return '';
-  if(/^https?:|^data:/.test(value))return value;
-  return new URL(value,location.href).href;
+  if(!value)return [];
+  if(/^data:/.test(value))return [value];
+  if(/^https?:/.test(value))return [value];
+  const clean=value.replace(/^\/+/,'');
+  return [`${STORAGE_PUBLIC_BASE}/${clean}`,new URL(clean,location.href).href];
 }
 function proxiedPosterLogoUrl(url){
-  if(!/^https?:\/\//.test(url))return url;
+  if(!/^https?:\/\//.test(url))return '';
   return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''));
 }
 function loadPosterImage(src){
-  const rawUrl=basketballPosterLogoUrl(src);
-  const urls=[rawUrl,proxiedPosterLogoUrl(rawUrl)].filter(Boolean);
+  return loadPosterImageAny([src]);
+}
+function loadPosterImageAny(sources){
+  const urls=[];
+  (sources||[]).forEach(src=>{
+    basketballPosterLogoUrls(src).forEach(url=>{
+      [url,proxiedPosterLogoUrl(url)].filter(Boolean).forEach(candidate=>{
+        if(!urls.includes(candidate))urls.push(candidate);
+      });
+    });
+  });
   let index=0;
   return new Promise(resolve=>{
     function tryNext(){
@@ -1318,12 +1329,14 @@ async function generateBasketballStory(i){
     canvas.width=1080;
     canvas.height=1920;
     const ctx=canvas.getContext('2d');
-    const homeLogo=basketballLogoForTeam(m.home)||m.homeLogo;
-    const awayLogo=basketballLogoForTeam(m.away)||m.awayLogo;
+    const homeKey=basketballTeamLogoKey(m.home);
+    const awayKey=basketballTeamLogoKey(m.away);
+    const homeLogoCandidates=[basketballLogoForTeam(m.home),m.homeLogo,`menupictures/teams/${homeKey}.png`];
+    const awayLogoCandidates=[basketballLogoForTeam(m.away),m.awayLogo,`menupictures/teams/${awayKey}.png`];
     const theme=basketballPosterTheme(m.posterTheme);
     const brandLogo=`${STORAGE_PUBLIC_BASE}/logo.png`;
     const brandLogoAlt=`${STORAGE_PUBLIC_BASE}/menupictures/logo.png`;
-    const [homeImg,awayImg,brandImgRoot,brandImgAlt]=await Promise.all([loadPosterImage(homeLogo),loadPosterImage(awayLogo),loadPosterImage(brandLogo),loadPosterImage(brandLogoAlt)]);
+    const [homeImg,awayImg,brandImgRoot,brandImgAlt]=await Promise.all([loadPosterImageAny(homeLogoCandidates),loadPosterImageAny(awayLogoCandidates),loadPosterImage(brandLogo),loadPosterImage(brandLogoAlt)]);
     const brandImg=brandImgRoot||brandImgAlt;
 
     const grad=ctx.createLinearGradient(0,0,0,1920);
