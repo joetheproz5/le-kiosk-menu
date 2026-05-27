@@ -259,6 +259,12 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
+.product-sales-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-6px 0 18px}
+.product-sales-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.product-sales-name{font-size:13px;font-weight:900;color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
+.product-sales-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:5px}
+.product-sales-number{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;text-align:right}
+.product-sales-sub{font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:right;margin-top:4px}
 .today-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-4px 0 18px}
 .today-card{background:#111827;color:#f9fafb;border:1px solid #0f172a;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.08)}
 .today-card:nth-child(2){background:var(--brand-dark);border-color:var(--brand)}
@@ -509,6 +515,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
       <section class="content">
         <div class="view active" id="view-dashboard">
           <div class="dash-grid" id="dashboard-stats"></div>
+          <div class="product-sales-grid" id="dashboard-product-sales"></div>
           <div class="today-bar" id="dashboard-today"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
         </div>
@@ -2243,6 +2250,44 @@ function menuStats(){
   });
   return {regular,addonCats,items,active,itemAddons,globalGroups};
 }
+function soldItemName(value){
+  return String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+}
+function orderItemsForStats(row){
+  const p=row.payload||{};
+  return Array.isArray(p.items)?p.items:[];
+}
+const DASHBOARD_PRODUCT_TARGETS=[
+  {id:'fajita',label:'Fajita',aliases:['fajita','fahita']},
+  {id:'taouk',label:'Taouk',aliases:['taouk','tawouk']},
+  {id:'crispy_burger',label:'Crispy Burger',aliases:['crispy burger','crispyburger']}
+];
+function dashboardProductSalesStats(){
+  const stats=Object.fromEntries(DASHBOARD_PRODUCT_TARGETS.map(t=>[t.id,{...t,today:0,week:0,total:0}]));
+  const today=dateKey(new Date());
+  const weekStart=new Date();
+  weekStart.setHours(0,0,0,0);
+  weekStart.setDate(weekStart.getDate()-6);
+
+  dashboardOrdersData.filter(isActiveOrder).forEach(row=>{
+    const d=orderStatDate(row);
+    orderItemsForStats(row).forEach(item=>{
+      const rawName=item.name||item.itemName||item.title||item.label||'';
+      const name=soldItemName(rawName);
+      const target=DASHBOARD_PRODUCT_TARGETS.find(t=>t.aliases.some(alias=>name.includes(alias)));
+      if(!target)return;
+      const qty=Math.max(1,Number(item.qty??item.quantity??item.count??1)||1);
+      const current=stats[target.id];
+      current.total+=qty;
+      if(d){
+        if(dateKey(d)===today)current.today+=qty;
+        if(d>=weekStart)current.week+=qty;
+      }
+    });
+  });
+
+  return DASHBOARD_PRODUCT_TARGETS.map(t=>stats[t.id]);
+}
 function renderDashboard(){
   const statsEl=document.getElementById('dashboard-stats');
   if(!statsEl)return;
@@ -2254,8 +2299,25 @@ function renderDashboard(){
     <div class="dash-card"><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} item extras · ${s.globalGroups} group options</div></div>
     <div class="dash-card"><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty is enabled':'Loyalty is disabled'}</div></div>
   `;
+  renderDashboardProductSales();
   renderTodayBar();
   renderDashboardCharts();
+}
+function renderDashboardProductSales(){
+  const el=document.getElementById('dashboard-product-sales');
+  if(!el)return;
+  el.innerHTML=dashboardProductSalesStats().map(item=>`
+    <div class="product-sales-card">
+      <div>
+        <div class="product-sales-name">${esc(item.label)}</div>
+        <div class="product-sales-meta">${item.today} sold today · ${item.total} total</div>
+      </div>
+      <div>
+        <div class="product-sales-number">${item.week}</div>
+        <div class="product-sales-sub">Weekly</div>
+      </div>
+    </div>
+  `).join('');
 }
 const DASHBOARD_DAYS=20;
 function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
