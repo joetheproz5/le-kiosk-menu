@@ -731,6 +731,14 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
             </div>
             <div class="setting-card">
+              <div class="setting-title">AI Combo Builder</div>
+              <div class="setting-copy">Show or hide the AI combo suggestion box on the public menu.</div>
+              <div class="switch-row">
+                <span class="field-label">Status</span>
+                <label class="switch"><input type="checkbox" id="ai-combo-toggle" onchange="setAiComboMode(this.checked)"><span class="slider"></span></label>
+              </div>
+            </div>
+            <div class="setting-card">
               <div class="setting-title">Basketball Popup</div>
               <div class="setting-copy">Show or hide the basketball match popup and floating bubble on the public menu.</div>
               <div class="switch-row">
@@ -821,7 +829,7 @@ let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
 let dashboardOrdersData=[],menuVisitorData=[];
-let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,basketballEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[]};
+let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
@@ -987,6 +995,7 @@ async function fetchConfig(){
       configData=j.data||{};
       if(typeof configData.loyaltyEnabled!=='boolean')configData.loyaltyEnabled=true;
       if(typeof configData.menuOrderingEnabled!=='boolean')configData.menuOrderingEnabled=true;
+      if(typeof configData.aiComboEnabled!=='boolean')configData.aiComboEnabled=true;
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
       if(typeof configData.basketballEnabled!=='boolean')configData.basketballEnabled=true;
       normalizeBasketballMatches();
@@ -1002,9 +1011,10 @@ function renderStatus(){
   const test=document.getElementById('status-test'),loy=document.getElementById('status-loyalty');
   test.textContent=configData.testingMode?'Test On':'Test Off';test.className='status-pill '+(configData.testingMode?'warn':'');
   loy.textContent=configData.loyaltyEnabled?'Loyalty On':'Loyalty Off';loy.className='status-pill '+(configData.loyaltyEnabled?'on':'');
-  const t=document.getElementById('testing-toggle'),mo=document.getElementById('menu-ordering-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main'),bt=document.getElementById('basketball-toggle');
+  const t=document.getElementById('testing-toggle'),mo=document.getElementById('menu-ordering-toggle'),ai=document.getElementById('ai-combo-toggle'),l=document.getElementById('loyalty-toggle'),lm=document.getElementById('loyalty-toggle-main'),bt=document.getElementById('basketball-toggle');
   if(t)t.checked=!!configData.testingMode;
   if(mo)mo.checked=configData.menuOrderingEnabled!==false;
+  if(ai)ai.checked=configData.aiComboEnabled!==false;
   if(l)l.checked=!!configData.loyaltyEnabled;
   if(lm)lm.checked=!!configData.loyaltyEnabled;
   if(bt)bt.checked=configData.basketballEnabled!==false;
@@ -1020,6 +1030,12 @@ async function setMenuOrderingMode(enabled){
   showLoading(enabled?'Enabling menu orders...':'Disabling menu orders...');
   try{configData.menuOrderingEnabled=enabled;await saveConfig();renderStatus();renderSettings();showToast(enabled?'Menu ordering enabled':'Menu ordering disabled','success');}
   catch(e){configData.menuOrderingEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
+  hideLoading();
+}
+async function setAiComboMode(enabled){
+  showLoading(enabled?'Enabling AI combo builder...':'Disabling AI combo builder...');
+  try{configData.aiComboEnabled=enabled;await saveConfig();renderStatus();renderSettings();showToast(enabled?'AI combo builder enabled':'AI combo builder disabled','success');}
+  catch(e){configData.aiComboEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
   hideLoading();
 }
 async function setBasketballMode(enabled){
