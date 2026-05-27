@@ -2080,17 +2080,18 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   loadBasketballMatches();
 })();
 </script>
-       <!-- Le Kiosk Table QR Ordering
+  <!-- Le Kiosk Table QR Ordering
 Paste this near the end of the public menu page, after the main menu/order script.
 QR links should use: https://lekiosk.store/?table=1
 Also supports ?t=1 and ?tbl=1.
 -->
-    <style>
+
+<style>
   #table-qr-badge {
     display: none;
     position: fixed;
     top: 12px;
-    left: 62px;
+    left: 12px;
     z-index: 62;
     align-items: center;
     gap: 7px;
@@ -2123,6 +2124,11 @@ Also supports ?t=1 and ?tbl=1.
     font-size: 12px;
     font-weight: 800;
   }
+  body.table-qr-mode #basketball-bubble,
+  body.table-qr-mode #basketball-popup {
+    display: none !important;
+    pointer-events: none !important;
+  }
 </style>
 
 <div id="table-qr-badge" aria-live="polite">Table <span id="table-qr-number"></span></div>
@@ -2135,13 +2141,26 @@ Also supports ?t=1 and ?tbl=1.
   if (!tableNumber) return;
 
   window.LE_KIOSK_TABLE_NUMBER = tableNumber;
+  window.LE_KIOSK_TABLE_MODE = true;
 
   function showTableBadge() {
+    document.body.classList.add('table-qr-mode');
     const badge = document.getElementById('table-qr-badge');
     const number = document.getElementById('table-qr-number');
     if (!badge || !number) return;
     number.textContent = tableNumber;
     badge.classList.add('show');
+  }
+
+  function hideBasketballForTable() {
+    document.body.classList.add('table-qr-mode');
+    const bubble = document.getElementById('basketball-bubble');
+    const popup = document.getElementById('basketball-popup');
+    if (bubble) bubble.classList.remove('show');
+    if (popup) {
+      popup.classList.remove('open', 'opening', 'closing');
+      popup.setAttribute('aria-hidden', 'true');
+    }
   }
 
   function lockDineIn() {
@@ -2219,6 +2238,7 @@ Also supports ?t=1 and ?tbl=1.
   }
 
   function bootTableQr() {
+    hideBasketballForTable();
     showTableBadge();
     lockDineIn();
     patchRenderSheet();
@@ -2233,6 +2253,7 @@ Also supports ?t=1 and ?tbl=1.
   }
 
   window.addEventListener('load', bootTableQr);
+  setInterval(hideBasketballForTable, 1000);
   document.addEventListener('click', e => {
     if (e.target.closest('#checkout-pill-inner') || e.target.closest('#order-mode-btn')) {
       setTimeout(bootTableQr, 0);
