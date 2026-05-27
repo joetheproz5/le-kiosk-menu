@@ -122,6 +122,7 @@ body.theme-dark .reward-row,
 body.theme-dark .mini-row,
 body.theme-dark .edit-row,
 body.theme-dark .editor-section,
+body.theme-dark .match-team-logo-wrap,
 body.theme-dark #preview-panel,
 body.theme-dark .modal{background:var(--panel);color:var(--ink);border-color:var(--line)}
 body.theme-dark .inp,
@@ -361,6 +362,17 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .edit-row-actions{display:flex;align-items:center;gap:7px;justify-content:flex-end}
 .edit-badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:var(--soft);color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase}
 .edit-badge.on{background:var(--green-soft);color:var(--green)}
+.basketball-edit-row{grid-template-columns:minmax(0,1fr) auto}
+.basketball-edit-row .edit-row-actions{flex-wrap:wrap}
+.matchup-line{display:grid;grid-template-columns:46px minmax(120px,1fr) 54px minmax(120px,1fr) 46px;gap:10px;align-items:center;min-width:0}
+.match-team-logo-wrap{width:46px;height:46px;border-radius:8px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.match-team-logo{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);object-fit:contain;z-index:2}
+.match-team-logo-fallback{font-size:14px;font-weight:900;color:var(--brand);z-index:1}
+.match-team-name{font-size:16px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.match-team-name.home{text-align:left}
+.match-team-name.away{text-align:right}
+.match-vs{width:54px;height:34px;border-radius:999px;background:var(--blue);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
+.match-meta{grid-column:1/-1;margin-top:1px;text-align:center}
 .theme-swatch-row{display:inline-flex;align-items:center;gap:5px}
 .theme-swatch{width:24px;height:24px;border-radius:999px;border:2px solid rgba(17,24,39,.12);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55);cursor:pointer}
 .theme-swatch:hover,.theme-swatch.active{transform:scale(1.12);border-color:#111827}
@@ -396,6 +408,10 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .item-card{grid-template-columns:80px minmax(0,1fr)}
   .item-actions{grid-column:1/-1;flex-direction:row}
   .edit-row{grid-template-columns:44px minmax(0,1fr)}
+  .basketball-edit-row{grid-template-columns:1fr}
+  .matchup-line{grid-template-columns:40px minmax(0,1fr) 46px minmax(0,1fr) 40px}
+  .match-team-logo-wrap{width:40px;height:40px}
+  .match-team-name{font-size:13px}
   .edit-row-actions{grid-column:1/-1;justify-content:flex-start}
   .editor-grid,.editor-grid.three{grid-template-columns:1fr}
 }
@@ -1159,7 +1175,14 @@ function basketballPosterThemeOptions(current){
   return Object.entries(BASKETBALL_POSTER_THEMES).map(([id,t])=>`<option value="${id}" ${current===id?'selected':''}>${t.label}</option>`).join('');
 }
 function basketballPosterThemeButtons(i,current){
-  return `<span class="theme-swatch-row">${Object.entries(BASKETBALL_POSTER_THEMES).map(([id,t])=>`<button class="theme-swatch ${id}${current===id?' active':''}" title="${t.label} story" onclick="generateBasketballStory(${i},'${id}')"></button>`).join('')}</span>`;
+  return `<span class="theme-swatch-row">${Object.entries(BASKETBALL_POSTER_THEMES).map(([id,t])=>`<button class="theme-swatch ${id}${current===id?' active':''}" type="button" title="Select ${t.label}" onclick="setBasketballPosterTheme(${i},'${id}')"></button>`).join('')}</span>`;
+}
+function setBasketballPosterTheme(i,theme){
+  const m=configData.basketballMatches?.[i];
+  if(!m||!BASKETBALL_POSTER_THEMES[theme])return;
+  m.posterTheme=theme;
+  renderBasketballManager();
+  saveConfig().catch(e=>showToast('Theme save failed: '+e.message,'error'));
 }
 function normalizeBasketballMatches(){
   const rows=Array.isArray(configData.basketballMatches)?configData.basketballMatches:[];
@@ -1262,6 +1285,35 @@ function basketballPosterLogoUrls(src){
   if(/^https?:/.test(value))return [value];
   const clean=value.replace(/^\/+/,'');
   return [`${STORAGE_PUBLIC_BASE}/${clean}`,new URL(clean,location.href).href];
+}
+function basketballLogoUrlList(name,savedLogo){
+  const urls=[];
+  basketballLogoCandidatesForTeam(name,savedLogo).forEach(src=>{
+    basketballPosterLogoUrls(src).forEach(url=>{
+      if(!urls.includes(url))urls.push(url);
+    });
+  });
+  return urls;
+}
+function advanceTeamLogo(img){
+  let urls=[];
+  try{urls=JSON.parse(decodeURIComponent(img.dataset.logos||'[]'));}catch(_){}
+  const next=(Number(img.dataset.logoIndex||0)||0)+1;
+  if(urls[next]){
+    img.dataset.logoIndex=String(next);
+    img.src=urls[next];
+  }else{
+    img.remove();
+  }
+}
+function basketballListLogoMarkup(name,savedLogo){
+  const urls=basketballLogoUrlList(name,savedLogo);
+  const initial=esc(String(name||'?').trim().slice(0,1).toUpperCase()||'?');
+  if(!urls.length)return `<span class="match-team-logo-wrap"><span class="match-team-logo-fallback">${initial}</span></span>`;
+  return `<span class="match-team-logo-wrap">
+    <span class="match-team-logo-fallback">${initial}</span>
+    <img class="match-team-logo" src="${esc(urls[0])}" data-logos="${encodeURIComponent(JSON.stringify(urls))}" data-logo-index="0" alt="${esc(name||'Team logo')}" onerror="advanceTeamLogo(this)">
+  </span>`;
 }
 function proxiedPosterLogoUrl(url){
   if(!/^https?:\/\//.test(url))return '';
@@ -1760,9 +1812,15 @@ function renderBasketballManager(){
   const list=document.getElementById('basketball-list');if(!list)return;
   const rows=configData.basketballMatches.map((m,i)=>({m,i})).filter(({m})=>!q||`${m.date} ${m.time} ${m.home} ${m.away} ${m.venue} ${m.note} ${m.homeLogo} ${m.awayLogo}`.toLowerCase().includes(q));
   if(!rows.length){list.innerHTML='<div class="empty-state">No matches yet. Add the first game.</div>';return;}
-  list.innerHTML=`<div class="edit-list">${rows.map(({m,i})=>`<div class="edit-row">
-    <div class="edit-row-img">K</div>
-    <div><div class="edit-row-title">${esc(m.home)} vs ${esc(m.away)}</div><div class="edit-row-meta">${esc(m.date)} · ${esc(m.time)} · ${esc(m.venue)} · ${esc(m.posterTheme||'blue')} theme</div></div>
+  list.innerHTML=`<div class="edit-list">${rows.map(({m,i})=>`<div class="edit-row basketball-edit-row">
+    <div class="matchup-line">
+      ${basketballListLogoMarkup(m.home,m.homeLogo)}
+      <div class="match-team-name home">${esc(m.home)}</div>
+      <span class="match-vs">VS</span>
+      <div class="match-team-name away">${esc(m.away)}</div>
+      ${basketballListLogoMarkup(m.away,m.awayLogo)}
+      <div class="edit-row-meta match-meta">${esc(m.date)} · ${esc(m.time)} · ${esc(m.venue)} · ${esc(m.posterTheme||'blue')} theme</div>
+    </div>
     <div class="edit-row-actions">
       <span class="edit-badge${m.active?' on':''}">${m.active?'Active':'Hidden'}</span>
       ${basketballPosterThemeButtons(i,m.posterTheme||'blue')}
