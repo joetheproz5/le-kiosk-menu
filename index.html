@@ -282,8 +282,290 @@ Recommended placement: below the nav and above <main id="menu-container">.
   .ai-combo-error.show {
     display: block;
   }
+  .sheet-line-tools {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 7px;
+  }
+  .sheet-line-tool {
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .sheet-line-tool.remove {
+    background: #fee2e2;
+    color: #dc2626;
+  }
 </style>
 
+<section class="ai-combo-box" id="ai-combo-builder">
+  <div class="ai-combo-card">
+    <div class="ai-combo-title">AI Combo Builder</div>
+    <div class="ai-combo-copy">Tell us what you crave and we’ll build a snack combo.</div>
+    <div class="ai-combo-row">
+      <input class="ai-combo-input" id="ai-combo-input" type="text" placeholder="Chocolate, salty, fruity..." autocomplete="off">
+      <button class="ai-combo-btn" id="ai-combo-btn" type="button">Build My Combo</button>
+    </div>
+    <div class="ai-combo-error" id="ai-combo-error"></div>
+    <div class="ai-combo-result" id="ai-combo-result"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const input = document.getElementById('ai-combo-input');
+  const btn = document.getElementById('ai-combo-btn');
+  const result = document.getElementById('ai-combo-result');
+  const error = document.getElementById('ai-combo-error');
+  let activeCombo = null;
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
+  }
+
+  function showError(message) {
+    error.textContent = message;
+    error.classList.add('show');
+  }
+
+  function clearError() {
+    error.textContent = '';
+    error.classList.remove('show');
+  }
+
+  function norm(s) {
+    return String(s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function findCartKey(itemName) {
+    const metaMap = typeof itemMeta !== 'undefined' ? itemMeta : window.itemMeta;
+    if (!metaMap) return '';
+    const wanted = norm(itemName);
+    return Object.keys(metaMap).find(key => {
+      const meta = metaMap[key] || {};
+      return norm(meta.name) === wanted;
+    }) || Object.keys(metaMap).find(key => {
+      const meta = metaMap[key] || {};
+      return wanted && norm(meta.name).includes(wanted);
+    }) || '';
+  }
+
+  function cartRef() {
+    if (typeof cart !== 'undefined') return cart;
+    window.cart = window.cart || {};
+    return window.cart;
+  }
+
+  function metaRef() {
+    return typeof itemMeta !== 'undefined' ? itemMeta : window.itemMeta;
+  }
+
+  function qtyIdForKey(key) {
+    const metaMap = metaRef();
+    if (!metaMap) return '';
+    const catKey = String(key || '').split('|')[0];
+    const sameCategoryKeys = Object.keys(metaMap).filter(k => k.startsWith(catKey + '|'));
+    const idx = sameCategoryKeys.indexOf(key);
+    return idx >= 0 ? `qty-${catKey}-${idx}` : '';
+  }
+
+  function syncMenuQtyUI() {
+    const activeCart = cartRef();
+    document.querySelectorAll('.qty-num').forEach(el => { el.textContent = '0'; });
+    document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
+
+    Object.entries(activeCart).forEach(([key, qty]) => {
+      const n = Math.max(0, Number(qty || 0));
+      const qtyId = qtyIdForKey(key);
+      if (!qtyId) return;
+      const num = document.getElementById(qtyId);
+      const card = document.getElementById('card-' + qtyId);
+      if (num) num.textContent = String(n);
+      if (card) card.classList.toggle('has-qty', n > 0);
+    });
+  }
+
+  function refreshCartViews() {
+    syncMenuQtyUI();
+    if (typeof updatePill === 'function') updatePill();
+    if (document.getElementById('checkout-sheet')?.classList.contains('open') && typeof renderSheet === 'function') {
+      renderSheet();
+      setTimeout(injectSheetRemoveControls, 0);
+    }
+  }
+
+  function addComboToCart() {
+    const items = Array.isArray(activeCombo?.items) ? activeCombo.items : [];
+    if (!items.length) return;
+
+    if (typeof MENU_ORDERING_ENABLED !== 'undefined' && !MENU_ORDERING_ENABLED) {
+      showError('Ordering is currently turned off.');
+      return;
+    }
+
+    if (typeof orderMode !== 'undefined' && !orderMode) {
+      if (typeof toggleOrderMode === 'function') {
+        toggleOrderMode();
+      } else {
+        orderMode = true;
+        document.body.classList.add('order-mode');
+      }
+    }
+
+    let added = 0;
+    items.forEach(name => {
+      const key = findCartKey(name);
+      if (!key) return;
+      const activeCart = cartRef();
+      activeCart[key] = Math.max(0, Number(activeCart[key] || 0)) + 1;
+      added++;
+    });
+
+    if (!added) {
+      showError('Could not add this combo. Try adding the items manually.');
+      return;
+    }
+
+    refreshCartViews();
+    document.body.classList.add('order-mode');
+    const addBtn = document.getElementById('ai-combo-add');
+    if (addBtn) {
+      addBtn.textContent = 'Added';
+      setTimeout(() => { addBtn.textContent = 'Add Combo'; }, 1400);
+    }
+  }
+
+  function removeCartKey(key, mode) {
+    const activeCart = cartRef();
+    if (!(key in activeCart)) return;
+    if (mode === 'all') activeCart[key] = 0;
+    else activeCart[key] = Math.max(0, Number(activeCart[key] || 0) - 1);
+    if (activeCart[key] <= 0) {
+      delete activeCart[key];
+      if (typeof addonSel !== 'undefined') delete addonSel[key];
+      if (typeof shishaSel !== 'undefined') delete shishaSel[key];
+    }
+    refreshCartViews();
+  }
+
+  function injectSheetRemoveControls() {
+    const scroll = document.getElementById('sheet-scroll');
+    if (!scroll) return;
+    const entries = Object.entries(cartRef()).filter(([, qty]) => Number(qty || 0) > 0);
+    scroll.querySelectorAll('.sheet-item').forEach((row, idx) => {
+      if (row.dataset.comboTools === '1') return;
+      const key = entries[idx]?.[0];
+      if (!key) return;
+      row.dataset.comboTools = '1';
+      row.dataset.cartKey = key;
+      const target = row.firstElementChild || row;
+      const tools = document.createElement('div');
+      tools.className = 'sheet-line-tools';
+      tools.innerHTML = `
+        <button class="sheet-line-tool" type="button" data-cart-minus="${esc(key)}">-</button>
+        <button class="sheet-line-tool remove" type="button" data-cart-remove="${esc(key)}">x</button>
+      `;
+      target.appendChild(tools);
+    });
+  }
+
+  function renderCombo(combo) {
+    activeCombo = combo;
+    const items = Array.isArray(combo.items) ? combo.items : [];
+    const total = Number(combo.totalPrice || 0);
+    result.innerHTML = `
+      <div class="ai-combo-name">${esc(combo.comboName || 'Your Combo')}</div>
+      <div class="ai-combo-desc">${esc(combo.description || '')}</div>
+      <div class="ai-combo-items">
+        ${items.map(item => `<span class="ai-combo-chip">${esc(item)}</span>`).join('')}
+      </div>
+      <div class="ai-combo-foot">
+        <span class="ai-combo-price">$${total.toFixed(2)}</span>
+        <span class="ai-combo-actions">
+          <button class="ai-combo-add" type="button" id="ai-combo-add">Add Combo</button>
+          <button class="ai-combo-try" type="button" id="ai-combo-try">Try Again</button>
+        </span>
+      </div>
+    `;
+    result.classList.add('show');
+    document.getElementById('ai-combo-add')?.addEventListener('click', addComboToCart);
+    document.getElementById('ai-combo-try')?.addEventListener('click', buildCombo);
+  }
+
+  async function buildCombo() {
+    const craving = input.value.trim();
+    if (!craving) {
+      showError('Tell us what you are craving first.');
+      input.focus();
+      return;
+    }
+
+    clearError();
+    result.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Building...';
+
+    try {
+      const res = await fetch(`${WORKER_URL}/api/combo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ craving }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not build combo');
+      renderCombo(data.combo || data);
+    } catch (e) {
+      showError(e.message || 'Could not build combo. Try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Build My Combo';
+    }
+  }
+
+  btn?.addEventListener('click', buildCombo);
+  input?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') buildCombo();
+  });
+
+  document.addEventListener('click', e => {
+    const minus = e.target.closest('[data-cart-minus]');
+    if (minus) {
+      removeCartKey(minus.dataset.cartMinus, 'one');
+      return;
+    }
+    const remove = e.target.closest('[data-cart-remove]');
+    if (remove) {
+      removeCartKey(remove.dataset.cartRemove, 'all');
+    }
+  });
+
+  const sheetScroll = document.getElementById('sheet-scroll');
+  if (sheetScroll) {
+    new MutationObserver(() => injectSheetRemoveControls()).observe(sheetScroll, { childList: true, subtree: true });
+  } else {
+    window.addEventListener('load', () => {
+      const laterSheetScroll = document.getElementById('sheet-scroll');
+      if (laterSheetScroll) {
+        new MutationObserver(() => injectSheetRemoveControls()).observe(laterSheetScroll, { childList: true, subtree: true });
+      }
+    });
+  }
+})();
+</script>
 <section class="ai-combo-box" id="ai-combo-builder">
   <div class="ai-combo-card">
     <div class="ai-combo-title">AI Combo Builder</div>
