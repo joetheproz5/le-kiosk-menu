@@ -1407,7 +1407,7 @@ async function generateBasketballStory(i){
     ctx.arc(540,760,164,0,Math.PI*2);
     ctx.stroke();
     if(brandImg){
-      const maxW=218,maxH=138;
+      const maxW=286,maxH=202;
       const scale=Math.min(maxW/brandImg.width,maxH/brandImg.height);
       const w=brandImg.width*scale,h=brandImg.height*scale;
       ctx.drawImage(brandImg,540-w/2,760-h/2,w,h);
