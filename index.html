@@ -2079,6 +2079,171 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
 
   loadBasketballMatches();
 })();
+    <!-- Le Kiosk Table QR Ordering
+Paste this near the end of the public menu page, after the main menu/order script.
+QR links should use: https://lekiosk.store/?table=1
+Also supports ?t=1 and ?tbl=1.
+-->
+
+<style>
+  #table-qr-badge {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 62px;
+    z-index: 62;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #fde68a;
+    border-radius: 999px;
+    background: #451a03;
+    color: #fff7ed;
+    box-shadow: 0 4px 16px rgba(69,26,3,.22);
+    padding: 8px 11px;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  #table-qr-badge.show {
+    display: inline-flex;
+  }
+  #table-qr-badge.hidden {
+    opacity: 0;
+    transform: translateY(-12px);
+    pointer-events: none;
+  }
+  .table-qr-sheet-note {
+    border: 1.5px solid #fde68a;
+    border-radius: 13px;
+    background: #fffbeb;
+    color: #451a03;
+    padding: 10px 12px;
+    margin: 12px 0 4px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+</style>
+
+<div id="table-qr-badge" aria-live="polite">Table <span id="table-qr-number"></span></div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const rawTable = params.get('table') || params.get('t') || params.get('tbl') || '';
+  const tableNumber = String(rawTable).trim().replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 12);
+  if (!tableNumber) return;
+
+  window.LE_KIOSK_TABLE_NUMBER = tableNumber;
+
+  function showTableBadge() {
+    const badge = document.getElementById('table-qr-badge');
+    const number = document.getElementById('table-qr-number');
+    if (!badge || !number) return;
+    number.textContent = tableNumber;
+    badge.classList.add('show');
+  }
+
+  function lockDineIn() {
+    try {
+      selectedType = 'dinein';
+      document.querySelectorAll('[data-select-type]').forEach(btn => {
+        const isDine = btn.dataset.selectType === 'dinein';
+        btn.classList.toggle('selected', isDine);
+        if (!isDine) {
+          btn.style.opacity = '.45';
+          btn.style.pointerEvents = 'none';
+        }
+      });
+      document.getElementById('sheet-delivery-sub')?.classList.remove('show');
+    } catch (_) {}
+  }
+
+  function injectTableNote() {
+    const scroll = document.getElementById('sheet-scroll');
+    if (!scroll || document.getElementById('table-qr-sheet-note')) return;
+    const detailsTitle = [...scroll.querySelectorAll('.sheet-section-title')]
+      .find(el => /your details/i.test(el.textContent || ''));
+    if (!detailsTitle) return;
+    const note = document.createElement('div');
+    note.className = 'table-qr-sheet-note';
+    note.id = 'table-qr-sheet-note';
+    note.textContent = `Table ${tableNumber} order`;
+    detailsTitle.before(note);
+  }
+
+  function patchRenderSheet() {
+    if (window.__lkTableRenderPatched || typeof renderSheet !== 'function') return;
+    const originalRenderSheet = renderSheet;
+    renderSheet = function() {
+      lockDineIn();
+      originalRenderSheet();
+      lockDineIn();
+      injectTableNote();
+    };
+    window.__lkTableRenderPatched = true;
+  }
+
+  function patchDispatchOrder() {
+    if (window.__lkTableDispatchPatched || typeof dispatchOrder !== 'function') return;
+    const originalDispatchOrder = dispatchOrder;
+    dispatchOrder = function(order) {
+      order.tableNumber = tableNumber;
+      order.tableLabel = `Table ${tableNumber}`;
+      order.orderType = 'dinein';
+      order.source = 'table-qr';
+      order.note = [order.note, `Table ${tableNumber}`].filter(Boolean).join(' · ');
+      return originalDispatchOrder(order);
+    };
+    window.__lkTableDispatchPatched = true;
+  }
+
+  function patchWhatsappMessage() {
+    if (window.__lkTableWaPatched) return;
+    const originalOpen = window.open.bind(window);
+    window.open = function(url, target, features) {
+      try {
+        const value = String(url || '');
+        if (value.includes('wa.me/') && value.includes('text=')) {
+          const u = new URL(value);
+          const current = u.searchParams.get('text') || '';
+          if (!current.includes(`Table ${tableNumber}`)) {
+            u.searchParams.set('text', `${current}\n🪑 *Table:* ${tableNumber}`);
+          }
+          return originalOpen(u.toString(), target, features);
+        }
+      } catch (_) {}
+      return originalOpen(url, target, features);
+    };
+    window.__lkTableWaPatched = true;
+  }
+
+  function bootTableQr() {
+    showTableBadge();
+    lockDineIn();
+    patchRenderSheet();
+    patchDispatchOrder();
+    patchWhatsappMessage();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootTableQr);
+  } else {
+    bootTableQr();
+  }
+
+  window.addEventListener('load', bootTableQr);
+  document.addEventListener('click', e => {
+    if (e.target.closest('#checkout-pill-inner') || e.target.closest('#order-mode-btn')) {
+      setTimeout(bootTableQr, 0);
+    }
+  });
+  window.addEventListener('scroll', () => {
+    const badge = document.getElementById('table-qr-badge');
+    if (badge) badge.classList.toggle('hidden', window.scrollY > 60);
+  }, { passive: true });
+})();
+</script>
 </script>
 </body>
 </html>
