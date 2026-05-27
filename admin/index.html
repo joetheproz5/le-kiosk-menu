@@ -662,6 +662,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               </div>
               <div class="toolbar-right">
                 <button class="btn btn-add btn-sm" onclick="addBasketballMatch()">Add Match</button>
+                <button class="btn btn-soft btn-sm" onclick="syncBasketballLogosToSupabase()">Sync Logos</button>
                 <button class="btn btn-save btn-sm" onclick="saveBasketballMatches()">Save Matches</button>
               </div>
             </div>
@@ -1055,6 +1056,22 @@ const BASKETBALL_TEAM_LOGOS={
   federation:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160',
   flb:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160'
 };
+const BASKETBALL_LOGO_LIBRARY=[
+  {name:'Riyadi',aliases:['riyadi','alriyadi','sportingalriyadi'],source:BASKETBALL_TEAM_LOGOS.riyadi},
+  {name:'Sagesse',aliases:['sagesse','hekmeh','alhekmeh'],source:BASKETBALL_TEAM_LOGOS.sagesse},
+  {name:'Beirut Club',aliases:['beirut','beirutclub'],source:BASKETBALL_TEAM_LOGOS.beirut},
+  {name:'Homenetmen',aliases:['homenetmen','hmentmen'],source:BASKETBALL_TEAM_LOGOS.homenetmen},
+  {name:'Champville',aliases:['champville','maristes','csmaristes'],source:BASKETBALL_TEAM_LOGOS.champville},
+  {name:'Antranik',aliases:['antranik'],source:BASKETBALL_TEAM_LOGOS.antranik},
+  {name:'Hoops',aliases:['hoops','hoopsclub'],source:BASKETBALL_TEAM_LOGOS.hoops},
+  {name:'Antonine',aliases:['antonine','antonin','clubantonin','clubantoninsportif'],source:BASKETBALL_TEAM_LOGOS.antonine},
+  {name:'NSA',aliases:['nsa','nadimsouaidacademy'],source:BASKETBALL_TEAM_LOGOS.nsa},
+  {name:'Central Jounieh',aliases:['central','clubcentral','clubcentraljounieh','almarkazia','markazia','almarkaziyyah'],source:BASKETBALL_TEAM_LOGOS.central},
+  {name:'Tadamoun Zouk',aliases:['tadamonzouk'],source:BASKETBALL_TEAM_LOGOS.tadamonzouk},
+  {name:'Tadamon Hrajel',aliases:['tadamonhrajel','clubtadamonhrajel','hrajel'],source:BASKETBALL_TEAM_LOGOS.tadamonhrajel},
+  {name:'Chabeb Batroun',aliases:['chabebbatroun','chababbatroun','cjsbatroun','clubjeunessesportifbatroun','batroun'],source:BASKETBALL_TEAM_LOGOS.chabebbatroun},
+  {name:'Lebanese Basketball Federation',aliases:['federation','flb'],source:BASKETBALL_TEAM_LOGOS.federation}
+];
 function basketballTeamLogoKey(name){
   return String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');
 }
@@ -1248,7 +1265,7 @@ function basketballPosterLogoUrls(src){
 }
 function proxiedPosterLogoUrl(url){
   if(!/^https?:\/\//.test(url))return '';
-  return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''))+'&output=png';
+  return 'https://images.weserv.nl/?url='+url.replace(/^https?:\/\//,'').replace(/\s/g,'%20')+'&output=png';
 }
 function alternatePosterProxyUrl(url){
   if(!/^https?:\/\//.test(url))return '';
@@ -1327,6 +1344,97 @@ function loadPosterImageAny(sources){
         .catch(done);
     });
   });
+}
+function basketballLogoLibraryForName(name){
+  const key=basketballTeamLogoKey(name);
+  return BASKETBALL_LOGO_LIBRARY.find(team=>
+    team.aliases.includes(key)||team.aliases.some(alias=>key.includes(alias)||alias.includes(key))
+  );
+}
+function basketballLogoFetchCandidates(source){
+  const urls=[];
+  basketballPosterLogoUrls(source).forEach(url=>{
+    [url,proxiedPosterLogoUrl(url),alternatePosterProxyUrl(url)].filter(Boolean).forEach(candidate=>{
+      if(!urls.includes(candidate))urls.push(candidate);
+    });
+  });
+  return urls;
+}
+async function fetchBasketballLogoBlob(source){
+  const urls=basketballLogoFetchCandidates(source);
+  let lastError=null;
+  for(const url of urls){
+    try{
+      const blob=await fetchPosterBlob(url,7000);
+      const type=String(blob.type||'');
+      if(blob.size>0&&(type.startsWith('image/')||!type||type==='application/octet-stream'))return blob;
+    }catch(e){
+      lastError=e;
+    }
+  }
+  throw lastError||new Error('Logo fetch failed');
+}
+function logoExtFromBlob(blob){
+  const type=String(blob?.type||'').toLowerCase();
+  if(type.includes('jpeg')||type.includes('jpg'))return 'jpg';
+  if(type.includes('webp'))return 'webp';
+  if(type.includes('svg'))return 'svg';
+  return 'png';
+}
+async function uploadBasketballLogoBlob(blob,path){
+  const file=new File([blob],path.split('/').pop()||'logo.png',{type:blob.type||'image/png'});
+  return uploadImage(file,null,path);
+}
+async function syncBasketballLogosToSupabase(){
+  normalizeBasketballMatches();
+  const byName=new Map(BASKETBALL_LOGO_LIBRARY.map(team=>[team.name,team]));
+  configData.basketballMatches.forEach(m=>{
+    [m.home,m.away].forEach(name=>{
+      if(!name||basketballLogoLibraryForName(name))return;
+      const source=basketballLogoForTeam(name);
+      if(source){
+        const aliases=basketballTeamLogoAliases(name);
+        byName.set(name,{name,aliases:aliases.length?aliases:[basketballTeamLogoKey(name)],source});
+      }
+    });
+  });
+  const teams=[...byName.values()];
+  const syncedByAlias={};
+  const failed=[];
+  let uploaded=0;
+  showLoading('Syncing team logos...');
+  try{
+    for(const team of teams){
+      const aliases=[...new Set((team.aliases||[]).concat(basketballTeamLogoKey(team.name)).filter(Boolean))];
+      if(!team.source||!aliases.length)continue;
+      try{
+        const blob=await fetchBasketballLogoBlob(team.source);
+        const ext=logoExtFromBlob(blob);
+        for(const alias of aliases){
+          const path=`menupictures/teams/${alias}.${ext}`;
+          await uploadBasketballLogoBlob(blob,path);
+          syncedByAlias[alias]=path;
+          uploaded++;
+        }
+      }catch(e){
+        failed.push(`${team.name}: ${e.message}`);
+      }
+    }
+    configData.basketballMatches.forEach(m=>{
+      const homePath=basketballTeamLogoAliases(m.home).map(alias=>syncedByAlias[alias]).find(Boolean);
+      const awayPath=basketballTeamLogoAliases(m.away).map(alias=>syncedByAlias[alias]).find(Boolean);
+      if(homePath)m.homeLogo=homePath;
+      if(awayPath)m.awayLogo=awayPath;
+    });
+    await saveConfig();
+    renderBasketballManager();
+    renderSettings();
+    if(failed.length)console.warn('Some basketball logos did not sync:',failed);
+    showToast(failed.length?`Synced ${uploaded} logo files; ${failed.length} teams need manual upload.`:`Synced ${uploaded} logo files to Supabase`,'success');
+  }catch(e){
+    showToast('Logo sync failed: '+e.message,'error');
+  }
+  hideLoading();
 }
 function roundRect(ctx,x,y,w,h,r,fill,stroke){
   const rr=Math.min(r,w/2,h/2);
