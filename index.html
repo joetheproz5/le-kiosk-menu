@@ -430,6 +430,19 @@ Recommended placement: below the nav and above <main id="menu-container">.
     }
   }
 
+  async function syncAiComboVisibility() {
+    const box = document.getElementById('ai-combo-builder');
+    if (!box) return;
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      const res = await fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const j = await res.json();
+      const enabled = j?.data?.aiComboEnabled !== false;
+      box.style.display = enabled ? '' : 'none';
+    } catch (_) {}
+  }
+
   function addComboToCart() {
     const items = Array.isArray(activeCombo?.items) ? activeCombo.items : [];
     if (!items.length) return;
@@ -566,6 +579,7 @@ Recommended placement: below the nav and above <main id="menu-container">.
 
   function bindComboUI() {
     patchChangeQty();
+    syncAiComboVisibility();
     btnEl()?.addEventListener('click', buildCombo);
     inputEl()?.addEventListener('keydown', e => {
       if (e.key === 'Enter') buildCombo();
@@ -603,8 +617,6 @@ Recommended placement: below the nav and above <main id="menu-container">.
   }
 })();
 </script>
-
-
 <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
 </main>
