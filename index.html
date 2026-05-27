@@ -907,33 +907,33 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
 
   .basketball-card {
     width: min(430px, 92vw);
-    max-height: 86vh;
+    max-height: 88vh;
     overflow: hidden;
     border-radius: 26px;
     border: 1px solid rgba(17,24,39,.1);
     background:
-      radial-gradient(circle at 14px 14px, rgba(17,24,39,.12) 0 5px, transparent 5.5px) 0 0 / 28px 28px,
-      linear-gradient(180deg, rgba(248,250,252,.96), rgba(239,246,255,.96));
+      radial-gradient(circle at 14px 14px, rgba(120,53,15,.16) 0 5px, transparent 5.5px) 0 0 / 28px 28px,
+      linear-gradient(180deg, rgba(255,251,235,.98), rgba(254,243,199,.96));
     box-shadow: 0 24px 70px rgba(0,0,0,.36);
     position: relative;
   }
   .basketball-card::before {
     content: "";
     position: absolute;
-    inset: 84px 24px 92px;
-    border: 16px solid rgba(96,165,250,.1);
+    inset: 76px 24px 82px;
+    border: 15px solid rgba(245,158,11,.11);
     border-radius: 50%;
     pointer-events: none;
   }
   .basketball-top {
     color: #111827;
-    padding: 22px 46px 8px;
+    padding: 18px 46px 6px;
     position: relative;
     text-align: center;
   }
   .basketball-title {
     font-family: 'Fredoka', sans-serif;
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 900;
     line-height: 1;
     letter-spacing: .02em;
@@ -941,12 +941,12 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     text-shadow: 0 2px 0 rgba(255,255,255,.8);
   }
   .basketball-sub {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #1d4ed8;
-    margin-top: 8px;
+    color: #b45309;
+    margin-top: 6px;
   }
   .basketball-close {
     position: absolute;
@@ -965,54 +965,54 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   }
   .basketball-list {
     position: relative;
-    max-height: 67vh;
+    max-height: 78vh;
     overflow-y: auto;
-    padding: 8px 18px 18px;
+    padding: 6px 14px 14px;
   }
   .basketball-match {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(37,99,235,.18);
+    border: 1px solid rgba(245,158,11,.34);
     background: rgba(255,255,255,.88);
-    border-radius: 22px;
-    padding: 168px 14px 14px;
-    margin-bottom: 14px;
-    box-shadow: 0 14px 34px rgba(15,23,42,.14);
+    border-radius: 18px;
+    padding: 94px 12px 10px;
+    margin-bottom: 9px;
+    box-shadow: 0 10px 25px rgba(69,26,3,.13);
   }
   .basketball-match::before {
-    content: "NEXT MATCH\A NEXT MATCH\A NEXT MATCH";
+    content: "NEXT MATCH\A NEXT MATCH";
     white-space: pre;
     position: absolute;
     left: 50%;
-    top: 10px;
+    top: 7px;
     transform: translateX(-50%);
     width: 112%;
     text-align: center;
     font-family: Impact, 'Arial Black', sans-serif;
-    font-size: clamp(42px, 13vw, 64px);
-    line-height: .78;
+    font-size: clamp(31px, 10vw, 46px);
+    line-height: .8;
     letter-spacing: 0;
-    color: rgba(37,99,235,.92);
+    color: rgba(180,83,9,.92);
     pointer-events: none;
   }
   .basketball-match::after {
     content: "";
     position: absolute;
     left: 50%;
-    top: 78px;
-    width: 106px;
-    height: 106px;
+    top: 48px;
+    width: 72px;
+    height: 72px;
     transform: translateX(-50%);
     border-radius: 50%;
     background:
-      radial-gradient(circle, #0f172a 0 64%, transparent 65%),
-      linear-gradient(135deg, #38bdf8, #2563eb);
-    box-shadow: 0 8px 24px rgba(15,23,42,.28);
+      radial-gradient(circle, #451a03 0 64%, transparent 65%),
+      linear-gradient(135deg, #f59e0b, #92400e);
+    box-shadow: 0 8px 20px rgba(69,26,3,.28);
     pointer-events: none;
   }
   .basketball-match.featured {
     border-color: rgba(245,158,11,.52);
-    box-shadow: 0 18px 42px rgba(15,23,42,.18), 0 0 0 3px rgba(245,158,11,.12);
+    box-shadow: 0 14px 34px rgba(69,26,3,.16), 0 0 0 3px rgba(245,158,11,.13);
   }
   .basketball-match-inner {
     position: relative;
@@ -1023,28 +1023,37 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     align-items: center;
     gap: 6px;
     width: max-content;
-    margin: 10px auto 0;
+    margin: 7px auto 0;
     border-radius: 999px;
-    padding: 6px 12px;
-    background: #1d4ed8;
+    padding: 5px 10px;
+    background: #78350f;
     color: #fff;
     font-size: 10px;
     font-weight: 900;
     text-transform: uppercase;
-    box-shadow: 0 7px 16px rgba(37,99,235,.28);
+    box-shadow: 0 7px 16px rgba(120,53,15,.24);
+  }
+  .basketball-time.live {
+    background: #16a34a;
+    box-shadow: 0 7px 16px rgba(22,163,74,.24);
+  }
+  .basketball-time.ended {
+    background: #9ca3af;
+    color: #fff;
+    box-shadow: none;
   }
   .basketball-mark {
     position: absolute;
     z-index: 2;
     left: 50%;
-    top: 86px;
+    top: 52px;
     transform: translateX(-50%);
-    width: 86px;
-    height: 86px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    background: #0f172a;
-    border: 5px solid #38bdf8;
-    box-shadow: 0 10px 26px rgba(15,23,42,.28);
+    background: #451a03;
+    border: 4px solid #f59e0b;
+    box-shadow: 0 9px 22px rgba(69,26,3,.26);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1059,20 +1068,20 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     display: none;
     font-family: 'Fredoka', sans-serif;
     color: #fff;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 900;
   }
   .basketball-scoreboard {
     display: grid;
-    grid-template-columns: minmax(0,1fr) 46px minmax(0,1fr);
+    grid-template-columns: minmax(0,1fr) 36px minmax(0,1fr);
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin-top: 0;
     background: rgba(255,255,255,.94);
-    border: 1px solid rgba(148,163,184,.32);
-    border-radius: 18px;
-    padding: 12px 10px;
-    box-shadow: 0 8px 22px rgba(15,23,42,.1);
+    border: 1px solid rgba(251,191,36,.42);
+    border-radius: 16px;
+    padding: 8px 8px;
+    box-shadow: 0 7px 18px rgba(69,26,3,.1);
   }
   .basketball-team {
     min-width: 0;
@@ -1080,82 +1089,82 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 7px;
+    gap: 4px;
   }
   .basketball-logo {
-    width: 58px;
-    height: 58px;
+    width: 38px;
+    height: 38px;
     border-radius: 14px;
-    border: 2px solid #e5e7eb;
-    background: #fff;
+    border: 2px solid #fde68a;
+    background: #fffaf0;
     object-fit: contain;
     padding: 5px;
     margin: 0 auto;
-    box-shadow: 0 4px 12px rgba(15,23,42,.1);
+    box-shadow: 0 4px 10px rgba(69,26,3,.1);
   }
   .basketball-logo-fallback {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1d4ed8;
+    color: #92400e;
     font-size: 18px;
     font-weight: 900;
   }
   .basketball-team-name {
     font-family: Impact, 'Arial Black', sans-serif;
-    font-size: 17px;
+    font-size: 13px;
     font-weight: 900;
-    color: #334155;
+    color: #451a03;
     line-height: 1;
     overflow-wrap: anywhere;
     text-transform: uppercase;
     max-width: 100%;
   }
   .basketball-vs {
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
-    background: #2563eb;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #f59e0b;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 900;
-    box-shadow: 0 8px 18px rgba(37,99,235,.28);
+    box-shadow: 0 8px 16px rgba(245,158,11,.3);
   }
   .basketball-meta {
     text-align: center;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 900;
-    color: #64748b;
-    margin-top: 8px;
+    color: #92400e;
+    margin-top: 5px;
     line-height: 1.35;
     text-transform: uppercase;
   }
   .basketball-note {
-    color: #334155;
+    color: #451a03;
     font-family: Impact, 'Arial Black', sans-serif;
-    font-size: 17px;
+    font-size: 14px;
     letter-spacing: .02em;
   }
   .basketball-reserve {
-    margin-top: 12px;
+    margin-top: 8px;
     width: 100%;
     border: 0;
     border-radius: 999px;
-    background: #1d4ed8;
+    background: #78350f;
     color: #fff;
-    padding: 13px 12px;
+    padding: 9px 12px;
     font-family: 'Poppins', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: .06em;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(37,99,235,.28);
+    box-shadow: 0 10px 20px rgba(120,53,15,.22);
   }
-  .basketball-reserve:hover { background: #1e40af; }
+  .basketball-reserve:hover { background: #451a03; }
   .basketball-empty {
     padding: 22px 14px;
     text-align: center;
@@ -1167,11 +1176,11 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     .basketball-scoreboard {
       grid-template-columns: minmax(0,1fr) 38px minmax(0,1fr);
       gap: 6px;
-      padding: 10px 8px;
+      padding: 9px 7px;
     }
-    .basketball-logo { width: 50px; height: 50px; }
-    .basketball-team-name { font-size: 15px; }
-    .basketball-vs { width: 38px; height: 38px; font-size: 12px; }
+    .basketball-logo { width: 40px; height: 40px; }
+    .basketball-team-name { font-size: 13px; }
+    .basketball-vs { width: 36px; height: 36px; font-size: 12px; }
   }
 </style>
 
@@ -1277,6 +1286,28 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     return hour * 60 + minute;
   }
 
+  function beirutMinutesNow() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Beirut',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).formatToParts(new Date());
+    const get = t => Number(parts.find(p => p.type === t)?.value || 0);
+    return get('hour') * 60 + get('minute');
+  }
+
+  function matchStatus(matches, index) {
+    const match = matches[index] || {};
+    const now = beirutMinutesNow();
+    const start = timeToMinutes(match.time);
+    const nextStart = matches[index + 1] ? timeToMinutes(matches[index + 1].time) : null;
+    if (now < start) return { label: `Start at ${match.time || ''}`, cls: '' };
+    if (nextStart !== null && now >= nextStart) return { label: 'Ended', cls: 'ended' };
+    if (nextStart === null && now >= start + 150) return { label: 'Ended', cls: 'ended' };
+    return { label: 'Live now', cls: 'live' };
+  }
+
   function teamInitial(name) {
     return String(name || '?').trim().slice(0, 1).toUpperCase() || '?';
   }
@@ -1366,8 +1397,10 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
       return;
     }
 
-    list.innerHTML = todaysMatches.map((m, i) => `
-      <div class="basketball-match${m.featured ? ' featured' : ''}">
+    list.innerHTML = todaysMatches.map((m, i) => {
+      const status = matchStatus(todaysMatches, i);
+      return `
+      <div class="basketball-match${m.featured ? ' featured' : ''}${status.cls === 'live' ? ' featured' : ''}">
         <div class="basketball-mark">
           <img src="${esc(BASKETBALL_STORAGE_PUBLIC_BASE)}/menupictures/logo.png" alt="Le Kiosk" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
           <span>LK</span>
@@ -1384,13 +1417,14 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
               <div class="basketball-team-name">${esc(m.away)}</div>
             </div>
           </div>
-          <span class="basketball-time">Start at ${esc(m.time)}</span>
+          <span class="basketball-time ${esc(status.cls)}">${esc(status.label)}</span>
           <div class="basketball-meta">${esc(m.league || 'Lebanon FLB')}${m.venue ? ' · ' + esc(m.venue) : ''}</div>
           ${m.note ? `<div class="basketball-meta basketball-note">${esc(m.note)}</div>` : ''}
           ${m.reserveEnabled !== false ? `<button class="basketball-reserve" type="button" data-match="${i}">Reserve Table</button>` : ''}
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     list.querySelectorAll('[data-match]').forEach(btn => {
       btn.addEventListener('click', () => openReserve(todaysMatches[Number(btn.dataset.match)]));
