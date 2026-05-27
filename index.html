@@ -1084,23 +1084,26 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
 <script>
 (function(){
   const WA_NUMBER = '96176840244';
+  const BASKETBALL_STORAGE_PUBLIC_BASE = typeof STORAGE_PUBLIC_BASE !== 'undefined'
+    ? STORAGE_PUBLIC_BASE
+    : 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
   const TEAM_LOGOS = {
     riyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
     alriyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
     sportingalriyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
-    sagesse: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
-    hekmeh: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
-    alhekmeh: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sagesse%20SC%20New%20Logo.png?width=160',
+    sagesse: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Sagesse_SC_New_Logo.png/250px-Sagesse_SC_New_Logo.png',
+    hekmeh: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Sagesse_SC_New_Logo.png/250px-Sagesse_SC_New_Logo.png',
+    alhekmeh: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Sagesse_SC_New_Logo.png/250px-Sagesse_SC_New_Logo.png',
     beirut: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
     beirutclub: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
-    homenetmen: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
-    hmentmen: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Hmemlogo2019.png?width=160',
-    champville: 'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
-    maristes: 'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
-    csmaristes: 'https://en.wikipedia.org/wiki/Special:Redirect/file/champvillelogo.jpg?width=160',
+    homenetmen: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Hmemlogo2019.png/250px-Hmemlogo2019.png',
+    hmentmen: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Hmemlogo2019.png/250px-Hmemlogo2019.png',
+    champville: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+    maristes: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+    csmaristes: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
     antranik: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Antranik%20logo.png?width=160',
-    hoops: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Hoops%20Club.png?width=160',
-    hoopsclub: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Hoops%20Club.png?width=160',
+    hoops: 'https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Hoops_Club.png/250px-Hoops_Club.png',
+    hoopsclub: 'https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Hoops_Club.png/250px-Hoops_Club.png',
     antonine: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
     antonin: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
     clubantonin: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
@@ -1164,16 +1167,72 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
       .replace(/[^a-z0-9]+/g, '');
   }
 
-  function teamLogo(name) {
-    return TEAM_LOGOS[teamLogoKey(name)] || '';
+  function teamLogoAliases(name) {
+    const key = teamLogoKey(name);
+    if (!key) return [];
+    const aliases = [key];
+    Object.keys(TEAM_LOGOS).forEach(alias => {
+      if ((key.includes(alias) || alias.includes(key)) && !aliases.includes(alias)) aliases.push(alias);
+    });
+    return aliases;
   }
 
-  function logoHtml(src, name) {
-    const finalSrc = src || teamLogo(name);
-    if (finalSrc) {
-      return `<img class="basketball-logo" src="${esc(finalSrc)}" alt="${esc(name)} logo" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'basketball-logo basketball-logo-fallback',textContent:'${esc(teamInitial(name))}'}))">`;
+  function teamLogo(name) {
+    const hit = teamLogoAliases(name).find(alias => TEAM_LOGOS[alias]);
+    return hit ? TEAM_LOGOS[hit] : '';
+  }
+
+  function logoSourceUrls(src) {
+    const value = String(src || '').trim();
+    if (!value) return [];
+    if (/^data:/.test(value) || /^https?:\/\//.test(value)) return [value];
+    const clean = value.replace(/^\/+/, '');
+    return [`${BASKETBALL_STORAGE_PUBLIC_BASE}/${clean}`, new URL(clean, location.href).href];
+  }
+
+  function teamStoredLogoUrls(name) {
+    const urls = [];
+    teamLogoAliases(name).forEach(alias => {
+      ['png', 'jpg', 'jpeg', 'webp'].forEach(ext => {
+        urls.push(`${BASKETBALL_STORAGE_PUBLIC_BASE}/menupictures/teams/${alias}.${ext}`);
+        urls.push(`${BASKETBALL_STORAGE_PUBLIC_BASE}/teams/${alias}.${ext}`);
+      });
+    });
+    return urls;
+  }
+
+  function logoCandidates(src, name) {
+    const urls = [
+      ...logoSourceUrls(src),
+      ...teamStoredLogoUrls(name),
+      teamLogo(name)
+    ].filter(Boolean);
+    return urls.filter((url, i) => urls.indexOf(url) === i);
+  }
+
+  function advanceLogo(img) {
+    let urls = [];
+    try { urls = JSON.parse(decodeURIComponent(img.dataset.logos || '[]')); } catch (_) {}
+    const next = (Number(img.dataset.logoIndex || 0) || 0) + 1;
+    if (urls[next]) {
+      img.dataset.logoIndex = String(next);
+      img.src = urls[next];
+      return;
     }
-    return `<div class="basketball-logo basketball-logo-fallback">${esc(teamInitial(name))}</div>`;
+    const fallback = document.createElement('div');
+    fallback.className = 'basketball-logo basketball-logo-fallback';
+    fallback.textContent = img.dataset.initial || '?';
+    img.replaceWith(fallback);
+  }
+  window.lkBasketballAdvanceLogo = advanceLogo;
+
+  function logoHtml(src, name) {
+    const urls = logoCandidates(src, name);
+    const initial = teamInitial(name);
+    if (urls.length) {
+      return `<img class="basketball-logo" src="${esc(urls[0])}" data-logos="${encodeURIComponent(JSON.stringify(urls))}" data-logo-index="0" data-initial="${esc(initial)}" alt="${esc(name)} logo" onerror="window.lkBasketballAdvanceLogo(this)">`;
+    }
+    return `<div class="basketball-logo basketball-logo-fallback">${esc(initial)}</div>`;
   }
 
   function renderMatches() {
