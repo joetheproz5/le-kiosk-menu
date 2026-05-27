@@ -825,7 +825,7 @@ const DEFAULT_LOYALTY_REWARDS=[
   {id:'ice_cream_cup',label:'Free Ice Cream Cup',kind:'fixed',value:3}
 ];
 
-let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null;
+let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
 let dashboardOrdersData=[],menuVisitorData=[];
@@ -961,7 +961,7 @@ function updateSessionBadge(){
 }
 function logout(){
   clearAuthSession();
-  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);
+  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
@@ -978,6 +978,7 @@ async function initAdmin(){
   showLoading('Loading admin...');
   try{
     await fetchConfig();
+    scheduleBasketballExpiryPrune();
     await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders(),fetchMenuVisitors()]);
     renderStatus();
     renderAll();
@@ -999,6 +1000,7 @@ async function fetchConfig(){
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
       if(typeof configData.basketballEnabled!=='boolean')configData.basketballEnabled=true;
       normalizeBasketballMatches();
+      await pruneExpiredBasketballMatches({persist:true,silent:true});
       normalizeLoyaltyRewards();
     }
   }catch(_){normalizeBasketballMatches();normalizeLoyaltyRewards();}
@@ -1054,6 +1056,34 @@ function todayBeirutKey(){
   const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Beirut',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
   const get=t=>parts.find(p=>p.type===t)?.value||'';
   return `${get('year')}-${get('month')}-${get('day')}`;
+}
+function isIsoDateKey(value){
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value||''));
+}
+async function pruneExpiredBasketballMatches({persist=false,silent=false}={}){
+  normalizeBasketballMatches();
+  const today=todayBeirutKey();
+  const before=configData.basketballMatches.length;
+  configData.basketballMatches=configData.basketballMatches.filter(m=>!isIsoDateKey(m.date)||m.date>=today);
+  const removed=before-configData.basketballMatches.length;
+  if(!removed)return 0;
+  if(persist)await saveConfig();
+  renderStatus();
+  if(currentView==='basketball')renderBasketballManager();
+  if(currentView==='settings')renderSettings();
+  if(!silent)showToast(`${removed} expired basketball match${removed===1?'':'es'} deleted`,'success');
+  return removed;
+}
+function scheduleBasketballExpiryPrune(){
+  clearInterval(basketballPruneTimer);
+  basketballPruneDay=todayBeirutKey();
+  basketballPruneTimer=setInterval(async()=>{
+    const today=todayBeirutKey();
+    if(today===basketballPruneDay)return;
+    basketballPruneDay=today;
+    try{await pruneExpiredBasketballMatches({persist:true});}
+    catch(e){showToast('Expired match cleanup failed: '+e.message,'error');}
+  },60000);
 }
 const BASKETBALL_TEAM_LOGOS={
   riyadi:'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
@@ -1261,6 +1291,7 @@ async function saveBasketballMatchesFromSettings(){
   showLoading('Saving matches...');
   try{
     configData.basketballMatches=parseBasketballMatchesText(input.value);
+    await pruneExpiredBasketballMatches({persist:false,silent:true});
     await saveConfig();
     renderSettings();
     showToast('Basketball matches saved','success');
@@ -1882,7 +1913,7 @@ function sortBasketballMatches(){
 }
 async function saveBasketballMatches(){
   showLoading('Saving matches...');
-  try{normalizeBasketballMatches();await saveConfig();renderBasketballManager();renderSettings();showToast('Basketball matches saved','success');}
+  try{normalizeBasketballMatches();await pruneExpiredBasketballMatches({persist:false,silent:true});await saveConfig();renderBasketballManager();renderSettings();showToast('Basketball matches saved','success');}
   catch(e){showToast('Save failed: '+e.message,'error');}
   hideLoading();
 }
@@ -2162,6 +2193,9 @@ function switchView(view){
   document.getElementById('page-kicker').textContent=titles[view][0];
   document.getElementById('page-title').textContent=titles[view][1];
   document.querySelector('.top-actions').style.display=['dashboard','menu','categories','items','addons'].includes(view)?'flex':'none';
+  if(view==='basketball'||view==='settings'){
+    pruneExpiredBasketballMatches({persist:true,silent:true}).catch(e=>showToast('Expired match cleanup failed: '+e.message,'error'));
+  }
   renderDashboard();
   renderCategoriesHub();
   renderItemsHub();
