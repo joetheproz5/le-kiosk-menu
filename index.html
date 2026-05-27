@@ -1049,44 +1049,71 @@ Requires Worker route:
   }
 
   function startListening() {
-    clearError();
-    if (!SpeechRecognition) {
-      showError('Voice is not supported on this browser. Try Chrome on Android or desktop.');
-      return;
-    }
-    if (listening && recognition) {
-      recognition.stop();
-      return;
-    }
-
-    recognition = new SpeechRecognition();
-recognition.lang = 'ar';
-recognition.interimResults = true;
-recognition.continuous = false;
-
-let finalText = '';
-let hasRetried = false;
-
-recognition.onresult = event => {
-  let interim = '';
-  for (let i = event.resultIndex; i < event.results.length; i++) {
-    const text = event.results[i][0].transcript;
-    if (event.results[i].isFinal) finalText += text + ' ';
-    else interim += text;
+  clearError();
+  if (!SpeechRecognition) {
+    showError('Voice is not supported on this browser. Try Chrome on Android or desktop.');
+    return;
   }
-  const current = (finalText + interim).trim();
-  setTranscript(current || 'Listening...');
+  if (listening && recognition) {
+    recognition.stop();
+    return;
+  }
 
-  // If result looks mostly Latin (Arabizi/English), retry in English
-  if (!hasRetried && current.length > 3) {
-    const latinChars = (current.match(/[a-zA-Z]/g) || []).length;
-    const ratio = latinChars / current.replace(/\s/g, '').length;
-    if (ratio > 0.6) {
-      hasRetried = true;
-      recognition.stop();
-      recognition.lang = 'en-US';
-      recognition.start();
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ar';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  let finalText = '';
+  let hasRetried = false;
+  listening = true;
+  mic.classList.add('listening');
+  mic.textContent = '■';
+  setTranscript('Listening...');
+
+  recognition.onresult = event => {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const text = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalText += text + ' ';
+      else interim += text;
     }
+    const current = (finalText + interim).trim();
+    setTranscript(current || 'Listening...');
+
+    // If mostly Latin chars (Arabizi/English), retry with en-US
+    if (!hasRetried && current.length > 3) {
+      const latinChars = (current.match(/[a-zA-Z]/g) || []).length;
+      const ratio = latinChars / current.replace(/\s/g, '').length;
+      if (ratio > 0.6) {
+        hasRetried = true;
+        recognition.abort();
+        recognition.lang = 'en-US';
+        recognition.start();
+      }
+    }
+  };
+
+  recognition.onerror = event => {
+    listening = false;
+    mic.classList.remove('listening');
+    mic.textContent = '🎙';
+    showError(event.error === 'not-allowed' ? 'Please allow microphone access.' : 'Voice error. Please try again.');
+  };
+
+  recognition.onend = () => {
+    // If we just switched to en-US, don't treat it as done yet
+    if (hasRetried && recognition.lang === 'ar') return;
+    listening = false;
+    mic.classList.remove('listening');
+    mic.textContent = '🎙';
+    const transcript = (finalText || transcriptBox?.textContent || '').replace(/^Listening\.\.\.$/, '').trim();
+    if (transcript) parseTranscript(transcript);
+    else setTranscript('');
+  };
+
+  recognition.start();
+}
   }
 };
 
