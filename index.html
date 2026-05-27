@@ -1060,9 +1060,35 @@ Requires Worker route:
     }
 
     recognition = new SpeechRecognition();
-    recognition.lang = 'ar-LB';
-    recognition.interimResults = true;
-    recognition.continuous = false;
+recognition.lang = 'ar';
+recognition.interimResults = true;
+recognition.continuous = false;
+
+let finalText = '';
+let hasRetried = false;
+
+recognition.onresult = event => {
+  let interim = '';
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const text = event.results[i][0].transcript;
+    if (event.results[i].isFinal) finalText += text + ' ';
+    else interim += text;
+  }
+  const current = (finalText + interim).trim();
+  setTranscript(current || 'Listening...');
+
+  // If result looks mostly Latin (Arabizi/English), retry in English
+  if (!hasRetried && current.length > 3) {
+    const latinChars = (current.match(/[a-zA-Z]/g) || []).length;
+    const ratio = latinChars / current.replace(/\s/g, '').length;
+    if (ratio > 0.6) {
+      hasRetried = true;
+      recognition.stop();
+      recognition.lang = 'en-US';
+      recognition.start();
+    }
+  }
+};
 
     let finalText = '';
     listening = true;
