@@ -1205,6 +1205,47 @@ function drawPosterText(ctx,text,x,y,maxWidth,lineHeight,maxLines){
   lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lineHeight));
   return y+lines.length*lineHeight;
 }
+function formatPosterDate(dateValue){
+  const d=new Date(String(dateValue||'')+'T12:00:00');
+  if(Number.isNaN(d.getTime()))return String(dateValue||todayBeirutKey());
+  return d.toLocaleDateString('en-US',{weekday:'long',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+}
+function drawPosterDots(ctx,xStart,xEnd,alpha=0.18){
+  ctx.save();
+  ctx.fillStyle=`rgba(17,24,39,${alpha})`;
+  for(let y=18;y<1900;y+=32){
+    for(let x=xStart;x<xEnd;x+=32){
+      const edge=Math.min(Math.abs(x-540)/540,1);
+      const size=5+(edge*10)+((y%96)/96)*3;
+      ctx.beginPath();
+      ctx.arc(x,y,size,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function drawPosterLogo(ctx,img,x,y,w,h,fallback){
+  ctx.save();
+  ctx.fillStyle='#ffffff';
+  roundRect(ctx,x,y,w,h,22,true,false);
+  ctx.strokeStyle='rgba(17,24,39,.12)';
+  ctx.lineWidth=3;
+  roundRect(ctx,x,y,w,h,22,false,true);
+  if(img){
+    const pad=22;
+    const maxW=w-pad*2,maxH=h-pad*2;
+    const scale=Math.min(maxW/img.width,maxH/img.height);
+    const iw=img.width*scale,ih=img.height*scale;
+    ctx.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);
+  }else{
+    ctx.fillStyle='#166534';
+    ctx.font='900 70px Fredoka, Poppins, sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(String(fallback||'?').slice(0,1).toUpperCase(),x+w/2,y+h/2+3);
+  }
+  ctx.restore();
+}
 async function generateBasketballStory(i){
   normalizeBasketballMatches();
   const m=configData.basketballMatches[i];
@@ -1219,83 +1260,118 @@ async function generateBasketballStory(i){
     const awayLogo=basketballLogoForTeam(m.away)||m.awayLogo;
     const [homeImg,awayImg]=await Promise.all([loadPosterImage(homeLogo),loadPosterImage(awayLogo)]);
 
-    const grad=ctx.createLinearGradient(0,0,1080,1920);
-    grad.addColorStop(0,'#1c0f00');
-    grad.addColorStop(.45,'#78350f');
-    grad.addColorStop(1,'#f59e0b');
+    const grad=ctx.createLinearGradient(0,0,0,1920);
+    grad.addColorStop(0,'#f8fafc');
+    grad.addColorStop(.5,'#ffffff');
+    grad.addColorStop(1,'#e5e7eb');
     ctx.fillStyle=grad;
     ctx.fillRect(0,0,1080,1920);
 
-    ctx.fillStyle='rgba(255,247,237,.08)';
-    for(let y=0;y<1920;y+=90){
-      ctx.fillRect(0,y,1080,2);
-    }
-    ctx.fillStyle='rgba(251,191,36,.18)';
+    drawPosterDots(ctx,0,310,0.16);
+    drawPosterDots(ctx,770,1080,0.16);
+    ctx.strokeStyle='rgba(17,24,39,.06)';
+    ctx.lineWidth=18;
     ctx.beginPath();
-    ctx.arc(900,190,260,0,Math.PI*2);
-    ctx.fill();
+    ctx.ellipse(540,960,520,850,0,0,Math.PI*2);
+    ctx.stroke();
+    ctx.lineWidth=8;
     ctx.beginPath();
-    ctx.arc(140,1710,310,0,Math.PI*2);
+    ctx.moveTo(130,930);
+    ctx.quadraticCurveTo(540,820,950,930);
+    ctx.stroke();
+    ctx.fillStyle='rgba(245,158,11,.12)';
+    ctx.beginPath();
+    ctx.arc(540,980,280,0,Math.PI*2);
     ctx.fill();
 
     ctx.textAlign='center';
+    ctx.fillStyle='#451a03';
+    ctx.font='900 82px Fredoka, Poppins, sans-serif';
+    ctx.fillText('Le Kiosk',540,145);
+    ctx.font='900 26px Poppins, sans-serif';
+    ctx.fillStyle='#166534';
+    ctx.fillText('BASKETBALL NIGHT',540,190);
+
+    const matchRows=[
+      {text:'NEXT MATCH',y:610,color:'#166534'},
+      {text:'NEXT MATCH',y:785,color:'#237a21'},
+      {text:'NEXT MATCH',y:960,color:'#45a92f'},
+      {text:'NEXT MATCH',y:1135,color:'#a7e08b'}
+    ];
+    ctx.textAlign='center';
+    matchRows.forEach(row=>{
+      ctx.fillStyle=row.color;
+      ctx.font='900 154px Impact, Anton, Poppins, sans-serif';
+      ctx.fillText(row.text,540,row.y);
+    });
+
+    ctx.save();
+    ctx.shadowColor='rgba(17,24,39,.22)';
+    ctx.shadowBlur=30;
+    ctx.shadowOffsetY=18;
     ctx.fillStyle='#fff7ed';
-    ctx.font='900 92px Fredoka, Poppins, sans-serif';
-    ctx.fillText('Le Kiosk',540,170);
-    ctx.font='800 28px Poppins, sans-serif';
-    ctx.fillStyle='#fde68a';
-    ctx.letterSpacing='0px';
-    ctx.fillText('GAME NIGHT',540,222);
-
-    ctx.fillStyle='rgba(255,255,255,.12)';
-    roundRect(ctx,80,285,920,1120,46,true,false);
-    ctx.strokeStyle='rgba(253,230,138,.55)';
-    ctx.lineWidth=3;
-    roundRect(ctx,80,285,920,1120,46,false,true);
-
-    drawPosterRoundImage(ctx,homeImg,145,430,280,m.home);
-    drawPosterRoundImage(ctx,awayImg,655,430,280,m.away);
-
-    ctx.fillStyle='#fde68a';
-    ctx.font='900 64px Fredoka, Poppins, sans-serif';
-    ctx.fillText('VS',540,610);
-
-    ctx.fillStyle='#fff7ed';
+    ctx.beginPath();
+    ctx.arc(540,820,176,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle='#f59e0b';
+    ctx.lineWidth=12;
+    ctx.beginPath();
+    ctx.arc(540,820,168,0,Math.PI*2);
+    ctx.stroke();
+    ctx.strokeStyle='rgba(69,26,3,.22)';
+    ctx.lineWidth=8;
+    ctx.beginPath();
+    ctx.arc(540,820,92,0,Math.PI*2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(540,650);
+    ctx.bezierCurveTo(500,735,500,905,540,990);
+    ctx.moveTo(540,650);
+    ctx.bezierCurveTo(580,735,580,905,540,990);
+    ctx.moveTo(382,820);
+    ctx.lineTo(698,820);
+    ctx.stroke();
+    ctx.fillStyle='#451a03';
     ctx.font='900 54px Fredoka, Poppins, sans-serif';
     ctx.textAlign='center';
-    drawPosterText(ctx,m.home,285,790,360,64,2);
-    drawPosterText(ctx,m.away,795,790,360,64,2);
+    ctx.fillText('VS',540,842);
 
-    ctx.fillStyle='#fff7ed';
-    ctx.font='900 74px Fredoka, Poppins, sans-serif';
-    ctx.fillText(m.time||'Tonight',540,1035);
-    ctx.font='800 34px Poppins, sans-serif';
-    ctx.fillStyle='#fde68a';
-    ctx.fillText(m.date||todayBeirutKey(),540,1092);
-    ctx.font='800 30px Poppins, sans-serif';
-    ctx.fillText(m.venue||'Le Kiosk',540,1140);
+    drawPosterLogo(ctx,homeImg,150,1232,150,150,m.home);
+    drawPosterLogo(ctx,awayImg,780,1232,150,150,m.away);
+    ctx.fillStyle='#374151';
+    ctx.font='900 46px Impact, Poppins, sans-serif';
+    ctx.textAlign='center';
+    drawPosterText(ctx,m.home,405,1300,250,50,2);
+    ctx.fillStyle='#111827';
+    ctx.font='900 48px Poppins, sans-serif';
+    ctx.fillText('VS',540,1328);
+    ctx.fillStyle='#374151';
+    ctx.font='900 46px Impact, Poppins, sans-serif';
+    drawPosterText(ctx,m.away,675,1300,250,50,2);
 
-    if(m.note){
-      ctx.fillStyle='rgba(255,247,237,.92)';
-      ctx.font='800 38px Poppins, sans-serif';
-      drawPosterText(ctx,m.note,540,1235,760,48,2);
-    }
+    ctx.fillStyle='#111827';
+    ctx.font='800 28px Poppins, sans-serif';
+    ctx.fillText(formatPosterDate(m.date),540,1446);
+    ctx.font='900 32px Poppins, sans-serif';
+    ctx.fillText(`START AT ${String(m.time||'TONIGHT').toUpperCase()}`,540,1492);
+    ctx.font='800 25px Poppins, sans-serif';
+    ctx.fillStyle='#6b7280';
+    ctx.fillText(String(m.venue||'Le Kiosk').toUpperCase(),540,1535);
 
-    ctx.fillStyle='#fff7ed';
-    ctx.font='900 58px Fredoka, Poppins, sans-serif';
-    ctx.fillText('Book Your Table Online',540,1518);
-    ctx.fillStyle='#fbbf24';
-    roundRect(ctx,210,1572,660,112,999,true,false);
-    ctx.fillStyle='#451a03';
-    ctx.font='900 38px Poppins, sans-serif';
-    ctx.fillText('Tap The Website Link Sticker',540,1642);
-    ctx.fillStyle='rgba(255,247,237,.9)';
-    ctx.font='800 26px Poppins, sans-serif';
-    ctx.fillText('Menu + reservations are on our website',540,1715);
+    const offer=String(m.note||'WATCH THE GAME AT LE KIOSK').toUpperCase();
+    ctx.fillStyle='#374151';
+    ctx.font='900 42px Impact, Poppins, sans-serif';
+    drawPosterText(ctx,offer,540,1627,850,52,2);
 
-    ctx.fillStyle='#fde68a';
-    ctx.font='800 26px Poppins, sans-serif';
-    ctx.fillText('Wadi Chahrour',540,1782);
+    ctx.fillStyle='#166534';
+    roundRect(ctx,175,1730,730,92,999,true,false);
+    ctx.fillStyle='#fff';
+    ctx.font='900 32px Poppins, sans-serif';
+    ctx.fillText('VISIT OUR WEBSITE TO BOOK',540,1787);
+    ctx.fillStyle='#6b7280';
+    ctx.font='800 23px Poppins, sans-serif';
+    ctx.fillText('ADD INSTAGRAM LINK STICKER OVER THE GREEN BUTTON',540,1850);
 
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
