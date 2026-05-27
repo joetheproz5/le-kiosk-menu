@@ -805,100 +805,86 @@ Requires Worker route:
 <script>
 (function(){
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const mic = document.getElementById('voice-order-mic');
+  const mic           = document.getElementById('voice-order-mic');
   const transcriptBox = document.getElementById('voice-order-text');
-  const resultBox = document.getElementById('voice-order-result');
-  const errorBox = document.getElementById('voice-order-error');
-  let recognition = null;
-  let listening = false;
-  let activeOrder = null;
-  let voiceNotes = {};
-
+  const resultBox     = document.getElementById('voice-order-result');
+  const errorBox      = document.getElementById('voice-order-error');
+  let recognition  = null;
+  let listening    = false;
+  let activeOrder  = null;
+  let voiceNotes   = {};
+ 
   function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, m => ({
-      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
-    }[m]));
+    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
   }
-
+ 
   function norm(s) {
-    return String(s || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, ' ')
-      .trim();
+    return String(s || '').toLowerCase().normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
   }
-
-  function showError(message) {
+ 
+  function showError(msg) {
     if (!errorBox) return;
-    errorBox.textContent = message;
+    errorBox.textContent = msg;
     errorBox.classList.add('show');
   }
-
+ 
   function clearError() {
     if (!errorBox) return;
     errorBox.textContent = '';
     errorBox.classList.remove('show');
   }
-
+ 
   function setTranscript(text) {
     if (!transcriptBox) return;
     transcriptBox.textContent = text;
     transcriptBox.classList.toggle('show', !!text);
   }
-
+ 
   function cartRef() {
     if (typeof cart !== 'undefined') return cart;
     window.cart = window.cart || {};
     return window.cart;
   }
-
+ 
   function metaRef() {
     return typeof itemMeta !== 'undefined' ? itemMeta : window.itemMeta;
   }
-
+ 
   function findCartKey(itemName) {
     const metaMap = metaRef();
     if (!metaMap) return '';
     const wanted = norm(itemName);
-    return Object.keys(metaMap).find(key => {
-      const meta = metaMap[key] || {};
-      return norm(meta.name) === wanted;
-    }) || Object.keys(metaMap).find(key => {
-      const meta = metaMap[key] || {};
-      return wanted && norm(meta.name).includes(wanted);
-    }) || Object.keys(metaMap).find(key => {
-      const meta = metaMap[key] || {};
-      const item = norm(meta.name);
-      return item && wanted.includes(item);
-    }) || '';
+    return Object.keys(metaMap).find(k => norm(metaMap[k]?.name) === wanted)
+        || Object.keys(metaMap).find(k => wanted && norm(metaMap[k]?.name).includes(wanted))
+        || Object.keys(metaMap).find(k => { const n = norm(metaMap[k]?.name); return n && wanted.includes(n); })
+        || '';
   }
-
+ 
   function qtyIdForKey(key) {
     const metaMap = metaRef();
     if (!metaMap) return '';
     const catKey = String(key || '').split('|')[0];
-    const sameCategoryKeys = Object.keys(metaMap).filter(k => k.startsWith(catKey + '|'));
-    const idx = sameCategoryKeys.indexOf(key);
+    const keys = Object.keys(metaMap).filter(k => k.startsWith(catKey + '|'));
+    const idx = keys.indexOf(key);
     return idx >= 0 ? `qty-${catKey}-${idx}` : '';
   }
-
+ 
   function syncMenuQtyUI() {
     const activeCart = cartRef();
     document.querySelectorAll('.qty-num').forEach(el => { el.textContent = '0'; });
     document.querySelectorAll('.item-card-wrap').forEach(el => el.classList.remove('has-qty'));
-
     Object.entries(activeCart).forEach(([key, qty]) => {
       const n = Math.max(0, Number(qty || 0));
       const qtyId = qtyIdForKey(key);
       if (!qtyId) return;
-      const num = document.getElementById(qtyId);
+      const num  = document.getElementById(qtyId);
       const card = document.getElementById('card-' + qtyId);
-      if (num) num.textContent = String(n);
+      if (num)  num.textContent = String(n);
       if (card) card.classList.toggle('has-qty', n > 0);
     });
   }
-
+ 
   function refreshCartViews() {
     syncMenuQtyUI();
     if (typeof updatePill === 'function') updatePill();
@@ -906,7 +892,7 @@ Requires Worker route:
       renderSheet();
     }
   }
-
+ 
   function ensureOrderMode() {
     if (typeof MENU_ORDERING_ENABLED !== 'undefined' && !MENU_ORDERING_ENABLED) {
       showError('Ordering is currently turned off.');
@@ -914,14 +900,11 @@ Requires Worker route:
     }
     if (typeof orderMode !== 'undefined' && !orderMode) {
       if (typeof toggleOrderMode === 'function') toggleOrderMode();
-      else {
-        orderMode = true;
-        document.body.classList.add('order-mode');
-      }
+      else { orderMode = true; document.body.classList.add('order-mode'); }
     }
     return true;
   }
-
+ 
   function patchOrderNotes() {
     if (window.__lkVoiceOrderNotesPatched) return;
     const originalOpen = window.open.bind(window);
@@ -941,9 +924,8 @@ Requires Worker route:
       } catch (_) {}
       return originalOpen(url, target, features);
     };
-
     if (typeof dispatchOrder === 'function') {
-      const originalDispatchOrder = dispatchOrder;
+      const orig = dispatchOrder;
       dispatchOrder = function(order) {
         if (order && Array.isArray(order.items)) {
           order.items = order.items.map(item => {
@@ -951,30 +933,28 @@ Requires Worker route:
             return note ? { ...item, notes: note, voiceNote: note } : item;
           });
         }
-        return originalDispatchOrder(order);
+        return orig(order);
       };
     }
-
     window.__lkVoiceOrderNotesPatched = true;
   }
-
+ 
   function renderResult(order) {
     activeOrder = order;
     const items = Array.isArray(order?.items) ? order.items : [];
     if (!resultBox) return;
-
+ 
     if (!items.length) {
       resultBox.innerHTML = `
         <div class="voice-order-summary">${esc(order?.summary || 'I could not find menu items from that.')}</div>
         <div class="voice-order-actions">
           <button class="voice-order-btn voice-order-retry" type="button" id="voice-order-retry">Try Again</button>
-        </div>
-      `;
+        </div>`;
       resultBox.classList.add('show');
       document.getElementById('voice-order-retry')?.addEventListener('click', startListening);
       return;
     }
-
+ 
     resultBox.innerHTML = `
       <div class="voice-order-summary">${esc(order.summary || 'Please confirm these items.')}</div>
       ${items.map(item => `
@@ -984,28 +964,26 @@ Requires Worker route:
             ${item.notes ? `<div class="voice-order-note">${esc(item.notes)}</div>` : ''}
           </div>
           <div class="voice-order-qty">x${Math.max(1, Number(item.qty || 1) || 1)}</div>
-        </div>
-      `).join('')}
-      ${Array.isArray(order.unmatched) && order.unmatched.length ? `<div class="voice-order-note">Not matched: ${esc(order.unmatched.join(', '))}</div>` : ''}
+        </div>`).join('')}
+      ${Array.isArray(order.unmatched) && order.unmatched.length
+        ? `<div class="voice-order-note">Not matched: ${esc(order.unmatched.join(', '))}</div>` : ''}
       <div class="voice-order-actions">
-        <button class="voice-order-btn voice-order-add" type="button" id="voice-order-add">Add To Cart</button>
+        <button class="voice-order-btn voice-order-add"   type="button" id="voice-order-add">Add To Cart</button>
         <button class="voice-order-btn voice-order-retry" type="button" id="voice-order-retry">Try Again</button>
-      </div>
-    `;
+      </div>`;
     resultBox.classList.add('show');
     document.getElementById('voice-order-add')?.addEventListener('click', addVoiceOrderToCart);
     document.getElementById('voice-order-retry')?.addEventListener('click', startListening);
   }
-
+ 
   async function parseTranscript(transcript) {
     clearError();
     if (!resultBox) return;
     resultBox.classList.remove('show');
     mic.disabled = true;
     mic.textContent = '...';
-
     try {
-      const res = await fetch(`${WORKER_URL}/api/voice-order`, {
+      const res  = await fetch(`${WORKER_URL}/api/voice-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript }),
@@ -1020,12 +998,11 @@ Requires Worker route:
       mic.textContent = '🎙';
     }
   }
-
+ 
   function addVoiceOrderToCart() {
     const items = Array.isArray(activeOrder?.items) ? activeOrder.items : [];
     if (!items.length || !ensureOrderMode()) return;
     patchOrderNotes();
-
     let added = 0;
     items.forEach(item => {
       const key = findCartKey(item.menuName);
@@ -1036,93 +1013,33 @@ Requires Worker route:
       if (item.notes) voiceNotes[item.menuName] = item.notes;
       added += qty;
     });
-
-    if (!added) {
-      showError('Could not add those items. Try adding them manually.');
-      return;
-    }
-
+    if (!added) { showError('Could not add those items. Try adding them manually.'); return; }
     refreshCartViews();
     document.body.classList.add('order-mode');
     resultBox.classList.remove('show');
     setTranscript('Added to cart.');
   }
-
+ 
   function startListening() {
-  clearError();
-  if (!SpeechRecognition) {
-    showError('Voice is not supported on this browser. Try Chrome on Android or desktop.');
-    return;
-  }
-  if (listening && recognition) {
-    recognition.stop();
-    return;
-  }
-
-  recognition = new SpeechRecognition();
-  recognition.lang = 'ar';
-  recognition.interimResults = true;
-  recognition.continuous = false;
-
-  let finalText = '';
-  let hasRetried = false;
-  listening = true;
-  mic.classList.add('listening');
-  mic.textContent = '■';
-  setTranscript('Listening...');
-
-  recognition.onresult = event => {
-    let interim = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const text = event.results[i][0].transcript;
-      if (event.results[i].isFinal) finalText += text + ' ';
-      else interim += text;
+    clearError();
+    if (!SpeechRecognition) {
+      showError('Voice is not supported on this browser. Try Chrome on Android or desktop.');
+      return;
     }
-    const current = (finalText + interim).trim();
-    setTranscript(current || 'Listening...');
-
-    // If mostly Latin chars (Arabizi/English), retry with en-US
-    if (!hasRetried && current.length > 3) {
-      const latinChars = (current.match(/[a-zA-Z]/g) || []).length;
-      const ratio = latinChars / current.replace(/\s/g, '').length;
-      if (ratio > 0.6) {
-        hasRetried = true;
-        recognition.abort();
-        recognition.lang = 'en-US';
-        recognition.start();
-      }
-    }
-  };
-
-  recognition.onerror = event => {
-    listening = false;
-    mic.classList.remove('listening');
-    mic.textContent = '🎙';
-    showError(event.error === 'not-allowed' ? 'Please allow microphone access.' : 'Voice error. Please try again.');
-  };
-
-  recognition.onend = () => {
-    // If we just switched to en-US, don't treat it as done yet
-    if (hasRetried && recognition.lang === 'ar') return;
-    listening = false;
-    mic.classList.remove('listening');
-    mic.textContent = '🎙';
-    const transcript = (finalText || transcriptBox?.textContent || '').replace(/^Listening\.\.\.$/, '').trim();
-    if (transcript) parseTranscript(transcript);
-    else setTranscript('');
-  };
-
-  recognition.start();
-}
-  }
-};
-
-    let finalText = '';
+    if (listening && recognition) { recognition.stop(); return; }
+ 
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ar';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+ 
+    let finalText  = '';
+    let hasRetried = false;
     listening = true;
     mic.classList.add('listening');
     mic.textContent = '■';
     setTranscript('Listening...');
-
+ 
     recognition.onresult = event => {
       let interim = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -1130,25 +1047,46 @@ Requires Worker route:
         if (event.results[i].isFinal) finalText += text + ' ';
         else interim += text;
       }
-      setTranscript((finalText + interim).trim() || 'Listening...');
+      const current = (finalText + interim).trim();
+      setTranscript(current || 'Listening...');
+ 
+      // Auto-switch to en-US if speech looks like Arabizi / English
+      if (!hasRetried && current.length > 3) {
+        const latinChars = (current.match(/[a-zA-Z]/g) || []).length;
+        const ratio = latinChars / current.replace(/\s/g, '').length;
+        if (ratio > 0.6) {
+          hasRetried = true;
+          recognition.abort();
+          recognition.lang = 'en-US';
+          recognition.start();
+        }
+      }
     };
-
+ 
     recognition.onerror = event => {
-      showError(event.error === 'not-allowed' ? 'Please allow microphone access.' : 'Voice error. Please try again.');
-    };
-
-    recognition.onend = () => {
       listening = false;
       mic.classList.remove('listening');
       mic.textContent = '🎙';
-      const transcript = (finalText || transcriptBox?.textContent || '').replace(/^Listening\.\.\.$/, '').trim();
+      showError(event.error === 'not-allowed'
+        ? 'Please allow microphone access.'
+        : 'Voice error. Please try again.');
+    };
+ 
+    recognition.onend = () => {
+      // Suppress the onend that fires right after abort() + restart
+      if (hasRetried && recognition.lang === 'en-US') return;
+      listening = false;
+      mic.classList.remove('listening');
+      mic.textContent = '🎙';
+      const transcript = (finalText || transcriptBox?.textContent || '')
+        .replace(/^Listening\.\.\.$/, '').trim();
       if (transcript) parseTranscript(transcript);
       else setTranscript('');
     };
-
+ 
     recognition.start();
   }
-
+ 
   mic?.addEventListener('click', startListening);
 })();
 </script>
