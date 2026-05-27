@@ -259,12 +259,17 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
-.product-sales-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-6px 0 18px}
-.product-sales-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.product-sales-name{font-size:13px;font-weight:900;color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
-.product-sales-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:5px}
-.product-sales-number{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;text-align:right}
-.product-sales-sub{font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:right;margin-top:4px}
+.dashboard-section{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;margin:-6px 0 18px;box-shadow:0 8px 24px rgba(17,24,39,.04)}
+.dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.dashboard-section-title{font-size:13px;font-weight:900;color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
+.dashboard-section-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.product-sales-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.product-sales-card{border:1px solid var(--line);border-radius:8px;padding:13px;background:var(--panel-2)}
+.product-sales-name{font-size:13px;font-weight:900;color:var(--ink)}
+.product-sales-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.product-sales-metric{border-radius:7px;background:#fff;border:1px solid var(--line);padding:9px;text-align:center}
+.product-sales-number{font-size:23px;font-weight:900;color:var(--brand-dark);line-height:1}
+.product-sales-sub{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
 .today-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-4px 0 18px}
 .today-card{background:#111827;color:#f9fafb;border:1px solid #0f172a;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.08)}
 .today-card:nth-child(2){background:var(--brand-dark);border-color:var(--brand)}
@@ -515,7 +520,15 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
       <section class="content">
         <div class="view active" id="view-dashboard">
           <div class="dash-grid" id="dashboard-stats"></div>
-          <div class="product-sales-grid" id="dashboard-product-sales"></div>
+          <div class="dashboard-section">
+            <div class="dashboard-section-head">
+              <div>
+                <div class="dashboard-section-title">Key Sandwich Sales</div>
+                <div class="dashboard-section-sub">Today, weekly, and total quantities from active orders</div>
+              </div>
+            </div>
+            <div class="product-sales-grid" id="dashboard-product-sales"></div>
+          </div>
           <div class="today-bar" id="dashboard-today"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
         </div>
@@ -2308,13 +2321,20 @@ function renderDashboardProductSales(){
   if(!el)return;
   el.innerHTML=dashboardProductSalesStats().map(item=>`
     <div class="product-sales-card">
-      <div>
-        <div class="product-sales-name">${esc(item.label)}</div>
-        <div class="product-sales-meta">${item.today} sold today · ${item.total} total</div>
-      </div>
-      <div>
-        <div class="product-sales-number">${item.week}</div>
-        <div class="product-sales-sub">Weekly</div>
+      <div class="product-sales-name">${esc(item.label)}</div>
+      <div class="product-sales-row">
+        <div class="product-sales-metric">
+          <div class="product-sales-number">${item.today}</div>
+          <div class="product-sales-sub">Today</div>
+        </div>
+        <div class="product-sales-metric">
+          <div class="product-sales-number">${item.week}</div>
+          <div class="product-sales-sub">Weekly</div>
+        </div>
+        <div class="product-sales-metric">
+          <div class="product-sales-number">${item.total}</div>
+          <div class="product-sales-sub">Total</div>
+        </div>
       </div>
     </div>
   `).join('');
