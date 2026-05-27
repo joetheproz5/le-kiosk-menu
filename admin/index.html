@@ -1072,16 +1072,26 @@ function basketballLogoForTeam(name){
   const hit=aliases.find(alias=>BASKETBALL_TEAM_LOGOS[alias]);
   return hit?BASKETBALL_TEAM_LOGOS[hit]:'';
 }
+function basketballStoredLogoPaths(name,fileName='logo.png'){
+  const key=basketballTeamLogoKey(name)||'team';
+  const rawExt=String(fileName||'logo.png').split('.').pop()||'png';
+  const ext=rawExt.toLowerCase().replace(/[^a-z0-9]/g,'')||'png';
+  return [`menupictures/teams/${key}.${ext}`,`teams/${key}.${ext}`];
+}
 function basketballLogoCandidatesForTeam(name,savedLogo){
   const aliases=basketballTeamLogoAliases(name);
-  const candidates=[savedLogo,basketballLogoForTeam(name)];
+  const saved=String(savedLogo||'').trim();
+  const savedIsRemote=/^https?:\/\//.test(saved);
+  const candidates=saved&&!savedIsRemote?[saved]:[];
   aliases.forEach(alias=>{
-    ['png','jpg'].forEach(ext=>{
+    ['png','jpg','jpeg','webp'].forEach(ext=>{
       candidates.push(`menupictures/teams/${alias}.${ext}`);
       candidates.push(`teams/${alias}.${ext}`);
     });
   });
-  return candidates.filter(Boolean);
+  if(saved&&savedIsRemote)candidates.push(saved);
+  candidates.push(basketballLogoForTeam(name));
+  return candidates.filter(Boolean).filter((value,index,arr)=>arr.indexOf(value)===index);
 }
 const BASKETBALL_POSTER_THEMES={
   blue:{
@@ -1660,8 +1670,22 @@ function basketballMatchEditorHtml(m,i){
       <div><label class="field-label">Time</label><input class="inp" type="text" value="${esc(m.time)}" placeholder="9:45 PM" onchange="updateBasketballMatch(${i},'time',this.value)"></div>
       <div><label class="field-label">Home</label><input class="inp" value="${esc(m.home)}" onchange="updateBasketballMatch(${i},'home',this.value)"></div>
       <div><label class="field-label">Away</label><input class="inp" value="${esc(m.away)}" onchange="updateBasketballMatch(${i},'away',this.value)"></div>
-      <div><label class="field-label">Home Logo</label><input class="inp" value="${esc(m.homeLogo)}" placeholder="menupictures/teams/home.png" onchange="updateBasketballMatch(${i},'homeLogo',this.value)"></div>
-      <div><label class="field-label">Away Logo</label><input class="inp" value="${esc(m.awayLogo)}" placeholder="menupictures/teams/away.png" onchange="updateBasketballMatch(${i},'awayLogo',this.value)"></div>
+      <div>
+        <label class="field-label">Home Logo</label>
+        <div class="field-row">
+          <input class="inp" value="${esc(m.homeLogo)}" placeholder="menupictures/teams/home.png" onchange="updateBasketballMatch(${i},'homeLogo',this.value)">
+          <button class="btn btn-soft btn-sm" type="button" onclick="triggerTeamLogoUpload(${i},'home')">Upload</button>
+        </div>
+        <input class="file-input" id="team-logo-home-${i}" type="file" accept="image/*" onchange="handleTeamLogoUpload(${i},'home',this)">
+      </div>
+      <div>
+        <label class="field-label">Away Logo</label>
+        <div class="field-row">
+          <input class="inp" value="${esc(m.awayLogo)}" placeholder="menupictures/teams/away.png" onchange="updateBasketballMatch(${i},'awayLogo',this.value)">
+          <button class="btn btn-soft btn-sm" type="button" onclick="triggerTeamLogoUpload(${i},'away')">Upload</button>
+        </div>
+        <input class="file-input" id="team-logo-away-${i}" type="file" accept="image/*" onchange="handleTeamLogoUpload(${i},'away',this)">
+      </div>
       <div><label class="field-label">Venue</label><input class="inp" value="${esc(m.venue)}" onchange="updateBasketballMatch(${i},'venue',this.value)"></div>
       <div><label class="field-label">League</label><input class="inp" value="${esc(m.league)}" onchange="updateBasketballMatch(${i},'league',this.value)"></div>
       <div><label class="field-label">Story Theme</label><select class="inp" onchange="updateBasketballMatch(${i},'posterTheme',this.value)">${basketballPosterThemeOptions(m.posterTheme)}</select></div>
@@ -2516,11 +2540,11 @@ async function handleImageUpload(i,input){
     getSec().items[i].image=path;markUnsaved();openItemEditor(i);renderEditor();showToast('Image uploaded','success');
   }catch(e){showToast('Upload failed: '+e.message,'error');if(bar)bar.style.width='0';}
 }
-async function uploadImage(file,onProgress){
+async function uploadImage(file,onProgress,customPath=''){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=async(e)=>{
-      const b64=e.target.result.split(',')[1],safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase(),path=IMG_FOLDER+'/'+safe;
+      const b64=e.target.result.split(',')[1],safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase(),path=customPath||IMG_FOLDER+'/'+safe;
       if(onProgress)onProgress(40);
       try{
         const res=await fetch(`${WORKER_URL}/image`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,b64,message:'Upload image: '+safe})});
@@ -2532,6 +2556,30 @@ async function uploadImage(file,onProgress){
     reader.onerror=()=>reject(new Error('File read failed'));
     reader.readAsDataURL(file);
   });
+}
+function triggerTeamLogoUpload(i,side){
+  document.getElementById(`team-logo-${side}-${i}`)?.click();
+}
+async function handleTeamLogoUpload(i,side,input){
+  if(!input.files||!input.files[0])return;
+  const m=configData.basketballMatches[i];
+  if(!m)return;
+  const file=input.files[0];
+  const team=side==='away'?m.away:m.home;
+  const path=basketballStoredLogoPaths(team,file.name)[0];
+  showLoading('Uploading team logo...');
+  try{
+    const savedPath=await uploadImage(file,null,path);
+    updateBasketballMatch(i,side==='away'?'awayLogo':'homeLogo',savedPath);
+    await saveConfig();
+    renderBasketballManager();
+    openBasketballMatchEditor(i);
+    showToast('Team logo uploaded and saved','success');
+  }catch(e){
+    showToast('Logo upload failed: '+e.message,'error');
+  }
+  input.value='';
+  hideLoading();
 }
 
 async function openBlockList(){
