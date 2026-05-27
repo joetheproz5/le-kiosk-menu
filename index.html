@@ -904,6 +904,11 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     backdrop-filter: blur(3px);
   }
   #basketball-popup.open { display: flex; }
+  #basketball-popup.closing {
+    display: flex;
+    pointer-events: none;
+    animation: basketballBackdropOut .42s ease forwards;
+  }
 
   .basketball-card {
     width: min(430px, 92vw);
@@ -916,6 +921,10 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
       linear-gradient(180deg, rgba(255,251,235,.98), rgba(254,243,199,.96));
     box-shadow: 0 24px 70px rgba(0,0,0,.36);
     position: relative;
+    transform-origin: top left;
+  }
+  #basketball-popup.closing .basketball-card {
+    animation: basketballCardToBubble .42s cubic-bezier(.34, 1.15, .64, 1) forwards;
   }
   .basketball-card::before {
     content: "";
@@ -1165,6 +1174,15 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     box-shadow: 0 10px 20px rgba(120,53,15,.22);
   }
   .basketball-reserve:hover { background: #451a03; }
+  .basketball-reserve:disabled,
+  .basketball-reserve.disabled {
+    background: #d1d5db;
+    color: #6b7280;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .basketball-reserve:disabled:hover,
+  .basketball-reserve.disabled:hover { background: #d1d5db; }
   .basketball-empty {
     padding: 22px 14px;
     text-align: center;
@@ -1181,6 +1199,29 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     .basketball-logo { width: 40px; height: 40px; }
     .basketball-team-name { font-size: 13px; }
     .basketball-vs { width: 36px; height: 36px; font-size: 12px; }
+  }
+  @keyframes basketballBackdropOut {
+    to {
+      background: rgba(28, 15, 0, 0);
+      backdrop-filter: blur(0);
+    }
+  }
+  @keyframes basketballCardToBubble {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+      border-radius: 26px;
+    }
+    75% {
+      opacity: .86;
+      transform: translate(calc(-50vw + 45px), calc(-50vh + 45px)) scale(.14) rotate(-5deg);
+      border-radius: 42px;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(-50vw + 33px), calc(-50vh + 33px)) scale(.08) rotate(-8deg);
+      border-radius: 999px;
+    }
   }
 </style>
 
@@ -1245,6 +1286,7 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     flb: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160'
   };
   let todaysMatches = [];
+  let closeTimer = null;
 
   function beirutDateKey(d = new Date()) {
     const parts = new Intl.DateTimeFormat('en-CA', {
@@ -1420,33 +1462,51 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
           <span class="basketball-time ${esc(status.cls)}">${esc(status.label)}</span>
           <div class="basketball-meta">${esc(m.league || 'Lebanon FLB')}${m.venue ? ' · ' + esc(m.venue) : ''}</div>
           ${m.note ? `<div class="basketball-meta basketball-note">${esc(m.note)}</div>` : ''}
-          ${m.reserveEnabled !== false ? `<button class="basketball-reserve" type="button" data-match="${i}">Reserve Table</button>` : ''}
+          ${m.reserveEnabled !== false ? `<button class="basketball-reserve${status.cls ? ' disabled' : ''}" type="button" data-match="${i}" ${status.cls ? 'disabled aria-disabled="true"' : ''}>${status.cls ? 'Reservations Closed' : 'Reserve Table'}</button>` : ''}
         </div>
       </div>
     `;
     }).join('');
 
     list.querySelectorAll('[data-match]').forEach(btn => {
-      btn.addEventListener('click', () => openReserve(todaysMatches[Number(btn.dataset.match)]));
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        openReserve(todaysMatches[Number(btn.dataset.match)]);
+      });
     });
   }
 
   function openPopup() {
     const popup = document.getElementById('basketball-popup');
     if (!popup) return;
+    clearTimeout(closeTimer);
     renderMatches();
+    popup.classList.remove('closing');
     popup.classList.add('open');
     popup.setAttribute('aria-hidden', 'false');
   }
 
-  function closePopup() {
+  function closePopup(animated = true) {
     const popup = document.getElementById('basketball-popup');
     const bubble = document.getElementById('basketball-bubble');
+    if (!popup || !popup.classList.contains('open')) return;
+    clearTimeout(closeTimer);
+    if (bubble && todaysMatches.length) {
+      bubble.classList.add('show');
+      bubble.classList.remove('hidden');
+    }
+    if (animated) {
+      popup.classList.add('closing');
+      closeTimer = setTimeout(() => {
+        popup.classList.remove('open', 'closing');
+        popup.setAttribute('aria-hidden', 'true');
+      }, 430);
+      return;
+    }
     if (popup) {
-      popup.classList.remove('open');
+      popup.classList.remove('open', 'closing');
       popup.setAttribute('aria-hidden', 'true');
     }
-    if (bubble && todaysMatches.length) bubble.classList.add('show');
   }
 
   async function loadBasketballMatches() {
