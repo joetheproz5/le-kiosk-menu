@@ -129,6 +129,239 @@
 </header>
 
 <nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto"></nav>
+<!-- Le Kiosk AI Combo Builder
+Paste this into the public menu page after WORKER_URL is defined.
+Recommended placement: below the nav and above <main id="menu-container">.
+-->
+
+<style>
+  .ai-combo-box {
+    max-width: 28rem;
+    margin: 18px auto 0;
+    padding: 0 16px;
+  }
+  .ai-combo-card {
+    background: #fff;
+    border: 1px solid rgba(251,191,36,.55);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(69,26,3,.08);
+  }
+  .ai-combo-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    color: #451a03;
+    line-height: 1;
+  }
+  .ai-combo-copy {
+    font-size: 11px;
+    color: #92400e;
+    font-weight: 700;
+    margin-top: 5px;
+  }
+  .ai-combo-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .ai-combo-input {
+    flex: 1;
+    min-width: 0;
+    border: 2px solid #fde68a;
+    border-radius: 13px;
+    background: #fffbeb;
+    color: #451a03;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 12px;
+    outline: none;
+  }
+  .ai-combo-input:focus {
+    border-color: #f59e0b;
+  }
+  .ai-combo-btn {
+    border: 0;
+    border-radius: 13px;
+    background: #78350f;
+    color: #fff7ed;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 0 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ai-combo-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+  .ai-combo-result {
+    display: none;
+    margin-top: 12px;
+    border-radius: 15px;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    padding: 13px;
+  }
+  .ai-combo-result.show {
+    display: block;
+  }
+  .ai-combo-name {
+    font-family: 'Fredoka', sans-serif;
+    color: #451a03;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .ai-combo-desc {
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .ai-combo-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .ai-combo-chip {
+    background: #fff;
+    border: 1px solid #fcd34d;
+    color: #78350f;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .ai-combo-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .ai-combo-price {
+    color: #451a03;
+    font-size: 15px;
+    font-weight: 900;
+  }
+  .ai-combo-try {
+    border: 0;
+    background: #fff;
+    color: #78350f;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .ai-combo-error {
+    display: none;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .ai-combo-error.show {
+    display: block;
+  }
+</style>
+
+<section class="ai-combo-box" id="ai-combo-builder">
+  <div class="ai-combo-card">
+    <div class="ai-combo-title">AI Combo Builder</div>
+    <div class="ai-combo-copy">Tell us what you crave and we’ll build a snack combo.</div>
+    <div class="ai-combo-row">
+      <input class="ai-combo-input" id="ai-combo-input" type="text" placeholder="Chocolate, salty, fruity..." autocomplete="off">
+      <button class="ai-combo-btn" id="ai-combo-btn" type="button">Build My Combo</button>
+    </div>
+    <div class="ai-combo-error" id="ai-combo-error"></div>
+    <div class="ai-combo-result" id="ai-combo-result"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const input = document.getElementById('ai-combo-input');
+  const btn = document.getElementById('ai-combo-btn');
+  const result = document.getElementById('ai-combo-result');
+  const error = document.getElementById('ai-combo-error');
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
+  }
+
+  function showError(message) {
+    error.textContent = message;
+    error.classList.add('show');
+  }
+
+  function clearError() {
+    error.textContent = '';
+    error.classList.remove('show');
+  }
+
+  function renderCombo(combo) {
+    const items = Array.isArray(combo.items) ? combo.items : [];
+    const total = Number(combo.totalPrice || 0);
+    result.innerHTML = `
+      <div class="ai-combo-name">${esc(combo.comboName || 'Your Combo')}</div>
+      <div class="ai-combo-desc">${esc(combo.description || '')}</div>
+      <div class="ai-combo-items">
+        ${items.map(item => `<span class="ai-combo-chip">${esc(item)}</span>`).join('')}
+      </div>
+      <div class="ai-combo-foot">
+        <span class="ai-combo-price">$${total.toFixed(2)}</span>
+        <button class="ai-combo-try" type="button" id="ai-combo-try">Try Again</button>
+      </div>
+    `;
+    result.classList.add('show');
+    document.getElementById('ai-combo-try')?.addEventListener('click', buildCombo);
+  }
+
+  async function buildCombo() {
+    const craving = input.value.trim();
+    if (!craving) {
+      showError('Tell us what you are craving first.');
+      input.focus();
+      return;
+    }
+
+    clearError();
+    result.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Building...';
+
+    try {
+      const res = await fetch(`${WORKER_URL}/api/combo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ craving }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not build combo');
+      renderCombo(data.combo || data);
+    } catch (e) {
+      showError(e.message || 'Could not build combo. Try again.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Build My Combo';
+    }
+  }
+
+  btn?.addEventListener('click', buildCombo);
+  input?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') buildCombo();
+  });
+})();
+</script>
 
 <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
