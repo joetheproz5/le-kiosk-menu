@@ -121,6 +121,9 @@ body.theme-dark .addon-group-card,
 body.theme-dark .reward-row,
 body.theme-dark .mini-row,
 body.theme-dark .edit-row,
+body.theme-dark .dashboard-section,
+body.theme-dark .product-sales-card,
+body.theme-dark .product-sales-metric,
 body.theme-dark .editor-section,
 body.theme-dark .match-team-logo-wrap,
 body.theme-dark #preview-panel,
@@ -263,7 +266,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .dashboard-section-title{font-size:13px;font-weight:900;color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
 .dashboard-section-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
-.product-sales-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.product-sales-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .product-sales-card{border:1px solid var(--line);border-radius:8px;padding:13px;background:var(--panel-2)}
 .product-sales-name{font-size:13px;font-weight:900;color:var(--ink)}
 .product-sales-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
@@ -416,7 +419,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .mega-search{width:100%;max-width:none;min-width:0}
   .content{padding:16px 14px 80px}
   .grid-menu,.settings-grid{grid-template-columns:1fr}
-  .dash-grid,.today-bar,.feature-grid,.loyalty-grid,.chart-grid{grid-template-columns:1fr}
+  .dash-grid,.today-bar,.feature-grid,.loyalty-grid,.chart-grid,.product-sales-grid{grid-template-columns:1fr}
   .customer-grid{grid-template-columns:1fr 1fr}
   .loyalty-customer{grid-template-columns:1fr 1fr}
   .reward-fields-grid,.reward-value-grid{grid-template-columns:1fr}
@@ -2273,7 +2276,8 @@ function orderItemsForStats(row){
 const DASHBOARD_PRODUCT_TARGETS=[
   {id:'fajita',label:'Fajita',aliases:['fajita','fahita']},
   {id:'taouk',label:'Taouk',aliases:['taouk','tawouk']},
-  {id:'crispy_burger',label:'Crispy Burger',aliases:['crispy burger','crispyburger']}
+  {id:'crispy_burger',label:'Crispy Burger',aliases:['crispy burger','crispyburger']},
+  {id:'loaded_fries',label:'Loaded Fries',aliases:['loaded fries','loadedfries']}
 ];
 function dashboardProductSalesStats(){
   const stats=Object.fromEntries(DASHBOARD_PRODUCT_TARGETS.map(t=>[t.id,{...t,today:0,week:0,total:0}]));
