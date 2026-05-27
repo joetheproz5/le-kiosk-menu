@@ -354,6 +354,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .edit-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .edit-row{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .edit-row:hover{border-color:var(--brand-line);box-shadow:0 6px 18px rgba(17,24,39,.05)}
+.edit-row.drag-over{border-color:var(--accent);background:#fffbeb}
 .edit-row-img{width:54px;height:54px;border-radius:8px;background:var(--soft);object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--brand)}
 .edit-row-title{font-size:13px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .edit-row-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px;line-height:1.35}
@@ -1227,7 +1228,23 @@ function basketballPosterLogoUrls(src){
 }
 function proxiedPosterLogoUrl(url){
   if(!/^https?:\/\//.test(url))return '';
-  return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''));
+  return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''))+'&output=png';
+}
+function alternatePosterProxyUrl(url){
+  if(!/^https?:\/\//.test(url))return '';
+  return 'https://wsrv.nl/?url='+encodeURIComponent(url)+'&output=png';
+}
+function isPosterImageCanvasSafe(img){
+  try{
+    const c=document.createElement('canvas');
+    c.width=2;c.height=2;
+    const x=c.getContext('2d');
+    x.drawImage(img,0,0,2,2);
+    c.toDataURL('image/png');
+    return true;
+  }catch(_){
+    return false;
+  }
 }
 function loadPosterImage(src){
   return loadPosterImageAny([src]);
@@ -1236,12 +1253,12 @@ function loadPosterImageAny(sources){
   const urls=[];
   (sources||[]).forEach(src=>{
     basketballPosterLogoUrls(src).forEach(url=>{
-      [url,proxiedPosterLogoUrl(url)].filter(Boolean).forEach(candidate=>{
+      [url,proxiedPosterLogoUrl(url),alternatePosterProxyUrl(url)].filter(Boolean).forEach(candidate=>{
         if(!urls.includes(candidate))urls.push(candidate);
       });
     });
   });
-  const limited=urls.slice(0,10);
+  const limited=urls.slice(0,14);
   return new Promise(resolve=>{
     if(!limited.length){resolve(null);return;}
     let settled=false,pending=limited.length;
@@ -1251,7 +1268,7 @@ function loadPosterImageAny(sources){
     limited.forEach(url=>{
       const img=new Image();
       img.crossOrigin='anonymous';
-      img.onload=()=>{clearTimeout(fallback);finish(img);};
+      img.onload=()=>{if(isPosterImageCanvasSafe(img)){clearTimeout(fallback);finish(img);}else done();};
       img.onerror=done;
       img.src=url;
     });
@@ -2145,22 +2162,22 @@ function renderCategoriesHub(){
   const el=document.getElementById('categories-hub');
   if(!el)return;
   if(!menuData.length){el.innerHTML='<div class="empty-state">No categories yet.</div>';return;}
-  el.innerHTML=menuData.map((sec,i)=>{
+  el.innerHTML=`<div class="edit-list">${menuData.map((sec,i)=>{
     const isAddon=sec.type==='addons';
     const count=isAddon?(sec.addonGroups||[]).length:(sec.items||[]).length;
     const banner=!isAddon&&sec.bottomBanner!==undefined?' · Banner on':'';
-    return `<div class="hub-card">
-      <div class="hub-top">
-        <div><div class="hub-title">${esc(sec.title||'Untitled')}</div><div class="hub-meta">${esc(sec.key||'no-key')} · ${isAddon?'Add-ons':'Menu Items'}${banner}</div></div>
-        <span class="hub-badge">${count}</span>
+    return `<div class="edit-row" draggable="true" ondragstart="dragCategoryStart(event,${i})" ondragover="dragCategoryOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropCategoryHub(event,${i})">
+      <div class="edit-row-img">::</div>
+      <div>
+        <div class="edit-row-title">${esc(sec.title||'Untitled')}</div>
+        <div class="edit-row-meta">${esc(sec.key||'no-key')} · ${isAddon?'Add-ons':'Menu Items'} · ${count} entries${banner}</div>
       </div>
-      <div class="hub-actions">
+      <div class="edit-row-actions">
+        <span class="edit-badge">${i+1}</span>
         <button class="btn btn-soft btn-sm" onclick="openCategory(${i})">Edit</button>
-        <button class="btn btn-soft btn-sm" onclick="moveCategory(${i},-1)">Up</button>
-        <button class="btn btn-soft btn-sm" onclick="moveCategory(${i},1)">Down</button>
       </div>
     </div>`;
-  }).join('');
+  }).join('')}</div>`;
 }
 function renderItemsHub(){
   const el=document.getElementById('items-hub');
@@ -2291,6 +2308,10 @@ function dropCategory(e,i){
   e.preventDefault();e.currentTarget.classList.remove('drag-over');
   if(dragSrcIdx===null||dragSrcIdx===i)return;
   const moved=menuData.splice(dragSrcIdx,1)[0];menuData.splice(i,0,moved);activeTab=i;dragSrcIdx=null;markUnsaved();renderCategoryList();renderEditor();
+}
+function dropCategoryHub(e,i){
+  dropCategory(e,i);
+  renderCategoriesHub();
 }
 function getSec(){return menuData[activeTab];}
 function renderEditor(){
