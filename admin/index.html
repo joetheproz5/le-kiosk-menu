@@ -150,6 +150,10 @@ body.theme-dark .mega-result.active,
 body.theme-dark .cat-row:hover{background:#1f2937}
 body.theme-dark .chart-canvas{background:linear-gradient(180deg,#1f2937 0%,#111827 72%)}
 body.theme-dark .product-sales-metric{background:#101722}
+body.theme-dark .today-card{background:#111827;border-color:#1f2937;color:#e5e7eb;box-shadow:none}
+body.theme-dark .today-card:nth-child(2){background:#2b220f;border-color:#4b3710;color:#fde68a}
+body.theme-dark .today-card:nth-child(3){background:#10251c;border-color:#1f4635;color:#bbf7d0}
+body.theme-dark .today-icon{background:rgba(255,255,255,.07)}
 body.theme-dark .cat-row{background:var(--panel);color:var(--ink)}
 body.theme-dark .cat-row.active{background:#2c1d07;border-color:#78350f}
 body.theme-dark .btn-soft,
@@ -276,13 +280,13 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .product-sales-number{font-size:23px;font-weight:900;color:var(--brand-dark);line-height:1}
 .product-sales-sub{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
 .today-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-4px 0 18px}
-.today-card{background:#111827;color:#f9fafb;border:1px solid #0f172a;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.08)}
-.today-card:nth-child(2){background:var(--brand-dark);border-color:var(--brand)}
-.today-card:nth-child(3){background:#0f3d2e;border-color:#14532d}
-.today-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.68)}
-.today-value{font-size:28px;font-weight:900;line-height:1;margin-top:7px;color:#fff}
-.today-note{font-size:11px;font-weight:700;color:rgba(255,255,255,.66);margin-top:6px}
-.today-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fbbf24;flex-shrink:0}
+.today-card{background:#eff6ff;color:#1e3a8a;border:1px solid #bfdbfe;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.06)}
+.today-card:nth-child(2){background:#fffbeb;border-color:#fde68a;color:#78350f}
+.today-card:nth-child(3){background:#ecfdf5;border-color:#bbf7d0;color:#14532d}
+.today-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:currentColor;opacity:.7}
+.today-value{font-size:28px;font-weight:900;line-height:1;margin-top:7px;color:currentColor}
+.today-note{font-size:11px;font-weight:700;color:currentColor;opacity:.68;margin-top:6px}
+.today-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.62);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:currentColor;flex-shrink:0}
 .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
 .chart-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0;box-shadow:0 8px 24px rgba(17,24,39,.05);overflow:hidden}
 .chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
