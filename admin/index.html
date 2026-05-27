@@ -1125,9 +1125,14 @@ function basketballPosterLogoUrl(src){
   if(/^https?:|^data:/.test(value))return value;
   return new URL(value,location.href).href;
 }
+function proxiedPosterLogoUrl(url){
+  if(!/^https?:\/\//.test(url))return url;
+  return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//,''));
+}
 function loadPosterImage(src){
   return new Promise(resolve=>{
-    const url=basketballPosterLogoUrl(src);
+    const rawUrl=basketballPosterLogoUrl(src);
+    const url=proxiedPosterLogoUrl(rawUrl);
     if(!url){resolve(null);return;}
     const img=new Image();
     img.crossOrigin='anonymous';
@@ -1282,7 +1287,7 @@ async function generateBasketballStory(i){
 
     ctx.fillStyle='#fde68a';
     ctx.font='800 26px Poppins, sans-serif';
-    ctx.fillText('Wadi Chahrour - Waffle & Ice Cream',540,1770);
+    ctx.fillText('Wadi Chahrour',540,1770);
 
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
