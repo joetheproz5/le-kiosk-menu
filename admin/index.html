@@ -352,6 +352,10 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .modal h3{font-family:var(--brandfont);font-size:22px;color:var(--brand-dark)}
 .modal-body{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5;margin:6px 0 20px}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px}
+.poster-share-card{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px;align-items:center}
+.poster-share-preview{width:170px;aspect-ratio:9/16;border-radius:8px;border:1px solid var(--line);object-fit:cover;background:var(--soft);box-shadow:0 8px 22px rgba(17,24,39,.12)}
+.poster-share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.poster-share-note{font-size:12px;font-weight:700;color:var(--muted);line-height:1.45;margin-top:8px}
 .edit-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .edit-row{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .edit-row:hover{border-color:var(--brand-line);box-shadow:0 6px 18px rgba(17,24,39,.05)}
@@ -414,6 +418,8 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .match-team-name{font-size:13px}
   .edit-row-actions{grid-column:1/-1;justify-content:flex-start}
   .editor-grid,.editor-grid.three{grid-template-columns:1fr}
+  .poster-share-card{grid-template-columns:1fr}
+  .poster-share-preview{width:min(210px,100%);justify-self:center}
 }
 </style>
 </head>
@@ -791,6 +797,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const IMG_FOLDER='menupictures';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
+const BASKETBALL_WA_NUMBER='96176840244';
 const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=6*60*60*1000;
 const AUTH_STORAGE_KEY='lk_admin_auth';
 const THEME_STORAGE_KEY='lk_admin_theme';
@@ -818,6 +825,7 @@ let configData={testingMode:false,menuOrderingEnabled:true,loyaltyEnabled:true,b
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
+let generatedBasketballPoster=null;
 function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
 function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
 function activeTheme(){return savedTheme()||systemTheme()}
@@ -1277,6 +1285,70 @@ function basketballMessage(m){
 }
 function basketballPosterFilename(m){
   return `le-kiosk-${m.date}-${m.home}-vs-${m.away}`.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.png';
+}
+function basketballPosterCaption(m){
+  return `Le Kiosk Basketball Watch Night\n${m.home} vs ${m.away}\n${formatPosterDate(m.date)} · ${m.time}\nVisit our website to book.`;
+}
+function canvasToPngBlob(canvas){
+  return new Promise((resolve,reject)=>{
+    canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Could not export PNG')),'image/png');
+  });
+}
+function setGeneratedBasketballPoster(blob,filename,match){
+  if(generatedBasketballPoster?.url)URL.revokeObjectURL(generatedBasketballPoster.url);
+  const file=new File([blob],filename,{type:'image/png'});
+  generatedBasketballPoster={
+    blob,
+    file,
+    filename,
+    url:URL.createObjectURL(blob),
+    caption:basketballPosterCaption(match)
+  };
+}
+function downloadGeneratedBasketballPoster(){
+  if(!generatedBasketballPoster){showToast('Generate a poster first','error');return;}
+  const a=document.createElement('a');
+  a.href=generatedBasketballPoster.url;
+  a.download=generatedBasketballPoster.filename;
+  a.click();
+  showToast('Story poster downloaded','success');
+}
+async function shareGeneratedBasketballPoster(){
+  if(!generatedBasketballPoster){showToast('Generate a poster first','error');return;}
+  const payload={
+    title:'Le Kiosk Story Poster',
+    text:generatedBasketballPoster.caption,
+    files:[generatedBasketballPoster.file]
+  };
+  try{
+    if(navigator.canShare?.({files:[generatedBasketballPoster.file]})&&navigator.share){
+      await navigator.share(payload);
+      showToast('Poster shared','success');
+      return;
+    }
+  }catch(e){
+    if(e.name==='AbortError')return;
+  }
+  downloadGeneratedBasketballPoster();
+  window.open(`https://wa.me/${BASKETBALL_WA_NUMBER}?text=${encodeURIComponent(generatedBasketballPoster.caption+'\n\nAttach the downloaded poster image.')}`,'_blank');
+  showToast('Poster downloaded and WhatsApp opened','success');
+}
+function openBasketballStoryOptions(m){
+  if(!generatedBasketballPoster)return;
+  openEditorModal('Story Poster Ready',`
+    <div class="poster-share-card">
+      <img class="poster-share-preview" src="${generatedBasketballPoster.url}" alt="Generated story poster">
+      <div>
+        <div class="setting-title">${esc(m.home)} vs ${esc(m.away)}</div>
+        <div class="setting-copy">${esc(formatPosterDate(m.date))} · ${esc(m.time)} · ${esc(m.venue||'Le Kiosk')}</div>
+        <div class="poster-share-actions">
+          <button class="btn btn-save" type="button" onclick="downloadGeneratedBasketballPoster()">Download PNG</button>
+          <button class="btn btn-blue" type="button" onclick="shareGeneratedBasketballPoster()">WhatsApp</button>
+        </div>
+        <div class="poster-share-note">On phones, WhatsApp can receive the image through the share sheet. On desktop, the poster downloads and the WhatsApp chat opens with the caption.</div>
+      </div>
+    </div>
+  `,'Close',null);
 }
 function basketballPosterLogoUrls(src){
   const value=String(src||'').trim();
@@ -1741,11 +1813,10 @@ async function generateBasketballStory(i,themeOverride=null){
     ctx.font='900 34px Poppins, sans-serif';
     ctx.fillText('VISIT OUR WEBSITE TO BOOK',540,1852);
 
-    const a=document.createElement('a');
-    a.href=canvas.toDataURL('image/png');
-    a.download=basketballPosterFilename(m);
-    a.click();
-    showToast('Story poster downloaded','success');
+    const blob=await canvasToPngBlob(canvas);
+    setGeneratedBasketballPoster(blob,basketballPosterFilename(m),m);
+    openBasketballStoryOptions(m);
+    showToast('Story poster ready','success');
   }catch(e){
     console.error(e);
     showToast('Poster failed: '+e.message,'error');
