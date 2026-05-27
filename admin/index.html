@@ -1024,8 +1024,30 @@ const BASKETBALL_TEAM_LOGOS={
 function basketballTeamLogoKey(name){
   return String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');
 }
+function basketballTeamLogoAliases(name){
+  const key=basketballTeamLogoKey(name);
+  if(!key)return [];
+  const aliases=[key];
+  Object.keys(BASKETBALL_TEAM_LOGOS).forEach(alias=>{
+    if((key.includes(alias)||alias.includes(key))&&!aliases.includes(alias))aliases.push(alias);
+  });
+  return aliases;
+}
 function basketballLogoForTeam(name){
-  return BASKETBALL_TEAM_LOGOS[basketballTeamLogoKey(name)]||'';
+  const aliases=basketballTeamLogoAliases(name);
+  const hit=aliases.find(alias=>BASKETBALL_TEAM_LOGOS[alias]);
+  return hit?BASKETBALL_TEAM_LOGOS[hit]:'';
+}
+function basketballLogoCandidatesForTeam(name,savedLogo){
+  const aliases=basketballTeamLogoAliases(name);
+  const candidates=[basketballLogoForTeam(name),savedLogo];
+  aliases.forEach(alias=>{
+    ['png','jpg','jpeg','webp'].forEach(ext=>{
+      candidates.push(`menupictures/teams/${alias}.${ext}`);
+      candidates.push(`teams/${alias}.${ext}`);
+    });
+  });
+  return candidates.filter(Boolean);
 }
 const BASKETBALL_POSTER_THEMES={
   blue:{
@@ -1329,10 +1351,8 @@ async function generateBasketballStory(i){
     canvas.width=1080;
     canvas.height=1920;
     const ctx=canvas.getContext('2d');
-    const homeKey=basketballTeamLogoKey(m.home);
-    const awayKey=basketballTeamLogoKey(m.away);
-    const homeLogoCandidates=[basketballLogoForTeam(m.home),m.homeLogo,`menupictures/teams/${homeKey}.png`];
-    const awayLogoCandidates=[basketballLogoForTeam(m.away),m.awayLogo,`menupictures/teams/${awayKey}.png`];
+    const homeLogoCandidates=basketballLogoCandidatesForTeam(m.home,m.homeLogo);
+    const awayLogoCandidates=basketballLogoCandidatesForTeam(m.away,m.awayLogo);
     const theme=basketballPosterTheme(m.posterTheme);
     const brandLogo=`${STORAGE_PUBLIC_BASE}/logo.png`;
     const brandLogoAlt=`${STORAGE_PUBLIC_BASE}/menupictures/logo.png`;
