@@ -304,12 +304,26 @@ Recommended placement: below the nav and above <main id="menu-container">.
     color: #dc2626;
   }
 </style>
+
+<section class="ai-combo-box" id="ai-combo-builder">
+  <div class="ai-combo-card">
+    <div class="ai-combo-title">AI Combo Builder</div>
+    <div class="ai-combo-copy">Tell us what you crave and we’ll build a snack combo.</div>
+    <div class="ai-combo-row">
+      <input class="ai-combo-input" id="ai-combo-input" type="text" placeholder="Chocolate, salty, fruity..." autocomplete="off">
+      <button class="ai-combo-btn" id="ai-combo-btn" type="button">Build My Combo</button>
+    </div>
+    <div class="ai-combo-error" id="ai-combo-error"></div>
+    <div class="ai-combo-result" id="ai-combo-result"></div>
+  </div>
+</section>
+
 <script>
 (function(){
-  const input = document.getElementById('ai-combo-input');
-  const btn = document.getElementById('ai-combo-btn');
-  const result = document.getElementById('ai-combo-result');
-  const error = document.getElementById('ai-combo-error');
+  function inputEl() { return document.getElementById('ai-combo-input'); }
+  function btnEl() { return document.getElementById('ai-combo-btn'); }
+  function resultEl() { return document.getElementById('ai-combo-result'); }
+  function errorEl() { return document.getElementById('ai-combo-error'); }
   let activeCombo = null;
 
   function esc(s) {
@@ -319,11 +333,15 @@ Recommended placement: below the nav and above <main id="menu-container">.
   }
 
   function showError(message) {
+    const error = errorEl();
+    if (!error) return;
     error.textContent = message;
     error.classList.add('show');
   }
 
   function clearError() {
+    const error = errorEl();
+    if (!error) return;
     error.textContent = '';
     error.classList.remove('show');
   }
@@ -385,7 +403,25 @@ Recommended placement: below the nav and above <main id="menu-container">.
     });
   }
 
+  function patchChangeQty() {
+    if (window.__lkComboChangeQtyPatched) return;
+    if (typeof changeQty !== 'function') return;
+    const originalChangeQty = changeQty;
+    changeQty = function(itemKey, delta, elId) {
+      originalChangeQty(itemKey, delta, elId);
+      if (typeof cart !== 'undefined' && cart[itemKey] <= 0) {
+        delete cart[itemKey];
+        if (typeof addonSel !== 'undefined') delete addonSel[itemKey];
+        if (typeof shishaSel !== 'undefined') delete shishaSel[itemKey];
+      }
+      syncMenuQtyUI();
+      if (typeof updatePill === 'function') updatePill();
+    };
+    window.__lkComboChangeQtyPatched = true;
+  }
+
   function refreshCartViews() {
+    patchChangeQty();
     syncMenuQtyUI();
     if (typeof updatePill === 'function') updatePill();
     if (document.getElementById('checkout-sheet')?.classList.contains('open') && typeof renderSheet === 'function') {
@@ -470,6 +506,8 @@ Recommended placement: below the nav and above <main id="menu-container">.
   }
 
   function renderCombo(combo) {
+    const result = resultEl();
+    if (!result) return;
     activeCombo = combo;
     const items = Array.isArray(combo.items) ? combo.items : [];
     const total = Number(combo.totalPrice || 0);
@@ -493,6 +531,10 @@ Recommended placement: below the nav and above <main id="menu-container">.
   }
 
   async function buildCombo() {
+    const input = inputEl();
+    const btn = btnEl();
+    const result = resultEl();
+    if (!input || !btn || !result) return;
     const craving = input.value.trim();
     if (!craving) {
       showError('Tell us what you are craving first.');
@@ -522,10 +564,19 @@ Recommended placement: below the nav and above <main id="menu-container">.
     }
   }
 
-  btn?.addEventListener('click', buildCombo);
-  input?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') buildCombo();
-  });
+  function bindComboUI() {
+    patchChangeQty();
+    btnEl()?.addEventListener('click', buildCombo);
+    inputEl()?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') buildCombo();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindComboUI);
+  } else {
+    bindComboUI();
+  }
 
   document.addEventListener('click', e => {
     const minus = e.target.closest('[data-cart-minus]');
@@ -552,169 +603,7 @@ Recommended placement: below the nav and above <main id="menu-container">.
   }
 })();
 </script>
-<section class="ai-combo-box" id="ai-combo-builder">
-  <div class="ai-combo-card">
-    <div class="ai-combo-title">AI Combo Builder</div>
-    <div class="ai-combo-copy">Tell us what you crave and we’ll build a snack combo.</div>
-    <div class="ai-combo-row">
-      <input class="ai-combo-input" id="ai-combo-input" type="text" placeholder="Chocolate, salty, fruity..." autocomplete="off">
-      <button class="ai-combo-btn" id="ai-combo-btn" type="button">Build My Combo</button>
-    </div>
-    <div class="ai-combo-error" id="ai-combo-error"></div>
-    <div class="ai-combo-result" id="ai-combo-result"></div>
-  </div>
-</section>
 
-<script>
-(function(){
-  const input = document.getElementById('ai-combo-input');
-  const btn = document.getElementById('ai-combo-btn');
-  const result = document.getElementById('ai-combo-result');
-  const error = document.getElementById('ai-combo-error');
-  let activeCombo = null;
-
-  function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, m => ({
-      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
-    }[m]));
-  }
-
-  function showError(message) {
-    error.textContent = message;
-    error.classList.add('show');
-  }
-
-  function clearError() {
-    error.textContent = '';
-    error.classList.remove('show');
-  }
-
-  function norm(s) {
-    return String(s || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, ' ')
-      .trim();
-  }
-
-  function findCartKey(itemName) {
-    const metaMap = typeof itemMeta !== 'undefined' ? itemMeta : window.itemMeta;
-    if (!metaMap) return '';
-    const wanted = norm(itemName);
-    return Object.keys(metaMap).find(key => {
-      const meta = metaMap[key] || {};
-      return norm(meta.name) === wanted;
-    }) || Object.keys(metaMap).find(key => {
-      const meta = metaMap[key] || {};
-      return wanted && norm(meta.name).includes(wanted);
-    }) || '';
-  }
-
-  function addComboToCart() {
-    const items = Array.isArray(activeCombo?.items) ? activeCombo.items : [];
-    if (!items.length) return;
-
-    if (typeof MENU_ORDERING_ENABLED !== 'undefined' && !MENU_ORDERING_ENABLED) {
-      showError('Ordering is currently turned off.');
-      return;
-    }
-
-    if (typeof orderMode !== 'undefined' && !orderMode) {
-      if (typeof toggleOrderMode === 'function') {
-        toggleOrderMode();
-      } else {
-        orderMode = true;
-        document.body.classList.add('order-mode');
-      }
-    }
-
-    let added = 0;
-    items.forEach(name => {
-      const key = findCartKey(name);
-      if (!key) return;
-      if (typeof cart !== 'undefined') {
-        cart[key] = Math.max(0, Number(cart[key] || 0)) + 1;
-      } else {
-        window.cart = window.cart || {};
-        window.cart[key] = Math.max(0, Number(window.cart[key] || 0)) + 1;
-      }
-      added++;
-    });
-
-    if (!added) {
-      showError('Could not add this combo. Try adding the items manually.');
-      return;
-    }
-
-    if (typeof updatePill === 'function') updatePill();
-    document.body.classList.add('order-mode');
-    const addBtn = document.getElementById('ai-combo-add');
-    if (addBtn) {
-      addBtn.textContent = 'Added';
-      setTimeout(() => { addBtn.textContent = 'Add Combo'; }, 1400);
-    }
-  }
-
-  function renderCombo(combo) {
-    activeCombo = combo;
-    const items = Array.isArray(combo.items) ? combo.items : [];
-    const total = Number(combo.totalPrice || 0);
-    result.innerHTML = `
-      <div class="ai-combo-name">${esc(combo.comboName || 'Your Combo')}</div>
-      <div class="ai-combo-desc">${esc(combo.description || '')}</div>
-      <div class="ai-combo-items">
-        ${items.map(item => `<span class="ai-combo-chip">${esc(item)}</span>`).join('')}
-      </div>
-      <div class="ai-combo-foot">
-        <span class="ai-combo-price">$${total.toFixed(2)}</span>
-        <span class="ai-combo-actions">
-          <button class="ai-combo-add" type="button" id="ai-combo-add">Add Combo</button>
-          <button class="ai-combo-try" type="button" id="ai-combo-try">Try Again</button>
-        </span>
-      </div>
-    `;
-    result.classList.add('show');
-    document.getElementById('ai-combo-add')?.addEventListener('click', addComboToCart);
-    document.getElementById('ai-combo-try')?.addEventListener('click', buildCombo);
-  }
-
-  async function buildCombo() {
-    const craving = input.value.trim();
-    if (!craving) {
-      showError('Tell us what you are craving first.');
-      input.focus();
-      return;
-    }
-
-    clearError();
-    result.classList.remove('show');
-    btn.disabled = true;
-    btn.textContent = 'Building...';
-
-    try {
-      const res = await fetch(`${WORKER_URL}/api/combo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ craving }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Could not build combo');
-      renderCombo(data.combo || data);
-    } catch (e) {
-      showError(e.message || 'Could not build combo. Try again.');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Build My Combo';
-    }
-  }
-
-  btn?.addEventListener('click', buildCombo);
-  input?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') buildCombo();
-  });
-})();
-</script>
 
 <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
