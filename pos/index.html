@@ -506,6 +506,31 @@ background:#e5e7eb}
 .quick-btn.primary{
 background:var(--side);
 color:#fff}
+.quick-btn.sound-ready{
+background:#dcfce7;
+color:#166534}
+.quick-btn.sound-off{
+background:#fee2e2;
+color:#991b1b;
+box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+.sync-pill{
+height:38px;
+border-radius:9px;
+border:0;
+background:#dcfce7;
+color:#166534;
+padding:0 12px;
+font-size:11px;
+font-weight:900;
+text-transform:uppercase;
+display:flex;
+align-items:center}
+.sync-pill.offline{
+background:#fee2e2;
+color:#991b1b}
+.sync-pill.pending{
+background:#fef3c7;
+color:#92400e}
 .main{
 min-height:0;
 display:grid;
@@ -1214,6 +1239,9 @@ color:#166534}
 .badge.cancelled{
 background:#fee2e2;
 color:#991b1b}
+.badge.offline{
+background:#fef3c7;
+color:#92400e}
 .badge.ready{
 background:#dcfce7;
 color:#166534}
@@ -1644,6 +1672,8 @@ margin-left:auto}
 <input class="search" id="search-input" placeholder="Search menu, orders, or customers..." oninput="handleSearch()">
 </div>
 <div class="top-actions">
+<button class="quick-btn sound-off" id="sound-btn" onclick="enableOrderSound(true)" title="Enable order sound">Sound Off</button>
+<button class="sync-pill" id="sync-pill" onclick="syncOfflineQueue(true)" title="Offline sync status">Synced</button>
 <button class="quick-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
 <button class="quick-btn hide-mobile" onclick="loadOrders(true)">Refresh</button>
 <button class="quick-btn primary" onclick="toggleCart()">Cart <span id="cart-count-mini">0</span>
@@ -1775,6 +1805,9 @@ const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/o
 const MAX_ATTEMPTS=5,LOCKOUT_MS=2*60*1000,SESSION_MS=6*60*60*1000;
 const AUTH_STORAGE_KEY='lk_pos_auth';
 const THEME_STORAGE_KEY='lk_pos_theme';
+const OFFLINE_QUEUE_KEY='lk_pos_offline_orders';
+const MENU_CACHE_KEY='lk_pos_menu_cache';
+const CUSTOMERS_CACHE_KEY='lk_pos_customers_cache';
 const WA_NUMBER='96176840244';
 const ZONE_FEES={
 A:.5,B:1,C:1.5}
@@ -1801,7 +1834,7 @@ let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loya
 let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
 let lastHydratedPhone='',lastAutoName='';
 let authSession=null;
-let audioCtx=null,alarmAudio=null,lastIncomingSoundAt=0;
+let audioCtx=null,alarmAudio=null,lastIncomingSoundAt=0,soundUnlocked=false;
 const $=id=>document.getElementById(id);
 function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
 function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
@@ -1829,6 +1862,65 @@ const money=n=>'$'+(Number(n)||0).toFixed(2);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const uid=()=>Date.now()+Math.random();
 function imageUrl(src){if(!src)return '';return /^https?:|^data:/.test(src)?src:`${STORAGE_PUBLIC_BASE}/${src}`;}
+function readJson(key,fallback){
+try{return JSON.parse(localStorage.getItem(key)||'')||fallback}catch(_){return fallback}
+}
+function writeJson(key,value){localStorage.setItem(key,JSON.stringify(value))}
+function offlineQueue(){return readJson(OFFLINE_QUEUE_KEY,[])}
+function saveOfflineQueue(queue){writeJson(OFFLINE_QUEUE_KEY,queue);updateSyncPill()}
+function queuedOrders(){return offlineQueue().map(e=>({...e.order,syncStatus:'offline'}))}
+function mergeQueuedOrders(){
+const queued=queuedOrders();
+queued.forEach(q=>{
+const idx=ordersData.findIndex(o=>o.id===q.id);
+if(idx>=0)ordersData[idx]={...ordersData[idx],syncStatus:'offline'};
+else ordersData.unshift(q);
+});
+}
+function updateSyncPill(){
+const el=$('sync-pill');
+if(!el)return;
+const count=offlineQueue().length;
+el.classList.toggle('pending',count>0&&navigator.onLine);
+el.classList.toggle('offline',count>0&&!navigator.onLine);
+el.textContent=count?`${count} Pending`:navigator.onLine?'Synced':'Offline';
+}
+function queueOfflineOrder(order,error){
+const queue=offlineQueue();
+const existing=queue.find(e=>e.id===order.id);
+if(existing){
+existing.order=order;
+existing.lastError=String(error?.message||error||'Offline');
+existing.updatedAt=new Date().toISOString();
+}else{
+queue.push({id:order.id,type:'order',order,attempts:0,createdAt:new Date().toISOString(),lastError:String(error?.message||error||'Offline')});
+}
+saveOfflineQueue(queue);
+}
+async function postOrder(order){
+const res=await fetch(`${WORKER_URL}/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});
+if(!res.ok)throw new Error('Order save '+res.status);
+return res;
+}
+async function syncOfflineQueue(showUI=false){
+let queue=offlineQueue();
+if(!queue.length){updateSyncPill();if(showUI)showToast('Nothing to sync','success');return}
+if(showUI)showLoading('Syncing offline orders...');
+const remaining=[];
+for(const entry of queue){
+try{
+await postOrder(entry.order);
+const local=ordersData.find(o=>o.id===entry.id);
+if(local)local.syncStatus='';
+}catch(e){
+remaining.push({...entry,attempts:Number(entry.attempts||0)+1,lastError:e.message,updatedAt:new Date().toISOString()});
+}
+}
+saveOfflineQueue(remaining);
+renderOrdersList();
+if(showUI)showToast(remaining.length?`${remaining.length} order(s) still pending`:'Offline orders synced',remaining.length?'error':'success');
+if(showUI)hideLoading();
+}
 function openSidebar(){
 document.querySelector('.sidebar')?.classList.add('open');
 document.body.classList.add('sidebar-open');
@@ -1888,18 +1980,36 @@ alarmAudio.volume=1;
 }
 return alarmAudio;
 }
-function primeAudio(){
+function updateSoundButton(){
+const btn=$('sound-btn');
+if(!btn)return;
+btn.textContent=soundUnlocked?'Sound On':'Sound Off';
+btn.classList.toggle('sound-ready',soundUnlocked);
+btn.classList.toggle('sound-off',!soundUnlocked);
+}
+function enableOrderSound(test=false){
 ensureAudio();
+let unlocked=false;
 try{
 const a=getAlarmAudio();
 const prevVol=a.volume;
-a.volume=0;
+a.volume=test?1:0;
 a.currentTime=0;
 const p=a.play();
-if(p&&p.then)p.then(()=>{a.pause();a.currentTime=0;a.volume=prevVol;}).catch(()=>{a.volume=prevVol;});
-else a.volume=prevVol;
+if(p&&p.then)p.then(()=>{if(!test){a.pause();a.currentTime=0;}a.volume=prevVol;soundUnlocked=true;updateSoundButton();}).catch(()=>{a.volume=prevVol;updateSoundButton();});
+else{soundUnlocked=true;updateSoundButton();}
+unlocked=true;
 }catch(_){}
-if(!audioCtx)return;
+if(audioCtx&&audioCtx.state==='running'){soundUnlocked=true;updateSoundButton();unlocked=true;}
+if(test){
+playWebAudioAlarm();
+showToast(unlocked?'Order sound enabled':'Tap Sound Off again to enable audio',unlocked?'success':'error');
+}
+return unlocked;
+}
+function primeAudio(){
+enableOrderSound(false);
+if(!audioCtx||audioCtx.state!=='running')return;
 const osc=audioCtx.createOscillator();
 const gain=audioCtx.createGain();
 osc.frequency.value=440;
@@ -2053,7 +2163,10 @@ showLoading('Loading POS...');
 await Promise.all([loadMenu(),loadCustomers(),loadConfig()]).catch(e=>showToast(e.message,'error'));
 await loadOrders(false).catch(()=>{});
 await pollInbox(false).catch(()=>{});
+mergeQueuedOrders();
 renderAll();
+updateSyncPill();
+syncOfflineQueue(false);
 hideLoading();
 inboxPollInterval=setInterval(()=>pollInbox(false),15000);
 }
@@ -2076,10 +2189,15 @@ const res=await fetch(`${WORKER_URL}/supabase/menu`,{cache:'no-store'});
 if(!res.ok)throw new Error('Supabase menu failed');
 const j=await res.json();all=Array.isArray(j.data)?j.data:[];
 if(!all.length)throw new Error('Empty menu');
+writeJson(MENU_CACHE_KEY,all);
 }catch(e){
+const cached=readJson(MENU_CACHE_KEY,[]);
+if(cached.length)all=cached;
+else{
 const res=await fetch('../menu.json?v='+Date.now());
 if(!res.ok)throw e;
 all=await res.json();
+}
 }
 menuData=all.filter(c=>c.type!=='addons').map(c=>({...c,items:(c.items||[]).filter(i=>i.active!==false)}));
 flatItems=[];
@@ -2097,7 +2215,8 @@ itemFreq:c.item_freq||c.itemFreq||{},favoriteItems:c.favorite_items||c.favoriteI
 loyaltyRewardReady:!!(c.loyalty_reward_ready||c.loyaltyRewardReady),loyaltyLastReward:c.loyalty_last_reward||c.loyaltyLastReward||null,
 loyaltyRewardRedeemedAt:c.loyalty_reward_redeemed_at||c.loyaltyRewardRedeemedAt||null,loyaltyLifetimeRedemptions:c.loyalty_lifetime_redemptions||c.loyaltyLifetimeRedemptions||0
 }));
-}catch(_){customersData=[]}
+writeJson(CUSTOMERS_CACHE_KEY,customersData);
+}catch(_){customersData=readJson(CUSTOMERS_CACHE_KEY,[])}
 }
 function renderAll(){renderCategoryChips();renderItems();renderCart();renderOrdersList();renderInboxList();renderCustomers();setOrderType(orderType,false)}
 function switchView(view){
@@ -2368,14 +2487,11 @@ async function chargeOrder(){
 if(!validateOrder())return;
 const order=buildOrder('pending'),btn=$('charge-btn');btn.disabled=true;btn.textContent='Saving...';showLoading('Saving order...');
 try{
-const res=await fetch(`${
-WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});
-if(!res.ok)throw new Error('Order save '+res.status);
+await postOrder(order);
 ordersData.unshift(order);await upsertCustomer(order);showToast(`Order ${
 order.id}
 saved`,'success');clearOrder();renderOrdersList();
-}catch(e){showToast('Save failed: '+e.message,'error')}
+}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList()}
 btn.disabled=false;btn.textContent='Charge & Save';hideLoading();
 }
 async function upsertCustomer(order){
@@ -2395,12 +2511,14 @@ const res=await fetch(`${
 WORKER_URL}
 /supabase/orders`,{cache:'no-store'});if(!res.ok)throw new Error('Orders read '+res.status);
 const j=await res.json();ordersData=(j.data||[]).filter(r=>r.status!=='inbox').map(r=>({...r.payload,id:r.id,status:r.status||(r.payload&&r.payload.status)||'pending'}));
+mergeQueuedOrders();
 renderOrdersList();
-}catch(e){if(showUI)showToast('Load failed: '+e.message,'error')}
+}catch(e){mergeQueuedOrders();renderOrdersList();if(showUI)showToast('Load failed: '+e.message,'error')}
 if(showUI)hideLoading();
 }
 function setOrderFilter(btn,filter){ordersFilter=filter;document.querySelectorAll('[data-order-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderOrdersList()}
 function getLoggedOrder(id){return ordersData.find(o=>o.id===id)}
+function tableLabel(o){const raw=o?.tableNumber||String(o?.tableLabel||'').replace(/^Table\s*/i,'');return raw?`Table ${esc(raw)}`:''}
 function renderOrdersList(){
 const q=searchQuery,el=$('orders-list');let rows=ordersData;
 if(ordersFilter!=='all')rows=rows.filter(o=>(o.status==='confirmed'?'pending':o.status)===ordersFilter);
@@ -2438,10 +2556,12 @@ hour:'2-digit',minute:'2-digit',hour12:true}
 · ${
 formatType(o.orderType)}
 ${
+tableLabel(o)?` · ${tableLabel(o)}`:''}
+${
 o.phone?` · +961 ${esc(o.phone)}`:''}
 </div></div><span class="badge ${status}">${
 status}
-</span></div>
+</span>${o.syncStatus==='offline'?'<span class="badge offline">Offline</span>':''}</div>
 <div class="panel-body">${
 items}
 ${
@@ -2552,6 +2672,8 @@ hour:'2-digit',minute:'2-digit',hour12:true}
 · ${
 formatType(o.orderType)}
 ${
+tableLabel(o)?` · ${tableLabel(o)}`:''}
+${
 o.deliveryZone?` · ${esc(o.deliveryZone)}`:''}
 ${
 o.phone?` · +961 ${esc(o.phone)}`:''}
@@ -2625,6 +2747,8 @@ esc(o.id||'POS')}
 esc(o.name)}
 </div><div>Type: ${
 formatType(o.orderType)}
+</div>${
+tableLabel(o)?`<div>${tableLabel(o)}</div>`:''}
 </div><div class="div"></div>${
 rows}
 ${
@@ -2655,6 +2779,8 @@ o.phone?`<div>Phone: <span>+961 ${esc(o.phone)}</span></div>`:''}
 <div>Type: <span>${
 formatType(o.orderType)}
 </span></div>${
+tableLabel(o)?`<div>Table: <span>${tableLabel(o).replace(/^Table\s*/,'')}</span></div>`:''}
+${
 o.deliveryZone?`<div>Zone: <span>${esc(o.deliveryZone)}</span></div>`:''}
 ${
 o.note?`<div>Note: <span>${esc(o.note)}</span></div>`:''}
@@ -2680,6 +2806,8 @@ o.id||'POS'}
 o.name||''}
 \nType: ${
 formatType(o.orderType)}
+\n${
+tableLabel(o)?`${tableLabel(o)}\n`:''}
 \n`;
 (o.items||[]).forEach(it=>{msg+=`- ${
 it.name}
@@ -2720,6 +2848,9 @@ $('loading-text').textContent=msg||'Loading...';
 $('loading').classList.add('show')}
 function hideLoading(){
 $('loading').classList.remove('show')}
+window.addEventListener('online',()=>{updateSyncPill();syncOfflineQueue(false)});
+window.addEventListener('offline',updateSyncPill);
+setInterval(()=>syncOfflineQueue(false),30000);
 </script>
 </body>
 </html>
