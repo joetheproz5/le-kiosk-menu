@@ -2106,12 +2106,13 @@ Requires Worker routes from:
   }
   .guest-gallery-strip {
     position: relative;
-    min-height: 205px;
+    min-height: 310px;
     overflow: hidden;
   }
   .guest-gallery-photo {
     position: relative;
-    aspect-ratio: 1.08;
+    width: 100%;
+    aspect-ratio: .88;
     border-radius: 14px;
     overflow: hidden;
     background: #fffbeb;
@@ -2122,11 +2123,12 @@ Requires Worker routes from:
   .guest-gallery-photo img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
     display: block;
   }
   @keyframes guestGalleryIn {
-    from { opacity: 0; transform: translateX(14px); }
+    from { opacity: 0; transform: translateX(10px); }
     to { opacity: 1; transform: translateX(0); }
   }
   .guest-gallery-caption {
@@ -2441,7 +2443,7 @@ Requires Worker routes from:
     section.classList.add('show');
     if (window.__lkGuestGalleryTimer) clearInterval(window.__lkGuestGalleryTimer);
     if (visiblePhotos.length > 1) {
-      window.__lkGuestGalleryTimer = setInterval(() => showPhoto(activePhoto + 1), 4200);
+      window.__lkGuestGalleryTimer = setInterval(() => showPhoto(activePhoto + 1), 500);
     }
   }
 
