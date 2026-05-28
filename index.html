@@ -2043,7 +2043,7 @@ Worker secrets/settings:
   }
 })();
 </script>
-    <!-- Le Kiosk Guest Gallery
+<!-- Le Kiosk Guest Gallery
 Paste this near the end of the public menu page, after WORKER_URL is defined.
 Recommended placement: before the Google reviews snippet, or before the "Leave us a review" section.
 
@@ -2141,6 +2141,17 @@ Requires Worker routes from:
     line-height: 1.25;
     background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.62));
     text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .guest-gallery-empty {
+    border: 1px dashed #fde68a;
+    border-radius: 14px;
+    background: #fffbeb;
+    color: #92400e;
+    padding: 14px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.45;
+    text-align: center;
   }
   #guest-gallery-sheet {
     position: fixed;
@@ -2394,8 +2405,16 @@ Requires Worker routes from:
   }
 
   function renderGallery(items) {
-    if (!strip || !section || !Array.isArray(items) || !items.length) return;
-    strip.innerHTML = items.slice(0, 12).map(item => {
+    if (!strip || !section) return;
+    const photos = Array.isArray(items) ? items : [];
+    if (!photos.length) {
+      strip.innerHTML = '<div class="guest-gallery-empty">No guest photos yet. Be the first to submit one.</div>';
+      insertBeforeReviews();
+      section.classList.add('show');
+      return;
+    }
+
+    strip.innerHTML = photos.slice(0, 12).map(item => {
       const src = /^https?:\/\//.test(item.image || '') ? item.image : `${STORAGE_BASE}/${item.image || ''}`;
       const label = item.caption || (item.customerName ? `Shared by ${item.customerName}` : '');
       return `<article class="guest-gallery-photo">
@@ -2426,6 +2445,7 @@ Requires Worker routes from:
         section?.classList.remove('show');
         return;
       }
+      renderGallery([]);
       const res = await fetch(`${WORKER_URL}/gallery/approved`, { cache: 'no-store' });
       if (!res.ok) return;
       const j = await res.json();
@@ -2499,6 +2519,5 @@ Requires Worker routes from:
   }
 })();
 </script>
-
 </body>
 </html>
