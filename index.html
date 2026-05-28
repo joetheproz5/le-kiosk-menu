@@ -2043,5 +2043,462 @@ Worker secrets/settings:
   }
 })();
 </script>
+    <!-- Le Kiosk Guest Gallery
+Paste this near the end of the public menu page, after WORKER_URL is defined.
+Recommended placement: before the Google reviews snippet, or before the "Leave us a review" section.
+
+Requires Worker routes from:
+  worker-guest-gallery-route-snippet.js
+-->
+
+<style>
+  .guest-gallery-box {
+    max-width: 28rem;
+    margin: 18px auto 0;
+    padding: 0 16px;
+    display: none;
+  }
+  .guest-gallery-box.show {
+    display: block;
+  }
+  .guest-gallery-card {
+    background: #fff;
+    border: 1px solid rgba(251,191,36,.6);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(69,26,3,.07);
+  }
+  .guest-gallery-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .guest-gallery-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 19px;
+    line-height: 1;
+    font-weight: 800;
+    color: #451a03;
+  }
+  .guest-gallery-copy {
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 5px;
+  }
+  .guest-gallery-submit-btn {
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 999px;
+    background: #16a34a;
+    color: #fff;
+    padding: 8px 11px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    cursor: pointer;
+  }
+  .guest-gallery-strip {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 43%;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .guest-gallery-strip::-webkit-scrollbar {
+    display: none;
+  }
+  .guest-gallery-photo {
+    scroll-snap-align: start;
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+  }
+  .guest-gallery-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .guest-gallery-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px 8px 8px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.25;
+    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.62));
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  #guest-gallery-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0,0,0,.52);
+    padding: 0 12px;
+  }
+  #guest-gallery-sheet.open {
+    display: flex;
+  }
+  .guest-gallery-sheet-body {
+    width: min(28rem, 100%);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 22px 22px 0 0;
+    padding: 16px;
+  }
+  .guest-gallery-sheet-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .guest-gallery-close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 10px;
+    background: #fef3c7;
+    color: #451a03;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .guest-gallery-field {
+    margin-bottom: 10px;
+  }
+  .guest-gallery-label {
+    display: block;
+    color: #b45309;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 5px;
+  }
+  .guest-gallery-input {
+    width: 100%;
+    border: 2px solid #fde68a;
+    border-radius: 12px;
+    background: #fffbeb;
+    color: #451a03;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 12px;
+    outline: none;
+  }
+  .guest-gallery-input:focus {
+    border-color: #f59e0b;
+  }
+  .guest-gallery-file {
+    padding: 10px;
+  }
+  .guest-gallery-note {
+    color: #92400e;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.45;
+    margin-top: 8px;
+  }
+  .guest-gallery-submit-main {
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    background: #16a34a;
+    color: #fff;
+    padding: 13px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    cursor: pointer;
+    margin-top: 5px;
+  }
+  .guest-gallery-submit-main:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+  .guest-gallery-error {
+    display: none;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .guest-gallery-error.show {
+    display: block;
+  }
+  .guest-gallery-ok {
+    display: none;
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .guest-gallery-ok.show {
+    display: block;
+  }
+</style>
+
+<section class="guest-gallery-box" id="guest-gallery">
+  <div class="guest-gallery-card">
+    <div class="guest-gallery-head">
+      <div>
+        <div class="guest-gallery-title">Guest Gallery</div>
+        <div class="guest-gallery-copy">Real Le Kiosk cravings, shared by customers.</div>
+      </div>
+      <button class="guest-gallery-submit-btn" type="button" id="guest-gallery-open">Submit Photo</button>
+    </div>
+    <div class="guest-gallery-strip" id="guest-gallery-strip"></div>
+  </div>
+</section>
+
+<div id="guest-gallery-sheet" aria-hidden="true">
+  <div class="guest-gallery-sheet-body">
+    <div class="guest-gallery-sheet-top">
+      <div>
+        <div class="guest-gallery-title">Share Your Photo</div>
+        <div class="guest-gallery-copy">We review photos before they appear.</div>
+      </div>
+      <button class="guest-gallery-close" type="button" id="guest-gallery-close" aria-label="Close">x</button>
+    </div>
+    <div class="guest-gallery-field">
+      <label class="guest-gallery-label" for="guest-gallery-file">Photo *</label>
+      <input class="guest-gallery-input guest-gallery-file" id="guest-gallery-file" type="file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <div class="guest-gallery-field">
+      <label class="guest-gallery-label" for="guest-gallery-name">Name (optional)</label>
+      <input class="guest-gallery-input" id="guest-gallery-name" type="text" maxlength="50" placeholder="e.g. Joe">
+    </div>
+    <div class="guest-gallery-field">
+      <label class="guest-gallery-label" for="guest-gallery-caption">Caption (optional)</label>
+      <input class="guest-gallery-input" id="guest-gallery-caption" type="text" maxlength="120" placeholder="Best waffle night">
+    </div>
+    <button class="guest-gallery-submit-main" type="button" id="guest-gallery-submit">Submit For Review</button>
+    <div class="guest-gallery-note">Limit: 3 uploads per visitor per day. JPG, PNG, or WEBP up to 3MB.</div>
+    <div class="guest-gallery-error" id="guest-gallery-error"></div>
+    <div class="guest-gallery-ok" id="guest-gallery-ok">Photo submitted. It will appear after admin approval.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_BASE = typeof STORAGE_PUBLIC_BASE !== 'undefined'
+    ? STORAGE_PUBLIC_BASE
+    : 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
+  const section = document.getElementById('guest-gallery');
+  const strip = document.getElementById('guest-gallery-strip');
+  const sheet = document.getElementById('guest-gallery-sheet');
+  const fileInput = document.getElementById('guest-gallery-file');
+  const nameInput = document.getElementById('guest-gallery-name');
+  const captionInput = document.getElementById('guest-gallery-caption');
+  const submitBtn = document.getElementById('guest-gallery-submit');
+  const errorBox = document.getElementById('guest-gallery-error');
+  const okBox = document.getElementById('guest-gallery-ok');
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
+  }
+
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function visitorId() {
+    const key = 'lk_menu_visitor_id';
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = crypto?.randomUUID?.() || ('v-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+      localStorage.setItem(key, id);
+    }
+    return id;
+  }
+
+  function localUploadCount() {
+    const key = 'lk_guest_gallery_uploads_' + todayKey();
+    return Number(localStorage.getItem(key) || 0) || 0;
+  }
+
+  function bumpLocalUploadCount() {
+    const key = 'lk_guest_gallery_uploads_' + todayKey();
+    localStorage.setItem(key, String(localUploadCount() + 1));
+  }
+
+  function showError(message) {
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.classList.add('show');
+    okBox?.classList.remove('show');
+  }
+
+  function clearMessages() {
+    errorBox?.classList.remove('show');
+    okBox?.classList.remove('show');
+  }
+
+  function openSheet() {
+    clearMessages();
+    if (localUploadCount() >= 3) {
+      showError('Daily upload limit reached. Try again tomorrow.');
+    }
+    sheet?.classList.add('open');
+    sheet?.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeSheet() {
+    sheet?.classList.remove('open');
+    sheet?.setAttribute('aria-hidden', 'true');
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Could not read image'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function insertBeforeReviews() {
+    const reviewSection = [...document.querySelectorAll('section')]
+      .find(sec => /leave us a review|google review/i.test(sec.textContent || ''));
+    if (section && reviewSection?.parentNode && section.nextElementSibling !== reviewSection) {
+      reviewSection.parentNode.insertBefore(section, reviewSection);
+    }
+  }
+
+  function renderGallery(items) {
+    if (!strip || !section || !Array.isArray(items) || !items.length) return;
+    strip.innerHTML = items.slice(0, 12).map(item => {
+      const src = /^https?:\/\//.test(item.image || '') ? item.image : `${STORAGE_BASE}/${item.image || ''}`;
+      const label = item.caption || (item.customerName ? `Shared by ${item.customerName}` : '');
+      return `<article class="guest-gallery-photo">
+        <img src="${esc(src)}" alt="${esc(label || 'Le Kiosk guest photo')}" loading="lazy">
+        ${label ? `<div class="guest-gallery-caption">${esc(label)}</div>` : ''}
+      </article>`;
+    }).join('');
+    insertBeforeReviews();
+    section.classList.add('show');
+  }
+
+  async function galleryEnabled() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return true;
+      const res = await fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' });
+      if (!res.ok) return true;
+      const j = await res.json();
+      return j?.data?.galleryEnabled !== false;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  async function loadGallery() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      if (!(await galleryEnabled())) {
+        section?.classList.remove('show');
+        return;
+      }
+      const res = await fetch(`${WORKER_URL}/gallery/approved`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const j = await res.json();
+      renderGallery(j.data || []);
+    } catch (_) {}
+  }
+
+  async function submitPhoto() {
+    try {
+      clearMessages();
+      if (localUploadCount() >= 3) {
+        showError('Daily upload limit reached. Try again tomorrow.');
+        return;
+      }
+
+      const file = fileInput?.files?.[0];
+      if (!file) {
+        showError('Choose a photo first.');
+        return;
+      }
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        showError('Only JPG, PNG, or WEBP images are allowed.');
+        return;
+      }
+      if (file.size > 3 * 1024 * 1024) {
+        showError('Image is too large. Max 3MB.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+      const imageBase64 = await fileToBase64(file);
+      const res = await fetch(`${WORKER_URL}/gallery/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          visitorId: visitorId(),
+          submitDate: todayKey(),
+          customerName: nameInput?.value || '',
+          caption: captionInput?.value || '',
+          contentType: file.type,
+          imageBase64,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not submit photo');
+
+      bumpLocalUploadCount();
+      if (fileInput) fileInput.value = '';
+      if (captionInput) captionInput.value = '';
+      okBox?.classList.add('show');
+    } catch (e) {
+      showError(e.message || 'Could not submit photo.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit For Review';
+    }
+  }
+
+  document.getElementById('guest-gallery-open')?.addEventListener('click', openSheet);
+  document.getElementById('guest-gallery-close')?.addEventListener('click', closeSheet);
+  sheet?.addEventListener('click', e => {
+    if (e.target === sheet) closeSheet();
+  });
+  submitBtn?.addEventListener('click', submitPhoto);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGallery);
+  } else {
+    loadGallery();
+  }
+})();
+</script>
+
 </body>
 </html>
