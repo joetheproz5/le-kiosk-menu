@@ -1931,28 +1931,6 @@ Worker secrets/settings:
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .google-review-dots {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    margin-top: 10px;
-  }
-  .google-review-dots.show {
-    display: flex;
-  }
-  .google-review-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    border: 0;
-    padding: 0;
-    background: #fde68a;
-    cursor: pointer;
-  }
-  .google-review-dot.active {
-    background: #f59e0b;
-  }
 </style>
 
 <script>
@@ -2000,7 +1978,7 @@ Worker secrets/settings:
 
     const rating = Number(data.rating || 0);
     const count = Number(data.userRatingsTotal || 0);
-    const visibleReviews = reviews.slice(0, 5);
+    const visibleReviews = reviews.slice(0, 10);
 
     box.innerHTML = `
       <div class="google-reviews-card">
@@ -2027,9 +2005,6 @@ Worker secrets/settings:
             </article>
           `).join('')}
         </div>
-        <div class="google-review-dots${visibleReviews.length > 1 ? ' show' : ''}">
-          ${visibleReviews.map((_, index) => `<button class="google-review-dot${index === 0 ? ' active' : ''}" type="button" aria-label="Show review ${index + 1}" data-google-review-dot="${index}"></button>`).join('')}
-        </div>
       </div>
     `;
     box.classList.add('show');
@@ -2046,24 +2021,9 @@ Worker secrets/settings:
       box.querySelectorAll('[data-google-review]').forEach(el => {
         el.classList.toggle('active', Number(el.dataset.googleReview) === active);
       });
-      box.querySelectorAll('[data-google-review-dot]').forEach(el => {
-        el.classList.toggle('active', Number(el.dataset.googleReviewDot) === active);
-      });
     }
 
-    function restart() {
-      clearInterval(timer);
-      timer = setInterval(() => setActive(active + 1), 4200);
-    }
-
-    box.querySelectorAll('[data-google-review-dot]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        setActive(Number(btn.dataset.googleReviewDot || 0));
-        restart();
-      });
-    });
-
-    restart();
+    timer = setInterval(() => setActive(active + 1), 4200);
   }
 
   async function loadGoogleReviews() {
