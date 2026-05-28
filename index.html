@@ -2110,28 +2110,24 @@ Requires Worker routes from:
     overflow: hidden;
   }
   .guest-gallery-photo {
-    position: absolute;
-    inset: 0;
+    position: relative;
     aspect-ratio: 1;
     border-radius: 14px;
     overflow: hidden;
     background: #fffbeb;
     border: 1px solid #fde68a;
-    opacity: 0;
-    transform: translateX(16px);
-    transition: opacity .35s ease, transform .35s ease;
-    pointer-events: none;
-  }
-  .guest-gallery-photo.active {
     opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
+    animation: guestGalleryIn .32s ease both;
   }
   .guest-gallery-photo img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+  }
+  @keyframes guestGalleryIn {
+    from { opacity: 0; transform: translateX(14px); }
+    to { opacity: 1; transform: translateX(0); }
   }
   .guest-gallery-caption {
     position: absolute;
@@ -2427,32 +2423,26 @@ Requires Worker routes from:
     }
 
     const visiblePhotos = photos.slice(0, 10);
-    strip.innerHTML = visiblePhotos.map((item, index) => {
+    let activePhoto = 0;
+
+    function showPhoto(index) {
+      activePhoto = (index + visiblePhotos.length) % visiblePhotos.length;
+      const item = visiblePhotos[activePhoto];
       const src = /^https?:\/\//.test(item.image || '') ? item.image : `${STORAGE_BASE}/${item.image || ''}`;
       const label = item.caption || (item.customerName ? `Shared by ${item.customerName}` : '');
-      return `<article class="guest-gallery-photo${index === 0 ? ' active' : ''}" data-gallery-photo="${index}">
+      strip.innerHTML = `<article class="guest-gallery-photo">
         <img src="${esc(src)}" alt="${esc(label || 'Le Kiosk guest photo')}" loading="lazy">
         ${label ? `<div class="guest-gallery-caption">${esc(label)}</div>` : ''}
       </article>`;
-    }).join('');
-    insertBeforeReviews();
-    section.classList.add('show');
-    startGallerySlider(visiblePhotos.length);
-  }
-
-  function startGallerySlider(count) {
-    if (window.__lkGuestGalleryTimer) clearInterval(window.__lkGuestGalleryTimer);
-    if (!strip || count <= 1) return;
-    let active = 0;
-
-    function setActive(next) {
-      active = (next + count) % count;
-      strip.querySelectorAll('[data-gallery-photo]').forEach(el => {
-        el.classList.toggle('active', Number(el.dataset.galleryPhoto) === active);
-      });
     }
 
-    window.__lkGuestGalleryTimer = setInterval(() => setActive(active + 1), 4200);
+    showPhoto(0);
+    insertBeforeReviews();
+    section.classList.add('show');
+    if (window.__lkGuestGalleryTimer) clearInterval(window.__lkGuestGalleryTimer);
+    if (visiblePhotos.length > 1) {
+      window.__lkGuestGalleryTimer = setInterval(() => showPhoto(activePhoto + 1), 4200);
+    }
   }
 
   async function galleryEnabled() {
