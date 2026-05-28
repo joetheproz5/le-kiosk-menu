@@ -2101,27 +2101,31 @@ Requires Worker routes from:
     letter-spacing: .05em;
     cursor: pointer;
   }
-  .guest-gallery-strip {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 43%;
-    gap: 8px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .guest-gallery-strip::-webkit-scrollbar {
+  .guest-gallery-submit-btn.hidden {
     display: none;
   }
-  .guest-gallery-photo {
-    scroll-snap-align: start;
+  .guest-gallery-strip {
     position: relative;
+    min-height: 230px;
+    overflow: hidden;
+  }
+  .guest-gallery-photo {
+    position: absolute;
+    inset: 0;
     aspect-ratio: 1;
     border-radius: 14px;
     overflow: hidden;
     background: #fffbeb;
     border: 1px solid #fde68a;
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity .35s ease, transform .35s ease;
+    pointer-events: none;
+  }
+  .guest-gallery-photo.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
   }
   .guest-gallery-photo img {
     width: 100%;
@@ -2143,6 +2147,10 @@ Requires Worker routes from:
     text-shadow: 0 1px 2px rgba(0,0,0,.35);
   }
   .guest-gallery-empty {
+    min-height: 122px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 1px dashed #fde68a;
     border-radius: 14px;
     background: #fffbeb;
@@ -2309,7 +2317,7 @@ Requires Worker routes from:
       <input class="guest-gallery-input" id="guest-gallery-caption" type="text" maxlength="120" placeholder="Best waffle night">
     </div>
     <button class="guest-gallery-submit-main" type="button" id="guest-gallery-submit">Submit For Review</button>
-    <div class="guest-gallery-note">Limit: 3 uploads per visitor per day. JPG, PNG, or WEBP up to 3MB.</div>
+    <div class="guest-gallery-note">Limit: 3 uploads per visitor per day. JPG, PNG, or WEBP up to 10MB.</div>
     <div class="guest-gallery-error" id="guest-gallery-error"></div>
     <div class="guest-gallery-ok" id="guest-gallery-ok">Photo submitted. It will appear after admin approval.</div>
   </div>
@@ -2329,6 +2337,9 @@ Requires Worker routes from:
   const submitBtn = document.getElementById('guest-gallery-submit');
   const errorBox = document.getElementById('guest-gallery-error');
   const okBox = document.getElementById('guest-gallery-ok');
+  const params = new URLSearchParams(location.search);
+  const tableNumber = String(params.get('table') || params.get('t') || params.get('tbl') || '').trim();
+  const canSubmitPhoto = !!tableNumber;
 
   function esc(s) {
     return String(s ?? '').replace(/[&<>"']/g, m => ({
@@ -2374,6 +2385,7 @@ Requires Worker routes from:
   }
 
   function openSheet() {
+    if (!canSubmitPhoto) return;
     clearMessages();
     if (localUploadCount() >= 3) {
       showError('Daily upload limit reached. Try again tomorrow.');
@@ -2414,16 +2426,33 @@ Requires Worker routes from:
       return;
     }
 
-    strip.innerHTML = photos.slice(0, 12).map(item => {
+    const visiblePhotos = photos.slice(0, 10);
+    strip.innerHTML = visiblePhotos.map((item, index) => {
       const src = /^https?:\/\//.test(item.image || '') ? item.image : `${STORAGE_BASE}/${item.image || ''}`;
       const label = item.caption || (item.customerName ? `Shared by ${item.customerName}` : '');
-      return `<article class="guest-gallery-photo">
+      return `<article class="guest-gallery-photo${index === 0 ? ' active' : ''}" data-gallery-photo="${index}">
         <img src="${esc(src)}" alt="${esc(label || 'Le Kiosk guest photo')}" loading="lazy">
         ${label ? `<div class="guest-gallery-caption">${esc(label)}</div>` : ''}
       </article>`;
     }).join('');
     insertBeforeReviews();
     section.classList.add('show');
+    startGallerySlider(visiblePhotos.length);
+  }
+
+  function startGallerySlider(count) {
+    if (window.__lkGuestGalleryTimer) clearInterval(window.__lkGuestGalleryTimer);
+    if (!strip || count <= 1) return;
+    let active = 0;
+
+    function setActive(next) {
+      active = (next + count) % count;
+      strip.querySelectorAll('[data-gallery-photo]').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.galleryPhoto) === active);
+      });
+    }
+
+    window.__lkGuestGalleryTimer = setInterval(() => setActive(active + 1), 4200);
   }
 
   async function galleryEnabled() {
@@ -2456,6 +2485,10 @@ Requires Worker routes from:
   async function submitPhoto() {
     try {
       clearMessages();
+      if (!canSubmitPhoto) {
+        showError('Photo uploads are only available from a table QR code.');
+        return;
+      }
       if (localUploadCount() >= 3) {
         showError('Daily upload limit reached. Try again tomorrow.');
         return;
@@ -2470,8 +2503,8 @@ Requires Worker routes from:
         showError('Only JPG, PNG, or WEBP images are allowed.');
         return;
       }
-      if (file.size > 3 * 1024 * 1024) {
-        showError('Image is too large. Max 3MB.');
+      if (file.size > 10 * 1024 * 1024) {
+        showError('Image is too large. Max 10MB.');
         return;
       }
 
@@ -2511,6 +2544,9 @@ Requires Worker routes from:
     if (e.target === sheet) closeSheet();
   });
   submitBtn?.addEventListener('click', submitPhoto);
+  if (!canSubmitPhoto) {
+    document.getElementById('guest-gallery-open')?.classList.add('hidden');
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadGallery);
