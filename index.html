@@ -1801,6 +1801,242 @@ Also supports ?t=1 and ?tbl=1.
   }, { passive: true });
 })();
 </script>
+<!-- Le Kiosk Google Reviews
+Paste this near the end of the public menu page, after WORKER_URL is defined.
+It inserts itself just above the existing "Leave us a review" section.
+
+Requires Worker route:
+  GET /api/google-reviews
+
+Worker secrets/settings:
+  GOOGLE_PLACES_API_KEY
+  GOOGLE_PLACE_ID
+-->
+
+<style>
+  .google-reviews-box {
+    max-width: 28rem;
+    margin: 18px auto 0;
+    padding: 0 16px;
+    display: none;
+  }
+  .google-reviews-box.show {
+    display: block;
+  }
+  .google-reviews-card {
+    background: #fff;
+    border: 1px solid rgba(251,191,36,.6);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(69,26,3,.07);
+  }
+  .google-reviews-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .google-reviews-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 19px;
+    line-height: 1;
+    font-weight: 800;
+    color: #451a03;
+  }
+  .google-reviews-sub {
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 5px;
+  }
+  .google-reviews-score {
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .google-reviews-rating {
+    color: #451a03;
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .google-reviews-stars {
+    color: #f59e0b;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+  .google-reviews-count {
+    color: #b45309;
+    font-size: 10px;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+  .google-review-list {
+    display: grid;
+    gap: 9px;
+  }
+  .google-review-item {
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    background: #fffbeb;
+    padding: 11px;
+  }
+  .google-review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .google-review-author {
+    color: #451a03;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  .google-review-time {
+    color: #b45309;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .google-review-stars {
+    color: #f59e0b;
+    font-size: 10px;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+  }
+  .google-review-text {
+    color: #78350f;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .google-reviews-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+  }
+  .google-reviews-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: #f59e0b;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    text-decoration: none;
+  }
+</style>
+
+<script>
+(function(){
+  const sectionId = 'google-reviews-section';
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
+  }
+
+  function stars(rating) {
+    const n = Math.max(0, Math.min(5, Math.round(Number(rating || 0))));
+    return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+  }
+
+  function findReviewSection() {
+    const googleReviewLink = [...document.querySelectorAll('a[href*="google"]')]
+      .find(a => /review/i.test(a.textContent || '') || /review/i.test(a.href || ''));
+    return googleReviewLink?.closest('section') || null;
+  }
+
+  function ensureSection() {
+    let box = document.getElementById(sectionId);
+    if (box) return box;
+
+    box = document.createElement('section');
+    box.className = 'google-reviews-box';
+    box.id = sectionId;
+
+    const reviewSection = findReviewSection();
+    if (reviewSection?.parentNode) {
+      reviewSection.parentNode.insertBefore(box, reviewSection);
+    } else {
+      document.getElementById('menu-container')?.after(box);
+    }
+    return box;
+  }
+
+  function render(data) {
+    const box = ensureSection();
+    const reviews = Array.isArray(data?.reviews) ? data.reviews.filter(r => r && r.text) : [];
+    if (!box || !reviews.length) return;
+
+    const rating = Number(data.rating || 0);
+    const count = Number(data.userRatingsTotal || 0);
+    const placeUrl = data.url || 'https://share.google/fmnwOKoSpsGkA0QmU';
+
+    box.innerHTML = `
+      <div class="google-reviews-card">
+        <div class="google-reviews-head">
+          <div>
+            <div class="google-reviews-title">Loved by Guests</div>
+            <div class="google-reviews-sub">Recent Google reviews from Le Kiosk visitors.</div>
+          </div>
+          <div class="google-reviews-score">
+            <div class="google-reviews-rating">${rating ? rating.toFixed(1) : '5.0'}</div>
+            <div class="google-reviews-stars">${esc(stars(rating || 5))}</div>
+            ${count ? `<div class="google-reviews-count">${count} reviews</div>` : ''}
+          </div>
+        </div>
+        <div class="google-review-list">
+          ${reviews.slice(0, 3).map(review => `
+            <article class="google-review-item">
+              <div class="google-review-top">
+                <div class="google-review-author">${esc(review.authorName || 'Google reviewer')}</div>
+                <div class="google-review-time">${esc(review.relativeTime || '')}</div>
+              </div>
+              <div class="google-review-stars">${esc(stars(review.rating || 5))}</div>
+              <div class="google-review-text">${esc(review.text)}</div>
+            </article>
+          `).join('')}
+        </div>
+        <div class="google-reviews-foot">
+          <a class="google-reviews-link" href="${esc(placeUrl)}" target="_blank" rel="noopener noreferrer">Read More</a>
+        </div>
+      </div>
+    `;
+    box.classList.add('show');
+  }
+
+  async function loadGoogleReviews() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      const res = await fetch(`${WORKER_URL}/api/google-reviews`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      render(data.data || data);
+    } catch (_) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGoogleReviews);
+  } else {
+    loadGoogleReviews();
+  }
+})();
+</script>
 
 </body>
 </html>
