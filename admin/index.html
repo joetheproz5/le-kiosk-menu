@@ -121,6 +121,7 @@ body.theme-dark .addon-group-card,
 body.theme-dark .reward-row,
 body.theme-dark .mini-row,
 body.theme-dark .edit-row,
+body.theme-dark .table-qr-card,
 body.theme-dark .dashboard-section,
 body.theme-dark .product-sales-card,
 body.theme-dark .product-sales-metric,
@@ -413,6 +414,13 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .inline-list{display:flex;flex-direction:column;gap:7px}
 .inline-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 34px;gap:7px;align-items:center}
 .settings-section-title{font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);grid-column:1/-1;margin:2px 0 -4px}
+.table-qr-form{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:8px;align-items:end;margin-bottom:12px}
+.tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.table-qr-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;grid-template-columns:96px minmax(0,1fr);gap:13px;align-items:start}
+.table-qr-img{width:96px;height:96px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px;object-fit:contain}
+.table-qr-title{font-size:15px;font-weight:900;color:var(--ink);line-height:1.2}
+.table-qr-url{font-size:10px;font-weight:700;color:var(--muted);line-height:1.35;margin-top:5px;word-break:break-all}
+.table-qr-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 
 @media(max-width:980px){
   body{overflow:auto}
@@ -440,6 +448,9 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
   .editor-grid,.editor-grid.three{grid-template-columns:1fr}
   .poster-share-card{grid-template-columns:1fr}
   .poster-share-preview{width:min(210px,100%);justify-self:center}
+  .table-qr-form{grid-template-columns:1fr}
+  .table-qr-card{grid-template-columns:84px minmax(0,1fr)}
+  .table-qr-img{width:84px;height:84px}
 }
 </style>
 </head>
@@ -493,6 +504,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
         <button class="nav-btn" id="nav-addons" onclick="switchView('addons')"><span class="nav-icon">A</span>Add-ons</button>
         <button class="nav-btn" id="nav-loyalty" onclick="switchView('loyalty')"><span class="nav-icon">L</span>Loyalty</button>
         <button class="nav-btn" id="nav-basketball" onclick="switchView('basketball')"><span class="nav-icon">K</span>Basketball</button>
+        <button class="nav-btn" id="nav-tables" onclick="switchView('tables')"><span class="nav-icon">T</span>Tables</button>
         <button class="nav-btn" id="nav-customers" onclick="switchView('customers')"><span class="nav-icon">C</span>Customers</button>
         <button class="nav-btn" id="nav-blocklist" onclick="switchView('blocklist')"><span class="nav-icon">B</span>Block List</button>
         <button class="nav-btn" id="nav-settings" onclick="switchView('settings')"><span class="nav-icon">S</span>Settings</button>
@@ -740,6 +752,33 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
           </div>
         </div>
 
+        <div class="view" id="view-tables">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Table QR Codes</div>
+                <div class="panel-sub">Add tables, generate customer order QR codes, and download PNGs</div>
+              </div>
+              <button class="btn btn-save btn-sm" onclick="saveTables()">Save Tables</button>
+            </div>
+            <div class="panel-body">
+              <div class="table-qr-form">
+                <div>
+                  <label class="field-label">Table ID</label>
+                  <input class="inp" id="table-new-id" type="text" placeholder="1">
+                </div>
+                <div>
+                  <label class="field-label">Label</label>
+                  <input class="inp" id="table-new-label" type="text" placeholder="Window table">
+                </div>
+                <button class="btn btn-add" onclick="addTable()">Add Table</button>
+              </div>
+              <div class="setting-copy" style="margin-bottom:12px">QR links use <strong>https://lekiosk.store/?table=TABLE_ID</strong>. Customers who scan will place a table order.</div>
+              <div class="tables-grid" id="tables-list"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="view" id="view-settings">
           <div class="settings-grid">
             <div class="settings-section-title">Switches</div>
@@ -778,6 +817,15 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               <div class="setting-note" id="basketball-matches-note">Manage games from the Basketball sidebar.</div>
               <div class="setting-actions">
                 <button class="btn btn-dark" onclick="switchView('basketball')">Manage Matches</button>
+              </div>
+            </div>
+            <div class="setting-card">
+              <div class="setting-title">Table QR Codes</div>
+              <div class="setting-copy">Create QR codes for dine-in tables. Each code opens the public menu with a table number attached.</div>
+              <div class="setting-stat" id="settings-table-count">0 tables configured</div>
+              <div class="setting-note">Links use https://lekiosk.store/?table=TABLE_ID.</div>
+              <div class="setting-actions">
+                <button class="btn btn-dark" onclick="switchView('tables')">Manage Tables</button>
               </div>
             </div>
             <div class="setting-card">
@@ -858,7 +906,7 @@ let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false;
 let dashboardOrdersData=[],menuVisitorData=[];
-let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[]};
+let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
@@ -1028,15 +1076,30 @@ async function fetchConfig(){
       if(typeof configData.aiComboEnabled!=='boolean')configData.aiComboEnabled=true;
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
       if(typeof configData.basketballEnabled!=='boolean')configData.basketballEnabled=true;
+      normalizeTables();
       normalizeBasketballMatches();
       await pruneExpiredBasketballMatches({persist:true,silent:true});
       normalizeLoyaltyRewards();
     }
-  }catch(_){normalizeBasketballMatches();normalizeLoyaltyRewards();}
+  }catch(_){normalizeTables();normalizeBasketballMatches();normalizeLoyaltyRewards();}
 }
 async function saveConfig(){
   const res=await fetch(`${WORKER_URL}/supabase/config`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:configData})});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||res.status);}
+}
+function normalizeTables(){
+  const rows=Array.isArray(configData.tables)?configData.tables:[];
+  const seen=new Set();
+  configData.tables=rows.map((t,i)=>{
+    const id=String(t.id||t.number||t.tableNumber||i+1).trim().replace(/[^a-zA-Z0-9_-]/g,'').slice(0,12)||String(i+1);
+    const cleanId=seen.has(id)?`${id}-${i+1}`:id;
+    seen.add(cleanId);
+    return {
+      id:cleanId,
+      label:String(t.label||t.name||`Table ${cleanId}`).trim()||`Table ${cleanId}`,
+      active:t.active!==false
+    };
+  });
 }
 function renderStatus(){
   const test=document.getElementById('status-test'),loy=document.getElementById('status-loyalty');
@@ -2201,6 +2264,92 @@ async function fetchMenuVisitors(){
   }
 }
 
+function tableQrPublicUrl(table){
+  const id=encodeURIComponent(String(table?.id||'').trim());
+  return `https://lekiosk.store/?table=${id}`;
+}
+function tableQrImageUrl(table,size=260){
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=14&data=${encodeURIComponent(tableQrPublicUrl(table))}`;
+}
+function renderTablesManager(){
+  normalizeTables();
+  const list=document.getElementById('tables-list');
+  if(!list)return;
+  if(!configData.tables.length){
+    list.innerHTML='<div class="empty-state">No tables yet. Add your first table above.</div>';
+    return;
+  }
+  list.innerHTML=configData.tables.map((t,i)=>`
+    <div class="table-qr-card">
+      <img class="table-qr-img" src="${tableQrImageUrl(t,180)}" alt="${esc(t.label)} QR">
+      <div>
+        <div class="table-qr-title">${esc(t.label)}</div>
+        <div class="table-qr-url">${esc(tableQrPublicUrl(t))}</div>
+        <div class="table-qr-actions">
+          <button class="btn btn-soft btn-sm" onclick="copyTableQrUrl(${i})">Copy Link</button>
+          <button class="btn btn-blue btn-sm" onclick="downloadTableQr(${i})">Download QR</button>
+          <button class="btn btn-soft btn-sm" onclick="openTableQr(${i})">Open</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTable(${i})">Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function addTable(){
+  normalizeTables();
+  const idEl=document.getElementById('table-new-id'),labelEl=document.getElementById('table-new-label');
+  const rawId=String(idEl?.value||'').trim();
+  const id=(rawId||String(configData.tables.length+1)).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,12);
+  if(!id){showToast('Enter a table ID','error');return;}
+  if(configData.tables.some(t=>String(t.id)===id)){showToast('Table ID already exists','error');return;}
+  const label=String(labelEl?.value||'').trim()||`Table ${id}`;
+  configData.tables.push({id,label,active:true});
+  if(idEl)idEl.value='';
+  if(labelEl)labelEl.value='';
+  renderTablesManager();
+  showToast('Table added. Save when ready.','success');
+}
+function deleteTable(i){
+  normalizeTables();
+  configData.tables.splice(i,1);
+  renderTablesManager();
+  showToast('Table removed. Save when ready.','success');
+}
+async function saveTables(){
+  normalizeTables();
+  showLoading('Saving tables...');
+  try{await saveConfig();renderTablesManager();renderSettings();showToast('Tables saved','success');}
+  catch(e){showToast('Failed: '+e.message,'error');}
+  hideLoading();
+}
+async function copyTableQrUrl(i){
+  const t=configData.tables?.[i];if(!t)return;
+  const url=tableQrPublicUrl(t);
+  try{await navigator.clipboard.writeText(url);showToast('Table link copied','success');}
+  catch(_){prompt('Copy table link:',url);}
+}
+function openTableQr(i){
+  const t=configData.tables?.[i];if(!t)return;
+  window.open(tableQrPublicUrl(t),'_blank');
+}
+async function downloadTableQr(i){
+  const t=configData.tables?.[i];if(!t)return;
+  const filename=`le-kiosk-table-${String(t.id).replace(/[^a-zA-Z0-9_-]/g,'') || i+1}-qr.png`;
+  const src=tableQrImageUrl(t,900);
+  try{
+    const res=await fetch(src);
+    if(!res.ok)throw new Error('QR download failed');
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(_){
+    const a=document.createElement('a');
+    a.href=src;a.download=filename;a.target='_blank';document.body.appendChild(a);a.click();a.remove();
+  }
+}
+
 function switchView(view){
   currentView=view;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -2215,6 +2364,7 @@ function switchView(view){
     addons:['Options','Add-ons'],
     loyalty:['Rewards','Loyalty'],
     basketball:['Game Nights','Basketball'],
+    tables:['Dine-In','Table QR Codes'],
     customers:['Customer CRM','Customers'],
     blocklist:['Risk Control','Block List'],
     settings:['System Config','Settings']
@@ -2231,10 +2381,12 @@ function switchView(view){
   renderAddonsHub();
   renderLoyaltyHub();
   renderBasketballManager();
+  renderTablesManager();
   if(view==='customers')openCustomersAdmin();
   if(view==='loyalty')openCustomersAdmin();
   if(view==='blocklist')openBlockList();
   if(view==='basketball')renderBasketballManager();
+  if(view==='tables')renderTablesManager();
   if(view==='settings')renderSettings();
 }
 function renderAll(){
@@ -2247,6 +2399,7 @@ function renderAll(){
   renderAddonsHub();
   renderLoyaltyHub();
   renderBasketballManager();
+  renderTablesManager();
   renderPreview();
   renderStatus();
   markSaved();
@@ -3082,6 +3235,7 @@ function renderSettings(){
   renderStatus();
   normalizeLoyaltyRewards();
   normalizeBasketballMatches();
+  normalizeTables();
   const s=menuStats();
   const rewards=configData.loyaltyRewards||[];
   const matchCount=document.getElementById('basketball-matches-count');
@@ -3096,6 +3250,8 @@ function renderSettings(){
   if(rewardCount)rewardCount.textContent=`${rewards.length} reward${rewards.length===1?'':'s'} configured`;
   const rewardNote=document.getElementById('settings-reward-note');
   if(rewardNote)rewardNote.textContent=configData.loyaltyEnabled?'Available in POS when a customer has a reward ready.':'Loyalty is off, so POS will hide reward redemption.';
+  const tableCount=document.getElementById('settings-table-count');
+  if(tableCount)tableCount.textContent=`${configData.tables.length} table${configData.tables.length===1?'':'s'} configured`;
   const menuCounts=document.getElementById('settings-menu-counts');
   if(menuCounts)menuCounts.textContent=`${s.active}/${s.items} active items · ${s.regular} categories · ${s.itemAddons+s.globalGroups} add-ons`;
   const menuWarning=document.getElementById('settings-menu-warning');
