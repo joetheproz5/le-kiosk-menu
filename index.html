@@ -605,11 +605,11 @@ Worker secrets to add:
     audioChunks = [];
 
     // Pick the best supported format (webm/opus is best for Whisper; fall back to mp4)
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-      ? 'audio/webm;codecs=opus'
-      : MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : 'audio/mp4';
+    const mimeType = MediaRecorder.isTypeSupported('audio/mp4')
+  ? 'audio/mp4'
+  : MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus'
+    : 'audio/webm';
 
     mediaRecorder = new MediaRecorder(stream, { mimeType });
 
