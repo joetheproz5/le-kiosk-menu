@@ -1874,14 +1874,26 @@ Worker secrets/settings:
     margin-top: 2px;
   }
   .google-review-list {
-    display: grid;
-    gap: 9px;
+    position: relative;
+    min-height: 122px;
+    overflow: hidden;
   }
   .google-review-item {
+    position: absolute;
+    inset: 0;
     border: 1px solid #fde68a;
     border-radius: 14px;
     background: #fffbeb;
     padding: 11px;
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity .35s ease, transform .35s ease;
+    pointer-events: none;
+  }
+  .google-review-item.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
   }
   .google-review-top {
     display: flex;
@@ -1919,24 +1931,27 @@ Worker secrets/settings:
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .google-reviews-foot {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 12px;
-  }
-  .google-reviews-link {
-    display: inline-flex;
+  .google-review-dots {
+    display: none;
     align-items: center;
     justify-content: center;
-    border-radius: 999px;
+    gap: 5px;
+    margin-top: 10px;
+  }
+  .google-review-dots.show {
+    display: flex;
+  }
+  .google-review-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 0;
+    padding: 0;
+    background: #fde68a;
+    cursor: pointer;
+  }
+  .google-review-dot.active {
     background: #f59e0b;
-    color: #fff;
-    padding: 8px 12px;
-    font-size: 10px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    text-decoration: none;
   }
 </style>
 
@@ -1985,7 +2000,7 @@ Worker secrets/settings:
 
     const rating = Number(data.rating || 0);
     const count = Number(data.userRatingsTotal || 0);
-    const placeUrl = data.url || 'https://share.google/fmnwOKoSpsGkA0QmU';
+    const visibleReviews = reviews.slice(0, 5);
 
     box.innerHTML = `
       <div class="google-reviews-card">
@@ -2001,8 +2016,8 @@ Worker secrets/settings:
           </div>
         </div>
         <div class="google-review-list">
-          ${reviews.slice(0, 3).map(review => `
-            <article class="google-review-item">
+          ${visibleReviews.map((review, index) => `
+            <article class="google-review-item${index === 0 ? ' active' : ''}" data-google-review="${index}">
               <div class="google-review-top">
                 <div class="google-review-author">${esc(review.authorName || 'Google reviewer')}</div>
                 <div class="google-review-time">${esc(review.relativeTime || '')}</div>
@@ -2012,12 +2027,43 @@ Worker secrets/settings:
             </article>
           `).join('')}
         </div>
-        <div class="google-reviews-foot">
-          <a class="google-reviews-link" href="${esc(placeUrl)}" target="_blank" rel="noopener noreferrer">Read More</a>
+        <div class="google-review-dots${visibleReviews.length > 1 ? ' show' : ''}">
+          ${visibleReviews.map((_, index) => `<button class="google-review-dot${index === 0 ? ' active' : ''}" type="button" aria-label="Show review ${index + 1}" data-google-review-dot="${index}"></button>`).join('')}
         </div>
       </div>
     `;
     box.classList.add('show');
+    startReviewSlider(box, visibleReviews.length);
+  }
+
+  function startReviewSlider(box, count) {
+    if (!box || count <= 1) return;
+    let active = 0;
+    let timer = null;
+
+    function setActive(next) {
+      active = (next + count) % count;
+      box.querySelectorAll('[data-google-review]').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.googleReview) === active);
+      });
+      box.querySelectorAll('[data-google-review-dot]').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.googleReviewDot) === active);
+      });
+    }
+
+    function restart() {
+      clearInterval(timer);
+      timer = setInterval(() => setActive(active + 1), 4200);
+    }
+
+    box.querySelectorAll('[data-google-review-dot]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setActive(Number(btn.dataset.googleReviewDot || 0));
+        restart();
+      });
+    });
+
+    restart();
   }
 
   async function loadGoogleReviews() {
@@ -2037,6 +2083,5 @@ Worker secrets/settings:
   }
 })();
 </script>
-
 </body>
 </html>
