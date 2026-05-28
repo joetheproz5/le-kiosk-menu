@@ -440,6 +440,9 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .gallery-admin-photo{width:86px;aspect-ratio:1;border-radius:8px;border:1px solid var(--line);background:#fff;object-fit:cover}
 .gallery-admin-title{font-size:13px;font-weight:900;color:var(--ink);line-height:1.25}
 .gallery-admin-meta{font-size:10px;font-weight:700;color:var(--muted);line-height:1.35;margin-top:3px}
+.gallery-admin-fields{display:grid;gap:7px;margin-top:9px}
+.gallery-admin-fields .field-label{margin-bottom:3px}
+.gallery-admin-fields .field-input{padding:8px 9px;font-size:12px}
 .gallery-admin-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
 .gallery-admin-delete{grid-column:1/-1;display:flex;justify-content:flex-end}
 
@@ -2462,7 +2465,18 @@ function renderGalleryAdmin(){
       <div>
         <div class="gallery-admin-title">${esc(p.caption||'Guest photo')}</div>
         <div class="gallery-admin-meta">${esc(p.customerName||'Anonymous')} · ${esc(p.status||'pending')} · ${p.createdAt?new Date(p.createdAt).toLocaleString():'-'}</div>
+        <div class="gallery-admin-fields">
+          <div class="field">
+            <label class="field-label">Name</label>
+            <input class="field-input" id="gallery-name-${i}" value="${esc(p.customerName||'')}" maxlength="50" placeholder="Customer name">
+          </div>
+          <div class="field">
+            <label class="field-label">Description</label>
+            <textarea class="field-input" id="gallery-caption-${i}" rows="2" maxlength="120" placeholder="Photo description">${esc(p.caption||'')}</textarea>
+          </div>
+        </div>
         <div class="gallery-admin-actions">
+          <button class="btn btn-dark btn-sm" onclick="saveGalleryPhotoText(${i})">Save Text</button>
           ${p.status!=='approved'?`<button class="btn btn-save btn-sm" onclick="updateGalleryPhoto(${i},{status:'approved',hidden:false})">Approve</button>`:''}
           ${p.status!=='rejected'?`<button class="btn btn-soft btn-sm" onclick="updateGalleryPhoto(${i},{status:'rejected',hidden:true})">Reject</button>`:''}
           ${p.status==='approved'?`<button class="btn btn-soft btn-sm" onclick="updateGalleryPhoto(${i},{hidden:${!p.hidden}})">${p.hidden?'Show':'Hide'}</button>`:''}
@@ -2471,6 +2485,11 @@ function renderGalleryAdmin(){
       <div class="gallery-admin-delete"><button class="btn btn-danger btn-sm" onclick="deleteGalleryPhoto(${i})">Delete Photo</button></div>
     </div>
   `).join('');
+}
+async function saveGalleryPhotoText(i){
+  const name=document.getElementById('gallery-name-'+i)?.value||'';
+  const caption=document.getElementById('gallery-caption-'+i)?.value||'';
+  await updateGalleryPhoto(i,{customerName:name,caption});
 }
 async function updateGalleryPhoto(i,patch){
   const photo=galleryAdminData[i];if(!photo)return;
