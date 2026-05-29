@@ -37,6 +37,9 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 @keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
 #map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:height .25s ease}
 .map-card.delivering #map{height:min(58vh,520px);min-height:380px}
+.map-actions{display:flex;align-items:center;gap:8px}
+.nav-btn{height:30px;border:0;border-radius:9px;background:#22c55e;color:#052e16;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;padding:0 10px;cursor:pointer;white-space:nowrap}
+.nav-btn:active{transform:translateY(1px)}
 .driver-heading{width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transition:transform .45s cubic-bezier(.22,.61,.36,1);will-change:transform}
 .driver-heading .tip{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}
 .driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}
@@ -162,9 +165,9 @@ function restoreDriverPosition(id,track){
 }
 
 function routeShouldRefresh(lat,lng){
- if(routeNeeded||Date.now()-routeLastFetched>10000)return true;
+ if(routeNeeded||Date.now()-routeLastFetched>6500)return true;
  if(lastRouteLat===null||lastRouteLng===null)return true;
- return haversine(lat,lng,lastRouteLat,lastRouteLng)>25;
+ return haversine(lat,lng,lastRouteLat,lastRouteLng)>12;
 }
 
 function smoothHeading(raw){
@@ -201,6 +204,7 @@ function followDriver(lat,lng){
  clearTimeout(followTimer);
  followTimer=setTimeout(function(){
   var ahead=pointAhead(lat,lng,h,FOLLOW_AHEAD_METERS);
+  if(mapInst.stop)mapInst.stop();
   mapInst.easeTo({
    center:[ahead.lng,ahead.lat],
    zoom:Math.max(mapInst.getZoom()||0,FOLLOW_ZOOM),
@@ -348,9 +352,9 @@ function renderDetail(o){
  var html='\x3Cbutton class="back-btn" onclick="location.href=\x27?\x27"\x3E← Back\x3C/button\x3E';
 
  if(o.orderType==='delivery'&&!firstMapDone){
-  var gpsCls=gpsActive?' active':'';
+ var gpsCls=gpsActive?' active':'';
   html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
-  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-actions"\x3E'+(customerPoint?'\x3Cbutton class="nav-btn" onclick="D.openGoogleNav(event)"\x3EGoogle Maps\x3C/button\x3E':'')+'\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
   if(!customerPoint)html+='\x3Cdiv class="warn"\x3ECustomer GPS is missing for this order\x3C/div\x3E';
  }
 
@@ -556,6 +560,12 @@ function sendNow(){
 window.D={
  switchTab:function(tab){listTab=tab;renderList(allOrders)},
  reload:function(){load()},
+ openGoogleNav:function(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  var p=pointFromGPS(orderData&&orderData.gps);
+  if(!p){toast('Customer GPS missing');return}
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat+','+p.lng)+'&travelmode=driving','_blank');
+ },
  toggleGPS:function(){
   if(gpsActive){stopGPS();return}
   startGPS();
