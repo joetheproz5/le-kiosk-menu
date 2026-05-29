@@ -211,6 +211,7 @@ function drawCustMarker(gps){
  if(!gps||typeof gps.lat!=='number'||custMarker)return;
  var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
  custMarker=L.marker([gps.lat,gps.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
+ L.polyline([[RLAT,RLNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.4}).addTo(mapInst);
 }
 
 function drawDriverMarker(lat,lng){
@@ -235,9 +236,10 @@ function updateMapView(track,gps){
 function moveDriver(lat,lng){
  driverLat=lat;driverLng=lng;
  drawDriverMarker(lat,lng);
+ mapInst.setView([lat,lng],mapInst.getZoom()||16,{animate:true,duration:1});
  var el=document.getElementById('gps-coords');
  if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
- if(custMarker&&mapInst){
+ if(custMarker&&Date.now()-routeLastFetched>10000){
   var c=custMarker.getLatLng();
   fetchRoute(lat,lng,c.lat,c.lng);
  }
