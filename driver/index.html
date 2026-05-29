@@ -152,7 +152,7 @@ function renderDetail(o){
  }
 
  var canDeliver=!!track.preparing;
- var canDelivered=!!track.delivering&&nearEnough;
+ var canDelivered=!!track.delivering;
 
  html+='\x3Cdiv class="detail-card"\x3E'+
   '\x3Cdiv class="order-header"\x3E\x3Cspan class="order-id"\x3E'+esc(o.id)+'\x3C/span\x3E\x3Cspan class="order-type"\x3E'+stepLabel+'\x3C/span\x3E\x3C/div\x3E'+
@@ -165,13 +165,10 @@ function renderDetail(o){
  if(!canDeliver&&!track.delivering&&!track.delivered){
   html+='\x3Cdiv class="warn"\x3EWaiting for kitchen to finish preparing\x3C/div\x3E';
  }
- if(canDeliver&&!track.delivering&&!nearEnough&&driverLat){
-  html+='\x3Cdiv class="warn"\x3EYou are '+Math.round(distToCust)+'m from customer. Drive closer to mark delivered.\x3C/div\x3E';
- }
 
  html+='\x3Cdiv class="actions"\x3E'+
   (track.delivering?'\x3Cbutton class="action-btn done" disabled\x3EPicked Up\x3C/button\x3E':'\x3Cbutton class="action-btn delivering" id="btn-delivering" onclick="D.mark(\x27delivering\x27)" '+(canDeliver?'':'disabled')+'\x3EDelivering\x3C/button\x3E')+
-  (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" '+(canDelivered?'':'disabled')+'\x3EDelivered'+(driverLat&&!nearEnough?' ('+Math.round(distToCust)+'m away)':'')+'\x3C/button\x3E')+
+  (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" '+(canDelivered?'':'disabled')+'\x3EDelivered\x3C/button\x3E')+
   '\x3C/div\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
  document.getElementById('app').innerHTML=html;
