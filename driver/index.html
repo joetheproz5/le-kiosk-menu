@@ -76,11 +76,12 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 var RLAT=33.821091, RLNG=35.564961;
-var orderData=null, mapInst=null, driverMarker=null, custMarker=null;
+var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
 var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
+var firstMapDone=false, routeLastFetched=0;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -92,6 +93,23 @@ function haversine(lat1,lon1,lat2,lon2){
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
+
+function fetchRoute(dLat,dLng,cLat,cLng){
+ try{
+  var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
+  return fetch(url).then(function(res){if(!res.ok)return;return res.json().then(function(j){
+   if(j.code!=='Ok'||!j.routes||!j.routes[0])return;
+   var route=j.routes[0];
+   if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
+   if(!mapInst)return;
+   routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:4,opacity:.8}}).addTo(mapInst);
+   var eta=Math.round(route.duration/60);
+   var el=document.querySelector('.map-distance');
+   if(el)el.textContent=eta+' min drive';
+   routeLastFetched=Date.now();
+  })});
+ }catch(e){}
+}
 
 function renderList(data){
  allOrders=data||[];
@@ -126,7 +144,6 @@ function renderList(data){
 }
 
 function renderDetail(o){
- if(mapInst){try{mapInst.remove()}catch(e){};mapInst=null;driverMarker=null;custMarker=null}
  var track=o.tracking||{};
  var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
  var items='';
@@ -136,23 +153,18 @@ function renderDetail(o){
   (it.addons||[]).forEach(function(a){items+='\x3Cdiv class="item-addon"\x3E+ '+esc(a.label)+' '+money(a.price)+'\x3C/div\x3E'});
  });
 
- var custLat=o.gps&&typeof o.gps.lat==='number'?o.gps.lat:null;
- var custLng=o.gps&&typeof o.gps.lng==='number'?o.gps.lng:null;
- var distToCust=custLat&&driverLat?haversine(driverLat,driverLng,custLat,custLng):Infinity;
- var nearEnough=distToCust<=50;
-
- var html='\x3Cbutton class="back-btn" onclick="location.href=\x27?\x27"\x3E← Back\x3C/button\x3E';
-
- if(o.orderType==='delivery'){
-  var gpsCls=gpsActive?' active':'';
-  html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
-  html+='\x3Cdiv id="map"\x3E\x3C/div\x3E';
- }
-
  var canDeliver=!!track.preparing;
  var canDelivered=!!track.delivering;
 
- html+='\x3Cdiv class="detail-card"\x3E'+
+ var html='\x3Cbutton class="back-btn" onclick="location.href=\x27?\x27"\x3E← Back\x3C/button\x3E';
+
+ if(o.orderType==='delivery'&&!firstMapDone){
+  var gpsCls=gpsActive?' active':'';
+  html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
+  html+='\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+ }
+
+ html+='\x3Cdiv id="detail-info"\x3E\x3Cdiv class="detail-card"\x3E'+
   '\x3Cdiv class="order-header"\x3E\x3Cspan class="order-id"\x3E'+esc(o.id)+'\x3C/span\x3E\x3Cspan class="order-type"\x3E'+stepLabel+'\x3C/span\x3E\x3C/div\x3E'+
   '\x3Cdiv class="customer-name"\x3E'+esc(o.name||'Guest')+'\x3C/div\x3E'+
   '\x3Cdiv class="customer-info"\x3E'+(o.phone?'\x3Cspan\x3E+961 '+esc(o.phone)+'\x3C/span\x3E':'')+' · Delivery'+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+'\x3C/div\x3E'+
@@ -167,11 +179,18 @@ function renderDetail(o){
  html+='\x3Cdiv class="actions"\x3E'+
   (track.delivering?'\x3Cbutton class="action-btn done" disabled\x3EPicked Up\x3C/button\x3E':'\x3Cbutton class="action-btn delivering" id="btn-delivering" onclick="D.mark(\x27delivering\x27)" '+(canDeliver?'':'disabled')+'\x3EDelivering\x3C/button\x3E')+
   (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" '+(canDelivered?'':'disabled')+'\x3EDelivered\x3C/button\x3E')+
-  '\x3C/div\x3E\x3C/div\x3E';
+  '\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
- document.getElementById('app').innerHTML=html;
 
- if(o.orderType==='delivery'){initMap(o.gps);if(track.driverLocation)moveDriver(track.driverLocation.lat,track.driverLocation.lng);if(driverLat)moveDriver(driverLat,driverLng)}
+ if(!firstMapDone){
+  document.getElementById('app').innerHTML=html;
+  if(o.orderType==='delivery')setTimeout(function(){initMapOnce(o.gps);updateMapView(track,o.gps)},60);
+ }else{
+  var info=document.getElementById('detail-info');
+  if(info)info.innerHTML=html.split('id="detail-info"\x3E')[1].split('\x3Cdiv class="last-updated"\x3E')[0];
+  updateMapView(track,o.gps);
+ }
+ firstMapDone=true;
 }
 
 function initMap(gps){
