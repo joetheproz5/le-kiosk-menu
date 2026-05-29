@@ -35,7 +35,9 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 .gps-coords{font-size:10px;font-weight:600;color:#6b7280;text-align:right}
 .gps-bar.active .gps-coords{color:#86efac}
 @keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
-#map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08)}
+#map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:height .25s ease}
+.map-card.delivering #map{height:min(58vh,520px);min-height:380px}
+.leaflet-marker-icon{transition:transform .35s linear}
 .detail-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:14px}
 .order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .order-id{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7280}
@@ -84,7 +86,7 @@ var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
-var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, mapBearing=0;
+var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, mapBearing=0, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -99,6 +101,14 @@ function bearingBetween(lat1,lng1,lat2,lng2){
  var y=Math.sin((lng2-lng1)*Math.PI/180)*Math.cos(lat2*Math.PI/180);
  var x=Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)-Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos((lng2-lng1)*Math.PI/180);
  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+
+function pointAhead(lat,lng,bearing,meters){
+ if(!Number.isFinite(Number(bearing)))return{lat:lat,lng:lng};
+ var R=6371000,d=meters/R,br=Number(bearing)*Math.PI/180,la1=lat*Math.PI/180,ln1=lng*Math.PI/180;
+ var la2=Math.asin(Math.sin(la1)*Math.cos(d)+Math.cos(la1)*Math.sin(d)*Math.cos(br));
+ var ln2=ln1+Math.atan2(Math.sin(br)*Math.sin(d)*Math.cos(la1),Math.cos(d)-Math.sin(la1)*Math.sin(la2));
+ return{lat:la2*180/Math.PI,lng:ln2*180/Math.PI};
 }
 
 function pointFromGPS(gps){
@@ -175,8 +185,18 @@ function applyMapBearing(){
 
 function followDriver(lat,lng){
  if(!mapInst)return;
- mapInst.setView([lat,lng],Math.max(mapInst.getZoom()||FOLLOW_ZOOM,FOLLOW_ZOOM),{animate:true,duration:.45});
- setTimeout(applyMapBearing,40);
+ var moved=lastFollowLat===null?999:haversine(lastFollowLat,lastFollowLng,lat,lng);
+ var h=Number.isFinite(Number(driverHeading))?Number(driverHeading):lastFollowHeading;
+ var turn=(lastFollowHeading===null||!Number.isFinite(Number(h)))?999:Math.abs((((h-lastFollowHeading)+540)%360)-180);
+ if(moved<3&&turn<7)return;
+ clearTimeout(followTimer);
+ followTimer=setTimeout(function(){
+  var ahead=pointAhead(lat,lng,h,70);
+  if((mapInst.getZoom()||0)<FOLLOW_ZOOM)mapInst.setZoom(FOLLOW_ZOOM,{animate:true});
+  mapInst.panTo([ahead.lat,ahead.lng],{animate:true,duration:.35,easeLinearity:.25,noMoveStart:true});
+  lastFollowLat=lat;lastFollowLng=lng;lastFollowHeading=Number.isFinite(Number(h))?Number(h):lastFollowHeading;
+  setTimeout(applyMapBearing,35);
+ },80);
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
@@ -306,7 +326,7 @@ function renderDetail(o){
  if(o.orderType==='delivery'&&!firstMapDone){
   var gpsCls=gpsActive?' active':'';
   html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
-  html+='\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
   if(!customerPoint)html+='\x3Cdiv class="warn"\x3ECustomer GPS is missing for this order\x3C/div\x3E';
  }
 
@@ -337,6 +357,9 @@ function renderDetail(o){
   updateMapView(track,o.gps);
  }
  firstMapDone=true;
+ var mapCard=document.querySelector('.map-card');
+ if(mapCard)mapCard.classList.toggle('delivering',!!(track.delivering&&!track.delivered));
+ if(mapInst)setTimeout(function(){mapInst.invalidateSize();if(driverLat)followDriver(driverLat,driverLng)},280);
  if(shouldResumeGPS&&!gpsActive)setTimeout(function(){startGPS()},250);
 }
 
