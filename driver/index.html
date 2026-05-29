@@ -38,6 +38,9 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 #map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:height .25s ease}
 .map-card.delivering #map{height:min(58vh,520px);min-height:380px}
 .leaflet-marker-icon{transition:transform .35s linear}
+.driver-heading{width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transition:transform .45s cubic-bezier(.22,.61,.36,1);will-change:transform}
+.driver-heading .tip{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}
+.driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}
 .detail-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:14px}
 .order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .order-id{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7280}
@@ -81,12 +84,12 @@ var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var FOLLOW_ZOOM=17;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
-var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, mapBearing=0, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
+var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -163,24 +166,30 @@ function routeShouldRefresh(lat,lng){
 }
 
 function driverIcon(){
- var heading=Number.isFinite(Number(driverHeading))?Number(driverHeading):0;
  return L.divIcon({
-  className:'',
-  html:'\x3Cdiv style="width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transform:rotate('+heading+'deg)"\x3E\x3Cdiv style="position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)"\x3E\x3C/div\x3E\x3Cdiv style="position:absolute;inset:9px;border-radius:50%;background:#dcfce7"\x3E\x3C/div\x3E\x3C/div\x3E',
+  className:'driver-marker-icon',
+  html:'\x3Cdiv class="driver-heading"\x3E\x3Cdiv class="tip"\x3E\x3C/div\x3E\x3Cdiv class="core"\x3E\x3C/div\x3E\x3C/div\x3E',
   iconSize:[34,34],
   iconAnchor:[17,17]
  });
 }
 
-function applyMapBearing(){
- if(!mapInst)return;
- var pane=mapInst.getPane('mapPane');
- if(!pane)return;
- var heading=Number.isFinite(Number(driverHeading))?Number(driverHeading):0;
- mapBearing=-heading;
- var base=(pane.style.transform||'').replace(/\s*rotate\([^)]*\)/g,'').replace(/\s*scale\([^)]*\)/g,'');
- pane.style.transformOrigin='50% 50%';
- pane.style.transform=base+' rotate('+mapBearing+'deg) scale(1.18)';
+function smoothHeading(raw){
+ var h=Number(raw);
+ if(!Number.isFinite(h))return displayedHeading===null?0:displayedHeading;
+ h=((h%360)+360)%360;
+ if(displayedHeading===null)return h;
+ var prev=((displayedHeading%360)+360)%360;
+ var delta=((h-prev+540)%360)-180;
+ return displayedHeading+delta;
+}
+
+function updateDriverMarkerHeading(){
+ if(!driverMarker)return;
+ displayedHeading=smoothHeading(driverHeading);
+ var el=driverMarker.getElement();
+ var headingEl=el&&el.querySelector('.driver-heading');
+ if(headingEl)headingEl.style.transform='rotate('+displayedHeading+'deg)';
 }
 
 function followDriver(lat,lng){
@@ -195,7 +204,6 @@ function followDriver(lat,lng){
   if((mapInst.getZoom()||0)<FOLLOW_ZOOM)mapInst.setZoom(FOLLOW_ZOOM,{animate:true});
   mapInst.panTo([ahead.lat,ahead.lng],{animate:true,duration:.35,easeLinearity:.25,noMoveStart:true});
   lastFollowLat=lat;lastFollowLng=lng;lastFollowHeading=Number.isFinite(Number(h))?Number(h):lastFollowHeading;
-  setTimeout(applyMapBearing,35);
  },80);
 }
 
@@ -370,7 +378,6 @@ function initMapOnce(gps){
  var cLat=customerPoint?customerPoint.lat:RLAT;
  var cLng=customerPoint?customerPoint.lng:RLNG;
  mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([cLat,cLng],14);
- mapInst.on('moveend zoomend',applyMapBearing);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
  var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[28,28],iconAnchor:[14,28]});
  L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E');
@@ -389,9 +396,10 @@ function drawCustMarker(gps){
 
 function drawDriverMarker(lat,lng){
  if(!mapInst)return;
- if(driverMarker){driverMarker.setLatLng([lat,lng]);driverMarker.setIcon(driverIcon())}
+ if(driverMarker){driverMarker.setLatLng([lat,lng]);updateDriverMarkerHeading()}
  else{
   driverMarker=L.marker([lat,lng],{icon:driverIcon(),zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EYou\x3C/b\x3E');
+  setTimeout(updateDriverMarkerHeading,0);
  }
 }
 
