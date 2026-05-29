@@ -62,6 +62,10 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.ok{background:#047857}
 .last-updated{text-align:center;font-size:10px;color:#4b5563;margin-top:16px}
+.tab-bar{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;margin-bottom:16px}
+.tab-bar button{flex:1;height:38px;border-radius:10px;border:0;background:transparent;color:#9ca3af;font-size:13px;font-weight:800;letter-spacing:.02em;cursor:pointer;transition:all .15s}
+.tab-bar button.active{background:rgba(245,158,11,.25);color:#fbbf24}
+.tab-count{font-size:10px;font-weight:900;margin-left:4px;opacity:.6}
 </style>
 </head>
 <body>
@@ -75,6 +79,8 @@ var RLAT=33.821091, RLNG=35.564961;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null;
 var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null;
 var autoRefresh=null;
+var listTab='pending';
+var allOrders=[];
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -88,34 +94,38 @@ function haversine(lat1,lon1,lat2,lon2){
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
 
 function renderList(data){
+ allOrders=data||[];
  var active=data.filter(function(o){return !(o.tracking||{}).delivered});
  var done=data.filter(function(o){return !!(o.tracking||{}).delivered});
- var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3Cspan class="badge"\x3E'+active.length+' active\x3C/span\x3E\x3C/div\x3E';
- html+='\x3Cdiv class="refresh-bar"\x3E\x3Cspan\x3EAuto-refreshes every 10s\x3C/span\x3E\x3Cbutton onclick="location.reload()"\x3ERefresh\x3C/button\x3E\x3C/div\x3E';
+ var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
+ html+='\x3Cdiv class="tab-bar"\x3E'+
+  '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
+  '\x3Cbutton class="'+(listTab==='done'?'active':'')+'" onclick="switchTab(\x27done\x27)"\x3EDone\x3Cspan class="tab-count"\x3E'+done.length+'\x3C/span\x3E\x3C/button\x3E'+
+  '\x3C/div\x3E';
 
- function card(o,status){
+ function card(o){
+  var track=o.tracking||{};
+  var status=track.delivered?'Delivered':track.delivering?'Out for Delivery':'Ready';
   var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
   if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
   return'\x3Cdiv class="order-card" onclick="location.href=\x27?id=\x27+encodeURIComponent(\x27'+esc(o.id)+'\x27)"\x3E'+
    '\x3Cdiv class="head"\x3E\x3Cspan class="name"\x3E'+esc(o.name||'Guest')+'\x3C/span\x3E\x3Cspan class="total"\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E'+
-   '\x3Cdiv class="meta"\x3E'+status+(o.phone?' · +961 '+esc(o.phone):'')+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+(o.address?' · '+esc(o.address):'')+'\x3C/div\x3E'+
+   '\x3Cdiv class="meta"\x3E'+status+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+(o.address?' · '+esc(o.address):'')+'\x3C/div\x3E'+
    '\x3Cdiv class="items-preview"\x3E'+esc(items)+'\x3C/div\x3E'+
    '\x3C/div\x3E';
  }
 
- if(active.length){
-  html+='\x3Cdiv style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#f59e0b;margin-bottom:6px"\x3EPending\x3C/div\x3E';
-  active.forEach(function(o){html+=card(o,(o.tracking||{}).delivering?'Out for Delivery':'Ready');});
+ var list=listTab==='done'?done:active;
+ if(!list.length){
+  html+='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E'+(listTab==='done'?'✅':'🛵')+'\x3C/div\x3E\x3Cdiv class="msg"\x3E'+(listTab==='done'?'No completed deliveries yet':'No pending deliveries')+'\x3C/div\x3E\x3C/div\x3E';
+ }else{
+  list.forEach(function(o){html+=card(o)});
  }
- if(done.length){
-  html+='\x3Cdiv style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#86efac;margin:14px 0 6px"\x3ECompleted\x3C/div\x3E';
-  done.forEach(function(o){html+=card(o,'Delivered '+new Date((o.tracking||{}).delivered).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}));});
- }
- if(!active.length&&!done.length){
-  html+='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🛵\x3C/div\x3E\x3Cdiv class="msg"\x3ENo deliveries\x3C/div\x3E\x3C/div\x3E';
- }
+ html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
  document.getElementById('app').innerHTML=html;
 }
+
+function switchTab(tab){listTab=tab;renderList(allOrders)}
 
 function renderDetail(o){
  if(mapInst){try{mapInst.remove()}catch(e){};mapInst=null;driverMarker=null;custMarker=null}
