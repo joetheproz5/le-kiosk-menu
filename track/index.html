@@ -70,9 +70,10 @@ const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const RESTAURANT_LAT=33.821091,RESTAURANT_LNG=35.564961;
 const STEPS=[
 {key:'received',label:'Order Received',icon:'📥'},
-{key:'preparing',label:'Preparing Your Order',icon:'👨‍🍳'},
-{key:'ready',label:'Ready to Serve',icon:'✅'},
-{key:'served',label:'Order Served',icon:'🍽️'}
+{key:'confirmed',label:'Order Confirmed',icon:'✅'},
+{key:'preparing',label:'Preparing',icon:'👨‍🍳'},
+{key:'delivering',label:'Out for Delivery',icon:'🛵'},
+{key:'delivered',label:'Delivered',icon:'🍽️'}
 ];
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -100,7 +101,7 @@ document.getElementById('content').innerHTML=`<div class="error-card"><div class
 }
 function renderOrder(order){
 const track=order.tracking||{};
-const currentStepIdx=order.orderType==='delivery'?findCurrentStep(track):null;
+const isDelivery=order.orderType==='delivery';
 const itemsHtml=(order.items||[]).map(it=>`<div class="order-item">${it.flavor?`<div style="width:100%"><span class="qty">${it.qty}x</span><span class="name">${esc(it.name)}</span><div class="addon">Flavor: ${esc(it.flavor)}</div>${(it.addons||[]).map(a=>`<div class="addon">+ ${esc(a.label)}</div>`).join('')}</div>`:`<div style="width:100%"><span class="qty">${it.qty}x</span><span class="name">${esc(it.name)}</span>${(it.addons||[]).map(a=>`<div class="addon">+ ${esc(a.label)}</div>`).join('')}</div>`}<span class="price">${money(it.price*it.qty)}</span></div>`).join('');
 const html=`<div class="order-card">
 <div class="order-id">${esc(order.id)}</div>
@@ -109,21 +110,22 @@ const html=`<div class="order-card">
 <div class="order-total"><span>Total</span><span>${money(order.total)}</span></div>
 </div>
 <div class="timeline"><div class="timeline-title">Status</div><div class="steps">${renderSteps(track)}</div></div>
-${order.orderType==='delivery'&&order.gps?renderMap(order):''}`;
+${isDelivery?renderMap(order):''}`;
 document.getElementById('content').innerHTML=html;
-if(order.orderType==='delivery'&&order.gps){initMap(order.gps)}
+if(isDelivery)initMap(order.gps)}
 }
 function findCurrentStep(track){
-const names=['received','preparing','ready','served'];
+const names=['received','confirmed','preparing','delivering','delivered'];
 for(let i=names.length-1;i>=0;i--){if(track[names[i]])return i}
 return 0;
 }
 function renderSteps(track){
-const current=findCurrentStep(track);
+let lastComplete=-1;
+STEPS.forEach((s,i)=>{if(track[s.key])lastComplete=i});
 return STEPS.map((s,i)=>{
 let cls='step';
-if(i<current||(i===current&&track[s.key]))cls+=' complete';
-else if(i===current||(i===0&&!track[s.key]))cls+=' current';
+if(track[s.key])cls+=' complete';
+else if(i===lastComplete+1)cls+=' current';
 const time=track[s.key]?formatTime(track[s.key]):'';
 let dotCls='dot';
 if(cls.includes('current'))dotCls+=' pulse';
@@ -132,24 +134,34 @@ return`<div class="${cls}"><div class="${dotCls}"></div><div><div class="step-la
 }
 function renderMap(order){
 const gps=order.gps||{};
-const dist=haversineMeters(RESTAURANT_LAT,RESTAURANT_LNG,gps.lat||0,gps.lng||0);
+const custLat=typeof gps.lat==='number'?gps.lat:RESTAURANT_LAT;
+const custLng=typeof gps.lng==='number'?gps.lng:RESTAURANT_LNG;
+const dist=haversineMeters(RESTAURANT_LAT,RESTAURANT_LNG,custLat,custLng);
 return`<div class="map-card"><div class="map-head"><span class="map-title">Delivery Route</span><span class="map-distance">~${formatDistance(dist)}</span></div><div id="map"></div></div>`;
 }
 let mapInstance=null;
 function initMap(gps){
-if(!gps||typeof gps.lat!=='number'||typeof gps.lng!=='number')return;
-if(mapInstance){mapInstance.remove();mapInstance=null}
 const mapEl=document.getElementById('map');
 if(!mapEl)return;
-const bounds=[[Math.min(RESTAURANT_LAT,gps.lat),Math.min(RESTAURANT_LNG,gps.lng)],[Math.max(RESTAURANT_LAT,gps.lat),Math.max(RESTAURANT_LNG,gps.lng)]];
+if(mapInstance)try{mapInstance.remove()}catch(_){};
+mapInstance=null;
+const custLat=typeof gps?.lat==='number'?gps.lat:RESTAURANT_LAT;
+const custLng=typeof gps?.lng==='number'?gps.lng:RESTAURANT_LNG;
+const bounds=[[Math.min(RESTAURANT_LAT,custLat),Math.min(RESTAURANT_LNG,custLng)],[Math.max(RESTAURANT_LAT,custLat),Math.max(RESTAURANT_LNG,custLng)]];
 mapInstance=L.map('map',{zoomControl:false,attributionControl:false}).fitBounds(bounds,{padding:[40,40]});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
-const restIcon=L.divIcon({className:'',html:`<div style="width:32px;height:32px;background:${'#b45309'};border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[32,32],iconAnchor:[16,32]});
-const custIcon=L.divIcon({className:'',html:`<div style="width:24px;height:24px;background:${'#2563eb'};border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[24,24],iconAnchor:[12,12]});
+const restIcon=L.divIcon({className:'',html:`<div style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[32,32],iconAnchor:[16,32]});
+const custIcon=L.divIcon({className:'',html:`<div style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[24,24],iconAnchor:[12,12]});
 L.marker([RESTAURANT_LAT,RESTAURANT_LNG],{icon:restIcon}).addTo(mapInstance).bindPopup('<b>Le Kiosk</b><br>Wadi Chahrour');
-L.marker([gps.lat,gps.lng],{icon:custIcon}).addTo(mapInstance).bindPopup('<b>Your Delivery</b>');
-L.polyline([[RESTAURANT_LAT,RESTAURANT_LNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2.5,dashArray:'8,6',opacity:.7}).addTo(mapInstance);
-setTimeout(()=>mapInstance?.invalidateSize(),100);
+L.marker([custLat,custLng],{icon:custIcon}).addTo(mapInstance).bindPopup('<b>Delivery Location</b>');
+const dist=haversineMeters(RESTAURANT_LAT,RESTAURANT_LNG,custLat,custLng);
+L.polyline([[RESTAURANT_LAT,RESTAURANT_LNG],[custLat,custLng]],{color:'#b45309',weight:2.5,dashArray:'8,6',opacity:.7}).addTo(mapInstance);
+document.querySelector('.map-distance').textContent=`~${formatDistance(dist)}`;
+setTimeout(()=>{if(document.getElementById('map'))mapInstance?.invalidateSize()},150);
+}
+function initMapSafe(gps){
+if(mapInstance)return;
+initMap(gps);
 }
 loadOrder();
 setInterval(loadOrder,5000);
