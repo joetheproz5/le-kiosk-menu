@@ -142,8 +142,8 @@ function buildSteps(track){
 
 function buildMap(order){
  var gps=order.gps||{};
- var clat=typeof gps.lat==='number'?gps.lat:RLAT;
- var clng=typeof gps.lng==='number'?gps.lng:RLNG;
+ var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
+ var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
  var dist=haversine(RLAT,RLNG,clat,clng);
  return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E~'+fmtDist(dist)+'\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
 }
@@ -155,8 +155,8 @@ function initMap(gps){
  if(!el)return;
  if(mapInst)try{mapInst.remove()}catch(e){}
  mapInst=null;
- var clat=typeof gps==='object'&&typeof gps.lat==='number'?gps.lat:RLAT;
- var clng=typeof gps==='object'&&typeof gps.lng==='number'?gps.lng:RLNG;
+ var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
+ var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
  var bounds=[[Math.min(RLAT,clat),Math.min(RLNG,clng)],[Math.max(RLAT,clat),Math.max(RLNG,clng)]];
  mapInst=L.map('map',{zoomControl:false,attributionControl:false}).fitBounds(bounds,{padding:[40,40]});
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
