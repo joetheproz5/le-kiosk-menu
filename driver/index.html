@@ -87,6 +87,7 @@ var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var FOLLOW_ZOOM=17;
 var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=220, LOCATION_SEND_MS=800;
+var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
 var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0;
 var autoRefresh=null;
@@ -95,6 +96,7 @@ var allOrders=[];
 var markingStep=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
 var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
+var knownOrderIds=null, alertAudioCtx=null, alertAudioUnlocked=false, lastOrderAlertAt=0;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -104,6 +106,52 @@ function isMenuOrder(o){
  var source=String(o.source||o.channel||'').toLowerCase();
  var id=String(o.id||'').toUpperCase();
  return source==='menu'||source.indexOf('menu')>=0||id.indexOf('MENU-')===0;
+}
+function unlockAlertSound(){
+ try{
+  var AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return;
+  if(!alertAudioCtx)alertAudioCtx=new AC();
+  if(alertAudioCtx.state==='suspended')alertAudioCtx.resume();
+  alertAudioUnlocked=true;
+ }catch(e){}
+}
+function beep(freq,start,duration,gain){
+ if(!alertAudioCtx)return;
+ var osc=alertAudioCtx.createOscillator();
+ var vol=alertAudioCtx.createGain();
+ osc.type='sine';
+ osc.frequency.setValueAtTime(freq,alertAudioCtx.currentTime+start);
+ vol.gain.setValueAtTime(0.0001,alertAudioCtx.currentTime+start);
+ vol.gain.exponentialRampToValueAtTime(gain,alertAudioCtx.currentTime+start+0.025);
+ vol.gain.exponentialRampToValueAtTime(0.0001,alertAudioCtx.currentTime+start+duration);
+ osc.connect(vol);
+ vol.connect(alertAudioCtx.destination);
+ osc.start(alertAudioCtx.currentTime+start);
+ osc.stop(alertAudioCtx.currentTime+start+duration+0.03);
+}
+function playOrderAlert(){
+ if(Date.now()-lastOrderAlertAt<1800)return;
+ lastOrderAlertAt=Date.now();
+ unlockAlertSound();
+ try{
+  if(alertAudioCtx){
+   beep(880,0,0.18,0.22);
+   beep(1175,0.22,0.22,0.24);
+   beep(988,0.52,0.22,0.2);
+  }else{
+   toast('New delivery order','ok');
+  }
+ }catch(e){toast('New delivery order','ok')}
+ if(navigator.vibrate)navigator.vibrate([220,90,220,90,320]);
+}
+function checkNewOrders(rows){
+ var ids=new Set((rows||[]).filter(function(o){return !(o.tracking||{}).delivered}).map(function(o){return String(o.id||'')}).filter(Boolean));
+ if(knownOrderIds===null){knownOrderIds=ids;return}
+ var hasNew=false;
+ ids.forEach(function(id){if(!knownOrderIds.has(id))hasNew=true});
+ knownOrderIds=ids;
+ if(hasNew)playOrderAlert();
 }
 
 function haversine(lat1,lon1,lat2,lon2){
@@ -224,7 +272,7 @@ function followDriver(lat,lng){
  },30);
 }
 
-function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
+function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,DRIVER_REFRESH_MS);}
 function sleep(ms){return new Promise(function(resolve){setTimeout(resolve,ms)})}
 
 async function keepAwake(){
@@ -241,8 +289,10 @@ function bindWakeLock(){
   if(document.visibilityState==='visible'){keepAwake();load()}
  });
  window.addEventListener('focus',function(){keepAwake();load()});
- document.addEventListener('click',keepAwake);
- document.addEventListener('touchstart',keepAwake,{passive:true});
+document.addEventListener('click',keepAwake);
+document.addEventListener('touchstart',keepAwake,{passive:true});
+document.addEventListener('click',unlockAlertSound);
+document.addEventListener('touchstart',unlockAlertSound,{passive:true});
 }
 
 async function fetchJSON(url,options,tries){
@@ -312,6 +362,7 @@ function renderList(data){
  allOrders=(data||[]).filter(isMenuOrder);
  var active=allOrders.filter(function(o){return !(o.tracking||{}).delivered});
  var done=allOrders.filter(function(o){return !!(o.tracking||{}).delivered});
+ checkNewOrders(allOrders);
  var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="tab-bar"\x3E'+
   '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="D.switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
