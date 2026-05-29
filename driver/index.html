@@ -8,72 +8,24 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-height:100vh}
-.container{max-width:480px;margin:0 auto;padding:20px 16px 100px}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.top h1{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:700;color:#fbbf24}
-.top .badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(34,197,94,.15);color:#86efac;margin-left:auto}
-.order-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
-.order-card:hover{border-color:rgba(251,191,36,.3)}
-.order-card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.order-card .name{font-size:15px;font-weight:900;color:#fff}
-.order-card .total{font-size:16px;font-weight:900;color:#fbbf24;white-space:nowrap}
-.order-card .meta{font-size:12px;font-weight:600;color:#9ca3af;margin-top:4px;line-height:1.45}
-.order-card .items-preview{font-size:11px;color:#6b7280;margin-top:6px}
-.empty{text-align:center;padding:60px 20px;color:#6b7280}
-.empty .emoji{font-size:48px;margin-bottom:12px}
-.empty .msg{font-size:14px;font-weight:700}
-.refresh-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
-.refresh-bar span{font-size:11px;font-weight:700;color:#6b7280}
-.refresh-bar button{background:rgba(255,255,255,.08);border:0;color:#e5e7eb;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
-.gps-bar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);margin-bottom:16px;cursor:pointer}
-.gps-bar.active{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3)}
-.gps-dot{width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0}
-.gps-bar.active .gps-dot{background:#22c55e;animation:pulse2 1.5s infinite}
-.gps-text{flex:1;font-size:12px;font-weight:700;color:#9ca3af}
-.gps-bar.active .gps-text{color:#86efac}
-.gps-coords{font-size:10px;font-weight:600;color:#6b7280;text-align:right}
-.gps-bar.active .gps-coords{color:#86efac}
-@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
-#map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:height .25s ease}
-.map-card.delivering #map{height:min(58vh,520px);min-height:380px}
-.map-actions{display:flex;align-items:center;gap:8px}
-.nav-btn{height:30px;border:0;border-radius:9px;background:#22c55e;color:#052e16;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;padding:0 10px;cursor:pointer;white-space:nowrap}
-.nav-btn:active{transform:translateY(1px)}
-.driver-heading{width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transition:transform .45s cubic-bezier(.22,.61,.36,1);will-change:transform}
-.driver-heading .tip{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}
-.driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}
-.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
-.detail-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:14px}
-.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.order-id{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7280}
-.order-type{font-size:10px;font-weight:900;padding:3px 8px;border-radius:999px;background:rgba(251,191,36,.15);color:#fbbf24}
-.customer-name{font-size:18px;font-weight:900;color:#fff;margin-bottom:4px}
-.customer-info{font-size:13px;font-weight:600;color:#9ca3af;line-height:1.5;margin-bottom:12px}
-.customer-info span{color:#e5e7eb}
-.items-list{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;padding:10px;background:rgba(255,255,255,.03);border-radius:10px}
-.item-row{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#d1d5db}
-.item-row .qty{color:#6b7280;min-width:24px}
-.item-addon{font-size:11px;color:#6b7280;padding-left:24px}
-.total-row{display:flex;justify-content:space-between;font-size:16px;font-weight:900;color:#fbbf24;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
-.warn{font-size:11px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.1);padding:8px 12px;border-radius:8px;margin-bottom:8px;text-align:center}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.action-btn{height:52px;border-radius:12px;border:0;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
-.action-btn.delivering{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
-.action-btn.delivering:active{background:#1d4ed8}
-.action-btn.delivered{background:linear-gradient(135deg,#059669,#047857);color:#fff;grid-column:1/-1}
-.action-btn.delivered:active{background:#047857}
-.action-btn:disabled{opacity:.35;cursor:not-allowed}
-.action-btn.done{background:rgba(255,255,255,.08);color:#9ca3af}
-.back-btn{height:36px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:18px;font-weight:900;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 12px;gap:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(90px);background:#1f2937;color:#fff;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:100;transition:transform .25s;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.ok{background:#047857}
-.last-updated{text-align:center;font-size:10px;color:#4b5563;margin-top:16px}
-.tab-bar{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;margin-bottom:16px}
-.tab-bar button{flex:1;height:38px;border-radius:10px;border:0;background:transparent;color:#9ca3af;font-size:13px;font-weight:800;letter-spacing:.02em;cursor:pointer;transition:all .15s}
-.tab-bar button.active{background:rgba(245,158,11,.25);color:#fbbf24}
-.tab-count{font-size:10px;font-weight:900;margin-left:4px;opacity:.6}
+:root{--bg:#070b12;--panel:#101722;--panel2:#151f2d;--line:rgba(255,255,255,.08);--text:#f8fafc;--muted:#8d9aab;--amber:#f59e0b;--green:#22c55e;--blue:#38bdf8;--red:#fb7185}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg,rgba(56,189,248,.12),transparent 30%),linear-gradient(145deg,rgba(245,158,11,.08),transparent 42%);pointer-events:none}
+.container{position:relative;max-width:520px;margin:0 auto;padding:14px 12px 112px}
+.top{position:sticky;top:0;z-index:30;margin:-14px -12px 14px;padding:14px 12px 12px;background:rgba(7,11,18,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.brand-dot{width:42px;height:42px;border-radius:14px;background:#fff url('/menupictures/logo.png') center/cover no-repeat;box-shadow:0 10px 28px rgba(0,0,0,.28);flex-shrink:0}
+.top-copy{min-width:0;flex:1}.kicker{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.top h1{font-family:'Fredoka',sans-serif;font-size:25px;line-height:1;color:#fff}.top .badge{font-size:10px;font-weight:900;padding:7px 10px;border-radius:999px;background:rgba(34,197,94,.13);color:#86efac;border:1px solid rgba(34,197,94,.25);white-space:nowrap}
+.tab-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:14px}.tab-bar button{height:42px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:13px;font-weight:900;cursor:pointer}.tab-bar button.active{background:#fff;color:#101722}.tab-count{font-size:10px;font-weight:900;margin-left:5px;opacity:.7}
+.order-card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.045));border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:11px;cursor:pointer;box-shadow:0 16px 38px rgba(0,0,0,.18)}.order-card:active{transform:translateY(1px)}.order-card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.order-card .name{font-size:17px;font-weight:950;color:#fff;line-height:1.15}.order-card .total{font-size:16px;font-weight:950;color:#fbbf24;white-space:nowrap}.order-card .meta{font-size:12px;font-weight:800;color:#aeb8c6;margin-top:7px;line-height:1.45}.order-card .items-preview{font-size:11px;color:#788596;margin-top:8px;line-height:1.45}
+.empty{text-align:center;padding:72px 20px;color:#7d8999}.empty .emoji{font-size:44px;margin-bottom:12px}.empty .msg{font-size:14px;font-weight:800}
+.back-btn{height:40px;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 13px;gap:5px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin:2px 0 12px}
+.gps-bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);margin-bottom:12px;cursor:pointer}.gps-bar.active{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.35)}.gps-dot{width:11px;height:11px;border-radius:50%;background:#64748b;box-shadow:0 0 0 6px rgba(100,116,139,.12)}.gps-bar.active .gps-dot{background:var(--green);animation:pulse2 1.4s infinite}.gps-text{font-size:12px;font-weight:900;color:#cbd5e1}.gps-coords{font-size:10px;font-weight:800;color:#7f8ea1;text-align:right}.gps-weak{border-color:rgba(251,113,133,.45)!important;background:rgba(251,113,133,.1)!important}.gps-weak .gps-text{color:#fecdd3!important}@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 9px rgba(34,197,94,0)}}
+.map-card{position:relative;background:#0a0f17;border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:12px;box-shadow:0 24px 60px rgba(0,0,0,.28)}.map-head{position:absolute;left:10px;right:10px;top:10px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}.map-title,.map-distance,.map-chip{height:32px;display:inline-flex;align-items:center;border-radius:999px;padding:0 11px;background:rgba(7,11,18,.78);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);font-size:11px;font-weight:950;color:#fff}.map-distance{color:#bbf7d0}.map-actions{display:flex;align-items:center;gap:7px}.nav-btn{height:32px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.92);color:#0f172a;font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;padding:0 10px;cursor:pointer;pointer-events:auto}
+#map{height:330px;width:100%;transition:height .25s ease}.map-card.delivering #map{height:min(68vh,620px);min-height:460px}.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}.driver-heading{width:36px;height:36px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 8px 24px rgba(0,0,0,.42);position:relative;transition:transform .28s cubic-bezier(.22,.61,.36,1);will-change:transform}.driver-heading .tip{position:absolute;left:50%;top:-10px;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}.driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}
+.detail-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:12px}.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.order-id{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#7f8ea1}.order-type{font-size:10px;font-weight:950;padding:5px 9px;border-radius:999px;background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.18)}.customer-name{font-size:22px;font-weight:950;color:#fff;margin-bottom:5px;line-height:1.1}.customer-info{font-size:12px;font-weight:750;color:#9aa7b8;line-height:1.45;margin-bottom:10px}.customer-info span{color:#e5e7eb}.driver-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:13px;padding:9px}.stat-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:#7f8ea1}.stat-value{margin-top:3px;font-size:13px;font-weight:950;color:#fff}.items-list{display:flex;flex-direction:column;gap:5px;margin:12px 0;padding:10px;background:rgba(255,255,255,.04);border-radius:12px}.item-row{display:grid;grid-template-columns:28px 1fr auto;gap:8px;font-size:13px;font-weight:750;color:#d1d5db}.item-row .qty{color:#7f8ea1}.item-addon{font-size:11px;color:#7f8ea1;padding-left:36px}.total-row{display:flex;justify-content:space-between;font-size:17px;font-weight:950;color:#fbbf24;padding-top:10px;border-top:1px solid var(--line)}.warn{font-size:11px;font-weight:850;color:#fbbf24;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.22);padding:9px 11px;border-radius:12px;margin-bottom:10px;text-align:center}
+.actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}.action-btn{height:56px;border-radius:15px;border:0;font-size:13px;font-weight:950;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}.action-btn.delivering{background:linear-gradient(135deg,#38bdf8,#2563eb);color:#fff}.action-btn.delivered{background:linear-gradient(135deg,#22c55e,#059669);color:#052e16}.action-btn:disabled{opacity:.45;cursor:not-allowed}.action-btn.done{background:rgba(255,255,255,.08);color:#9ca3af}.sticky-delivered{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 12px 14px;background:linear-gradient(180deg,transparent,rgba(7,11,18,.92) 30%);pointer-events:none}.sticky-delivered-inner{max-width:520px;margin:0 auto;pointer-events:auto}.sticky-delivered .action-btn{width:100%;box-shadow:0 18px 44px rgba(34,197,94,.28)}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(110px);background:#111827;color:#fff;padding:11px 18px;border-radius:12px;font-size:12px;font-weight:800;z-index:100;transition:transform .25s;box-shadow:0 16px 40px rgba(0,0,0,.4);border:1px solid var(--line)}.toast.show{transform:translateX(-50%) translateY(0)}.toast.ok{background:#047857}.last-updated{text-align:center;font-size:10px;color:#556274;margin-top:16px}
+@media(min-width:860px){.container{max-width:980px}.driver-detail-shell{display:grid;grid-template-columns:minmax(0,1.25fr) 360px;gap:14px;align-items:start}.map-card{position:sticky;top:72px}.map-card.delivering #map{height:calc(100vh - 112px);min-height:560px}.detail-side{position:sticky;top:72px}.sticky-delivered-inner{max-width:980px}.sticky-delivered .action-btn{max-width:360px;margin-left:auto;display:block}}
 </style>
 </head>
 <body>
@@ -90,12 +42,12 @@ var FOLLOW_ZOOM=17;
 var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=220, LOCATION_SEND_MS=800;
 var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
 var markingStep=null;
-var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null, currentRouteCoords=null;
 var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
 var knownOrderIds=null, alertAudioCtx=null, alertAudioUnlocked=false, lastOrderAlertAt=0;
 
@@ -271,6 +223,31 @@ function routeShouldRefresh(lat,lng){
  if(lastRouteLat===null||lastRouteLng===null)return true;
  return haversine(lat,lng,lastRouteLat,lastRouteLng)>3;
 }
+function distanceToSegmentMeters(p,a,b){
+ var x=p.lng,y=p.lat,x1=a[0],y1=a[1],x2=b[0],y2=b[1];
+ var dx=x2-x1,dy=y2-y1;
+ if(dx===0&&dy===0)return haversine(y,x,y1,x1);
+ var t=((x-x1)*dx+(y-y1)*dy)/(dx*dx+dy*dy);
+ t=Math.max(0,Math.min(1,t));
+ return haversine(y,x,y1+t*dy,x1+t*dx);
+}
+function distanceToRouteMeters(lat,lng){
+ if(!currentRouteCoords||currentRouteCoords.length<2)return Infinity;
+ var best=Infinity,p={lat:lat,lng:lng};
+ for(var i=1;i<currentRouteCoords.length;i++){
+  best=Math.min(best,distanceToSegmentMeters(p,currentRouteCoords[i-1],currentRouteCoords[i]));
+  if(best<18)break;
+ }
+ return best;
+}
+function gpsQuality(){
+ var acc=Number(gpsAccuracy);
+ if(!Number.isFinite(acc))return{label:'GPS waiting',cls:'',value:'--'};
+ if(acc<=20)return{label:'GPS strong',cls:'',value:Math.round(acc)+'m'};
+ if(acc<=55)return{label:'GPS okay',cls:'',value:Math.round(acc)+'m'};
+ return{label:'GPS weak',cls:' gps-weak',value:Math.round(acc)+'m'};
+}
+function fmtKm(m){return Number.isFinite(m)?(m<1000?Math.round(m)+'m':(m/1000).toFixed(1)+'km'):'--'}
 
 function smoothHeading(raw){
  var h=Number(raw);
@@ -287,7 +264,7 @@ function updateDriverMarkerHeading(){
  displayedHeading=smoothHeading(driverHeading);
  var el=driverMarker.getElement&&driverMarker.getElement();
  var headingEl=el&&el.querySelector('.driver-heading');
- if(headingEl)headingEl.style.transform='rotate(0deg)';
+ if(headingEl)headingEl.style.transform='rotate('+(displayedHeading||0)+'deg)';
 }
 
 function markerEl(html){
@@ -299,7 +276,7 @@ function markerEl(html){
 function followDriver(lat,lng){
  if(!mapInst)return;
  var moved=lastFollowLat===null?999:haversine(lastFollowLat,lastFollowLng,lat,lng);
- if(moved<2)return;
+ if(moved<1.2)return;
  var h=smoothHeading(Number.isFinite(Number(driverHeading))?Number(driverHeading):lastFollowHeading);
  var turn=(lastFollowHeading===null||!Number.isFinite(Number(h)))?999:Math.abs((((h-lastFollowHeading)+540)%360)-180);
  if(moved<3&&turn<4)return;
@@ -318,6 +295,11 @@ function followDriver(lat,lng){
   });
   lastFollowLat=lat;lastFollowLng=lng;lastFollowHeading=Number.isFinite(Number(h))?Number(h):lastFollowHeading;
  },30);
+}
+function recenterDriver(){
+ if(driverLat===null||driverLng===null)return;
+ lastFollowLat=null;
+ followDriver(driverLat,driverLng);
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,DRIVER_REFRESH_MS);}
@@ -384,9 +366,10 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   var route=j.routes[0];
   if(!mapInst)return;
   setRouteGeometry(route.geometry,false);
+  currentRouteCoords=(route.geometry&&route.geometry.coordinates)||null;
   var eta=Math.round(route.duration/60);
   var el=document.querySelector('.map-distance');
-  if(el)el.textContent=eta+' min drive';
+  if(el)el.textContent=eta+' min · '+fmtKm(route.distance);
   lastRouteLat=dLat;
   lastRouteLng=dLng;
   routeLastFetched=Date.now();
@@ -395,6 +378,7 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
 
 function setRouteGeometry(geometry,dashed){
  if(!mapInst)return;
+ if(geometry&&geometry.coordinates)currentRouteCoords=geometry.coordinates;
  if(!mapInst.getSource('route')){
   mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});
   return;
@@ -407,11 +391,12 @@ function setRouteGeometry(geometry,dashed){
 }
 
 function renderList(data){
+ syncStickyDelivered(false);
  allOrders=(data||[]).filter(isMenuOrder);
  var active=allOrders.filter(function(o){return !isDeliveredOrder(o)});
  var done=allOrders.filter(isDeliveredOrder);
  checkNewOrders(allOrders);
- var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
+ var html='\x3Cdiv class="top"\x3E\x3Cdiv class="brand-dot"\x3E\x3C/div\x3E\x3Cdiv class="top-copy"\x3E\x3Cdiv class="kicker"\x3ELe Kiosk Driver\x3C/div\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E\x3Cdiv class="badge"\x3ELive\x3C/div\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="tab-bar"\x3E'+
   '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="D.switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
   '\x3Cbutton class="'+(listTab==='done'?'active':'')+'" onclick="D.switchTab(\x27done\x27)"\x3EDone\x3Cspan class="tab-count"\x3E'+done.length+'\x3C/span\x3E\x3C/button\x3E'+
@@ -446,6 +431,8 @@ function renderDetail(o){
  var shouldResumeGPS=restoreDriverPosition(o.id,track)&&track.delivering&&!track.delivered;
  var customerPoint=pointFromGPS(o.gps);
  var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
+ var gq=gpsQuality();
+ var routeDist=(driverLat!==null&&customerPoint)?haversine(driverLat,driverLng,customerPoint.lat,customerPoint.lng):NaN;
  var items='';
  (o.items||[]).forEach(function(it){
   items+='\x3Cdiv class="item-row"\x3E\x3Cspan class="qty"\x3E'+it.qty+'x\x3C/span\x3E\x3Cspan\x3E'+esc(it.name)+'\x3C/span\x3E\x3Cspan\x3E'+money(it.price*it.qty)+'\x3C/span\x3E\x3C/div\x3E';
@@ -456,31 +443,34 @@ function renderDetail(o){
  var canDeliver=!!track.preparing;
  var canDelivered=!!track.delivering;
 
- var html='\x3Cbutton class="back-btn" onclick="location.href=\x27?\x27"\x3E← Back\x3C/button\x3E';
+ var html='\x3Cbutton class="back-btn" onclick="location.href=\x27?\x27"\x3E← Back\x3C/button\x3E\x3Cdiv class="driver-detail-shell"\x3E\x3Cdiv\x3E';
 
  if(o.orderType==='delivery'&&!firstMapDone){
  var gpsCls=gpsActive?' active':'';
-  html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
-  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-actions"\x3E'+(customerPoint?'\x3Cbutton class="nav-btn" onclick="D.openGoogleNav(event)"\x3EGoogle Maps\x3C/button\x3E':'')+'\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+  html+='\x3Cdiv class="gps-bar'+gpsCls+gq.cls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?gq.label:'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(gpsActive?gq.value:'')+'\x3C/div\x3E\x3C/div\x3E';
+  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3ENavigation\x3C/span\x3E\x3Cspan class="map-actions"\x3E\x3Cbutton class="nav-btn" onclick="D.recenter(event)"\x3ERecenter\x3C/button\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
   if(!customerPoint)html+='\x3Cdiv class="warn"\x3ECustomer GPS is missing for this order\x3C/div\x3E';
  }
 
- html+='\x3Cdiv id="detail-info"\x3E\x3Cdiv class="detail-card"\x3E'+
+ var detailInner='\x3Cdiv class="detail-card"\x3E'+
   '\x3Cdiv class="order-header"\x3E\x3Cspan class="order-id"\x3E'+esc(o.id)+'\x3C/span\x3E\x3Cspan class="order-type"\x3E'+stepLabel+'\x3C/span\x3E\x3C/div\x3E'+
   '\x3Cdiv class="customer-name"\x3E'+esc(o.name||'Guest')+'\x3C/div\x3E'+
   '\x3Cdiv class="customer-info"\x3E'+(o.phone?'\x3Cspan\x3E+961 '+esc(o.phone)+'\x3C/span\x3E':'')+' · Delivery'+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+'\x3C/div\x3E'+
   (o.address?'\x3Cdiv class="customer-info"\x3EAddress: \x3Cspan\x3E'+esc(o.address)+'\x3C/span\x3E\x3C/div\x3E':'')+
+  '\x3Cdiv class="driver-stats"\x3E\x3Cdiv class="stat"\x3E\x3Cdiv class="stat-label"\x3EDistance\x3C/div\x3E\x3Cdiv class="stat-value"\x3E'+fmtKm(routeDist)+'\x3C/div\x3E\x3C/div\x3E\x3Cdiv class="stat"\x3E\x3Cdiv class="stat-label"\x3EGPS\x3C/div\x3E\x3Cdiv class="stat-value"\x3E'+gq.value+'\x3C/div\x3E\x3C/div\x3E\x3Cdiv class="stat"\x3E\x3Cdiv class="stat-label"\x3EStatus\x3C/div\x3E\x3Cdiv class="stat-value"\x3E'+esc(stepLabel)+'\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E'+
   '\x3Cdiv class="items-list"\x3E'+items+'\x3C/div\x3E'+
   '\x3Cdiv class="total-row"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E';
 
  if(!canDeliver&&!track.delivering&&!track.delivered){
-  html+='\x3Cdiv class="warn"\x3EWaiting for kitchen to finish preparing\x3C/div\x3E';
+  detailInner+='\x3Cdiv class="warn"\x3EWaiting for kitchen to finish preparing\x3C/div\x3E';
  }
 
- html+='\x3Cdiv class="actions"\x3E'+
+ detailInner+='\x3Cdiv class="actions"\x3E'+
   (track.delivering?'\x3Cbutton class="action-btn done" disabled\x3EPicked Up\x3C/button\x3E':'\x3Cbutton class="action-btn delivering" id="btn-delivering" onclick="D.mark(\x27delivering\x27)" '+(canDeliver?'':'disabled')+'\x3EDelivering\x3C/button\x3E')+
   (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" '+(canDelivered?'':'disabled')+'\x3EDelivered\x3C/button\x3E')+
-  '\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
+  '\x3C/div\x3E\x3C/div\x3E';
+ html+='\x3C/div\x3E\x3Cdiv class="detail-side" id="detail-info"\x3E'+detailInner+'\x3C/div\x3E\x3C/div\x3E';
+ if(canDelivered&&!track.delivered)html+='\x3Cdiv class="sticky-delivered"\x3E\x3Cdiv class="sticky-delivered-inner"\x3E\x3Cbutton class="action-btn delivered" onclick="D.mark(\x27delivered\x27)"\x3EDelivered\x3C/button\x3E\x3C/div\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
 
  if(!firstMapDone){
@@ -488,14 +478,25 @@ function renderDetail(o){
   if(o.orderType==='delivery')setTimeout(function(){initMapOnce(o.gps);updateMapView(track,o.gps)},60);
  }else{
   var info=document.getElementById('detail-info');
-  if(info)info.innerHTML=html.split('id="detail-info"\x3E')[1].split('\x3Cdiv class="last-updated"\x3E')[0];
+  if(info)info.innerHTML=detailInner;
   updateMapView(track,o.gps);
  }
+ syncStickyDelivered(canDelivered&&!track.delivered);
  firstMapDone=true;
  var mapCard=document.querySelector('.map-card');
  if(mapCard)mapCard.classList.toggle('delivering',!!(track.delivering&&!track.delivered));
  if(mapInst)setTimeout(function(){mapInst.resize();if(driverLat)followDriver(driverLat,driverLng)},280);
  if(shouldResumeGPS&&!gpsActive)setTimeout(function(){startGPS()},250);
+}
+
+function syncStickyDelivered(show){
+ var old=document.querySelector('.sticky-delivered');
+ if(old)old.remove();
+ if(!show)return;
+ var wrap=document.createElement('div');
+ wrap.className='sticky-delivered';
+ wrap.innerHTML='\x3Cdiv class="sticky-delivered-inner"\x3E\x3Cbutton class="action-btn delivered" onclick="D.mark(\x27delivered\x27)"\x3EDelivered\x3C/button\x3E\x3C/div\x3E';
+ document.body.appendChild(wrap);
 }
 
 function initMapOnce(gps){
@@ -570,6 +571,7 @@ function updateMapView(track,gps){
  if(driverLat)drawDriverMarker(driverLat,driverLng);
  if(driverLat&&custMarker){
   var c=custMarker.getLngLat();
+  if(distanceToRouteMeters(driverLat,driverLng)>35)routeNeeded=true;
   if(routeShouldRefresh(driverLat,driverLng)){
    routeNeeded=false;
    fetchRoute(driverLat,driverLng,c.lat,c.lng);
@@ -590,10 +592,10 @@ function moveDriver(lat,lng,heading){
  saveActiveDelivery(true);
  if(!mapInst)return;
  drawDriverMarker(lat,lng);
- var el=document.getElementById('gps-coords');
- if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
+ updateGPSBar();
  if(custMarker){
   var c=custMarker.getLngLat();
+  if(distanceToRouteMeters(lat,lng)>35)routeNeeded=true;
   if(routeShouldRefresh(lat,lng)){
    routeNeeded=false;
    fetchRoute(lat,lng,c.lat,c.lng);
@@ -607,6 +609,9 @@ function moveDriver(lat,lng,heading){
 
 function moveDriverFromPosition(pos){
  var accuracy=Number(pos.coords.accuracy);
+ gpsAccuracy=Number.isFinite(accuracy)?accuracy:gpsAccuracy;
+ lastGPSAt=Date.now();
+ updateGPSBar();
  if(Number.isFinite(accuracy)&&accuracy>80)return false;
  var speed=Number(pos.coords.speed);
  var heading=Number(pos.coords.heading);
@@ -652,9 +657,12 @@ function stopGPS(){
 function updateGPSBar(){
  var bar=document.getElementById('gps-bar');
  var text=document.getElementById('gps-text');
+ var coords=document.getElementById('gps-coords');
  if(!bar||!text)return;
- if(gpsActive){bar.classList.add('active');text.textContent='Sharing location…'}
- else{bar.classList.remove('active');text.textContent='Tap to share your location'}
+ var q=gpsQuality();
+ bar.className='gps-bar'+(gpsActive?' active':'')+(gpsActive?q.cls:'');
+ if(gpsActive){text.textContent=q.label;if(coords)coords.textContent=q.value}
+ else{text.textContent='Tap to share your location';if(coords)coords.textContent=''}
 }
 
 function sendNow(){
@@ -672,6 +680,10 @@ window.D={
   var p=pointFromGPS(orderData&&orderData.gps);
   if(!p){toast('Customer GPS missing');return}
   window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat+','+p.lng)+'&travelmode=driving','_blank');
+ },
+ recenter:function(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  recenterDriver();
  },
  toggleGPS:function(){
   if(gpsActive){stopGPS();return}
