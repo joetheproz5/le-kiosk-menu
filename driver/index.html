@@ -84,7 +84,7 @@ var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
-var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false;
+var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, mapBearing=0;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -160,6 +160,23 @@ function driverIcon(){
   iconSize:[34,34],
   iconAnchor:[17,17]
  });
+}
+
+function applyMapBearing(){
+ if(!mapInst)return;
+ var pane=mapInst.getPane('mapPane');
+ if(!pane)return;
+ var heading=Number.isFinite(Number(driverHeading))?Number(driverHeading):0;
+ mapBearing=-heading;
+ var base=(pane.style.transform||'').replace(/\s*rotate\([^)]*\)/g,'').replace(/\s*scale\([^)]*\)/g,'');
+ pane.style.transformOrigin='50% 50%';
+ pane.style.transform=base+' rotate('+mapBearing+'deg) scale(1.18)';
+}
+
+function followDriver(lat,lng){
+ if(!mapInst)return;
+ mapInst.setView([lat,lng],Math.max(mapInst.getZoom()||FOLLOW_ZOOM,FOLLOW_ZOOM),{animate:true,duration:.45});
+ setTimeout(applyMapBearing,40);
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
@@ -330,11 +347,12 @@ function initMapOnce(gps){
  var cLat=customerPoint?customerPoint.lat:RLAT;
  var cLng=customerPoint?customerPoint.lng:RLNG;
  mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([cLat,cLng],14);
+ mapInst.on('moveend zoomend',applyMapBearing);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
  var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[28,28],iconAnchor:[14,28]});
  L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E');
  if(customerPoint)drawCustMarker(customerPoint);
- if(driverLat){drawDriverMarker(driverLat,driverLng);mapInst.setView([driverLat,driverLng],FOLLOW_ZOOM)}
+ if(driverLat){drawDriverMarker(driverLat,driverLng);followDriver(driverLat,driverLng)}
  setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
 }
 
@@ -367,7 +385,7 @@ function updateMapView(track,gps){
    routeNeeded=false;
    fetchRoute(driverLat,driverLng,c.lat,c.lng);
   }
-  mapInst.setView([driverLat,driverLng],Math.max(mapInst.getZoom()||FOLLOW_ZOOM,FOLLOW_ZOOM),{animate:true,duration:.6});
+  followDriver(driverLat,driverLng);
  }
 }
 
@@ -387,9 +405,9 @@ function moveDriver(lat,lng,heading){
    routeNeeded=false;
    fetchRoute(lat,lng,c.lat,c.lng);
   }
-  mapInst.setView([lat,lng],Math.max(mapInst.getZoom()||FOLLOW_ZOOM,FOLLOW_ZOOM),{animate:true,duration:.6});
+  followDriver(lat,lng);
  }else{
-  mapInst.setView([lat,lng],Math.max(mapInst.getZoom()||FOLLOW_ZOOM,FOLLOW_ZOOM),{animate:true,duration:.6});
+  followDriver(lat,lng);
  }
 }
 
@@ -450,22 +468,22 @@ window.D={
   startGPS();
  },
  mark:async function(step){
-   var btn=document.getElementById('btn-'+step);
+  var btn=document.getElementById('btn-'+step);
    if(btn)btn.disabled=true;
+   if(btn&&step==='delivered')btn.textContent='Saving...';
    if(step==='delivering'&&!gpsActive)startGPS();
    try{
-    var res=await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/status',{
+    var j=await fetchJSON(W+'/driver/'+encodeURIComponent(orderData.id)+'/status',{
      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:step})
-    });
-    var j=await res.json().catch(function(){return{}});
-    if(!res.ok)throw new Error(j.error||'Failed');
+    },3);
+    if(!j.ok)throw new Error(j.error||'Failed');
     if(!orderData.tracking)orderData.tracking={};
     orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;sendNow();updateMapView(orderData.tracking||{},orderData.gps)}
-    if(step==='delivered'){stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},1500)}
+    if(step==='delivered'){stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},900)}
    else setTimeout(function(){load()},1200);
-  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn)btn.disabled=false}
+  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn){btn.disabled=false;if(step==='delivered')btn.textContent='Delivered'}}
  }
 };
 
