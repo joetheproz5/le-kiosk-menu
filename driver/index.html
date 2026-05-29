@@ -109,6 +109,7 @@ function renderList(data){
 }
 
 function renderDetail(o){
+ if(mapInst){try{mapInst.remove()}catch(e){};mapInst=null;driverMarker=null;custMarker=null}
  var track=o.tracking||{};
  var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
  var items='';
