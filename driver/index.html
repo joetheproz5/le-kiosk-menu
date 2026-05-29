@@ -86,7 +86,7 @@ var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var FOLLOW_ZOOM=17;
-var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=280, LOCATION_SEND_MS=1500;
+var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=220, LOCATION_SEND_MS=800;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
 var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0;
 var autoRefresh=null;
@@ -171,9 +171,9 @@ function restoreDriverPosition(id,track){
 }
 
 function routeShouldRefresh(lat,lng){
- if(routeNeeded||Date.now()-routeLastFetched>3000)return true;
+ if(routeNeeded||Date.now()-routeLastFetched>1800)return true;
  if(lastRouteLat===null||lastRouteLng===null)return true;
- return haversine(lat,lng,lastRouteLat,lastRouteLng)>6;
+ return haversine(lat,lng,lastRouteLat,lastRouteLng)>3;
 }
 
 function smoothHeading(raw){
@@ -481,10 +481,10 @@ function moveDriver(lat,lng,heading){
  var h=Number(heading);
  var movedFromLast=driverLat===null?999:haversine(driverLat,driverLng,lat,lng);
  var movedFromGood=lastGoodLat===null?999:haversine(lastGoodLat,lastGoodLng,lat,lng);
- if(movedFromLast<1.5&&movedFromGood<3)return false;
- if(movedFromGood>=3){lastGoodLat=lat;lastGoodLng=lng;lastMoveAt=Date.now()}
- if(Number.isFinite(h)&&movedFromLast>2.5)driverHeading=h;
- else if(driverLat!==null&&movedFromLast>2.5)driverHeading=bearingBetween(driverLat,driverLng,lat,lng);
+ if(movedFromLast<0.7&&movedFromGood<1.5)return false;
+ if(movedFromGood>=1.5){lastGoodLat=lat;lastGoodLng=lng;lastMoveAt=Date.now()}
+ if(Number.isFinite(h)&&movedFromLast>1.5)driverHeading=h;
+ else if(driverLat!==null&&movedFromLast>1.5)driverHeading=bearingBetween(driverLat,driverLng,lat,lng);
   driverLat=lat;driverLng=lng;
  saveActiveDelivery(true);
  if(!mapInst)return;
@@ -537,7 +537,7 @@ function startGPS(){
    if(accepted&&Date.now()-lastSent>LOCATION_SEND_MS)sendLocation(pos.coords.latitude,pos.coords.longitude);
   },
   function(){toast('GPS error — check permissions');gpsActive=false;updateGPSBar()},
-  {enableHighAccuracy:true,maximumAge:250,timeout:8000}
+  {enableHighAccuracy:true,maximumAge:0,timeout:6000}
  );
 }
 
@@ -560,7 +560,7 @@ function sendNow(){
  if(!navigator.geolocation)return;
  navigator.geolocation.getCurrentPosition(function(pos){
   if(moveDriverFromPosition(pos))sendLocation(pos.coords.latitude,pos.coords.longitude);
- },function(){},{enableHighAccuracy:true,maximumAge:250,timeout:7000});
+ },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:6000});
 }
 
 window.D={
