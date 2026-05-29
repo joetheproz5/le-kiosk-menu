@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Driver — Le Kiosk</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-height:100vh}
@@ -37,10 +37,10 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 @keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
 #map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:height .25s ease}
 .map-card.delivering #map{height:min(58vh,520px);min-height:380px}
-.leaflet-marker-icon{transition:transform .35s linear}
 .driver-heading{width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transition:transform .45s cubic-bezier(.22,.61,.36,1);will-change:transform}
 .driver-heading .tip{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}
 .driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
 .detail-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:14px}
 .order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .order-id{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7280}
@@ -76,7 +76,7 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 <body>
 <div class="container" id="app"></div>
 <div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 <script>
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
@@ -166,15 +166,6 @@ function routeShouldRefresh(lat,lng){
  return haversine(lat,lng,lastRouteLat,lastRouteLng)>25;
 }
 
-function driverIcon(){
- return L.divIcon({
-  className:'driver-marker-icon',
-  html:'\x3Cdiv class="driver-heading"\x3E\x3Cdiv class="tip"\x3E\x3C/div\x3E\x3Cdiv class="core"\x3E\x3C/div\x3E\x3C/div\x3E',
-  iconSize:[34,34],
-  iconAnchor:[17,17]
- });
-}
-
 function smoothHeading(raw){
  var h=Number(raw);
  if(!Number.isFinite(h))return displayedHeading===null?0:displayedHeading;
@@ -188,9 +179,15 @@ function smoothHeading(raw){
 function updateDriverMarkerHeading(){
  if(!driverMarker)return;
  displayedHeading=smoothHeading(driverHeading);
- var el=driverMarker.getElement();
+ var el=driverMarker.getElement&&driverMarker.getElement();
  var headingEl=el&&el.querySelector('.driver-heading');
- if(headingEl)headingEl.style.transform='rotate('+displayedHeading+'deg)';
+ if(headingEl)headingEl.style.transform='rotate(0deg)';
+}
+
+function markerEl(html){
+ var el=document.createElement('div');
+ el.innerHTML=html;
+ return el.firstChild;
 }
 
 function followDriver(lat,lng){
@@ -202,8 +199,14 @@ function followDriver(lat,lng){
  clearTimeout(followTimer);
  followTimer=setTimeout(function(){
   var ahead=pointAhead(lat,lng,h,70);
-  if((mapInst.getZoom()||0)<FOLLOW_ZOOM)mapInst.setZoom(FOLLOW_ZOOM,{animate:true});
-  mapInst.panTo([ahead.lat,ahead.lng],{animate:true,duration:.35,easeLinearity:.25,noMoveStart:true});
+  mapInst.easeTo({
+   center:[ahead.lng,ahead.lat],
+   zoom:Math.max(mapInst.getZoom()||0,FOLLOW_ZOOM),
+   bearing:Number.isFinite(Number(h))?Number(h):mapInst.getBearing(),
+   pitch:58,
+   duration:520,
+   easing:function(t){return t*(2-t)}
+  });
   lastFollowLat=lat;lastFollowLng=lng;lastFollowHeading=Number.isFinite(Number(h))?Number(h):lastFollowHeading;
  },80);
 }
@@ -254,9 +257,7 @@ async function fetchJSON(url,options,tries){
 async function fetchRoute(dLat,dLng,cLat,cLng){
  function drawFallback(){
   if(!mapInst)return;
-  if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
-  routeLine=L.polyline([[dLat,dLng],[cLat,cLng]],{color:'#22c55e',weight:5,opacity:.75,dashArray:'10,8'}).addTo(mapInst);
-  if(routeLine.bringToFront)routeLine.bringToFront();
+  setRouteGeometry({type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},true);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=(haversine(dLat,dLng,cLat,cLng)/1000).toFixed(1)+' km';
   lastRouteLat=dLat;
@@ -270,10 +271,8 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   var j=await res.json();
   if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
   var route=j.routes[0];
-  if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
   if(!mapInst)return;
-  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:6,opacity:.95}}).addTo(mapInst);
-  if(routeLine.bringToFront)routeLine.bringToFront();
+  setRouteGeometry(route.geometry,false);
   var eta=Math.round(route.duration/60);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=eta+' min drive';
@@ -281,6 +280,19 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   lastRouteLng=dLng;
   routeLastFetched=Date.now();
  }catch(e){drawFallback()}
+}
+
+function setRouteGeometry(geometry,dashed){
+ if(!mapInst)return;
+ if(!mapInst.getSource('route')){
+  mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});
+  return;
+ }
+ mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
+ if(mapInst.getLayer('route-line')){
+  mapInst.setPaintProperty('route-line','line-dasharray',dashed?[1.5,1.5]:[1,0]);
+ }
+ routeLine=true;
 }
 
 function renderList(data){
@@ -368,7 +380,7 @@ function renderDetail(o){
  firstMapDone=true;
  var mapCard=document.querySelector('.map-card');
  if(mapCard)mapCard.classList.toggle('delivering',!!(track.delivering&&!track.delivered));
- if(mapInst)setTimeout(function(){mapInst.invalidateSize();if(driverLat)followDriver(driverLat,driverLng)},280);
+ if(mapInst)setTimeout(function(){mapInst.resize();if(driverLat)followDriver(driverLat,driverLng)},280);
  if(shouldResumeGPS&&!gpsActive)setTimeout(function(){startGPS()},250);
 }
 
@@ -378,28 +390,59 @@ function initMapOnce(gps){
  var customerPoint=pointFromGPS(gps);
  var cLat=customerPoint?customerPoint.lat:RLAT;
  var cLng=customerPoint?customerPoint.lng:RLNG;
- mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([cLat,cLng],14);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
- var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[28,28],iconAnchor:[14,28]});
- L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E');
- if(customerPoint)drawCustMarker(customerPoint);
- if(driverLat){drawDriverMarker(driverLat,driverLng);followDriver(driverLat,driverLng)}
- setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
+ mapInst=new maplibregl.Map({
+  container:'map',
+  center:[cLng,cLat],
+  zoom:14,
+  pitch:42,
+  bearing:0,
+  attributionControl:false,
+  style:{
+   version:8,
+   sources:{
+    carto:{type:'raster',tiles:['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO'},
+    route:{type:'geojson',data:{type:'FeatureCollection',features:[]}},
+    storeLine:{type:'geojson',data:{type:'FeatureCollection',features:[]}}
+   },
+   layers:[
+    {id:'carto',type:'raster',source:'carto'},
+    {id:'store-line',type:'line',source:'storeLine',paint:{'line-color':'#b45309','line-width':2,'line-opacity':.45,'line-dasharray':[1.5,1.5]}},
+    {id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.95}}
+   ]
+  }
+ });
+ mapInst.addControl(new maplibregl.NavigationControl({showCompass:true,showZoom:true}),'top-right');
+ mapInst.on('load',function(){
+  drawStoreMarker();
+  if(customerPoint)drawCustMarker(customerPoint);
+  if(driverLat){drawDriverMarker(driverLat,driverLng);followDriver(driverLat,driverLng)}
+ });
+ setTimeout(function(){if(document.getElementById('map'))mapInst.resize()},200);
+}
+
+function drawStoreMarker(){
+ var el=markerEl('\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E');
+ new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([RLNG,RLAT]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ELe Kiosk\x3C/b\x3E')).addTo(mapInst);
 }
 
 function drawCustMarker(gps){
  var point=pointFromGPS(gps);
  if(!point||custMarker)return;
- var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
- custMarker=L.marker([point.lat,point.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
- L.polyline([[RLAT,RLNG],[point.lat,point.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.4}).addTo(mapInst);
+ var el=markerEl('\x3Cdiv style="width:22px;height:22px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E');
+ custMarker=new maplibregl.Marker({element:el}).setLngLat([point.lng,point.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ECustomer\x3C/b\x3E')).addTo(mapInst);
+ function drawStoreLine(){
+  if(mapInst.getSource('storeLine'))mapInst.getSource('storeLine').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:[[RLNG,RLAT],[point.lng,point.lat]]},properties:{}}]});
+ }
+ if(mapInst.getSource('storeLine'))drawStoreLine();
+ else mapInst.once('load',drawStoreLine);
 }
 
 function drawDriverMarker(lat,lng){
  if(!mapInst)return;
- if(driverMarker){driverMarker.setLatLng([lat,lng]);updateDriverMarkerHeading()}
+ if(driverMarker){driverMarker.setLngLat([lng,lat]);updateDriverMarkerHeading()}
  else{
-  driverMarker=L.marker([lat,lng],{icon:driverIcon(),zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EYou\x3C/b\x3E');
+  var el=markerEl('\x3Cdiv class="driver-heading"\x3E\x3Cdiv class="tip"\x3E\x3C/div\x3E\x3Cdiv class="core"\x3E\x3C/div\x3E\x3C/div\x3E');
+  driverMarker=new maplibregl.Marker({element:el}).setLngLat([lng,lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EYou\x3C/b\x3E')).addTo(mapInst);
   setTimeout(updateDriverMarkerHeading,0);
  }
 }
@@ -412,7 +455,7 @@ function updateMapView(track,gps){
  if(customerPoint)drawCustMarker(customerPoint);
  if(driverLat)drawDriverMarker(driverLat,driverLng);
  if(driverLat&&custMarker){
-  var c=custMarker.getLatLng();
+  var c=custMarker.getLngLat();
   if(routeShouldRefresh(driverLat,driverLng)){
    routeNeeded=false;
    fetchRoute(driverLat,driverLng,c.lat,c.lng);
@@ -432,7 +475,7 @@ function moveDriver(lat,lng,heading){
  var el=document.getElementById('gps-coords');
  if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
  if(custMarker){
-  var c=custMarker.getLatLng();
+  var c=custMarker.getLngLat();
   if(routeShouldRefresh(lat,lng)){
    routeNeeded=false;
    fetchRoute(lat,lng,c.lat,c.lng);
