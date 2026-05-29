@@ -189,23 +189,35 @@ async function fetchJSON(url,options,tries){
 }
 
 async function fetchRoute(dLat,dLng,cLat,cLng){
+ function drawFallback(){
+  if(!mapInst)return;
+  if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
+  routeLine=L.polyline([[dLat,dLng],[cLat,cLng]],{color:'#22c55e',weight:5,opacity:.75,dashArray:'10,8'}).addTo(mapInst);
+  if(routeLine.bringToFront)routeLine.bringToFront();
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=(haversine(dLat,dLng,cLat,cLng)/1000).toFixed(1)+' km';
+  lastRouteLat=dLat;
+  lastRouteLng=dLng;
+  routeLastFetched=Date.now();
+ }
  try{
   var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
   var res=await fetch(url);
-  if(!res.ok){routeLastFetched=Date.now();return}
+  if(!res.ok){drawFallback();return}
   var j=await res.json();
-  if(j.code!=='Ok'||!j.routes||!j.routes[0]){routeLastFetched=Date.now();return}
+  if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
   var route=j.routes[0];
   if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
   if(!mapInst)return;
-  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:4,opacity:.8}}).addTo(mapInst);
+  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:6,opacity:.95}}).addTo(mapInst);
+  if(routeLine.bringToFront)routeLine.bringToFront();
   var eta=Math.round(route.duration/60);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=eta+' min drive';
   lastRouteLat=dLat;
   lastRouteLng=dLng;
   routeLastFetched=Date.now();
- }catch(e){routeLastFetched=Date.now()}
+ }catch(e){drawFallback()}
 }
 
 function renderList(data){
