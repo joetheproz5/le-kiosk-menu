@@ -99,6 +99,12 @@ var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false,
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
 function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(ok?' ok':'');clearTimeout(toast.tid);toast.tid=setTimeout(function(){t.className='toast'},3000);}
+function isMenuOrder(o){
+ if(!o)return false;
+ var source=String(o.source||o.channel||'').toLowerCase();
+ var id=String(o.id||'').toUpperCase();
+ return source==='menu'||source.indexOf('menu')>=0||id.indexOf('MENU-')===0;
+}
 
 function haversine(lat1,lon1,lat2,lon2){
  var R=6371000,a=Math.sin((lat2-lat1)*Math.PI/360)*Math.sin((lat2-lat1)*Math.PI/360)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin((lon2-lon1)*Math.PI/360)*Math.sin((lon2-lon1)*Math.PI/360);
@@ -303,9 +309,9 @@ function setRouteGeometry(geometry,dashed){
 }
 
 function renderList(data){
- allOrders=data||[];
- var active=data.filter(function(o){return !(o.tracking||{}).delivered});
- var done=data.filter(function(o){return !!(o.tracking||{}).delivered});
+ allOrders=(data||[]).filter(isMenuOrder);
+ var active=allOrders.filter(function(o){return !(o.tracking||{}).delivered});
+ var done=allOrders.filter(function(o){return !!(o.tracking||{}).delivered});
  var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="tab-bar"\x3E'+
   '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="D.switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
@@ -603,6 +609,10 @@ async function load(){
     var j=await fetchJSON(W+'/driver/'+encodeURIComponent(id),{},3);
     if(!j.ok)throw new Error(j.error||'Invalid response');
     orderData=j.data;
+    if(!isMenuOrder(orderData)){
+     document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🧾\x3C/div\x3E\x3Cdiv class="msg"\x3EThis is a POS order and is not assigned to drivers.\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="location.href=\x27?\x27"\x3EBack to deliveries\x3C/button\x3E\x3C/div\x3E';
+     return;
+    }
     lastDetailLoaded=true;
     renderDetail(orderData);
    }catch(e){

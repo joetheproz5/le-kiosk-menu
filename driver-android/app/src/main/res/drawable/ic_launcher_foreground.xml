@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="78dp"
+        android:height="78dp"
+        android:gravity="center">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/lekiosk_logo" />
+    </item>
+    <item
+        android:width="38dp"
+        android:height="38dp"
+        android:gravity="bottom|end"
+        android:right="18dp"
+        android:bottom="18dp"
+        android:drawable="@drawable/ic_driver_badge" />
+</layer-list>
