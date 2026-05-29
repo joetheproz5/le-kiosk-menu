@@ -554,10 +554,92 @@ overflow:hidden}
 .menu-tools{
 background:#fff;
 border-bottom:1px solid var(--line);
-padding:9px 18px;
+padding:12px 14px;
 display:flex;
 align-items:center;
 gap:10px}
+.active-orders-box{
+width:100%;
+min-width:0}
+.active-orders-head{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-bottom:9px}
+.active-orders-title{
+font-size:13px;
+font-weight:900;
+text-transform:uppercase;
+letter-spacing:.08em;
+color:#78350f}
+.active-orders-sub{
+font-size:10px;
+font-weight:800;
+color:#9ca3af;
+margin-top:1px}
+.active-orders-list{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+gap:9px;
+max-height:152px;
+overflow:auto;
+padding-right:2px}
+.active-order-card{
+background:#fffbeb;
+border:1.5px solid #fde68a;
+border-radius:10px;
+padding:10px;
+display:grid;
+grid-template-columns:minmax(0,1fr) auto;
+gap:8px;
+align-items:center}
+.active-order-name{
+font-size:13px;
+font-weight:900;
+color:#111827;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap}
+.active-order-meta{
+font-size:10px;
+font-weight:800;
+color:#92400e;
+margin-top:2px}
+.active-order-items{
+grid-column:1/-1;
+font-size:10px;
+font-weight:700;
+color:#6b7280;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap}
+.active-order-actions{
+display:flex;
+gap:6px;
+justify-content:flex-end;
+grid-column:1/-1}
+.active-empty{
+height:54px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:1px dashed #fde68a;
+border-radius:10px;
+font-size:12px;
+font-weight:900;
+color:#92400e;
+background:#fffbeb}
+body.theme-dark .active-order-card,
+body.theme-dark .active-empty{
+background:#101722;
+border-color:#3f2c12}
+body.theme-dark .active-order-name{
+color:#f9fafb}
+body.theme-dark .active-orders-title,
+body.theme-dark .active-order-meta,
+body.theme-dark .active-empty{
+color:#fbbf24}
 .category-toggle{
 height:34px;
 border-radius:10px;
@@ -1239,6 +1321,9 @@ text-transform:uppercase}
 .badge.pending{
 background:#fef3c7;
 color:#92400e}
+.badge.confirmed{
+background:#dbeafe;
+color:#1d4ed8}
 .badge.done{
 background:#dcfce7;
 color:#166534}
@@ -1690,7 +1775,18 @@ margin-left:auto}
 <section class="content">
 <div id="menu-view" class="content-view">
 <div class="menu-tools" id="menu-tools">
-<div class="category-drawer">
+<div class="active-orders-box">
+<div class="active-orders-head">
+<div>
+<div class="active-orders-title">Active Orders</div>
+<div class="active-orders-sub" id="active-orders-sub">Orders waiting for Done</div>
+</div>
+<button class="quick-btn" onclick="loadOrders(true)">Refresh</button>
+</div>
+<div class="active-orders-list" id="active-orders-list">
+</div>
+</div>
+<div class="category-drawer hidden">
 <div class="chip-row" id="category-chips">
 </div>
 </div>
@@ -2233,7 +2329,7 @@ loyaltyRewardRedeemedAt:c.loyalty_reward_redeemed_at||c.loyaltyRewardRedeemedAt|
 writeJson(CUSTOMERS_CACHE_KEY,customersData);
 }catch(_){customersData=readJson(CUSTOMERS_CACHE_KEY,[])}
 }
-function renderAll(){renderCategoryChips();renderItems();renderCart();renderOrdersList();renderInboxList();renderCustomers();setOrderType(orderType,false)}
+function renderAll(){renderCategoryChips();renderActiveOrders();renderItems();renderCart();renderOrdersList();renderInboxList();renderCustomers();setOrderType(orderType,false)}
 function switchView(view){
 currentView=view;
 document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -2260,6 +2356,29 @@ btn.setAttribute('aria-label',inInbox?'Back to menu':'Incoming orders');
 count.classList.toggle('hidden',inInbox);
 }
 function handleSearch(){searchQuery=$('search-input').value.trim().toLowerCase();if(currentView==='menu')renderItems();if(currentView==='orders')renderOrdersList();if(currentView==='customers')renderCustomers();}
+function activeOrderRows(){
+return ordersData.filter(o=>{
+const s=o.status==='confirmed'?'pending':o.status||'pending';
+return !['done','cancelled','declined','inbox'].includes(s);
+}).sort((a,b)=>new Date(a.timestamp||0)-new Date(b.timestamp||0));
+}
+function activeOrderCard(o){
+const dt=o.timestamp?new Date(o.timestamp):new Date(),items=(o.items||[]).slice(0,3).map(it=>`${it.qty}x ${it.name}`).join(', ');
+const more=(o.items||[]).length>3?` +${o.items.length-3}`:'';
+return `<div class="active-order-card">
+<div><div class="active-order-name">${esc(o.name||'Guest')}</div><div class="active-order-meta">${esc(o.id)} · ${dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})} · ${formatType(o.orderType)}${tableLabel(o)?` · ${tableLabel(o)}`:''}</div></div>
+<span class="badge ${o.status==='confirmed'?'confirmed':(o.status||'pending')}">${o.status==='confirmed'?'pending':(o.status||'pending')}</span>
+<div class="active-order-items">${esc(items+more)}</div>
+<div class="active-order-actions"><button class="small-btn green" onclick="quickStatus('${esc(o.id)}','done')">Done</button><button class="small-btn red" onclick="quickStatus('${esc(o.id)}','cancelled')">Cancel</button></div>
+</div>`;
+}
+function renderActiveOrders(){
+const el=$('active-orders-list'),sub=$('active-orders-sub');
+if(!el)return;
+const rows=activeOrderRows();
+if(sub)sub.textContent=rows.length?`${rows.length} order${rows.length===1?'':'s'} waiting for Done`:'No unfinished orders';
+el.innerHTML=rows.length?rows.map(activeOrderCard).join(''):'<div class="active-empty">No active orders right now</div>';
+}
 function renderCategoryChips(){
 $('category-chips').innerHTML=`<button class="cat-chip${
 activeCat==='all'?' active':''}
@@ -2553,10 +2672,10 @@ if(!validateOrder())return;
 const order=buildOrder('pending'),btn=$('charge-btn');btn.disabled=true;btn.textContent='Saving...';showLoading('Saving order...');
 try{
 await postOrder(order);
-ordersData.unshift(order);await upsertCustomer(order);showToast(`Order ${
+ordersData.unshift(order);await upsertCustomer(order);renderActiveOrders();showToast(`Order ${
 order.id}
 saved`,'success');clearOrder();renderOrdersList();
-}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList()}
+}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});renderActiveOrders();await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList()}
 btn.disabled=false;btn.textContent='Charge & Save';hideLoading();
 }
 async function upsertCustomer(order){
@@ -2577,8 +2696,9 @@ WORKER_URL}
 /supabase/orders`,{cache:'no-store'});if(!res.ok)throw new Error('Orders read '+res.status);
 const j=await res.json();ordersData=(j.data||[]).filter(r=>r.status!=='inbox').map(r=>({...r.payload,id:r.id,status:r.status||(r.payload&&r.payload.status)||'pending'}));
 mergeQueuedOrders();
+renderActiveOrders();
 renderOrdersList();
-}catch(e){mergeQueuedOrders();renderOrdersList();if(showUI)showToast('Load failed: '+e.message,'error')}
+}catch(e){mergeQueuedOrders();renderActiveOrders();renderOrdersList();if(showUI)showToast('Load failed: '+e.message,'error')}
 if(showUI)hideLoading();
 }
 function setOrderFilter(btn,filter){ordersFilter=filter;document.querySelectorAll('[data-order-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderOrdersList()}
@@ -2591,6 +2711,7 @@ if(q)rows=rows.filter(o=>String(o.id+' '+o.name+' '+o.phone).toLowerCase().inclu
 if(!rows.length){el.innerHTML='<div class="empty">No orders found.</div>';return}
 el.innerHTML=rows.map(orderCard).join('');
 }
+function quickStatus(id,status){updateOrderStatus(id,status)}
 function orderCard(o){
 const status=o.status==='confirmed'?'pending':o.status||'pending',dt=o.timestamp?new Date(o.timestamp):new Date();
 const items=(o.items||[]).map(it=>`<div class="row"><span>${
@@ -2639,7 +2760,7 @@ money(o.total)}
 status!=='done'?`<button class="small-btn green" onclick="confirmStatus('${esc(o.id)}','done')">Done</button>`:''}
 ${
 status!=='cancelled'?`<button class="small-btn red" onclick="confirmStatus('${esc(o.id)}','cancelled')">Cancel</button>`:''}
-<button class="small-btn amber" onclick="loadOrder('${esc(o.id)}')">Load</button><button class="small-btn dark" onclick="printLoggedOrder('${esc(o.id)}','thermal')">Thermal</button><button class="small-btn blue" onclick="printLoggedOrder('${esc(o.id)}','card')">Card</button><button class="small-btn blue" onclick="sendWhatsAppLoggedOrder('${esc(o.id)}')">WA</button></div></div>`;
+<button class="small-btn amber" onclick="loadOrder('${esc(o.id)}')">Load</button><button class="small-btn blue" onclick="window.open('${esc(trackUrl(o.id))}','_blank')">Track</button><button class="small-btn dark" onclick="printLoggedOrder('${esc(o.id)}','thermal')">Thermal</button><button class="small-btn blue" onclick="printLoggedOrder('${esc(o.id)}','card')">Card</button><button class="small-btn blue" onclick="sendWhatsAppLoggedOrder('${esc(o.id)}')">WA</button></div></div>`;
 }
 function confirmStatus(id,status){openModal(status==='done'?'Mark order as done':'Cancel order',`Update ${
 id}
@@ -2648,12 +2769,13 @@ status}
 ?`,()=>updateOrderStatus(id,status))}
 async function updateOrderStatus(id,status){
 const o=getLoggedOrder(id);if(!o)return;o.status=status;showLoading('Updating...');
+renderActiveOrders();
 o.tracking=o.tracking||{};
 var now=new Date().toISOString();
 if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});o.tracking.received=o.tracking.received||now;o.tracking.confirmed=o.tracking.confirmed||now;o.tracking.preparing=now;if(o.orderType!=='delivery')o.tracking.delivered=now}
 try{await fetch(`${
 WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error')}
+/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderActiveOrders();renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error');renderActiveOrders()}
 hideLoading();
 }
 async function updateTracking(id,step){
