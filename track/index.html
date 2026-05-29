@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Order — Le Kiosk</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--amber:#f59e0b;--amber-d:#b45309;--amber-l:#fef3c7;--green:#16a34a;--green-l:#dcfce7;--gray:#d1d5db;--gray-l:#f3f4f6;--ink:#1f2937;--muted:#6b7280;--white:#fff}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 0%,#fff 40%,#fff 100%);color:var(--ink);min-height:100vh}
+.container{max-width:520px;margin:0 auto;padding:28px 20px 80px}
+.header{text-align:center;margin-bottom:32px}
+.header .logo{font-family:'Fredoka',sans-serif;font-size:36px;font-weight:800;color:var(--amber-d)}
+.header .sub{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-d);opacity:.6;margin-top:2px}
+.order-card{background:var(--white);border:1px solid #fde68a;border-radius:16px;padding:20px;margin-bottom:22px;box-shadow:0 4px 20px rgba(180,83,9,.06)}
+.order-id{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.order-type{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--amber-l);color:var(--amber-d);margin-bottom:14px}
+.order-items{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.order-item{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;padding:6px 0;border-bottom:1px solid var(--gray-l)}
+.order-item .qty{color:var(--muted);font-size:12px;margin-right:6px}
+.order-item .name{flex:1}
+.order-item .price{font-weight:800;color:var(--amber-d)}
+.order-item .addon{font-size:11px;color:var(--muted);padding-left:12px;flex-basis:100%}
+.order-total{display:flex;justify-content:space-between;font-size:18px;font-weight:900;color:var(--amber-d);padding-top:8px;border-top:2px solid #fde68a}
+.timeline{margin-bottom:22px}
+.timeline-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px}
+.steps{position:relative;padding-left:32px}
+.steps::before{content:'';position:absolute;left:14px;top:4px;bottom:4px;width:2px;background:var(--gray);border-radius:1px}
+.step{position:relative;padding:6px 0 18px;display:flex;align-items:flex-start;gap:12px;transition:opacity .3s}
+.step:last-child{padding-bottom:0}
+.step .dot{position:absolute;left:-22px;top:6px;width:18px;height:18px;border-radius:50%;border:2px solid var(--gray);background:var(--white);z-index:1;transition:all .4s}
+.step .dot.pulse{animation:pulse 1.5s infinite}
+.step.complete .dot{background:var(--green);border-color:var(--green);animation:none}
+.step.current .dot{background:var(--amber);border-color:var(--amber)}
+.step.complete .step-label,.step.current .step-label{font-weight:700}
+.step.complete .step-label{color:var(--green)}
+.step.current .step-label{color:var(--amber-d)}
+.step-label{font-size:14px;font-weight:500;color:var(--muted);transition:color .3s}
+.step-time{font-size:11px;color:var(--muted);margin-top:2px}
+.step.complete .step-time{color:var(--green)}
+.step.current .step-time{color:var(--amber-d)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.4)}50%{box-shadow:0 0 0 8px rgba(245,158,11,0)}}
+.map-card{background:var(--white);border:1px solid #fde68a;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(180,83,9,.06);margin-bottom:22px}
+.map-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:10px}
+.map-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.map-distance{font-size:14px;font-weight:900;color:var(--amber-d)}
+#map{height:280px;width:100%}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);font-weight:600}
+.spinner{width:36px;height:36px;border:3px solid #fde68a;border-top-color:var(--amber-d);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-card{text-align:center;padding:60px 20px}
+.error-card .emoji{font-size:48px;margin-bottom:12px}
+.error-card .msg{font-size:15px;font-weight:700;color:var(--muted)}
+.footer{text-align:center;margin-top:30px;font-size:12px;font-weight:600;color:var(--muted)}
+.footer a{color:var(--amber-d);text-decoration:none;font-weight:800}
+@media(max-width:480px){.container{padding:20px 14px 60px}.order-card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><div class="logo">Le Kiosk</div><div class="sub">Order Tracking</div></div>
+<div id="content"><div class="loading"><div class="spinner"></div>Loading your order...</div></div>
+<div class="footer">Need help? <a href="tel:+96176840244">+961 76 840 244</a><br><a href="https://g.page/r/CVH0uR_N89RlEAg/review" target="_blank">Leave a Google Review</a></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<script>
+const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
+const RESTAURANT_LAT=33.821091,RESTAURANT_LNG=35.564961;
+const STEPS=[
+{key:'received',label:'Order Received',icon:'📥'},
+{key:'preparing',label:'Preparing Your Order',icon:'👨‍🍳'},
+{key:'ready',label:'Ready to Serve',icon:'✅'},
+{key:'served',label:'Order Served',icon:'🍽️'}
+];
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){return'$'+(Number(n)||0).toFixed(2);}
+function haversineMeters(lat1,lon1,lat2,lon2){
+const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function formatDistance(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km';}
+function formatTime(d){if(!d)return'--';const dt=new Date(d);return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}
+async function loadOrder(){
+const params=new URLSearchParams(window.location.search);
+const id=params.get('id');
+if(!id){showError('No order ID provided');return}
+try{
+const res=await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`);
+if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Order not found');}
+const j=await res.json();
+if(!j.ok)throw new Error(j.error||'Invalid response');
+renderOrder(j.data);
+}catch(e){showError(e.message)}
+}
+function showError(msg){
+document.getElementById('content').innerHTML=`<div class="error-card"><div class="emoji">🔍</div><div class="msg">${esc(msg)}</div></div>`;
+}
+function renderOrder(order){
+const track=order.tracking||{};
+const currentStepIdx=order.orderType==='delivery'?findCurrentStep(track):null;
+const itemsHtml=(order.items||[]).map(it=>`<div class="order-item">${it.flavor?`<div style="width:100%"><span class="qty">${it.qty}x</span><span class="name">${esc(it.name)}</span><div class="addon">Flavor: ${esc(it.flavor)}</div>${(it.addons||[]).map(a=>`<div class="addon">+ ${esc(a.label)}</div>`).join('')}</div>`:`<div style="width:100%"><span class="qty">${it.qty}x</span><span class="name">${esc(it.name)}</span>${(it.addons||[]).map(a=>`<div class="addon">+ ${esc(a.label)}</div>`).join('')}</div>`}<span class="price">${money(it.price*it.qty)}</span></div>`).join('');
+const html=`<div class="order-card">
+<div class="order-id">${esc(order.id)}</div>
+<div class="order-type">${order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway'}</div>
+<div class="order-items">${itemsHtml}</div>
+<div class="order-total"><span>Total</span><span>${money(order.total)}</span></div>
+</div>
+<div class="timeline"><div class="timeline-title">Status</div><div class="steps">${renderSteps(track)}</div></div>
+${order.orderType==='delivery'&&order.gps?renderMap(order):''}`;
+document.getElementById('content').innerHTML=html;
+if(order.orderType==='delivery'&&order.gps){initMap(order.gps)}
+}
+function findCurrentStep(track){
+const names=['received','preparing','ready','served'];
+for(let i=names.length-1;i>=0;i--){if(track[names[i]])return i}
+return 0;
+}
+function renderSteps(track){
+const current=findCurrentStep(track);
+return STEPS.map((s,i)=>{
+let cls='step';
+if(i<current||(i===current&&track[s.key]))cls+=' complete';
+else if(i===current||(i===0&&!track[s.key]))cls+=' current';
+const time=track[s.key]?formatTime(track[s.key]):'';
+let dotCls='dot';
+if(cls.includes('current'))dotCls+=' pulse';
+return`<div class="${cls}"><div class="${dotCls}"></div><div><div class="step-label">${s.icon} ${esc(s.label)}</div>${time?`<div class="step-time">${time}</div>`:''}</div></div>`;
+}).join('');
+}
+function renderMap(order){
+const gps=order.gps||{};
+const dist=haversineMeters(RESTAURANT_LAT,RESTAURANT_LNG,gps.lat||0,gps.lng||0);
+return`<div class="map-card"><div class="map-head"><span class="map-title">Delivery Route</span><span class="map-distance">~${formatDistance(dist)}</span></div><div id="map"></div></div>`;
+}
+let mapInstance=null;
+function initMap(gps){
+if(!gps||typeof gps.lat!=='number'||typeof gps.lng!=='number')return;
+if(mapInstance){mapInstance.remove();mapInstance=null}
+const mapEl=document.getElementById('map');
+if(!mapEl)return;
+const bounds=[[Math.min(RESTAURANT_LAT,gps.lat),Math.min(RESTAURANT_LNG,gps.lng)],[Math.max(RESTAURANT_LAT,gps.lat),Math.max(RESTAURANT_LNG,gps.lng)]];
+mapInstance=L.map('map',{zoomControl:false,attributionControl:false}).fitBounds(bounds,{padding:[40,40]});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
+const restIcon=L.divIcon({className:'',html:`<div style="width:32px;height:32px;background:${'#b45309'};border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[32,32],iconAnchor:[16,32]});
+const custIcon=L.divIcon({className:'',html:`<div style="width:24px;height:24px;background:${'#2563eb'};border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[24,24],iconAnchor:[12,12]});
+L.marker([RESTAURANT_LAT,RESTAURANT_LNG],{icon:restIcon}).addTo(mapInstance).bindPopup('<b>Le Kiosk</b><br>Wadi Chahrour');
+L.marker([gps.lat,gps.lng],{icon:custIcon}).addTo(mapInstance).bindPopup('<b>Your Delivery</b>');
+L.polyline([[RESTAURANT_LAT,RESTAURANT_LNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2.5,dashArray:'8,6',opacity:.7}).addTo(mapInstance);
+setTimeout(()=>mapInstance?.invalidateSize(),100);
+}
+loadOrder();
+setInterval(loadOrder,5000);
+</script>
+</body>
+</html>
