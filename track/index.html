@@ -101,10 +101,6 @@ function routeShouldRefresh(lat,lng){
  if(lastRouteLat===null||lastRouteLng===null)return true;
  return haversine(lat,lng,lastRouteLat,lastRouteLng)>ROUTE_REFRESH_METERS;
 }
-function setLiveRoute(dLat,dLng,cLat,cLng){
- if(!mapInst||!mapInst.getSource('liveRoute'))return;
- mapInst.getSource('liveRoute').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},properties:{}}]});
-}
 
 function showError(msg){
  document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(msg)+'\x3C/div\x3E\x3C/div\x3E';
@@ -182,14 +178,12 @@ function initMapOnce(track,gps){
    sources:{
     carto:{type:'raster',tiles:['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO'},
     route:{type:'geojson',data:{type:'FeatureCollection',features:[]}},
-    liveRoute:{type:'geojson',data:{type:'FeatureCollection',features:[]}},
     storeLine:{type:'geojson',data:{type:'FeatureCollection',features:[]}}
    },
    layers:[
     {id:'carto',type:'raster',source:'carto'},
     {id:'store-line',type:'line',source:'storeLine',paint:{'line-color':'#b45309','line-width':2,'line-opacity':.45,'line-dasharray':[1.5,1.5]}},
-    {id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.9}},
-    {id:'live-route-line',type:'line',source:'liveRoute',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':5,'line-opacity':.42,'line-dasharray':[1.2,1.2]}}
+    {id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.9}}
    ]
   }
  });
@@ -251,7 +245,6 @@ function updateMap(track,gps){
   if(custMarker&&routeShouldRefresh(dl.lat,dl.lng)){
    routeNeeded=false;
    var c=custMarker.getLngLat();
-   setLiveRoute(dl.lat,dl.lng,c.lat,c.lng);
    fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
   }
  }
@@ -272,7 +265,6 @@ function animateDriverMarker(lat,lng){
 }
 
 async function fetchRoute(dLat,dLng,cLat,cLng){
- setLiveRoute(dLat,dLng,cLat,cLng);
  if(routeFetchBusy){
   pendingRoute={dLat:dLat,dLng:dLng,cLat:cLat,cLng:cLng};
   return;
