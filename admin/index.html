@@ -446,6 +446,14 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .gallery-admin-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
 .gallery-admin-delete{grid-column:1/-1;display:flex;justify-content:flex-end}
 
+.bulk-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:8px;margin:8px 0}
+.bulk-bar.show{display:flex}
+.bulk-bar .bulk-count{font-size:12px;font-weight:900;color:var(--brand);white-space:nowrap}
+.bulk-bar input[type=number]{width:80px;height:30px;border:1.5px solid var(--line);border-radius:7px;padding:0 8px;font-size:12px;font-weight:700;text-align:center;color:var(--ink)}
+.bulk-chk{width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer}
+.mini-row .bulk-chk{margin-right:4px}
+body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink);border-color:var(--line)}
+
 @media(max-width:980px){
   body{overflow:auto}
   #admin-screen{height:auto;min-height:100vh}
@@ -631,6 +639,14 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               <div class="table-toolbar">
                 <input class="search-input" id="items-search" type="text" placeholder="Search items, category, price..." oninput="renderItemsHub()">
                 <button class="btn btn-add" onclick="switchView('menu');addItem()">Add Item</button>
+              </div>
+              <div class="bulk-bar" id="bulk-bar">
+                <span class="bulk-count" id="bulk-count">0 selected</span>
+                <button class="btn btn-soft btn-sm" onclick="selectAllItems()">Select All</button>
+                <button class="btn btn-soft btn-sm" onclick="clearBulkSelection()">Clear</button>
+                <input type="number" id="bulk-amount" step="0.01" placeholder="1.00" value="1.00" min="0.01">
+                <button class="btn btn-add btn-sm" onclick="applyBulkPrice('add')">+$</button>
+                <button class="btn btn-add btn-sm" onclick="applyBulkPrice('pct')">%</button>
               </div>
               <div class="mini-list" id="items-hub"></div>
             </div>
@@ -964,7 +980,8 @@ const DEFAULT_LOYALTY_REWARDS=[
 ];
 
 let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
-let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
+let selectedItems=new Set();
+let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false,dashboardRefreshTimer=null;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false,galleryAdminData=[],galleryFilter='pending';
 let dashboardOrdersData=[],menuVisitorData=[];
 let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,galleryEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
@@ -1099,7 +1116,7 @@ function updateSessionBadge(){
 }
 function logout(){
   clearAuthSession();
-  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);
+  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);clearInterval(dashboardRefreshTimer);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
@@ -1119,8 +1136,9 @@ async function initAdmin(){
     scheduleBasketballExpiryPrune();
     await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders(),fetchMenuVisitors()]);
     renderStatus();
-    renderAll();
-  }catch(e){
+  renderAll();
+  dashboardRefreshTimer=setInterval(refreshDashboard,60000);
+}catch(e){
     showToast('Load failed: '+e.message,'error');
     document.getElementById('editor-root').innerHTML=`<div class="empty-state">Could not load menu. <button class="btn btn-save btn-sm" onclick="initAdmin()">Retry</button></div>`;
   }
@@ -2326,6 +2344,11 @@ async function fetchDashboardOrders(){
     dashboardOrdersData=[];
   }
 }
+async function refreshDashboard(){
+  if(currentView!=='dashboard')return;
+  await Promise.all([fetchDashboardOrders(),fetchMenuVisitors()]);
+  renderDashboard();
+}
 async function fetchMenuVisitors(){
   try{
     const res=await fetch(`${WORKER_URL}/supabase/menu-visits`,{cache:'no-store'});
@@ -2582,7 +2605,7 @@ function renderAll(){
 }
 function markUnsaved(){hasUnsaved=true;document.getElementById('unsaved-indicator').classList.add('show');}
 function markSaved(){hasUnsaved=false;document.getElementById('unsaved-indicator').classList.remove('show');}
-window.addEventListener('beforeunload',e=>{if(hasUnsaved){e.preventDefault();e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(hasUnsaved||rewardsDirty||customersAdminDirty||blockDirty){e.preventDefault();e.returnValue='';}});
 
 function menuStats(){
   let regular=0,addonCats=0,items=0,active=0,itemAddons=0,globalGroups=0;
@@ -2972,15 +2995,52 @@ function renderItemsHub(){
       if(!q||hay.includes(q))rows.push({sec,si,item,ii});
     });
   });
+  const bar=document.getElementById('bulk-bar');
+  const countEl=document.getElementById('bulk-count');
+  const selected=rows.filter(r=>selectedItems.has(`${r.si}-${r.ii}`));
+  if(bar)bar.classList.toggle('show',selected.length>0);
+  if(countEl)countEl.textContent=selected.length+' selected';
   if(!rows.length){el.innerHTML='<div class="empty-state">No menu items found.</div>';return;}
   el.innerHTML=rows.map(({sec,si,item,ii})=>{
+    const key=`${si}-${ii}`;
     const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
     return `<div class="mini-row">
+      <input type="checkbox" class="bulk-chk" ${selectedItems.has(key)?'checked':''} onclick="toggleSelectItem('${si}','${ii}')">
       ${img?`<img class="mini-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="mini-img"></div>`}
       <div><div class="mini-name">${esc(item.name||'Untitled')}</div><div class="mini-meta">${esc(sec.title||'Category')} · ${esc(item.price||'$0')} · ${item.active===false?'Inactive':'Active'}</div></div>
       <button class="btn btn-soft btn-sm" onclick="openItem(${si},${ii})">Edit</button>
     </div>`;
   }).join('');
+}
+function toggleSelectItem(si,ii){
+  const key=`${si}-${ii}`;
+  if(selectedItems.has(key))selectedItems.delete(key);
+  else selectedItems.add(key);
+  renderItemsHub();
+}
+function selectAllItems(){
+  menuData.forEach((sec,si)=>{if(sec.type!=='addons')(sec.items||[]).forEach((item,ii)=>{selectedItems.add(`${si}-${ii}`)});});
+  renderItemsHub();
+}
+function clearBulkSelection(){selectedItems.clear();renderItemsHub();}
+function applyBulkPrice(mode){
+  const amt=parseFloat(document.getElementById('bulk-amount')?.value);
+  if(!amt||amt<=0){showToast('Enter a valid amount','error');return}
+  let changed=0;
+  selectedItems.forEach(key=>{
+    const [si,ii]=key.split('-').map(Number);
+    const item=menuData[si]?.items?.[ii];
+    if(!item)return;
+    const current=parseFloat(String(item.price||'0').replace(/[^0-9.]/g,''))||0;
+    let next=mode==='add'?current+amt:current*(1+amt/100);
+    if(next<0)next=0;
+    item.price='$'+next.toFixed(2).replace(/\.00$/,'');
+    changed++;
+  });
+  markUnsaved();
+  clearBulkSelection();
+  renderItemsHub();
+  showToast(`${changed} item${changed===1?'':'s'} updated`,'success');
 }
 function renderAddonsHub(){
   const el=document.getElementById('addons-hub');
