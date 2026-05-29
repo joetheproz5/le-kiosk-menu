@@ -79,7 +79,7 @@ var STEPS=[
 ];
 
 var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var firstMapDone=false, routeLastFetched=0;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -158,6 +158,7 @@ function updateMap(track,gps){
  addCustMarker(gps);
  var dl=track&&track.driverLocation;
  if(dl){
+  if(!driverMarker)routeNeeded=true;
   if(driverMarker)driverMarker.setLatLng([dl.lat,dl.lng]);
   else{
    var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
@@ -165,7 +166,8 @@ function updateMap(track,gps){
   }
   var isDel=track.delivering&&!track.delivered;
   if(isDel)mapInst.setView([dl.lat,dl.lng],16,{animate:true});
-  if(custMarker&&Date.now()-routeLastFetched>10000){
+  if(custMarker&&(routeNeeded||Date.now()-routeLastFetched>10000)){
+   routeNeeded=false;
    var c=custMarker.getLatLng();
    fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
   }
