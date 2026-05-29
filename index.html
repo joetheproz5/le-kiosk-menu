@@ -153,10 +153,12 @@
         #checkout-sheet.open { pointer-events: all; }
         #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
         #checkout-sheet.open #sheet-backdrop { background: rgba(0,0,0,0.55); }
-        #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; touch-action: pan-y; }
+        #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; }
         #checkout-sheet.open #sheet-body { transform: translateY(0); }
         .sheet-handle { width: 46px; height: 5px; background: #d1d5db; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; cursor: grab; }
+        .sheet-handle,.sheet-header { touch-action: none; }
         .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
+        .sheet-scroll { touch-action: pan-y; }
         .sheet-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         .sheet-actions { display: flex; align-items: center; gap: 8px; }
         .clear-cart-btn { border: 1px solid #fecaca; background: #fff1f2; color: #be123c; border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
@@ -575,17 +577,27 @@ function openSheet(){
     renderSheet();
     bindCheckoutSheetDrag();
     clearTimeout(closeSheet.t);
-    document.getElementById('checkout-sheet').classList.add('open');
+    var sheet=document.getElementById('checkout-sheet');
+    var body=document.getElementById('sheet-body');
+    if(body){body.style.transition='';body.style.transform='';}
+    sheet.classList.add('open');
     document.body.classList.add('sheet-open');
     document.body.style.overflow='hidden';
 }
 function closeSheet(){
+    var sheet=document.getElementById('checkout-sheet');
     var body=document.getElementById('sheet-body');
-    if(body){body.style.transition='';body.style.transform='';}
-    document.getElementById('checkout-sheet').classList.remove('open');
-    document.body.style.overflow='';
     clearTimeout(closeSheet.t);
-    closeSheet.t=setTimeout(function(){document.body.classList.remove('sheet-open')},320);
+    if(body&&sheet.classList.contains('open')){
+        body.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';
+        body.style.transform='translateY(100%)';
+    }
+    document.body.style.overflow='';
+    closeSheet.t=setTimeout(function(){
+        sheet.classList.remove('open');
+        if(body){body.style.transition='';body.style.transform='';}
+        document.body.classList.remove('sheet-open');
+    },300);
 }
 
 function renderSheet(){
@@ -997,6 +1009,7 @@ function bindCheckoutSheetDrag(){
     body.dataset.dragBound='1';
     let startY=0,currentY=0,dragging=false;
     function canDragFrom(target){
+        if(target.closest&&target.closest('.sheet-handle,.sheet-header'))return true;
         const scroll=target.closest&&target.closest('#sheet-scroll');
         return !scroll||scroll.scrollTop<=0;
     }
