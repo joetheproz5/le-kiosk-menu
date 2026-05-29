@@ -2633,7 +2633,7 @@ status}
 ?`,()=>updateOrderStatus(id,status))}
 async function updateOrderStatus(id,status){
 const o=getLoggedOrder(id);if(!o)return;o.status=status;showLoading('Updating...');
-if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});updateTracking(id,o.orderType==='delivery'?'delivering':'delivered');updateTracking(id,'preparing')}
+if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});updateTracking(id,'preparing')}
 try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error')}
