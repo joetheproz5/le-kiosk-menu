@@ -88,6 +88,7 @@ var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, d
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
+var markingStep=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
 var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
 
@@ -499,9 +500,10 @@ window.D={
   startGPS();
  },
  mark:async function(step){
+  if(markingStep)return;
+  markingStep=step;
   var btn=document.getElementById('btn-'+step);
-   if(btn)btn.disabled=true;
-   if(btn&&step==='delivered')btn.textContent='Saving...';
+   if(btn){btn.disabled=true;btn.textContent=step==='delivering'?'Starting...':'Saving...'}
    if(step==='delivering'&&!gpsActive)startGPS();
    try{
     var j=await fetchJSON(W+'/driver/'+encodeURIComponent(orderData.id)+'/status',{
@@ -511,10 +513,10 @@ window.D={
     if(!orderData.tracking)orderData.tracking={};
     orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
-    if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;sendNow();updateMapView(orderData.tracking||{},orderData.gps)}
+    if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);markingStep=null}
     if(step==='delivered'){stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},900)}
    else setTimeout(function(){load()},1200);
-  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn){btn.disabled=false;if(step==='delivered')btn.textContent='Delivered'}}
+  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn){btn.disabled=false;btn.textContent=step==='delivering'?'Delivering':'Delivered'};markingStep=null}
  }
 };
 
