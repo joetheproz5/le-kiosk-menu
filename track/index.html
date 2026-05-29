@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Le Kiosk</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--amber:#f59e0b;--amber-d:#b45309;--amber-l:#fef3c7;--green:#16a34a;--green-l:#dcfce7;--gray:#d1d5db;--gray-l:#f3f4f6;--ink:#1f2937;--muted:#6b7280;--white:#fff}
@@ -52,6 +52,7 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 .map-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .map-distance{font-size:14px;font-weight:900;color:var(--amber-d)}
 #map{height:280px;width:100%}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
 .loading{text-align:center;padding:60px 20px;color:var(--muted);font-weight:600}
 .spinner{width:36px;height:36px;border:3px solid #fde68a;border-top-color:var(--amber-d);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -70,7 +71,7 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 <div id="map-area"></div>
 <div class="footer">Need help? <a href="tel:+96176840244">+961 76 840 244</a><br><a href="https://g.page/r/CVH0uR_N89RlEAg/review" target="_blank">Leave a Google Review</a></div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 <script>
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
@@ -86,6 +87,7 @@ var STEPS=[
 var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true;
 var wasDelivering=false;
+var lastDriverLat=null,lastDriverLng=null;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -139,7 +141,8 @@ function buildMapArea(){
 
 function recenterMap(){
  if(!mapInst||!driverMarker)return;
- mapInst.setView(driverMarker.getLatLng(),16);
+ var p=driverMarker.getLngLat();
+ mapInst.easeTo({center:[p.lng,p.lat],zoom:15.5,pitch:0,bearing:0,duration:450});
 }
 window.recenterMap=recenterMap;
 
@@ -156,44 +159,85 @@ function initMapOnce(track,gps){
  var customerPoint=pointFromGPS(gps);
  var clat=customerPoint?customerPoint.lat:RLAT;
  var clng=customerPoint?customerPoint.lng:RLNG;
- mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([clat,clng],14);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
- var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[32,32],iconAnchor:[16,32]});
- L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour');
+ mapInst=new maplibregl.Map({
+  container:'map',
+  center:[clng,clat],
+  zoom:14,
+  pitch:0,
+  bearing:0,
+  attributionControl:false,
+  style:{
+   version:8,
+   sources:{
+    carto:{type:'raster',tiles:['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO'},
+    route:{type:'geojson',data:{type:'FeatureCollection',features:[]}},
+    storeLine:{type:'geojson',data:{type:'FeatureCollection',features:[]}}
+   },
+   layers:[
+    {id:'carto',type:'raster',source:'carto'},
+    {id:'store-line',type:'line',source:'storeLine',paint:{'line-color':'#b45309','line-width':2,'line-opacity':.45,'line-dasharray':[1.5,1.5]}},
+    {id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.95}}
+   ]
+  }
+ });
+ mapInst.addControl(new maplibregl.NavigationControl({showCompass:false,showZoom:true}),'top-right');
+ mapInst.on('load',function(){
+  addStoreMarker();
+  addCustMarker(gps);
+  var drvNow=pointFromGPS(track&&track.driverLocation);
+  if(drvNow){updateMap(track,gps);mapInst.easeTo({center:[drvNow.lng,drvNow.lat],zoom:(track.delivering&&!track.delivered)?15.5:14,duration:350})}
+ });
  var drvNow=track&&track.driverLocation;
- if(drvNow)mapInst.setView([drvNow.lat,drvNow.lng],(track.delivering&&!track.delivered)?16:14);
  if(drvNow||(track.delivering&&!track.delivered)){var rb=document.getElementById('map-recenter');if(rb)rb.style.display='block'}
  firstMapDone=true;
- setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
+ setTimeout(function(){if(document.getElementById('map'))mapInst.resize()},200);
+}
+
+function markerEl(html){
+ var el=document.createElement('div');
+ el.innerHTML=html;
+ return el.firstChild;
+}
+
+function addStoreMarker(){
+ var el=markerEl('\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E');
+ new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([RLNG,RLAT]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour')).addTo(mapInst);
 }
 
 function addCustMarker(gps){
  var point=pointFromGPS(gps);
  if(!point||!mapInst||custMarker)return;
- var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
- custMarker=L.marker([point.lat,point.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
- L.polyline([[RLAT,RLNG],[point.lat,point.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.5}).addTo(mapInst);
+ var el=markerEl('\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E');
+ custMarker=new maplibregl.Marker({element:el}).setLngLat([point.lng,point.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ECustomer\x3C/b\x3E')).addTo(mapInst);
+ function drawStoreLine(){
+  if(mapInst.getSource('storeLine'))mapInst.getSource('storeLine').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:[[RLNG,RLAT],[point.lng,point.lat]]},properties:{}}]});
+ }
+ if(mapInst.getSource('storeLine'))drawStoreLine();
+ else mapInst.once('load',drawStoreLine);
 }
 
 function updateMap(track,gps){
  if(!mapInst)return;
  addCustMarker(gps);
  var dl=track&&track.driverLocation;
+ dl=pointFromGPS(dl);
  if(dl){
   if(!driverMarker)routeNeeded=true;
-  if(driverMarker)driverMarker.setLatLng([dl.lat,dl.lng]);
+  if(driverMarker)driverMarker.setLngLat([dl.lng,dl.lat]);
   else{
-   var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
-   driverMarker=L.marker([dl.lat,dl.lng],{icon:dIcon,zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E');
+   var el=markerEl('\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E');
+   driverMarker=new maplibregl.Marker({element:el}).setLngLat([dl.lng,dl.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EDriver\x3C/b\x3E')).addTo(mapInst);
   }
   var isDel=track.delivering&&!track.delivered;
-  if(isDel&&!wasDelivering){mapInst.setView([dl.lat,dl.lng],16);wasDelivering=true}
+  if(isDel&&!wasDelivering){mapInst.easeTo({center:[dl.lng,dl.lat],zoom:15.5,duration:400});wasDelivering=true}
+  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>8)){mapInst.easeTo({center:[dl.lng,dl.lat],zoom:Math.max(mapInst.getZoom(),15),duration:450})}
+  lastDriverLat=dl.lat;lastDriverLng=dl.lng;
   if(!isDel)wasDelivering=false;
   var rb=document.getElementById('map-recenter');
   if(rb)rb.style.display=(isDel||driverMarker)?'block':'none';
   if(custMarker&&(routeNeeded||Date.now()-routeLastFetched>10000)){
    routeNeeded=false;
-   var c=custMarker.getLatLng();
+   var c=custMarker.getLngLat();
    fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
   }
  }
@@ -202,9 +246,7 @@ function updateMap(track,gps){
 async function fetchRoute(dLat,dLng,cLat,cLng){
  function drawFallback(){
   if(!mapInst)return;
-  if(routeLine)mapInst.removeLayer(routeLine);
-  routeLine=L.polyline([[dLat,dLng],[cLat,cLng]],{color:'#22c55e',weight:5,opacity:.75,dashArray:'10,8'}).addTo(mapInst);
-  if(routeLine.bringToFront)routeLine.bringToFront();
+  setRouteGeometry({type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},true);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=fmtDist(haversine(dLat,dLng,cLat,cLng));
   routeLastFetched=Date.now();
@@ -216,14 +258,20 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   var j=await res.json();
   if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
   var route=j.routes[0];
-  if(routeLine)mapInst.removeLayer(routeLine);
-  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:6,opacity:.95}}).addTo(mapInst);
-  if(routeLine.bringToFront)routeLine.bringToFront();
+  setRouteGeometry(route.geometry,false);
   var eta=Math.round(route.duration/60);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=eta+' min drive';
   routeLastFetched=Date.now();
  }catch(e){drawFallback()}
+}
+
+function setRouteGeometry(geometry,dashed){
+ if(!mapInst)return;
+ if(!mapInst.getSource('route')){mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});return}
+ mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
+ if(mapInst.getLayer('route-line'))mapInst.setPaintProperty('route-line','line-dasharray',dashed?[1.5,1.5]:[1,0]);
+ routeLine=true;
 }
 
 async function load(){
