@@ -82,6 +82,7 @@ var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true;
+var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -100,6 +101,47 @@ function pointFromGPS(gps){
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
+function sleep(ms){return new Promise(function(resolve){setTimeout(resolve,ms)})}
+
+async function keepAwake(){
+ if(!('wakeLock' in navigator)||document.visibilityState!=='visible'||wakeLock)return;
+ try{
+  wakeLock=await navigator.wakeLock.request('screen');
+  wakeLock.addEventListener('release',function(){wakeLock=null});
+ }catch(e){}
+}
+
+function bindWakeLock(){
+ keepAwake();
+ document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){keepAwake();load()}
+ });
+ window.addEventListener('focus',function(){keepAwake();load()});
+ document.addEventListener('click',keepAwake);
+ document.addEventListener('touchstart',keepAwake,{passive:true});
+}
+
+async function fetchJSON(url,options,tries){
+ var lastErr=null;
+ tries=tries||2;
+ for(var i=0;i<tries;i++){
+  var ctrl=new AbortController();
+  var t=setTimeout(function(){ctrl.abort()},10000);
+  try{
+   var res=await fetch(url,Object.assign({cache:'no-store'},options||{},{signal:ctrl.signal}));
+   clearTimeout(t);
+   var text=await res.text();
+   var data=text?JSON.parse(text):{};
+   if(!res.ok)throw new Error(data.error||('Request failed '+res.status));
+   return data;
+  }catch(e){
+   clearTimeout(t);
+   lastErr=e;
+   if(i<tries-1)await sleep(500+i*700);
+  }
+ }
+ throw lastErr||new Error('Failed to fetch');
+}
 
 async function fetchRoute(dLat,dLng,cLat,cLng){
  try{
@@ -317,6 +359,7 @@ function sendNow(){
 
 window.D={
  switchTab:function(tab){listTab=tab;renderList(allOrders)},
+ reload:function(){load()},
  toggleGPS:function(){
   if(gpsActive){stopGPS();return}
   startGPS();
@@ -342,35 +385,43 @@ window.D={
 };
 
 async function load(){
+ if(loadBusy)return;
+ loadBusy=true;
  var params=new URLSearchParams(window.location.search);
  var id=params.get('id');
- if(id){
-  startRefresh();
-  try{
-   var res=await fetch(W+'/driver/'+encodeURIComponent(id));
-   if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Not found')}
-   var j=await res.json();
-   if(!j.ok)throw new Error(j.error);
-   orderData=j.data;
-   renderDetail(orderData);
-  }catch(e){
-   document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(e.message||'Order not found')+'\x3C/div\x3E\x3C/div\x3E';
-  }
+ try{
+  if(id){
+   startRefresh();
+   try{
+    var j=await fetchJSON(W+'/driver/'+encodeURIComponent(id),{},3);
+    if(!j.ok)throw new Error(j.error||'Invalid response');
+    orderData=j.data;
+    lastDetailLoaded=true;
+    renderDetail(orderData);
+   }catch(e){
+    if(lastDetailLoaded)toast('Connection issue. Keeping current order on screen.');
+    else document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(e.message||'Could not load order')+'\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="D.reload()"\x3ERetry\x3C/button\x3E\x3C/div\x3E';
+   }
   }else{
    clearInterval(autoRefresh);
    startRefresh();
    firstMapDone=false;mapInst=null;driverMarker=null;custMarker=null;routeLine=null;
-  try{
-   var res2=await fetch(W+'/driver');
-   if(!res2.ok)throw new Error('Failed to load');
-   var j2=await res2.json();
-   renderList(j2.data||[]);
-  }catch(e){
-   document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E⚠️\x3C/div\x3E\x3Cdiv class="msg"\x3EFailed to load deliveries\x3C/div\x3E\x3C/div\x3E';
+   try{
+    var j2=await fetchJSON(W+'/driver',{},3);
+    allOrders=j2.data||[];
+    lastListLoaded=true;
+    renderList(allOrders);
+   }catch(e){
+    if(lastListLoaded)toast('Connection issue. Keeping deliveries on screen.');
+    else document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E⚠️\x3C/div\x3E\x3Cdiv class="msg"\x3ECould not load deliveries. Check internet and retry.\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="D.reload()"\x3ERetry\x3C/button\x3E\x3C/div\x3E';
+   }
   }
+ }finally{
+  loadBusy=false;
  }
 }
 
+bindWakeLock();
 load();
 })();
 </script>
