@@ -2633,14 +2633,14 @@ status}
 ?`,()=>updateOrderStatus(id,status))}
 async function updateOrderStatus(id,status){
 const o=getLoggedOrder(id);if(!o)return;o.status=status;showLoading('Updating...');
-if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});updateTracking(id,'preparing')}
+if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});await updateTracking(id,'preparing')}
 try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error')}
 hideLoading();
 }
 async function updateTracking(id,step){
-  try{await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step})})}catch(_){}
+  try{await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step})})}catch(e){console.warn('updateTracking failed:',e.message)}
 }
 async function applyLoyaltyCompletion(order){
 if(!loyaltyEnabled||!order.phone||order.phone==='00000000'||order.loyaltyProcessed)return;
