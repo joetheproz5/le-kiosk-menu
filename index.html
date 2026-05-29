@@ -141,6 +141,7 @@
         #checkout-pill { position: fixed; top: 58px; left: 50%; width: min(calc(100% - 28px), 28rem); transform: translateX(-50%) translateY(-16px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 80; }
         #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
         body.contact-open #checkout-pill { transform: translateX(-50%) translateY(-16px); opacity: 0; pointer-events: none; }
+        body.sheet-open #checkout-pill { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-16px); }
         .pill-inner { background: #1c0f00; border: 1px solid rgba(245,158,11,.7); border-radius: 16px; padding: 10px 10px 10px 12px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; box-shadow: 0 12px 30px rgba(28,15,0,.24); cursor: pointer; transition: transform 0.15s; }
         .pill-inner:hover { transform: translateY(-1px); }
         .pill-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -152,10 +153,14 @@
         #checkout-sheet.open { pointer-events: all; }
         #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
         #checkout-sheet.open #sheet-backdrop { background: rgba(0,0,0,0.55); }
-        #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; }
+        #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; touch-action: pan-y; }
         #checkout-sheet.open #sheet-body { transform: translateY(0); }
-        .sheet-handle { width: 40px; height: 4px; background: #e5e7eb; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; }
+        .sheet-handle { width: 46px; height: 5px; background: #d1d5db; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; cursor: grab; }
         .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
+        .sheet-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .sheet-actions { display: flex; align-items: center; gap: 8px; }
+        .clear-cart-btn { border: 1px solid #fecaca; background: #fff1f2; color: #be123c; border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+        .clear-cart-btn:hover { background: #ffe4e6; }
         .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 24px; -webkit-overflow-scrolling: touch; }
         .sheet-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #fef3c7; }
         .sheet-item:last-child { border-bottom: none; }
@@ -291,9 +296,12 @@
     <div id="sheet-body">
         <div class="sheet-handle"></div>
         <div class="sheet-header">
-            <div class="flex items-center justify-between">
+            <div class="sheet-title-row">
                 <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
-                <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                <div class="sheet-actions">
+                    <button id="clear-cart-btn" class="clear-cart-btn" type="button">Clear cart</button>
+                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                </div>
             </div>
         </div>
         <div class="sheet-scroll" id="sheet-scroll"></div>
@@ -551,9 +559,34 @@ function updatePill(){
     }
 }
 
+function clearCart(){
+    cart={};addonSel={};shishaSel={};
+    selectedType=null;detectedZone=null;userGPS=null;deliveryAddress='';changeFor='';
+    document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
+    document.querySelectorAll('.item-card-wrap').forEach(el=>el.classList.remove('has-qty'));
+    closeSheet();
+    updatePill();
+    showInboxToast('Cart cleared.','ok');
+}
+
 // SHEET
-function openSheet(){closeContactPanel();renderSheet();document.getElementById('checkout-sheet').classList.add('open');document.body.style.overflow='hidden';}
-function closeSheet(){document.getElementById('checkout-sheet').classList.remove('open');document.body.style.overflow='';}
+function openSheet(){
+    closeContactPanel();
+    renderSheet();
+    bindCheckoutSheetDrag();
+    clearTimeout(closeSheet.t);
+    document.getElementById('checkout-sheet').classList.add('open');
+    document.body.classList.add('sheet-open');
+    document.body.style.overflow='hidden';
+}
+function closeSheet(){
+    var body=document.getElementById('sheet-body');
+    if(body){body.style.transition='';body.style.transform='';}
+    document.getElementById('checkout-sheet').classList.remove('open');
+    document.body.style.overflow='';
+    clearTimeout(closeSheet.t);
+    closeSheet.t=setTimeout(function(){document.body.classList.remove('sheet-open')},320);
+}
 
 function renderSheet(){
     _addonMap=[];
@@ -862,6 +895,7 @@ document.addEventListener('click',function(e){
     if(e.target.closest('#order-mode-btn')){openOrderPage();return;}
     if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
     if(e.target.closest('#contact-close')){closeContactPanel();return;}
+    if(e.target.closest('#clear-cart-btn')){clearCart();return;}
     if(e.target.closest('#close-sheet-btn')||e.target===document.getElementById('sheet-backdrop')){closeSheet();return;}
     if(e.target.closest('#send-order-btn')){sendOrder();return;}
     if(e.target.closest('#locate-btn')){detectLocation();return;}
@@ -954,6 +988,41 @@ function initScrollSpy(menuData){
     function setActive(id){navLinks.forEach(link=>{if(link.dataset.section===id){link.classList.add('active');link.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}else link.classList.remove('active');});}
     const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:'-30% 0px -65% 0px',threshold:0});
     menuData.forEach(c=>{const el=document.getElementById(c.key);if(el)observer.observe(el);});
+}
+
+function bindCheckoutSheetDrag(){
+    const sheet=document.getElementById('checkout-sheet');
+    const body=document.getElementById('sheet-body');
+    if(!sheet||!body||body.dataset.dragBound)return;
+    body.dataset.dragBound='1';
+    let startY=0,currentY=0,dragging=false;
+    function canDragFrom(target){
+        const scroll=target.closest&&target.closest('#sheet-scroll');
+        return !scroll||scroll.scrollTop<=0;
+    }
+    body.addEventListener('pointerdown',function(e){
+        if(!sheet.classList.contains('open')||!canDragFrom(e.target))return;
+        dragging=true;startY=e.clientY;currentY=0;
+        body.style.transition='none';
+        body.setPointerCapture&&body.setPointerCapture(e.pointerId);
+    });
+    body.addEventListener('pointermove',function(e){
+        if(!dragging)return;
+        currentY=Math.max(0,e.clientY-startY);
+        if(currentY>0){
+            e.preventDefault();
+            body.style.transform='translateY('+currentY+'px)';
+        }
+    });
+    function endDrag(){
+        if(!dragging)return;
+        dragging=false;
+        body.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';
+        if(currentY>90)closeSheet();
+        else body.style.transform='';
+    }
+    body.addEventListener('pointerup',endDrag);
+    body.addEventListener('pointercancel',endDrag);
 }
 
 // Contact bubble
