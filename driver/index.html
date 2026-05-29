@@ -81,7 +81,7 @@ var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
-var firstMapDone=false, routeLastFetched=0;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
@@ -90,6 +90,13 @@ function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;
 function haversine(lat1,lon1,lat2,lon2){
  var R=6371000,a=Math.sin((lat2-lat1)*Math.PI/360)*Math.sin((lat2-lat1)*Math.PI/360)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin((lon2-lon1)*Math.PI/360)*Math.sin((lon2-lon1)*Math.PI/360);
  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function pointFromGPS(gps){
+ if(!gps)return null;
+ var lat=Number(gps.lat),lng=Number(gps.lng);
+ if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
+ return{lat:lat,lng:lng};
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
@@ -146,6 +153,7 @@ function renderList(data){
 
 function renderDetail(o){
  var track=o.tracking||{};
+ var customerPoint=pointFromGPS(o.gps);
  var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
  var items='';
  (o.items||[]).forEach(function(it){
@@ -163,6 +171,7 @@ function renderDetail(o){
   var gpsCls=gpsActive?' active':'';
   html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
   html+='\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+  if(!customerPoint)html+='\x3Cdiv class="warn"\x3ECustomer GPS is missing for this order\x3C/div\x3E';
  }
 
  html+='\x3Cdiv id="detail-info"\x3E\x3Cdiv class="detail-card"\x3E'+
@@ -197,22 +206,24 @@ function renderDetail(o){
 function initMapOnce(gps){
  var el=document.getElementById('map');
  if(!el||mapInst)return;
- var cLat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
- var cLng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
+ var customerPoint=pointFromGPS(gps);
+ var cLat=customerPoint?customerPoint.lat:RLAT;
+ var cLng=customerPoint?customerPoint.lng:RLNG;
  mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([cLat,cLng],14);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
  var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[28,28],iconAnchor:[14,28]});
  L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E');
- if(gps&&typeof gps.lat==='number')drawCustMarker(gps);
+ if(customerPoint)drawCustMarker(customerPoint);
  if(driverLat){drawDriverMarker(driverLat,driverLng);mapInst.setView([driverLat,driverLng],16)}
  setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
 }
 
 function drawCustMarker(gps){
- if(!gps||typeof gps.lat!=='number'||custMarker)return;
+ var point=pointFromGPS(gps);
+ if(!point||custMarker)return;
  var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
- custMarker=L.marker([gps.lat,gps.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
- L.polyline([[RLAT,RLNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.4}).addTo(mapInst);
+ custMarker=L.marker([point.lat,point.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
+ L.polyline([[RLAT,RLNG],[point.lat,point.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.4}).addTo(mapInst);
 }
 
 function drawDriverMarker(lat,lng){
@@ -226,11 +237,17 @@ function drawDriverMarker(lat,lng){
 
 function updateMapView(track,gps){
  if(!mapInst)return;
- if(gps&&typeof gps.lat==='number')drawCustMarker(gps);
+ var customerPoint=pointFromGPS(gps);
+ if(customerPoint)drawCustMarker(customerPoint);
  if(driverLat)drawDriverMarker(driverLat,driverLng);
  if(driverLat&&custMarker){
   var c=custMarker.getLatLng();
-  fetchRoute(driverLat,driverLng,c.lat,c.lng);
+  if(routeNeeded||Date.now()-routeLastFetched>10000){
+   routeNeeded=false;
+   fetchRoute(driverLat,driverLng,c.lat,c.lng);
+  }
+  var bounds=L.latLngBounds([[driverLat,driverLng],[c.lat,c.lng]]);
+  mapInst.fitBounds(bounds,{padding:[34,34],maxZoom:16});
  }
 }
 
@@ -238,12 +255,16 @@ function moveDriver(lat,lng){
  driverLat=lat;driverLng=lng;
  if(!mapInst)return;
  drawDriverMarker(lat,lng);
- mapInst.setView([lat,lng],mapInst.getZoom()||16,{animate:true,duration:1});
  var el=document.getElementById('gps-coords');
  if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
  if(custMarker){
   var c=custMarker.getLatLng();
+  routeNeeded=false;
   fetchRoute(lat,lng,c.lat,c.lng);
+  var bounds=L.latLngBounds([[lat,lng],[c.lat,c.lng]]);
+  mapInst.fitBounds(bounds,{padding:[34,34],maxZoom:16});
+ }else{
+  mapInst.setView([lat,lng],mapInst.getZoom()||16,{animate:true,duration:1});
  }
 }
 
@@ -258,10 +279,10 @@ async function sendLocation(lat,lng){
 
 function startGPS(){
  if(!navigator.geolocation){toast('GPS not available');return}
+ if(gpsActive)return;
  gpsActive=true;
- document.getElementById('gps-bar').classList.add('active');
- document.getElementById('gps-text').textContent='Sharing location…';
- sendNow();
+ updateGPSBar();
+  sendNow();
  watchId=navigator.geolocation.watchPosition(
   function(pos){
    moveDriver(pos.coords.latitude,pos.coords.longitude);
@@ -300,20 +321,23 @@ window.D={
   if(gpsActive){stopGPS();return}
   startGPS();
  },
-  mark:async function(step){
+ mark:async function(step){
    var btn=document.getElementById('btn-'+step);
    if(btn)btn.disabled=true;
+   if(step==='delivering'&&!gpsActive)startGPS();
    try{
     var res=await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/status',{
      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:step})
     });
     var j=await res.json().catch(function(){return{}});
     if(!res.ok)throw new Error(j.error||'Failed');
+    if(!orderData.tracking)orderData.tracking={};
+    orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
-    if(step==='delivering'){D.sendNow();if(!gpsActive)D.toggleGPS()}
+    if(step==='delivering'){routeNeeded=true;sendNow();updateMapView(orderData.tracking||{},orderData.gps)}
     if(step==='delivered'){stopGPS();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},1500)}
    else setTimeout(function(){load()},1200);
-  }catch(e){toast(e.message);if(btn)btn.disabled=false}
+  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn)btn.disabled=false}
  }
 };
 
