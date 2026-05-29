@@ -2526,13 +2526,17 @@ function buildOrder(status='pending'){
 const phone=normalizePhone($('cust-phone').value),disc=rewardDiscount(),reward=disc&&selectedRewardType?{type:selectedRewardType,label:rewardById(selectedRewardType)?.label||selectedRewardType,discount:disc}:null;
 const source=loadedSourceOrder||{};
 const note=$('order-note').value.trim();
+const now=new Date().toISOString();
+const tracking=source.tracking?{...source.tracking}:{};
+tracking.received=tracking.received||now;
+tracking.confirmed=now;
 const order={
-id:loadedInboxOrderId||'ORD-'+Date.now(),status,timestamp:new Date().toISOString(),
+id:loadedInboxOrderId||'ORD-'+Date.now(),status,timestamp:now,
 name:$('cust-name').value.trim()||'Guest',phone,note,orderType,
 deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:deliveryFee(),subtotal:itemsTotal(),rewardDiscount:disc,loyaltyReward:reward,total:grandTotal(),
 items:cart.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),
 splitPayments:splitEnabled&&splitPayments.length?splitPayments.map(p=>({amount:p.amount,type:p.type})):null,
-tracking:{received:new Date().toISOString(),confirmed:new Date().toISOString()}
+tracking
 };
 if(orderType==='delivery'){
   if(source.gps)order.gps=source.gps;
@@ -2769,7 +2773,7 @@ const msg=`Hello ${o.name||'there'}, your order is confirmed. We are preparing i
 window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;
-var now=new Date().toISOString();o.tracking=o.tracking||{};o.tracking.received=o.tracking.received||now;o.tracking.confirmed=now;
+var now=new Date().toISOString();o.tracking=o.tracking||{};o.tracking.received=o.tracking.received||now;delete o.tracking.confirmed;
 try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
