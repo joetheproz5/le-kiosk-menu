@@ -85,15 +85,22 @@ var STEPS=[
 ];
 
 var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var firstMapDone=false, routeLastFetched=0, routeNeeded=true;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true, routeFetchBusy=false, pendingRoute=null, lastRouteLat=null, lastRouteLng=null;
+var TRACK_REFRESH_MS=1500, ROUTE_REFRESH_MS=2200, ROUTE_REFRESH_METERS=5;
 var wasDelivering=false;
 var lastDriverLat=null,lastDriverLng=null,driverAnim=null;
+var loadBusy=false;
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
 function fmtDist(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km';}
 function fmtTime(d){if(!d)return'--';var dt=new Date(d);return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});}
 function haversine(a,b,c,d){var R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180;var z=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2);return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z));}
+function routeShouldRefresh(lat,lng){
+ if(routeNeeded||Date.now()-routeLastFetched>ROUTE_REFRESH_MS)return true;
+ if(lastRouteLat===null||lastRouteLng===null)return true;
+ return haversine(lat,lng,lastRouteLat,lastRouteLng)>ROUTE_REFRESH_METERS;
+}
 
 function showError(msg){
  document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(msg)+'\x3C/div\x3E\x3C/div\x3E';
@@ -235,7 +242,7 @@ function updateMap(track,gps){
   if(!isDel)wasDelivering=false;
   var rb=document.getElementById('map-recenter');
   if(rb)rb.style.display=(isDel||driverMarker)?'block':'none';
-  if(custMarker&&(routeNeeded||Date.now()-routeLastFetched>6500)){
+  if(custMarker&&routeShouldRefresh(dl.lat,dl.lng)){
    routeNeeded=false;
    var c=custMarker.getLngLat();
    fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
@@ -258,16 +265,33 @@ function animateDriverMarker(lat,lng){
 }
 
 async function fetchRoute(dLat,dLng,cLat,cLng){
+ if(routeFetchBusy){
+  pendingRoute={dLat:dLat,dLng:dLng,cLat:cLat,cLng:cLng};
+  return;
+ }
+ routeFetchBusy=true;
+ pendingRoute=null;
+ function finishRoute(){
+  routeFetchBusy=false;
+  if(pendingRoute){
+   var next=pendingRoute;
+   pendingRoute=null;
+   if(routeShouldRefresh(next.dLat,next.dLng))fetchRoute(next.dLat,next.dLng,next.cLat,next.cLng);
+  }
+ }
  function drawFallback(){
   if(!mapInst)return;
   setRouteGeometry({type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},true);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=fmtDist(haversine(dLat,dLng,cLat,cLng));
+  lastRouteLat=dLat;
+  lastRouteLng=dLng;
   routeLastFetched=Date.now();
+  finishRoute();
  }
  try{
   var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
-  var res=await fetch(url);
+  var res=await fetch(url,{cache:'no-store'});
   if(!res.ok){drawFallback();return}
   var j=await res.json();
   if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
@@ -276,7 +300,10 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   var eta=Math.round(route.duration/60);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=eta+' min drive';
+  lastRouteLat=dLat;
+  lastRouteLng=dLng;
   routeLastFetched=Date.now();
+  finishRoute();
  }catch(e){drawFallback()}
 }
 
@@ -289,17 +316,19 @@ function setRouteGeometry(geometry,dashed){
 }
 
 async function load(){
+ if(loadBusy)return;
+ loadBusy=true;
  var id=new URLSearchParams(window.location.search).get('id');
- if(!id){showError('No order ID. Use: /track/?id=ORD-123');return}
+ if(!id){showError('No order ID. Use: /track/?id=ORD-123');loadBusy=false;return}
  var ctrl=new AbortController(),tmr=setTimeout(function(){ctrl.abort()},10000);
  try{
-  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:ctrl.signal});
+  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:ctrl.signal,cache:'no-store'});
   clearTimeout(tmr);
   if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Order not found')}
   var j=await res.json();
   if(!j.ok)throw new Error(j.error||'Invalid response');
   var o=j.data,track=o.tracking||{};
-  if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
+ if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
    document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
    document.getElementById('map-area').innerHTML='';return;
   }
@@ -312,11 +341,13 @@ async function load(){
   clearTimeout(tmr);
   if(e.name==='AbortError')showError('Request timed out');
   else showError(e.message||'Could not load order');
+ }finally{
+  loadBusy=false;
  }
 }
 
 load();
-setInterval(load,3000);
+setInterval(load,TRACK_REFRESH_MS);
 })();
 </script>
 </body>
