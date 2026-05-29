@@ -79,7 +79,7 @@ var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var FOLLOW_ZOOM=17;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
@@ -93,6 +93,12 @@ function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;
 function haversine(lat1,lon1,lat2,lon2){
  var R=6371000,a=Math.sin((lat2-lat1)*Math.PI/360)*Math.sin((lat2-lat1)*Math.PI/360)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin((lon2-lon1)*Math.PI/360)*Math.sin((lon2-lon1)*Math.PI/360);
  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function bearingBetween(lat1,lng1,lat2,lng2){
+ var y=Math.sin((lng2-lng1)*Math.PI/180)*Math.cos(lat2*Math.PI/180);
+ var x=Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)-Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos((lng2-lng1)*Math.PI/180);
+ return (Math.atan2(y,x)*180/Math.PI+360)%360;
 }
 
 function pointFromGPS(gps){
@@ -117,6 +123,7 @@ function saveActiveDelivery(active){
    orderId:orderData.id,
    lat:driverLat,
    lng:driverLng,
+   heading:driverHeading,
    gpsActive:active!==undefined?!!active:!!gpsActive,
    updatedAt:Date.now()
   }));
@@ -132,7 +139,7 @@ function restoreDriverPosition(id,track){
  var saved=readActiveDelivery();
  if(saved&&saved.orderId===id){
   var savedPoint=pointFromGPS({lat:saved.lat,lng:saved.lng});
-  if(savedPoint){driverLat=savedPoint.lat;driverLng=savedPoint.lng}
+  if(savedPoint){driverLat=savedPoint.lat;driverLng=savedPoint.lng;driverHeading=Number.isFinite(Number(saved.heading))?Number(saved.heading):driverHeading}
   return !!saved.gpsActive;
  }
  if(serverPoint){driverLat=serverPoint.lat;driverLng=serverPoint.lng}
@@ -143,6 +150,16 @@ function routeShouldRefresh(lat,lng){
  if(routeNeeded||Date.now()-routeLastFetched>10000)return true;
  if(lastRouteLat===null||lastRouteLng===null)return true;
  return haversine(lat,lng,lastRouteLat,lastRouteLng)>25;
+}
+
+function driverIcon(){
+ var heading=Number.isFinite(Number(driverHeading))?Number(driverHeading):0;
+ return L.divIcon({
+  className:'',
+  html:'\x3Cdiv style="width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transform:rotate('+heading+'deg)"\x3E\x3Cdiv style="position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)"\x3E\x3C/div\x3E\x3Cdiv style="position:absolute;inset:9px;border-radius:50%;background:#dcfce7"\x3E\x3C/div\x3E\x3C/div\x3E',
+  iconSize:[34,34],
+  iconAnchor:[17,17]
+ });
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
@@ -331,10 +348,9 @@ function drawCustMarker(gps){
 
 function drawDriverMarker(lat,lng){
  if(!mapInst)return;
- if(driverMarker)driverMarker.setLatLng([lat,lng]);
+ if(driverMarker){driverMarker.setLatLng([lat,lng]);driverMarker.setIcon(driverIcon())}
  else{
-  var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
-  driverMarker=L.marker([lat,lng],{icon:dIcon,zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EYou\x3C/b\x3E');
+  driverMarker=L.marker([lat,lng],{icon:driverIcon(),zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EYou\x3C/b\x3E');
  }
 }
 
@@ -355,8 +371,11 @@ function updateMapView(track,gps){
  }
 }
 
-function moveDriver(lat,lng){
- driverLat=lat;driverLng=lng;
+function moveDriver(lat,lng,heading){
+ var h=Number(heading);
+ if(Number.isFinite(h))driverHeading=h;
+ else if(driverLat!==null&&haversine(driverLat,driverLng,lat,lng)>8)driverHeading=bearingBetween(driverLat,driverLng,lat,lng);
+  driverLat=lat;driverLng=lng;
  saveActiveDelivery(true);
  if(!mapInst)return;
  drawDriverMarker(lat,lng);
@@ -377,7 +396,7 @@ function moveDriver(lat,lng){
 async function sendLocation(lat,lng){
  try{
   await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/location',{
-   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:lat,lng:lng})
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:lat,lng:lng,heading:driverHeading})
   });
   lastSent=Date.now();
  }catch(e){}
@@ -392,7 +411,7 @@ function startGPS(){
   sendNow();
  watchId=navigator.geolocation.watchPosition(
   function(pos){
-   moveDriver(pos.coords.latitude,pos.coords.longitude);
+   moveDriver(pos.coords.latitude,pos.coords.longitude,pos.coords.heading);
    if(Date.now()-lastSent>8000)sendLocation(pos.coords.latitude,pos.coords.longitude);
   },
   function(){toast('GPS error — check permissions');gpsActive=false;updateGPSBar()},
@@ -418,7 +437,7 @@ function updateGPSBar(){
 function sendNow(){
  if(!navigator.geolocation)return;
  navigator.geolocation.getCurrentPosition(function(pos){
-  moveDriver(pos.coords.latitude,pos.coords.longitude);
+  moveDriver(pos.coords.latitude,pos.coords.longitude,pos.coords.heading);
   sendLocation(pos.coords.latitude,pos.coords.longitude);
  },function(){},{enableHighAccuracy:true,timeout:8000});
 }
