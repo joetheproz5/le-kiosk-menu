@@ -67,8 +67,6 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
-/* Le Kiosk Order Tracking */
-var TRACK = {};
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 var RLAT=33.821091, RLNG=35.564961;
@@ -80,26 +78,14 @@ var STEPS=[
  {key:'delivered',label:'Delivered',icon:'🍽️'}
 ];
 
-function esc(s){
- if(!s)return'';
- return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');
-}
+var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
+var firstMapDone=false, routeLastFetched=0;
 
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
-
-function haversine(lat1,lon1,lat2,lon2){
- var R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
- var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
- return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
 function fmtDist(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km';}
-
-function fmtTime(d){
- if(!d)return'--';
- var dt=new Date(d);
- return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-}
+function fmtTime(d){if(!d)return'--';var dt=new Date(d);return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});}
+function haversine(a,b,c,d){var R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180;var z=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2);return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z));}
 
 function showError(msg){
  document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(msg)+'\x3C/div\x3E\x3C/div\x3E';
@@ -115,75 +101,14 @@ function buildHTML(order,track){
   row+='\x3C/div\x3E\x3Cspan class="price"\x3E'+money(it.price*it.qty)+'\x3C/span\x3E\x3C/div\x3E';
   items+=row;
  });
- var html='';
- html+='\x3Cdiv class="order-card"\x3E';
- html+='\x3Cdiv class="order-id"\x3E'+esc(order.id)+'\x3C/div\x3E';
- html+='\x3Cdiv class="order-type"\x3E'+(order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway')+'\x3C/div\x3E';
- html+='\x3Cdiv class="order-items"\x3E'+items+'\x3C/div\x3E';
- html+='\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/div\x3E';
- html+='\x3C/div\x3E';
- html+='\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E';
- html+='\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E';
- return html;
-}
-
-function buildMapArea(order){
- var gps=order.gps||{};
- var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
- var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
- var dist=haversine(RLAT,RLNG,clat,clng);
- return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E~'+fmtDist(dist)+'\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
-}
-
-function initMap(gps,track){
- var el=document.getElementById('map');
- if(!el||mapInst)return;
- var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
- var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
- mapInst=L.map('map',{zoomControl:false,attributionControl:false}).setView([RLAT,RLNG],14);
- L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
- var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[32,32],iconAnchor:[16,32]});
- L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour');
- var drvNow=track&&track.driverLocation;
- if(drvNow)mapInst.setView([drvNow.lat,drvNow.lng],(track.delivering&&!track.delivered)?16:14);
- var dist=haversine(RLAT,RLNG,clat,clng);
- document.querySelector('.map-distance').textContent='~'+fmtDist(dist);
- setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
- firstMapDone=true;
-}
-
-function getDistToCust(track,gps){
- if(!gps||typeof gps.lat!=='number')return Infinity;
- var dl=track&&track.driverLocation;
- if(!dl)return Infinity;
- return haversine(dl.lat,dl.lng,gps.lat,gps.lng);
-}
-
-function showCustomer(gps){
- if(!gps||typeof gps.lat!=='number'||!mapInst||custOnMap)return;
- var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
- custOnMap=L.marker([gps.lat,gps.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3EDelivery Location\x3C/b\x3E');
- L.polyline([[RLAT,RLNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.5}).addTo(mapInst);
-}
-
-function updateDriver(track,gps){
- var dl=track&&track.driverLocation;
- if(!dl||!mapInst)return;
- if(trackDriverMarker)trackDriverMarker.setLatLng([dl.lat,dl.lng]);
- else{
-  var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
-  trackDriverMarker=L.marker([dl.lat,dl.lng],{icon:dIcon,zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E');
- }
- var isDelivering=track.delivering&&!track.delivered;
- var distToC=getDistToCust(track,gps);
- if(isDelivering){
-  mapInst.setView([dl.lat,dl.lng],16,{animate:true});
-  if(distToC<200)showCustomer(gps);
- }else{
-  if(distToC<200)showCustomer(gps);
- }
- var custDist=gps&&typeof gps.lat==='number'?haversine(RLAT,RLNG,gps.lat,gps.lng):0;
- document.querySelector('.map-distance').textContent='~'+fmtDist(custDist);
+ return'\x3Cdiv class="order-card"\x3E'+
+  '\x3Cdiv class="order-id"\x3E'+esc(order.id)+'\x3C/div\x3E'+
+  '\x3Cdiv class="order-type"\x3E'+(order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway')+'\x3C/div\x3E'+
+  '\x3Cdiv class="order-items"\x3E'+items+'\x3C/div\x3E'+
+  '\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/span\x3E\x3C/div\x3E'+
+  '\x3C/div\x3E'+
+  '\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E'+
+  '\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E';
 }
 
 function buildSteps(track,isDelivery){
@@ -201,84 +126,91 @@ function buildSteps(track,isDelivery){
  }).join('');
 }
 
-function buildMap(order){
- var gps=order.gps||{};
- var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
- var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
- var dist=haversine(RLAT,RLNG,clat,clng);
- return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E~'+fmtDist(dist)+'\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+function buildMapArea(){
+ return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
 }
 
-var mapInst=null;
-var trackDriverMarker=null;
-var custOnMap=null;
-var firstMapDone=false;
-
-function initMap(gps){
+function initMapOnce(track,gps){
  var el=document.getElementById('map');
- if(!el)return;
- if(mapInst)try{mapInst.remove()}catch(e){}
- mapInst=null;trackDriverMarker=null;
+ if(!el||mapInst)return;
  var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
  var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
- var bounds=[[Math.min(RLAT,clat),Math.min(RLNG,clng)],[Math.max(RLAT,clat),Math.max(RLNG,clng)]];
- mapInst=L.map('map',{zoomControl:false,attributionControl:false}).fitBounds(bounds,{padding:[40,40]});
+ mapInst=L.map('map',{zoomControl:false,attributionControl:false}).setView([RLAT,RLNG],14);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
  var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[32,32],iconAnchor:[16,32]});
- var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
  L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour');
- L.marker([clat,clng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3EDelivery Location\x3C/b\x3E');
- var dist=haversine(RLAT,RLNG,clat,clng);
- L.polyline([[RLAT,RLNG],[clat,clng]],{color:'#b45309',weight:2.5,dashArray:'8,6',opacity:.7}).addTo(mapInst);
- document.querySelector('.map-distance').textContent='~'+fmtDist(dist);
- setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},150);
+ addCustMarker(gps);
+ var drv=track&&track.driverLocation;
+ if(drv)mapInst.setView([drv.lat,drv.lng],(track.delivering&&!track.delivered)?16:14);
+ firstMapDone=true;
+ setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
 }
 
-function showDriver(track){
+function addCustMarker(gps){
+ if(!gps||typeof gps.lat!=='number'||!mapInst||custMarker)return;
+ var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
+ custMarker=L.marker([gps.lat,gps.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
+ L.polyline([[RLAT,RLNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.5}).addTo(mapInst);
+}
+
+function updateMap(track,gps){
+ if(!mapInst)return;
+ addCustMarker(gps);
  var dl=track&&track.driverLocation;
- if(!dl||!mapInst)return;
- if(trackDriverMarker)trackDriverMarker.setLatLng([dl.lat,dl.lng]);
- else{
-  var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
-  trackDriverMarker=L.marker([dl.lat,dl.lng],{icon:dIcon,zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E');
+ if(dl){
+  if(driverMarker)driverMarker.setLatLng([dl.lat,dl.lng]);
+  else{
+   var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
+   driverMarker=L.marker([dl.lat,dl.lng],{icon:dIcon,zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E');
+  }
+  var isDel=track.delivering&&!track.delivered;
+  if(isDel)mapInst.setView([dl.lat,dl.lng],16,{animate:true});
+  if(gps&&typeof gps.lat==='number'&&Date.now()-routeLastFetched>15000){
+   fetchRoute(dl.lat,dl.lng,gps.lat,gps.lng);
+  }
  }
- if(mapInst){
-  var b=mapInst.getBounds();
-  b.extend([dl.lat,dl.lng]);
-  mapInst.fitBounds(b,{padding:[40,40]});
- }
+}
+
+async function fetchRoute(dLat,dLng,cLat,cLng){
+ try{
+  var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
+  var res=await fetch(url);
+  if(!res.ok)return;
+  var j=await res.json();
+  if(j.code!=='Ok'||!j.routes||!j.routes[0])return;
+  var route=j.routes[0];
+  if(routeLine)mapInst.removeLayer(routeLine);
+  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:4,opacity:.8}}).addTo(mapInst);
+  var eta=Math.round(route.duration/60);
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=eta+' min drive';
+  routeLastFetched=Date.now();
+ }catch(e){}
 }
 
 async function load(){
  var id=new URLSearchParams(window.location.search).get('id');
  if(!id){showError('No order ID. Use: /track/?id=ORD-123');return}
- var controller=new AbortController();
- var timer=setTimeout(function(){controller.abort()},10000);
+ var ctrl=new AbortController(),tmr=setTimeout(function(){ctrl.abort()},10000);
  try{
-  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:controller.signal});
-  clearTimeout(timer);
+  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:ctrl.signal});
+  clearTimeout(tmr);
   if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Order not found')}
   var j=await res.json();
   if(!j.ok)throw new Error(j.error||'Invalid response');
-  var o=j.data;
-  var track=o.tracking||{};
+  var o=j.data,track=o.tracking||{};
   if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
    document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
-   document.getElementById('map-area').innerHTML='';
-   return;
+   document.getElementById('map-area').innerHTML='';return;
   }
   document.getElementById('content').innerHTML=buildHTML(o,track);
   if(o.orderType==='delivery'){
-   if(!firstMapDone){
-    document.getElementById('map-area').innerHTML=buildMapArea(o);
-    setTimeout(function(){initMap(o.gps,track);updateDriver(track,o.gps)},50);
-   }else{
-    updateDriver(track,o.gps);
-   }
+   if(!firstMapDone){document.getElementById('map-area').innerHTML=buildMapArea();setTimeout(function(){initMapOnce(track,o.gps);updateMap(track,o.gps)},60)}
+   else updateMap(track,o.gps);
   }
  }catch(e){
-  clearTimeout(timer);
-  if(e.name==='AbortError')showError('Request timed out. Is the Worker deployed?');
+  clearTimeout(tmr);
+  if(e.name==='AbortError')showError('Request timed out');
   else showError(e.message||'Could not load order');
  }
 }
