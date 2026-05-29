@@ -107,6 +107,9 @@
         .nav-link { padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.8); color: #451a03; border: 1px solid rgba(251,191,36,0.3); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s, color 0.2s; white-space: nowrap; text-decoration: none; display: inline-block; }
         .nav-link:hover { background: #fef3c7; }
         .nav-link.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+        body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section { display: none; }
+        body.order-mode #main-nav { top: 0; }
+        body.order-mode #menu-container { min-height: 100vh; padding-top: 16px; padding-bottom: 210px; }
         #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
         .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 14px 14px; pointer-events: none; }
@@ -132,13 +135,15 @@
         .qty-plus:hover { background: #d97706; }
         .qty-num { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: #451a03; background: #fff; border-top: 1.5px solid #fde68a; border-bottom: 1.5px solid #fde68a; height: 28px; line-height: 28px; }
         .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
-        #checkout-pill { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 55; white-space: nowrap; }
+        #checkout-pill { position: fixed; bottom: 96px; left: 50%; width: min(calc(100% - 28px), 28rem); transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 49; }
         #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
-        .pill-inner { background: #1c0f00; border: 1px solid #f59e0b; border-radius: 100px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.15s; }
-        .pill-inner:hover { transform: scale(1.03); }
+        body.contact-open #checkout-pill { transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; }
+        .pill-inner { position: relative; background: #fff; border: 1px solid rgba(245,158,11,.55); border-radius: 22px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; box-shadow: 0 18px 45px rgba(69,26,3,.2); cursor: pointer; transition: transform 0.15s; }
+        .pill-inner::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 18px; height: 18px; background: #fff; border-right: 1px solid rgba(245,158,11,.55); border-bottom: 1px solid rgba(245,158,11,.55); transform: translateX(-50%) rotate(45deg); border-radius: 0 0 5px 0; }
+        .pill-inner:hover { transform: translateY(-1px); }
         .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
-        .pill-total { color: #fef3c7; font-size: 13px; font-weight: 700; }
-        .pill-cta { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 5px 12px; border-radius: 100px; }
+        .pill-total { color: #451a03; font-size: 16px; font-weight: 900; justify-self: start; }
+        .pill-cta { background: #1c0f00; color: #fef3c7; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 8px 12px; border-radius: 12px; }
         #checkout-sheet { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
         #checkout-sheet.open { pointer-events: all; }
         #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
@@ -240,13 +245,13 @@
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
 </main>
 
-<div class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
+<div id="review-divider" class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
     <div class="flex-1 h-px bg-amber-200"></div>
     <span class="text-amber-400 text-[10px] font-bold uppercase tracking-widest px-2">✦ &nbsp; Le Kiosk &nbsp; ✦</span>
     <div class="flex-1 h-px bg-amber-200"></div>
 </div>
 
-<section class="max-w-md mx-auto px-4 pb-6 mt-2">
+<section id="review-section" class="max-w-md mx-auto px-4 pb-6 mt-2">
     <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-5 text-center">
         <div class="text-3xl mb-2">⭐</div>
         <h3 class="brand-heading text-lg font-bold text-amber-950 uppercase tracking-wide">Enjoyed your visit?</h3>
@@ -409,6 +414,7 @@ let orderMode=false,cart={},addonSel={},shishaSel={},itemMeta={};
 let selectedType=null,detectedZone=null,userGPS=null,deliveryAddress='',changeFor='';
 let customerName='',customerPhone='';
 let _addonMap=[];
+let bubbleOpen=false;
 
 function isOpen(){
     if(TESTING_MODE) return true;
@@ -471,9 +477,11 @@ function renderOrderModeButton(){
 function toggleOrderMode(){
     if(!MENU_ORDERING_ENABLED) return;
     if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
+    closeContactPanel();
     orderMode=!orderMode;
     document.body.classList.toggle('order-mode',orderMode);
     renderOrderModeButton();
+    if(orderMode) document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
     if(!orderMode){
         cart={};addonSel={};shishaSel={};
         document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
@@ -503,6 +511,7 @@ function getGrandTotal(){return getItemsSubtotal()+getDeliveryFee();}
 
 function updatePill(){
     const count=getTotalItems();
+    if(count>0&&orderMode) closeContactPanel();
     document.getElementById('checkout-pill').classList.toggle('show',count>0&&orderMode);
     if(count>0){
         document.getElementById('pill-count').textContent=count+' item'+(count!==1?'s':'');
@@ -511,7 +520,7 @@ function updatePill(){
 }
 
 // SHEET
-function openSheet(){renderSheet();document.getElementById('checkout-sheet').classList.add('open');document.body.style.overflow='hidden';}
+function openSheet(){closeContactPanel();renderSheet();document.getElementById('checkout-sheet').classList.add('open');document.body.style.overflow='hidden';}
 function closeSheet(){document.getElementById('checkout-sheet').classList.remove('open');document.body.style.overflow='';}
 
 function renderSheet(){
@@ -917,9 +926,18 @@ function initScrollSpy(menuData){
 // Contact bubble
 const bubble = document.getElementById('contact-bubble');
 const ctoggle = document.getElementById('contact-toggle');
-let bubbleOpen = false;
-ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
-document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); } });
+function closeContactPanel(){
+    bubbleOpen=false;
+    if(bubble) bubble.classList.remove('open');
+    document.body.classList.remove('contact-open');
+}
+function toggleContactPanel(){
+    bubbleOpen=!bubbleOpen;
+    if(bubble) bubble.classList.toggle('open',bubbleOpen);
+    document.body.classList.toggle('contact-open',bubbleOpen);
+}
+ctoggle.addEventListener('click', toggleContactPanel);
+document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) closeContactPanel(); });
 
 // Scroll spy for status badge
 (function(){
