@@ -62,6 +62,7 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 <div class="container">
 <div class="header"><div class="logo">Le Kiosk</div><div class="sub">Order Tracking</div></div>
 <div id="content"><div class="loading"><div class="spinner"></div>Loading your order...</div></div>
+<div id="map-area"></div>
 <div class="footer">Need help? <a href="tel:+96176840244">+961 76 840 244</a><br><a href="https://g.page/r/CVH0uR_N89RlEAg/review" target="_blank">Leave a Google Review</a></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
@@ -114,16 +115,75 @@ function buildHTML(order,track){
   row+='\x3C/div\x3E\x3Cspan class="price"\x3E'+money(it.price*it.qty)+'\x3C/span\x3E\x3C/div\x3E';
   items+=row;
  });
- var html='\x3Cdiv class="order-card"\x3E';
+ var html='';
+ html+='\x3Cdiv class="order-card"\x3E';
  html+='\x3Cdiv class="order-id"\x3E'+esc(order.id)+'\x3C/div\x3E';
  html+='\x3Cdiv class="order-type"\x3E'+(order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway')+'\x3C/div\x3E';
  html+='\x3Cdiv class="order-items"\x3E'+items+'\x3C/div\x3E';
- html+='\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/span\x3E\x3C/div\x3E';
+ html+='\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/div\x3E';
  html+='\x3C/div\x3E';
  html+='\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E';
  html+='\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E';
- if(isDel)html+=buildMap(order);
  return html;
+}
+
+function buildMapArea(order){
+ var gps=order.gps||{};
+ var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
+ var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
+ var dist=haversine(RLAT,RLNG,clat,clng);
+ return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E~'+fmtDist(dist)+'\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+}
+
+function initMap(gps,track){
+ var el=document.getElementById('map');
+ if(!el||mapInst)return;
+ var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
+ var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
+ mapInst=L.map('map',{zoomControl:false,attributionControl:false}).setView([RLAT,RLNG],14);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
+ var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[32,32],iconAnchor:[16,32]});
+ L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour');
+ var drvNow=track&&track.driverLocation;
+ if(drvNow)mapInst.setView([drvNow.lat,drvNow.lng],(track.delivering&&!track.delivered)?16:14);
+ var dist=haversine(RLAT,RLNG,clat,clng);
+ document.querySelector('.map-distance').textContent='~'+fmtDist(dist);
+ setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},200);
+ firstMapDone=true;
+}
+
+function getDistToCust(track,gps){
+ if(!gps||typeof gps.lat!=='number')return Infinity;
+ var dl=track&&track.driverLocation;
+ if(!dl)return Infinity;
+ return haversine(dl.lat,dl.lng,gps.lat,gps.lng);
+}
+
+function showCustomer(gps){
+ if(!gps||typeof gps.lat!=='number'||!mapInst||custOnMap)return;
+ var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
+ custOnMap=L.marker([gps.lat,gps.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3EDelivery Location\x3C/b\x3E');
+ L.polyline([[RLAT,RLNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.5}).addTo(mapInst);
+}
+
+function updateDriver(track,gps){
+ var dl=track&&track.driverLocation;
+ if(!dl||!mapInst)return;
+ if(trackDriverMarker)trackDriverMarker.setLatLng([dl.lat,dl.lng]);
+ else{
+  var dIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E',iconSize:[22,22],iconAnchor:[11,11]});
+  trackDriverMarker=L.marker([dl.lat,dl.lng],{icon:dIcon,zIndexOffset:100}).addTo(mapInst).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E');
+ }
+ var isDelivering=track.delivering&&!track.delivered;
+ var distToC=getDistToCust(track,gps);
+ if(isDelivering){
+  mapInst.setView([dl.lat,dl.lng],16,{animate:true});
+  if(distToC<200)showCustomer(gps);
+ }else{
+  if(distToC<200)showCustomer(gps);
+ }
+ var custDist=gps&&typeof gps.lat==='number'?haversine(RLAT,RLNG,gps.lat,gps.lng):0;
+ document.querySelector('.map-distance').textContent='~'+fmtDist(custDist);
 }
 
 function buildSteps(track,isDelivery){
@@ -151,6 +211,8 @@ function buildMap(order){
 
 var mapInst=null;
 var trackDriverMarker=null;
+var custOnMap=null;
+var firstMapDone=false;
 
 function initMap(gps){
  var el=document.getElementById('map');
@@ -202,10 +264,18 @@ async function load(){
   var track=o.tracking||{};
   if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
    document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
+   document.getElementById('map-area').innerHTML='';
    return;
   }
   document.getElementById('content').innerHTML=buildHTML(o,track);
-  if(o.orderType==='delivery'){if(mapInst)try{mapInst.remove()}catch(e){};mapInst=null;trackDriverMarker=null;initMap(o.gps);showDriver(track)}
+  if(o.orderType==='delivery'){
+   if(!firstMapDone){
+    document.getElementById('map-area').innerHTML=buildMapArea(o);
+    setTimeout(function(){initMap(o.gps,track);updateDriver(track,o.gps)},50);
+   }else{
+    updateDriver(track,o.gps);
+   }
+  }
  }catch(e){
   clearTimeout(timer);
   if(e.name==='AbortError')showError('Request timed out. Is the Worker deployed?');
