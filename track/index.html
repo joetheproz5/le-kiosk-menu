@@ -165,8 +165,9 @@ function updateMap(track,gps){
   }
   var isDel=track.delivering&&!track.delivered;
   if(isDel)mapInst.setView([dl.lat,dl.lng],16,{animate:true});
-  if(gps&&typeof gps.lat==='number'&&Date.now()-routeLastFetched>15000){
-   fetchRoute(dl.lat,dl.lng,gps.lat,gps.lng);
+  if(custMarker&&Date.now()-routeLastFetched>10000){
+   var c=custMarker.getLatLng();
+   fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
   }
  }
 }
