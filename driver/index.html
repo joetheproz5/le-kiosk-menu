@@ -125,10 +125,6 @@ function renderList(data){
  document.getElementById('app').innerHTML=html;
 }
 
-function switchTab(tab){listTab=tab;renderList(allOrders)}
-window.D=window.D||{};
-window.D.switchTab=switchTab;
-
 function renderDetail(o){
  if(mapInst){try{mapInst.remove()}catch(e){};mapInst=null;driverMarker=null;custMarker=null}
  var track=o.tracking||{};
@@ -261,6 +257,7 @@ function sendNow(){
 }
 
 window.D={
+ switchTab:function(tab){listTab=tab;renderList(allOrders)},
  toggleGPS:function(){
   if(gpsActive){stopGPS();return}
   startGPS();
