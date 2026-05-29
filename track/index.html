@@ -200,7 +200,7 @@ async function load(){
    return;
   }
   document.getElementById('content').innerHTML=buildHTML(o,track);
-  if(o.orderType==='delivery'){initMap(o.gps);showDriver(o.tracking)}
+  if(o.orderType==='delivery'){if(mapInst)try{mapInst.remove()}catch(e){};mapInst=null;trackDriverMarker=null;initMap(o.gps);showDriver(track)}
  }catch(e){
   clearTimeout(timer);
   if(e.name==='AbortError')showError('Request timed out. Is the Worker deployed?');
