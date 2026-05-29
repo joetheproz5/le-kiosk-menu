@@ -763,8 +763,9 @@ async function sendOrder(){
     if (WORKER_URL && !WORKER_URL.includes('YOUR-SUBDOMAIN')) {
         showInboxToast('📥 Sending to POS…');
         try {
-            await dispatchOrder(order);
-            showInboxToast('✅ Order received by POS', 'ok');
+            const result = await dispatchOrder(order);
+            const trackUrl = `https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
+            showInboxToast(`✅ Order received! <a href="${trackUrl}" target="_blank" style="color:#fff;text-decoration:underline">Track your order</a>`, 'ok');
         } catch(e) {
             console.error('Worker dispatch failed:', e);
             showInboxToast('⚠️ POS sync failed — WhatsApp still sent', 'err');
@@ -791,7 +792,8 @@ async function sendOrder(){
     msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n`;
     if(changeForNum>subtotal) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}* (change back: $${(changeForNum-subtotal).toFixed(2)})\n`;
     else if(changeForNum>0) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}*\n`;
-    msg+=`\nPlease confirm my order 🙏`;
+    msg+=`\nPlease confirm my order 🙏
+🔗 Track: https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
 
     window.open('https://wa.me/76840244?text='+encodeURIComponent(msg),'_blank');
     closeSheet();
