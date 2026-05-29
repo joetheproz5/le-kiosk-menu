@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — Le Kiosk</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--amber:#f59e0b;--amber-d:#b45309;--amber-l:#fef3c7;--green:#16a34a;--green-l:#dcfce7;--gray:#d1d5db;--gray-l:#f3f4f6;--ink:#1f2937;--muted:#6b7280;--white:#fff}
@@ -66,111 +66,134 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 </div>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
-const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
-const RESTAURANT_LAT=33.821091,RESTAURANT_LNG=35.564961;
-const STEPS=[
-{key:'received',label:'Order Received',icon:'📥'},
-{key:'confirmed',label:'Order Confirmed',icon:'✅'},
-{key:'preparing',label:'Preparing',icon:'👨‍🍳'},
-{key:'delivering',label:'Out for Delivery',icon:'🛵'},
-{key:'delivered',label:'Delivered',icon:'🍽️'}
+/* Le Kiosk Order Tracking */
+var TRACK = {};
+(function(){
+var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
+var RLAT=33.821091, RLNG=35.564961;
+var STEPS=[
+ {key:'received',label:'Order Received',icon:'📥'},
+ {key:'confirmed',label:'Order Confirmed',icon:'✅'},
+ {key:'preparing',label:'Preparing',icon:'👨‍🍳'},
+ {key:'delivering',label:'Out for Delivery',icon:'🛵'},
+ {key:'delivered',label:'Delivered',icon:'🍽️'}
 ];
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function esc(s){
+ if(!s)return'';
+ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function money(n){return'$'+(Number(n)||0).toFixed(2);}
-function haversineMeters(lat1,lon1,lat2,lon2){
-const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
-const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+
+function haversine(lat1,lon1,lat2,lon2){
+ var R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+ var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+ return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-function formatDistance(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km';}
-function formatTime(d){if(!d)return'--';const dt=new Date(d);return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}
-async function loadOrder(){
-const params=new URLSearchParams(window.location.search);
-const id=params.get('id');
-if(!id){showError('No order ID provided. Use: /track/?id=ORD-123');return}
-try{
-const controller=new AbortController();
-const timeout=setTimeout(()=>controller.abort(),10000);
-const res=await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`,{signal:controller.signal});
-clearTimeout(timeout);
-if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Order not found');}
-const j=await res.json();
-if(!j.ok)throw new Error(j.error||'Invalid response');
-renderOrder(j.data);
-}catch(e){
-if(e.name==='AbortError')showError('Request timed out. Is the Worker deployed?');
-else showError(e.message||'Could not load order');
+
+function fmtDist(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km';}
+
+function fmtTime(d){
+ if(!d)return'--';
+ var dt=new Date(d);
+ return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
 }
-}
+
 function showError(msg){
-document.getElementById('content').innerHTML=`<div class="error-card"><div class="emoji">🔍</div><div class="msg">${esc(msg)}</div></div>`;
+ document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(msg)+'\x3C/div\x3E\x3C/div\x3E';
 }
-function renderOrder(order){
-const track=order.tracking||{};
-const isDelivery=order.orderType==='delivery';
-const itemsHtml=(order.items||[]).map(it=>`<div class="order-item">${it.flavor?`<div style="width:100%"><span class="qty">${it.qty}x</span><span class="name">${esc(it.name)}</span><div class="addon">Flavor: ${esc(it.flavor)}</div>${(it.addons||[]).map(a=>`<div class="addon">+ ${esc(a.label)}</div>`).join('')}</div>`:`<div style="width:100%"><span class="qty">${it.qty}x</span><span class="name">${esc(it.name)}</span>${(it.addons||[]).map(a=>`<div class="addon">+ ${esc(a.label)}</div>`).join('')}</div>`}<span class="price">${money(it.price*it.qty)}</span></div>`).join('');
-const html=`<div class="order-card">
-<div class="order-id">${esc(order.id)}</div>
-<div class="order-type">${order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway'}</div>
-<div class="order-items">${itemsHtml}</div>
-<div class="order-total"><span>Total</span><span>${money(order.total)}</span></div>
-</div>
-<div class="timeline"><div class="timeline-title">Status</div><div class="steps">${renderSteps(track)}</div></div>
-${isDelivery?renderMap(order):''}`;
-document.getElementById('content').innerHTML=html;
-if(isDelivery)initMap(order.gps)}
+
+function buildHTML(order,track){
+ var isDel=order.orderType==='delivery';
+ var items='';
+ (order.items||[]).forEach(function(it){
+  var row='\x3Cdiv class="order-item"\x3E\x3Cdiv style="width:100%"\x3E\x3Cspan class="qty"\x3E'+it.qty+'x\x3C/span\x3E\x3Cspan class="name"\x3E'+esc(it.name)+'\x3C/span\x3E';
+  if(it.flavor)row+='\x3Cdiv class="addon"\x3EFlavor: '+esc(it.flavor)+'\x3C/div\x3E';
+  (it.addons||[]).forEach(function(a){row+='\x3Cdiv class="addon"\x3E+ '+esc(a.label)+'\x3C/div\x3E'});
+  row+='\x3C/div\x3E\x3Cspan class="price"\x3E'+money(it.price*it.qty)+'\x3C/span\x3E\x3C/div\x3E';
+  items+=row;
+ });
+ var html='\x3Cdiv class="order-card"\x3E';
+ html+='\x3Cdiv class="order-id"\x3E'+esc(order.id)+'\x3C/div\x3E';
+ html+='\x3Cdiv class="order-type"\x3E'+(order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway')+'\x3C/div\x3E';
+ html+='\x3Cdiv class="order-items"\x3E'+items+'\x3C/div\x3E';
+ html+='\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/span\x3E\x3C/div\x3E';
+ html+='\x3C/div\x3E';
+ html+='\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E';
+ html+='\x3Cdiv class="steps"\x3E'+buildSteps(track)+'\x3C/div\x3E\x3C/div\x3E';
+ if(isDel)html+=buildMap(order);
+ return html;
 }
-function findCurrentStep(track){
-const names=['received','confirmed','preparing','delivering','delivered'];
-for(let i=names.length-1;i>=0;i--){if(track[names[i]])return i}
-return 0;
+
+function buildSteps(track){
+ var last=-1;
+ STEPS.forEach(function(s,i){if(track[s.key])last=i});
+ return STEPS.map(function(s,i){
+  var cls='step';
+  if(track[s.key])cls+=' complete';
+  else if(i===last+1)cls+=' current';
+  var time=track[s.key]?fmtTime(track[s.key]):'';
+  var dot='dot';
+  if(cls.indexOf('current')>=0)dot+=' pulse';
+  return'\x3Cdiv class="'+cls+'"\x3E\x3Cdiv class="'+dot+'"\x3E\x3C/div\x3E\x3Cdiv\x3E\x3Cdiv class="step-label"\x3E'+s.icon+' '+esc(s.label)+'\x3C/div\x3E'+(time?'\x3Cdiv class="step-time"\x3E'+time+'\x3C/div\x3E':'')+'\x3C/div\x3E\x3C/div\x3E';
+ }).join('');
 }
-function renderSteps(track){
-let lastComplete=-1;
-STEPS.forEach((s,i)=>{if(track[s.key])lastComplete=i});
-return STEPS.map((s,i)=>{
-let cls='step';
-if(track[s.key])cls+=' complete';
-else if(i===lastComplete+1)cls+=' current';
-const time=track[s.key]?formatTime(track[s.key]):'';
-let dotCls='dot';
-if(cls.includes('current'))dotCls+=' pulse';
-return`<div class="${cls}"><div class="${dotCls}"></div><div><div class="step-label">${s.icon} ${esc(s.label)}</div>${time?`<div class="step-time">${time}</div>`:''}</div></div>`;
-}).join('');
+
+function buildMap(order){
+ var gps=order.gps||{};
+ var clat=typeof gps.lat==='number'?gps.lat:RLAT;
+ var clng=typeof gps.lng==='number'?gps.lng:RLNG;
+ var dist=haversine(RLAT,RLNG,clat,clng);
+ return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E~'+fmtDist(dist)+'\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
 }
-function renderMap(order){
-const gps=order.gps||{};
-const custLat=typeof gps.lat==='number'?gps.lat:RESTAURANT_LAT;
-const custLng=typeof gps.lng==='number'?gps.lng:RESTAURANT_LNG;
-const dist=haversineMeters(RESTAURANT_LAT,RESTAURANT_LNG,custLat,custLng);
-return`<div class="map-card"><div class="map-head"><span class="map-title">Delivery Route</span><span class="map-distance">~${formatDistance(dist)}</span></div><div id="map"></div></div>`;
-}
-let mapInstance=null;
+
+var mapInst=null;
+
 function initMap(gps){
-const mapEl=document.getElementById('map');
-if(!mapEl)return;
-if(mapInstance)try{mapInstance.remove()}catch(_){};
-mapInstance=null;
-const custLat=typeof gps?.lat==='number'?gps.lat:RESTAURANT_LAT;
-const custLng=typeof gps?.lng==='number'?gps.lng:RESTAURANT_LNG;
-const bounds=[[Math.min(RESTAURANT_LAT,custLat),Math.min(RESTAURANT_LNG,custLng)],[Math.max(RESTAURANT_LAT,custLat),Math.max(RESTAURANT_LNG,custLng)]];
-mapInstance=L.map('map',{zoomControl:false,attributionControl:false}).fitBounds(bounds,{padding:[40,40]});
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
-const restIcon=L.divIcon({className:'',html:`<div style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[32,32],iconAnchor:[16,32]});
-const custIcon=L.divIcon({className:'',html:`<div style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,iconSize:[24,24],iconAnchor:[12,12]});
-L.marker([RESTAURANT_LAT,RESTAURANT_LNG],{icon:restIcon}).addTo(mapInstance).bindPopup('<b>Le Kiosk</b><br>Wadi Chahrour');
-L.marker([custLat,custLng],{icon:custIcon}).addTo(mapInstance).bindPopup('<b>Delivery Location</b>');
-const dist=haversineMeters(RESTAURANT_LAT,RESTAURANT_LNG,custLat,custLng);
-L.polyline([[RESTAURANT_LAT,RESTAURANT_LNG],[custLat,custLng]],{color:'#b45309',weight:2.5,dashArray:'8,6',opacity:.7}).addTo(mapInstance);
-document.querySelector('.map-distance').textContent=`~${formatDistance(dist)}`;
-setTimeout(()=>{if(document.getElementById('map'))mapInstance?.invalidateSize()},150);
+ var el=document.getElementById('map');
+ if(!el)return;
+ if(mapInst)try{mapInst.remove()}catch(e){}
+ mapInst=null;
+ var clat=typeof gps==='object'&&typeof gps.lat==='number'?gps.lat:RLAT;
+ var clng=typeof gps==='object'&&typeof gps.lng==='number'?gps.lng:RLNG;
+ var bounds=[[Math.min(RLAT,clat),Math.min(RLNG,clng)],[Math.max(RLAT,clat),Math.max(RLNG,clng)]];
+ mapInst=L.map('map',{zoomControl:false,attributionControl:false}).fitBounds(bounds,{padding:[40,40]});
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
+ var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[32,32],iconAnchor:[16,32]});
+ var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
+ L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour');
+ L.marker([clat,clng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3EDelivery Location\x3C/b\x3E');
+ var dist=haversine(RLAT,RLNG,clat,clng);
+ L.polyline([[RLAT,RLNG],[clat,clng]],{color:'#b45309',weight:2.5,dashArray:'8,6',opacity:.7}).addTo(mapInst);
+ document.querySelector('.map-distance').textContent='~'+fmtDist(dist);
+ setTimeout(function(){if(document.getElementById('map'))mapInst.invalidateSize()},150);
 }
-function initMapSafe(gps){
-if(mapInstance)return;
-initMap(gps);
+
+async function load(){
+ var id=new URLSearchParams(window.location.search).get('id');
+ if(!id){showError('No order ID. Use: /track/?id=ORD-123');return}
+ var controller=new AbortController();
+ var timer=setTimeout(function(){controller.abort()},10000);
+ try{
+  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:controller.signal});
+  clearTimeout(timer);
+  if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Order not found')}
+  var j=await res.json();
+  if(!j.ok)throw new Error(j.error||'Invalid response');
+  var o=j.data;
+  document.getElementById('content').innerHTML=buildHTML(o,o.tracking||{});
+  if(o.orderType==='delivery')initMap(o.gps);
+ }catch(e){
+  clearTimeout(timer);
+  if(e.name==='AbortError')showError('Request timed out. Is the Worker deployed?');
+  else showError(e.message||'Could not load order');
+ }
 }
-loadOrder();
-setInterval(loadOrder,5000);
+
+load();
+setInterval(load,5000);
+})();
 </script>
 </body>
 </html>
