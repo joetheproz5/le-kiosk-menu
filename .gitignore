@@ -1,0 +1,6 @@
+.DS_Store
+
+# Android local build state
+driver-android/.gradle/
+driver-android/**/build/
+driver-android/local.properties
