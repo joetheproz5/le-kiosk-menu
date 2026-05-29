@@ -112,26 +112,22 @@
         body.order-mode #menu-container { min-height: 100vh; padding-top: 84px; padding-bottom: 130px; }
         #contact-bubble { transition: opacity 0.25s, transform 0.28s cubic-bezier(.4,0,.2,1); transform: translateY(100%); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
-        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 14px 14px; pointer-events: none; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 12px 12px; pointer-events: none; }
         .bottom-dock-inner { max-width: 28rem; margin: 0 auto; pointer-events: auto; }
-        .bottom-contact-panel { position: fixed; inset: 0; z-index: 145; background: linear-gradient(180deg,#dbeafe 0%,#bfdbfe 48%,#93c5fd 100%); padding: 24px 18px 120px; display: flex; flex-direction: column; justify-content: center; gap: 14px; box-shadow: 0 -20px 60px rgba(28,15,0,.25); }
-        .contact-window { width: min(100%, 28rem); margin: 0 auto; background: #fff; border: 1px solid rgba(251,191,36,.55); border-radius: 26px; padding: 18px; box-shadow: 0 24px 60px rgba(69,26,3,.18); }
+        .bottom-contact-panel { position: fixed; inset: 0; z-index: 145; background: rgba(15,23,42,.34); backdrop-filter: blur(22px) saturate(1.25); -webkit-backdrop-filter: blur(22px) saturate(1.25); padding: 22px 16px 110px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+        .contact-window { width: min(100%, 28rem); margin: 0 auto; background: rgba(239,246,255,.78); backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2); border: 1px solid rgba(255,255,255,.62); border-radius: 22px; padding: 18px; box-shadow: 0 24px 70px rgba(30,64,175,.24); }
         .contact-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-        .contact-title { font-family: 'Fredoka', sans-serif; font-size: 24px; font-weight: 800; color: #451a03; line-height: 1; }
-        .contact-sub { font-size: 12px; font-weight: 700; color: #b45309; margin-top: 4px; }
-        .contact-close { width: 38px; height: 38px; border: 0; border-radius: 12px; background: #fef3c7; color: #451a03; font-size: 22px; font-weight: 900; cursor: pointer; }
+        .contact-title { font-family: 'Fredoka', sans-serif; font-size: 24px; font-weight: 800; color: #172554; line-height: 1; }
+        .contact-sub { font-size: 12px; font-weight: 700; color: #1d4ed8; margin-top: 4px; }
+        .contact-close { width: 38px; height: 38px; border: 0; border-radius: 12px; background: rgba(255,255,255,.75); color: #172554; font-size: 22px; font-weight: 900; cursor: pointer; }
         .contact-actions { display: grid; gap: 10px; }
-        .contact-action { min-height: 58px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 900; text-decoration: none; }
-        .bottom-bar { min-height: 70px; background: rgba(28,15,0,.94); color: #fef3c7; border: 1px solid rgba(245,158,11,.5); border-radius: 24px; box-shadow: 0 18px 55px rgba(28,15,0,.32); display: grid; grid-template-columns: 1fr 92px 1fr; align-items: center; gap: 8px; padding: 9px 10px; backdrop-filter: blur(14px); }
-        .bottom-tab { height: 50px; border: 0; border-radius: 16px; background: rgba(255,255,255,.08); color: #fef3c7; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease; }
-        .bottom-tab:hover { background: rgba(255,255,255,.12); }
+        .contact-action { min-height: 58px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 900; text-decoration: none; }
+        .bottom-bar { min-height: 68px; background: rgba(255,255,255,.9); color: #451a03; border: 1px solid rgba(120,53,15,.16); border-radius: 20px; box-shadow: 0 18px 50px rgba(69,26,3,.18); display: grid; grid-template-columns: repeat(3,1fr); align-items: center; gap: 6px; padding: 7px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+        .bottom-tab { height: 54px; border: 0; border-radius: 15px; background: transparent; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease; }
+        .bottom-tab:hover { background: rgba(245,158,11,.1); }
         .bottom-tab:active { transform: translateY(1px); }
-        .bottom-tab .tab-icon { font-size: 18px; line-height: 1; }
-        .order-fab { width: 76px; height: 76px; margin: -28px auto 0; border: 4px solid #1c0f00; border-radius: 999px; background: linear-gradient(135deg,#f59e0b,#facc15); color: #1c0f00; box-shadow: 0 16px 34px rgba(245,158,11,.38); font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: .04em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
-        .order-fab:hover { transform: translateY(-2px); box-shadow: 0 20px 42px rgba(245,158,11,.46); }
-        .order-fab:active { transform: translateY(0) scale(.98); }
-        .order-fab .tab-icon { font-size: 22px; line-height: 1; }
-        #order-mode-btn.active { background: linear-gradient(135deg,#16a34a,#86efac); color: #052e16; box-shadow: 0 18px 42px rgba(22,163,74,.35); }
+        .bottom-tab .tab-icon { font-size: 19px; line-height: 1; }
+        .bottom-tab.active, body.order-mode #order-mode-btn, body.contact-open #contact-toggle { background: #1c0f00; color: #fef3c7; box-shadow: 0 8px 20px rgba(28,15,0,.18); }
         #order-mode-btn.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.3); }
         .qty-control { display: none; align-items: center; margin-top: 8px; }
         .order-mode .qty-control { display: flex; }
@@ -324,7 +320,7 @@
     </div>
     <div class="bottom-bar" aria-label="Main actions">
         <button id="menu-jump-btn" class="bottom-tab" type="button"><span class="tab-icon">☰</span><span>Menu</span></button>
-        <button id="order-mode-btn" class="order-fab" type="button"><span class="tab-icon">🛒</span><span>Order</span></button>
+        <button id="order-mode-btn" class="bottom-tab" type="button"><span class="tab-icon">🛒</span><span>Order</span></button>
         <button id="contact-toggle" class="bottom-tab" type="button"><span class="tab-icon">☎</span><span>Contact</span></button>
     </div>
     </div>
@@ -491,25 +487,39 @@ async function dispatchOrder(order) {
 // ORDER MODE
 function renderOrderModeButton(){
     const btn=document.getElementById('order-mode-btn');
+    const menuBtn=document.getElementById('menu-jump-btn');
     if(!btn) return;
     btn.classList.toggle('active',orderMode);
-    btn.innerHTML=orderMode?'<span class="tab-icon">×</span><span>Cancel</span>':'<span class="tab-icon">🛒</span><span>Order</span>';
+    if(menuBtn) menuBtn.classList.toggle('active',!orderMode&&!bubbleOpen);
+    btn.innerHTML='<span class="tab-icon">🛒</span><span>Order</span>';
 }
 
-function toggleOrderMode(){
+function openOrderPage(){
     if(!MENU_ORDERING_ENABLED) return;
     if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
     closeContactPanel();
-    orderMode=!orderMode;
-    document.body.classList.toggle('order-mode',orderMode);
+    orderMode=true;
+    document.body.classList.add('order-mode');
     renderOrderModeButton();
-    if(orderMode) document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
-    if(!orderMode){
-        cart={};addonSel={};shishaSel={};
-        document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
-        document.querySelectorAll('.item-card-wrap').forEach(el=>el.classList.remove('has-qty'));
-        updatePill();closeSheet();
+    updatePill();
+    document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function openMenuPage(){
+    closeContactPanel();
+    if(orderMode){
+        orderMode=false;
+        document.body.classList.remove('order-mode');
+        closeSheet();
+        updatePill();
     }
+    renderOrderModeButton();
+    document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleOrderMode(){
+    if(orderMode) openMenuPage();
+    else openOrderPage();
 }
 function changeQty(itemKey,delta,elId){
     if(!orderMode) return;
@@ -848,8 +858,8 @@ async function sendOrder(){
 
 // DELEGATED CLICKS
 document.addEventListener('click',function(e){
-    if(e.target.closest('#menu-jump-btn')){document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
-    if(e.target.closest('#order-mode-btn')){toggleOrderMode();return;}
+    if(e.target.closest('#menu-jump-btn')){openMenuPage();return;}
+    if(e.target.closest('#order-mode-btn')){openOrderPage();return;}
     if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
     if(e.target.closest('#contact-close')){closeContactPanel();return;}
     if(e.target.closest('#close-sheet-btn')||e.target===document.getElementById('sheet-backdrop')){closeSheet();return;}
@@ -953,11 +963,19 @@ function closeContactPanel(){
     bubbleOpen=false;
     if(bubble) bubble.classList.remove('open');
     document.body.classList.remove('contact-open');
+    renderOrderModeButton();
 }
 function toggleContactPanel(){
-    bubbleOpen=!bubbleOpen;
+    bubbleOpen=true;
+    if(orderMode){
+        orderMode=false;
+        document.body.classList.remove('order-mode');
+        closeSheet();
+        updatePill();
+    }
     if(bubble) bubble.classList.toggle('open',bubbleOpen);
     document.body.classList.toggle('contact-open',bubbleOpen);
+    renderOrderModeButton();
 }
 ctoggle.addEventListener('click', toggleContactPanel);
 document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) closeContactPanel(); });
