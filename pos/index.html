@@ -1195,6 +1195,12 @@ flex:1}
 min-width:74px;
 text-align:right;
 color:#9ca3af}
+.split-row{display:flex;flex-direction:column;gap:6px}
+.split-item{display:flex;align-items:center;gap:6px;background:#f9fafb;border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.split-item input{flex:1;height:30px;min-width:0}
+.split-item select{height:30px;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:12px;font-weight:700;background:#fff}
+.split-item .del-btn{flex-shrink:0}
+body.theme-dark .split-item{background:#101722}
 .view{
 display:none;
 min-height:0;
@@ -1790,6 +1796,14 @@ margin-left:auto}
 <span>Cash</span>
 <input class="input" id="cash-input" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcChange()">
 <span id="change-display">Change: --</span>
+<button class="quick-btn" id="split-toggle" onclick="toggleSplit()" style="margin-left:auto;flex-shrink:0">Split</button>
+</div>
+<div id="split-section" style="display:none;grid-column:1/-1">
+<div class="split-row" id="split-rows"></div>
+<div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+<span style="font-size:11px;font-weight:900;color:#92400e" id="split-remaining">Remaining: $0.00</span>
+<button class="quick-btn" onclick="addSplitRow()" style="margin-left:auto">+ Add</button>
+</div>
 </div>
 </div>
 <div class="profile-card" id="profile-card">
@@ -1828,6 +1842,7 @@ appetizers:'Fries',sandwiches:'Sandwiches',burgers:'Burgers',sajj:'Sajj',dessert
 ;
 let menuData=[],flatItems=[],cart=[],activeCat='all',searchQuery='',orderType='takeaway',deliveryZone=null;
 let ordersData=[],customersData=[],inboxData=[],ordersFilter='all',currentView='menu';
+let splitPayments=[],splitEnabled=false;
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
 ...r}
 ));
@@ -2322,6 +2337,7 @@ function toggleFlavor(id,flavor){const l=cart.find(x=>x.id===id);if(!l)return;l.
 function toggleLineOptions(id){const l=cart.find(x=>x.id===id);if(!l)return;l.optionsOpen=!l.optionsOpen;renderCart()}
 function clearOrder(){
 cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;currentCustomerProfile=null;selectedRewardType=null;checkoutOpen=false;
+splitPayments=[];splitEnabled=false;$('split-section').style.display='none';$('split-toggle').textContent='Split';
 lastHydratedPhone='';lastAutoName='';
 $('cust-name').value='Guest';$('cust-phone').value='';$('order-note').value='';$('cash-input').value='';$('profile-card').classList.remove('show');
 setOrderType('takeaway',false);syncCheckoutVisibility();renderCart();renderItems();
@@ -2401,12 +2417,44 @@ ${
 disc?` - ${money(disc)} reward`:''}
 `;
 calcChange();
+if(splitEnabled)updateSplitRemaining();
 }
 function calcChange(){const cash=parseFloat($('cash-input').value)||0,change=cash-grandTotal();$('change-display').textContent=!cash?'Change: --':change<0?`${
 money(Math.abs(change))}
 short`:`Give ${
 money(change)}
 `;$('change-display').style.color=!cash?'#9ca3af':change<0?'var(--red-d)':'var(--green-d)'}
+function toggleSplit(){
+  splitEnabled=!splitEnabled;
+  $('split-section').style.display=splitEnabled?'block':'none';
+  $('split-toggle').textContent=splitEnabled?'Single':'Split';
+  if(splitEnabled&&!splitPayments.length)addSplitRow();
+  if(!splitEnabled)splitPayments=[];
+  updateSplitRemaining();
+}
+function addSplitRow(){
+  splitPayments.push({amount:0,type:'cash'});
+  renderSplitRows();
+}
+function removeSplitRow(i){splitPayments.splice(i,1);renderSplitRows();if(!splitPayments.length){splitEnabled=false;$('split-section').style.display='none';$('split-toggle').textContent='Split'}}
+function updateSplitRow(i,field,value){
+  if(field==='amount')splitPayments[i].amount=parseFloat(value)||0;
+  else splitPayments[i].type=value;
+  updateSplitRemaining();
+}
+function updateSplitRemaining(){
+  const total=grandTotal(),assigned=splitPayments.reduce((s,p)=>s+p.amount,0),rem=total-assigned;
+  $('split-remaining').textContent=`Remaining: ${money(Math.max(0,rem))}`;
+  $('split-remaining').style.color=rem<-0.01?'var(--red-d)':rem<0.01?'var(--green-d)':'#92400e';
+}
+function renderSplitRows(){
+  $('split-rows').innerHTML=splitPayments.map((p,i)=>`<div class="split-item">
+    <input class="input" type="number" step="0.01" min="0" value="${p.amount||''}" placeholder="0.00" oninput="updateSplitRow(${i},'amount',this.value)">
+    <select onchange="updateSplitRow(${i},'type',this.value)"><option value="cash" ${p.type==='cash'?'selected':''}>Cash</option><option value="card" ${p.type==='card'?'selected':''}>Card</option></select>
+    <button class="del-btn" onclick="removeSplitRow(${i})">x</button>
+  </div>`).join('');
+  updateSplitRemaining();
+}
 function toggleCart(){$('cart-panel').classList.toggle('open')}
 function showCartOnMobile(){if(matchMedia('(max-width:900px)').matches)$('cart-panel').classList.add('open')}
 function normalizePhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d||'00000000'}
@@ -2480,7 +2528,8 @@ return {
 id:loadedInboxOrderId||'ORD-'+Date.now(),status,timestamp:new Date().toISOString(),
 name:$('cust-name').value.trim()||'Guest',phone,note:$('order-note').value.trim(),orderType,
 deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:deliveryFee(),subtotal:itemsTotal(),rewardDiscount:disc,loyaltyReward:reward,total:grandTotal(),
-items:cart.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))}))
+items:cart.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),
+splitPayments:splitEnabled&&splitPayments.length?splitPayments.map(p=>({amount:p.amount,type:p.type})):null
 };
 }
 async function chargeOrder(){
@@ -2753,6 +2802,7 @@ tableLabel(o)?`<div>${tableLabel(o)}</div>`:''}
 rows}
 ${
 o.deliveryFee?`<div>Delivery <span style="float:right">${money(o.deliveryFee)}</span></div>`:''}
+${o.splitPayments?.length?`<div class="div"></div><div style="font-weight:bold">Split Payment</div>${o.splitPayments.map((p,i)=>`<div>${p.type==='cash'?'Cash':'Card'} ${i+1} <span style="float:right">${money(p.amount)}</span></div>`).join('')}`:''}
 <div class="div"></div><div class="bold">TOTAL <span style="float:right">${
 money(o.total)}
 </span></div><div class="div"></div><div class="center">Thank you!</div></div>`;
@@ -2794,6 +2844,7 @@ hour:'2-digit',minute:'2-digit',hour12:true}
 rows}
 ${
 o.deliveryFee?`<div class="cr-row"><span>Delivery</span><span>${money(o.deliveryFee)}</span></div>`:''}
+${o.splitPayments?.length?`<div class="cr-meta" style="margin-top:12px"><div style="font-weight:900;margin-bottom:4px">Split Payment</div>${o.splitPayments.map((p,i)=>`<div>${p.type==='cash'?'Cash':'Card'} ${i+1}: <span>${money(p.amount)}</span></div>`).join('')}</div>`:''}
 <div class="cr-total"><span>Total</span><span>${
 money(o.total)}
 </span></div><div class="cr-footer">Thank you for visiting Le Kiosk. Leave us a Google review.</div></div>`;
