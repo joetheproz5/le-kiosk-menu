@@ -94,21 +94,22 @@ function haversine(lat1,lon1,lat2,lon2){
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
 
-function fetchRoute(dLat,dLng,cLat,cLng){
+async function fetchRoute(dLat,dLng,cLat,cLng){
  try{
   var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
-  return fetch(url).then(function(res){if(!res.ok)return;return res.json().then(function(j){
-   if(j.code!=='Ok'||!j.routes||!j.routes[0])return;
-   var route=j.routes[0];
-   if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
-   if(!mapInst)return;
-   routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:4,opacity:.8}}).addTo(mapInst);
-   var eta=Math.round(route.duration/60);
-   var el=document.querySelector('.map-distance');
-   if(el)el.textContent=eta+' min drive';
-   routeLastFetched=Date.now();
-  })});
- }catch(e){}
+  var res=await fetch(url);
+  if(!res.ok){routeLastFetched=Date.now();return}
+  var j=await res.json();
+  if(j.code!=='Ok'||!j.routes||!j.routes[0]){routeLastFetched=Date.now();return}
+  var route=j.routes[0];
+  if(routeLine&&mapInst)mapInst.removeLayer(routeLine);
+  if(!mapInst)return;
+  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:4,opacity:.8}}).addTo(mapInst);
+  var eta=Math.round(route.duration/60);
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=eta+' min drive';
+  routeLastFetched=Date.now();
+ }catch(e){routeLastFetched=Date.now()}
 }
 
 function renderList(data){
@@ -227,7 +228,7 @@ function updateMapView(track,gps){
  if(!mapInst)return;
  if(gps&&typeof gps.lat==='number')drawCustMarker(gps);
  if(driverLat)drawDriverMarker(driverLat,driverLng);
- if(driverLat&&custMarker&&Date.now()-routeLastFetched>10000){
+ if(driverLat&&custMarker){
   var c=custMarker.getLatLng();
   fetchRoute(driverLat,driverLng,c.lat,c.lng);
  }
@@ -235,11 +236,12 @@ function updateMapView(track,gps){
 
 function moveDriver(lat,lng){
  driverLat=lat;driverLng=lng;
+ if(!mapInst)return;
  drawDriverMarker(lat,lng);
  mapInst.setView([lat,lng],mapInst.getZoom()||16,{animate:true,duration:1});
  var el=document.getElementById('gps-coords');
  if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
- if(custMarker&&Date.now()-routeLastFetched>10000){
+ if(custMarker){
   var c=custMarker.getLatLng();
   fetchRoute(lat,lng,c.lat,c.lng);
  }
