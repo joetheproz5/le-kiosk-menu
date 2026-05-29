@@ -1799,7 +1799,6 @@ margin-left:auto}
 </main>
 </section>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const WORKER_URL='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
@@ -1827,21 +1826,6 @@ id:'ice_cream_cup',label:'Free Ice Cream Cup',kind:'fixed',value:3}
 const CAT_ICONS={
 appetizers:'Fries',sandwiches:'Sandwiches',burgers:'Burgers',sajj:'Sajj',desserts:'Desserts',shisha:'Shisha',beverages:'Drinks',sweet:'Sweet',savory:'Savory'}
 ;
-const SUPABASE_URL='https://lbrdfzcbtgeqniibsfin.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxicmRmemNidGdlcW5paWJzZmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MTA5MjgsImV4cCI6MjA5NTI4NjkyOH0.bZnNf2_heJ7wU2ayThvjKsTHGiHsZ4w3cPQh61wXLyI';
-let supabaseClient=null,realtimeChannel=null;
-function initRealtime(){
-if(typeof supabase==='undefined'){console.warn('Supabase library not loaded');return false}
-try{supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);return true}catch(e){console.warn('Supabase init failed:',e.message);return false}}
-function startRealtimeOrders(){
-if(!supabaseClient)return;
-if(realtimeChannel)supabaseClient.removeChannel(realtimeChannel);
-realtimeChannel=supabaseClient
-.channel('inbox-orders')
-.on('postgres_changes',{event:'INSERT',schema:'public',table:'orders',filter:'status=eq.inbox'},payload=>{if(payload.new){pollInbox(true)}})
-.subscribe(status=>{if(status==='SUBSCRIBED')console.log('Realtime active - instant order alerts')})}
-function stopRealtime(){
-if(supabaseClient&&realtimeChannel){supabaseClient.removeChannel(realtimeChannel);realtimeChannel=null}}
 let menuData=[],flatItems=[],cart=[],activeCat='all',searchQuery='',orderType='takeaway',deliveryZone=null;
 let ordersData=[],customersData=[],inboxData=[],ordersFilter='all',currentView='menu';
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
@@ -2168,7 +2152,7 @@ restoreAuthSession();
 function startSession(){sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000)}
 function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);const rem=Math.max(0,sessionExpiry-Date.now());updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},rem)}
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
-function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);stopRealtime();clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
+function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
 function togglePassword(){
 const input=$('pw'),btn=$('show-pw-btn'),show=input.type==='password';
 input.type=show?'text':'password';
@@ -2184,7 +2168,7 @@ renderAll();
 updateSyncPill();
 syncOfflineQueue(false);
 hideLoading();
-if(initRealtime()){startRealtimeOrders();inboxPollInterval=setInterval(()=>pollInbox(false),30000)}else{inboxPollInterval=setInterval(()=>pollInbox(false),3000)}
+inboxPollInterval=setInterval(()=>pollInbox(false),3000);
 }
 async function loadConfig(){
 try{
