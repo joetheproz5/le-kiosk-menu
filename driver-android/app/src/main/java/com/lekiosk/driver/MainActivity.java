@@ -9,7 +9,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.WindowManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
@@ -126,6 +128,34 @@ public class MainActivity extends Activity {
     }
 
     private class DriverBridge {
+        @JavascriptInterface
+        public void requestNotifications() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    requestNotificationPermission();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void openNotificationSettings() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent;
+                    if (android.os.Build.VERSION.SDK_INT >= 26) {
+                        intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                    } else {
+                        intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            .setData(Uri.parse("package:" + getPackageName()));
+                    }
+                    startActivity(intent);
+                }
+            });
+        }
+
         @JavascriptInterface
         public void notifyNewOrder(final String title, final String body) {
             runOnUiThread(new Runnable() {

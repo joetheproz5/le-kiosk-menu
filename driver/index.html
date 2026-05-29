@@ -119,7 +119,20 @@ function unlockAlertSound(){
 }
 function requestNotificationPermission(){
  try{
+  if(window.LekioskAndroid&&typeof window.LekioskAndroid.requestNotifications==='function'){
+   window.LekioskAndroid.requestNotifications();
+   return;
+  }
+ }catch(e){}
+ try{
   if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+ }catch(e){}
+}
+function openNotificationSettings(){
+ try{
+  if(window.LekioskAndroid&&typeof window.LekioskAndroid.openNotificationSettings==='function'){
+   window.LekioskAndroid.openNotificationSettings();
+  }
  }catch(e){}
 }
 function beep(freq,start,duration,gain){
