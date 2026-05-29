@@ -99,8 +99,8 @@ function renderList(data){
  var done=data.filter(function(o){return !!(o.tracking||{}).delivered});
  var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="tab-bar"\x3E'+
-  '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
-  '\x3Cbutton class="'+(listTab==='done'?'active':'')+'" onclick="switchTab(\x27done\x27)"\x3EDone\x3Cspan class="tab-count"\x3E'+done.length+'\x3C/span\x3E\x3C/button\x3E'+
+  '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="D.switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
+  '\x3Cbutton class="'+(listTab==='done'?'active':'')+'" onclick="D.switchTab(\x27done\x27)"\x3EDone\x3Cspan class="tab-count"\x3E'+done.length+'\x3C/span\x3E\x3C/button\x3E'+
   '\x3C/div\x3E';
 
  function card(o){
@@ -126,6 +126,7 @@ function renderList(data){
 }
 
 function switchTab(tab){listTab=tab;renderList(allOrders)}
+window.D.switchTab=switchTab;
 
 function renderDetail(o){
  if(mapInst){try{mapInst.remove()}catch(e){};mapInst=null;driverMarker=null;custMarker=null}
