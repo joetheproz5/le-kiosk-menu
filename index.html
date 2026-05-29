@@ -110,11 +110,18 @@
         body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section { display: none; }
         body.order-mode #main-nav { top: 0; }
         body.order-mode #menu-container { min-height: 100vh; padding-top: 16px; padding-bottom: 210px; }
-        #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
+        #contact-bubble { transition: opacity 0.25s, transform 0.28s cubic-bezier(.4,0,.2,1); transform: translateY(100%); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
         .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 14px 14px; pointer-events: none; }
         .bottom-dock-inner { max-width: 28rem; margin: 0 auto; pointer-events: auto; }
-        .bottom-contact-panel { margin-bottom: 10px; background: #fff; border: 1px solid rgba(251,191,36,.45); border-radius: 18px; box-shadow: 0 18px 45px rgba(69,26,3,.18); padding: 10px; display: flex; gap: 10px; }
+        .bottom-contact-panel { position: fixed; inset: 0; z-index: 145; background: #fffaf0; padding: 24px 18px 120px; display: flex; flex-direction: column; justify-content: center; gap: 14px; box-shadow: 0 -20px 60px rgba(28,15,0,.25); }
+        .contact-window { width: min(100%, 28rem); margin: 0 auto; background: #fff; border: 1px solid rgba(251,191,36,.55); border-radius: 26px; padding: 18px; box-shadow: 0 24px 60px rgba(69,26,3,.18); }
+        .contact-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .contact-title { font-family: 'Fredoka', sans-serif; font-size: 24px; font-weight: 800; color: #451a03; line-height: 1; }
+        .contact-sub { font-size: 12px; font-weight: 700; color: #b45309; margin-top: 4px; }
+        .contact-close { width: 38px; height: 38px; border: 0; border-radius: 12px; background: #fef3c7; color: #451a03; font-size: 22px; font-weight: 900; cursor: pointer; }
+        .contact-actions { display: grid; gap: 10px; }
+        .contact-action { min-height: 58px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 900; text-decoration: none; }
         .bottom-bar { min-height: 70px; background: rgba(28,15,0,.94); color: #fef3c7; border: 1px solid rgba(245,158,11,.5); border-radius: 24px; box-shadow: 0 18px 55px rgba(28,15,0,.32); display: grid; grid-template-columns: 1fr 92px 1fr; align-items: center; gap: 8px; padding: 9px 10px; backdrop-filter: blur(14px); }
         .bottom-tab { height: 50px; border: 0; border-radius: 16px; background: rgba(255,255,255,.08); color: #fef3c7; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease; }
         .bottom-tab:hover { background: rgba(255,255,255,.12); }
@@ -135,15 +142,16 @@
         .qty-plus:hover { background: #d97706; }
         .qty-num { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: #451a03; background: #fff; border-top: 1.5px solid #fde68a; border-bottom: 1.5px solid #fde68a; height: 28px; line-height: 28px; }
         .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
-        #checkout-pill { position: fixed; bottom: 96px; left: 50%; width: min(calc(100% - 28px), 28rem); transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 49; }
+        #checkout-pill { position: fixed; bottom: 96px; left: 50%; width: min(calc(100% - 28px), 28rem); transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 80; }
         #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
         body.contact-open #checkout-pill { transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; }
-        .pill-inner { position: relative; background: #fff; border: 1px solid rgba(245,158,11,.55); border-radius: 22px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; box-shadow: 0 18px 45px rgba(69,26,3,.2); cursor: pointer; transition: transform 0.15s; }
-        .pill-inner::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 18px; height: 18px; background: #fff; border-right: 1px solid rgba(245,158,11,.55); border-bottom: 1px solid rgba(245,158,11,.55); transform: translateX(-50%) rotate(45deg); border-radius: 0 0 5px 0; }
+        .pill-inner { background: #fff; border: 1px solid rgba(245,158,11,.55); border-radius: 18px; padding: 12px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; box-shadow: 0 18px 45px rgba(69,26,3,.2); cursor: pointer; transition: transform 0.15s; }
         .pill-inner:hover { transform: translateY(-1px); }
+        .pill-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .pill-label { display: block; color: #92400e; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; line-height: 1; margin-bottom: 4px; }
         .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
         .pill-total { color: #451a03; font-size: 16px; font-weight: 900; justify-self: start; }
-        .pill-cta { background: #1c0f00; color: #fef3c7; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 8px 12px; border-radius: 12px; }
+        .pill-cta { background: #1c0f00; color: #fef3c7; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; padding: 12px 14px; border-radius: 14px; white-space: nowrap; }
         #checkout-sheet { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
         #checkout-sheet.open { pointer-events: all; }
         #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
@@ -271,8 +279,13 @@
 
 <div id="checkout-pill">
     <div class="pill-inner" id="checkout-pill-inner">
-        <span class="pill-count" id="pill-count">0 items</span>
-        <span class="pill-total" id="pill-total">$0.00</span>
+        <div class="pill-main">
+            <span class="pill-count" id="pill-count">0 items</span>
+            <span>
+                <span class="pill-label">Your order</span>
+                <span class="pill-total" id="pill-total">$0.00</span>
+            </span>
+        </div>
         <span class="pill-cta">Checkout →</span>
     </div>
 </div>
@@ -294,11 +307,20 @@
 <div class="bottom-dock">
     <div class="bottom-dock-inner">
     <div id="contact-bubble" class="bottom-contact-panel">
-        <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
-        <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-            <span>WhatsApp</span>
-        </a>
+        <div class="contact-window">
+            <div class="contact-head">
+                <div>
+                    <div class="contact-title">Contact Le Kiosk</div>
+                    <div class="contact-sub">Call us, message us, or find us in Wadi Chahrour.</div>
+                </div>
+                <button id="contact-close" class="contact-close" type="button">×</button>
+            </div>
+            <div class="contact-actions">
+                <a href="tel:+96176840244" class="contact-action bg-amber-500 hover:bg-amber-400 text-white transition shadow-sm">📞 Call +961 76 840 244</a>
+                <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="contact-action bg-green-500 hover:bg-green-400 text-white transition shadow-sm">WhatsApp</a>
+                <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="contact-action bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-200 transition">📍 Open Location</a>
+            </div>
+        </div>
     </div>
     <div class="bottom-bar" aria-label="Main actions">
         <button id="menu-jump-btn" class="bottom-tab" type="button"><span class="tab-icon">☰</span><span>Menu</span></button>
@@ -829,6 +851,7 @@ document.addEventListener('click',function(e){
     if(e.target.closest('#menu-jump-btn')){document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
     if(e.target.closest('#order-mode-btn')){toggleOrderMode();return;}
     if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
+    if(e.target.closest('#contact-close')){closeContactPanel();return;}
     if(e.target.closest('#close-sheet-btn')||e.target===document.getElementById('sheet-backdrop')){closeSheet();return;}
     if(e.target.closest('#send-order-btn')){sendOrder();return;}
     if(e.target.closest('#locate-btn')){detectLocation();return;}
