@@ -2633,7 +2633,9 @@ status}
 ?`,()=>updateOrderStatus(id,status))}
 async function updateOrderStatus(id,status){
 const o=getLoggedOrder(id);if(!o)return;o.status=status;showLoading('Updating...');
-if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});await updateTracking(id,'preparing');if(o.orderType!=='delivery')await updateTracking(id,'delivered')}
+o.tracking=o.tracking||{};
+var now=new Date().toISOString();
+if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});o.tracking.received=o.tracking.received||now;o.tracking.confirmed=o.tracking.confirmed||now;o.tracking.preparing=now;if(o.orderType!=='delivery')o.tracking.delivered=now}
 try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error')}
@@ -2755,9 +2757,11 @@ if(phone==='00000000'||phone.length!==8){showToast('No valid phone for WhatsApp'
 const msg=`Hello ${o.name||'there'}, your order is confirmed. We are preparing it now. Thank you - Le Kiosk`;
 window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank');
 }
-async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;try{await fetch(`${
+async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;
+var now=new Date().toISOString();o.tracking=o.tracking||{};o.tracking.received=o.tracking.received||now;o.tracking.confirmed=now;
+try{await fetch(`${
 WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);updateTracking(id,'received');updateTracking(id,'confirmed');setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
+/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
 async function declineInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='declined';inboxWritePending=true;try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();showToast('Order declined');setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Decline failed: '+e.message,'error')}inboxWritePending=false}
