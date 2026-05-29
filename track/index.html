@@ -137,11 +137,19 @@ function recenterMap(){
 }
 window.recenterMap=recenterMap;
 
+function pointFromGPS(gps){
+ if(!gps)return null;
+ var lat=Number(gps.lat),lng=Number(gps.lng);
+ if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
+ return{lat:lat,lng:lng};
+}
+
 function initMapOnce(track,gps){
  var el=document.getElementById('map');
  if(!el||mapInst)return;
- var clat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
- var clng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
+ var customerPoint=pointFromGPS(gps);
+ var clat=customerPoint?customerPoint.lat:RLAT;
+ var clng=customerPoint?customerPoint.lng:RLNG;
  mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([clat,clng],14);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
  var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[32,32],iconAnchor:[16,32]});
@@ -154,10 +162,11 @@ function initMapOnce(track,gps){
 }
 
 function addCustMarker(gps){
- if(!gps||typeof gps.lat!=='number'||!mapInst||custMarker)return;
+ var point=pointFromGPS(gps);
+ if(!point||!mapInst||custMarker)return;
  var cIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E',iconSize:[24,24],iconAnchor:[12,12]});
- custMarker=L.marker([gps.lat,gps.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
- L.polyline([[RLAT,RLNG],[gps.lat,gps.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.5}).addTo(mapInst);
+ custMarker=L.marker([point.lat,point.lng],{icon:cIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E');
+ L.polyline([[RLAT,RLNG],[point.lat,point.lng]],{color:'#b45309',weight:2,dashArray:'6,5',opacity:.5}).addTo(mapInst);
 }
 
 function updateMap(track,gps){
@@ -185,20 +194,30 @@ function updateMap(track,gps){
 }
 
 async function fetchRoute(dLat,dLng,cLat,cLng){
+ function drawFallback(){
+  if(!mapInst)return;
+  if(routeLine)mapInst.removeLayer(routeLine);
+  routeLine=L.polyline([[dLat,dLng],[cLat,cLng]],{color:'#22c55e',weight:5,opacity:.75,dashArray:'10,8'}).addTo(mapInst);
+  if(routeLine.bringToFront)routeLine.bringToFront();
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=fmtDist(haversine(dLat,dLng,cLat,cLng));
+  routeLastFetched=Date.now();
+ }
  try{
   var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
   var res=await fetch(url);
-  if(!res.ok)return;
+  if(!res.ok){drawFallback();return}
   var j=await res.json();
-  if(j.code!=='Ok'||!j.routes||!j.routes[0])return;
+  if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
   var route=j.routes[0];
   if(routeLine)mapInst.removeLayer(routeLine);
-  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:4,opacity:.8}}).addTo(mapInst);
+  routeLine=L.geoJSON(route.geometry,{style:{color:'#22c55e',weight:6,opacity:.95}}).addTo(mapInst);
+  if(routeLine.bringToFront)routeLine.bringToFront();
   var eta=Math.round(route.duration/60);
   var el=document.querySelector('.map-distance');
   if(el)el.textContent=eta+' min drive';
   routeLastFetched=Date.now();
- }catch(e){}
+ }catch(e){drawFallback()}
 }
 
 async function load(){
