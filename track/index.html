@@ -135,6 +135,7 @@ function recenterMap(){
  if(!mapInst||!driverMarker)return;
  mapInst.setView(driverMarker.getLatLng(),16);
 }
+window.recenterMap=recenterMap;
 
 function initMapOnce(track,gps){
  var el=document.getElementById('map');
