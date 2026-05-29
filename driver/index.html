@@ -85,6 +85,7 @@ body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-heigh
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
+var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
 var FOLLOW_ZOOM=17;
 var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=220, LOCATION_SEND_MS=800;
 var DRIVER_REFRESH_MS=2500;
@@ -106,6 +107,19 @@ function isMenuOrder(o){
  var source=String(o.source||o.channel||'').toLowerCase();
  var id=String(o.id||'').toUpperCase();
  return source==='menu'||source.indexOf('menu')>=0||id.indexOf('MENU-')===0;
+}
+function deliveredCache(){
+ try{return JSON.parse(localStorage.getItem(DELIVERED_CACHE_KEY)||'{}')||{}}catch(e){return{}}
+}
+function rememberDelivered(id){
+ if(!id)return;
+ var cache=deliveredCache(),now=Date.now();
+ Object.keys(cache).forEach(function(k){if(now-Number(cache[k]||0)>86400000)delete cache[k]});
+ cache[id]=now;
+ try{localStorage.setItem(DELIVERED_CACHE_KEY,JSON.stringify(cache))}catch(e){}
+}
+function isDeliveredOrder(o){
+ return !!(o&&(o.tracking||{}).delivered)||!!deliveredCache()[String(o&&o.id||'')];
 }
 function unlockAlertSound(){
  requestNotificationPermission();
@@ -181,9 +195,9 @@ function playOrderAlert(order){
  sendOrderNotification(order);
 }
 function checkNewOrders(rows){
- var ids=new Set((rows||[]).filter(function(o){return !(o.tracking||{}).delivered}).map(function(o){return String(o.id||'')}).filter(Boolean));
+ var ids=new Set((rows||[]).filter(function(o){return !isDeliveredOrder(o)}).map(function(o){return String(o.id||'')}).filter(Boolean));
  if(knownOrderIds===null){knownOrderIds=ids;return}
- var newOrder=(rows||[]).find(function(o){return !(o.tracking||{}).delivered&&o.id&&!knownOrderIds.has(String(o.id))});
+ var newOrder=(rows||[]).find(function(o){return !isDeliveredOrder(o)&&o.id&&!knownOrderIds.has(String(o.id))});
  knownOrderIds=ids;
  if(newOrder)playOrderAlert(newOrder);
 }
@@ -394,8 +408,8 @@ function setRouteGeometry(geometry,dashed){
 
 function renderList(data){
  allOrders=(data||[]).filter(isMenuOrder);
- var active=allOrders.filter(function(o){return !(o.tracking||{}).delivered});
- var done=allOrders.filter(function(o){return !!(o.tracking||{}).delivered});
+ var active=allOrders.filter(function(o){return !isDeliveredOrder(o)});
+ var done=allOrders.filter(isDeliveredOrder);
  checkNewOrders(allOrders);
  var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="tab-bar"\x3E'+
@@ -404,8 +418,8 @@ function renderList(data){
   '\x3C/div\x3E';
 
  function card(o){
-  var track=o.tracking||{};
-  var status=track.delivered?'Delivered':track.delivering?'Out for Delivery':'Ready';
+ var track=o.tracking||{};
+  var status=isDeliveredOrder(o)?'Delivered':track.delivering?'Out for Delivery':'Ready';
   var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
   if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
   return'\x3Cdiv class="order-card" onclick="location.href=\x27?id=\x27+encodeURIComponent(\x27'+esc(o.id)+'\x27)"\x3E'+
@@ -426,7 +440,9 @@ function renderList(data){
 }
 
 function renderDetail(o){
- var track=o.tracking||{};
+ o.tracking=o.tracking||{};
+ var track=o.tracking;
+ if(isDeliveredOrder(o)&&!track.delivered)track.delivered=new Date().toISOString();
  var shouldResumeGPS=restoreDriverPosition(o.id,track)&&track.delivering&&!track.delivered;
  var customerPoint=pointFromGPS(o.gps);
  var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
@@ -662,23 +678,25 @@ window.D={
   startGPS();
  },
  mark:async function(step){
-  if(markingStep)return;
+  if(markingStep||!orderData)return;
+  orderData.tracking=orderData.tracking||{};
+  if(orderData.tracking[step]||(step==='delivering'&&orderData.tracking.delivered))return;
   markingStep=step;
   var btn=document.getElementById('btn-'+step);
-   if(btn){btn.disabled=true;btn.textContent=step==='delivering'?'Starting...':'Saving...'}
+  document.querySelectorAll('.action-btn').forEach(function(b){b.disabled=true});
+   if(btn){btn.textContent=step==='delivering'?'Starting...':'Saving...'}
    if(step==='delivering'&&!gpsActive)startGPS();
    try{
     var j=await fetchJSON(W+'/driver/'+encodeURIComponent(orderData.id)+'/status',{
      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:step})
-    },3);
+    },1);
     if(!j.ok)throw new Error(j.error||'Failed');
-    if(!orderData.tracking)orderData.tracking={};
     orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);markingStep=null}
-    if(step==='delivered'){stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},900)}
+    if(step==='delivered'){rememberDelivered(orderData.id);stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250)}
    else setTimeout(function(){load()},1200);
-  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn){btn.disabled=false;btn.textContent=step==='delivering'?'Delivering':'Delivered'};markingStep=null}
+  }catch(e){if(step==='delivering')stopGPS();toast(e.message);markingStep=null;renderDetail(orderData)}
  }
 };
 
