@@ -107,8 +107,28 @@
         .nav-link { padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.8); color: #451a03; border: 1px solid rgba(251,191,36,0.3); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s, color 0.2s; white-space: nowrap; text-decoration: none; display: inline-block; }
         .nav-link:hover { background: #fef3c7; }
         .nav-link.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-        #contact-bubble { transition: opacity 0.2s, transform 0.2s; transform: translateY(8px); opacity: 0; pointer-events: none; }
+        body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section, body.order-mode #status-badge, body.order-mode #basketball-bubble { display: none !important; }
+        body.order-mode #main-nav { top: 0; }
+        body.order-mode #menu-container { min-height: 100vh; padding-top: 84px; padding-bottom: 130px; }
+        #contact-bubble { transition: opacity 0.25s, transform 0.28s cubic-bezier(.4,0,.2,1); transform: translateY(100%); opacity: 0; pointer-events: none; }
         #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 12px 12px; pointer-events: none; }
+        .bottom-dock-inner { max-width: 28rem; margin: 0 auto; pointer-events: auto; }
+        .bottom-contact-panel { position: fixed; inset: 0; z-index: 145; background: rgba(15,23,42,.34); backdrop-filter: blur(22px) saturate(1.25); -webkit-backdrop-filter: blur(22px) saturate(1.25); padding: 22px 16px 110px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+        .contact-window { width: min(100%, 28rem); margin: 0 auto; background: rgba(239,246,255,.78); backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2); border: 1px solid rgba(255,255,255,.62); border-radius: 22px; padding: 18px; box-shadow: 0 24px 70px rgba(30,64,175,.24); }
+        .contact-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .contact-title { font-family: 'Fredoka', sans-serif; font-size: 24px; font-weight: 800; color: #172554; line-height: 1; }
+        .contact-sub { font-size: 12px; font-weight: 700; color: #1d4ed8; margin-top: 4px; }
+        .contact-close { width: 38px; height: 38px; border: 0; border-radius: 12px; background: rgba(255,255,255,.75); color: #172554; font-size: 22px; font-weight: 900; cursor: pointer; }
+        .contact-actions { display: grid; gap: 10px; }
+        .contact-action { min-height: 58px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 900; text-decoration: none; }
+        .bottom-bar { min-height: 68px; background: rgba(255,255,255,.9); color: #451a03; border: 1px solid rgba(120,53,15,.16); border-radius: 20px; box-shadow: 0 18px 50px rgba(69,26,3,.18); display: grid; grid-template-columns: repeat(3,1fr); align-items: center; gap: 6px; padding: 7px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+        .bottom-tab { height: 54px; border: 0; border-radius: 15px; background: transparent; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease; }
+        .bottom-tab:hover { background: rgba(245,158,11,.1); }
+        .bottom-tab:active { transform: translateY(1px); }
+        .bottom-tab .tab-icon { font-size: 19px; line-height: 1; }
+        .bottom-tab.active, body.order-mode #order-mode-btn, body.contact-open #contact-toggle { background: #1c0f00; color: #fef3c7; box-shadow: 0 8px 20px rgba(28,15,0,.18); }
+        #order-mode-btn.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.3); }
         .qty-control { display: none; align-items: center; margin-top: 8px; }
         .order-mode .qty-control { display: flex; }
         .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
@@ -118,21 +138,31 @@
         .qty-plus:hover { background: #d97706; }
         .qty-num { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: #451a03; background: #fff; border-top: 1.5px solid #fde68a; border-bottom: 1.5px solid #fde68a; height: 28px; line-height: 28px; }
         .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
-        #checkout-pill { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 55; white-space: nowrap; }
+        #checkout-pill { position: fixed; top: 58px; left: 50%; width: min(calc(100% - 28px), 28rem); transform: translateX(-50%) translateY(-16px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 80; }
         #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
-        .pill-inner { background: #1c0f00; border: 1px solid #f59e0b; border-radius: 100px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.15s; }
-        .pill-inner:hover { transform: scale(1.03); }
+        body.contact-open #checkout-pill { transform: translateX(-50%) translateY(-16px); opacity: 0; pointer-events: none; }
+        body.sheet-open #checkout-pill { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-16px); }
+        .pill-inner { background: #1c0f00; border: 1px solid rgba(245,158,11,.7); border-radius: 16px; padding: 10px 10px 10px 12px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; box-shadow: 0 12px 30px rgba(28,15,0,.24); cursor: pointer; transition: transform 0.15s; }
+        .pill-inner:hover { transform: translateY(-1px); }
+        .pill-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .pill-label { display: block; color: #fbbf24; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; line-height: 1; margin-bottom: 4px; }
         .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
-        .pill-total { color: #fef3c7; font-size: 13px; font-weight: 700; }
-        .pill-cta { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 5px 12px; border-radius: 100px; }
+        .pill-total { color: #fff7ed; font-size: 16px; font-weight: 900; justify-self: start; }
+        .pill-cta { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; padding: 11px 13px; border-radius: 12px; white-space: nowrap; }
         #checkout-sheet { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
         #checkout-sheet.open { pointer-events: all; }
         #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
         #checkout-sheet.open #sheet-backdrop { background: rgba(0,0,0,0.55); }
         #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; }
         #checkout-sheet.open #sheet-body { transform: translateY(0); }
-        .sheet-handle { width: 40px; height: 4px; background: #e5e7eb; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; }
+        .sheet-handle { width: 46px; height: 5px; background: #d1d5db; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; cursor: grab; }
+        .sheet-handle,.sheet-header { touch-action: none; }
         .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
+        .sheet-scroll { touch-action: pan-y; }
+        .sheet-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .sheet-actions { display: flex; align-items: center; gap: 8px; }
+        .clear-cart-btn { border: 1px solid #fecaca; background: #fff1f2; color: #be123c; border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+        .clear-cart-btn:hover { background: #ffe4e6; }
         .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 24px; -webkit-overflow-scrolling: touch; }
         .sheet-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #fef3c7; }
         .sheet-item:last-child { border-bottom: none; }
@@ -173,7 +203,6 @@
         .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
         .err-text { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
         .err-text.show { display: block; }
-        #order-mode-btn.active { background: #f59e0b; color: #1c0f00; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin .7s linear infinite; display: inline-block; }
         #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
@@ -227,13 +256,13 @@
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
 </main>
 
-<div class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
+<div id="review-divider" class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
     <div class="flex-1 h-px bg-amber-200"></div>
     <span class="text-amber-400 text-[10px] font-bold uppercase tracking-widest px-2">✦ &nbsp; Le Kiosk &nbsp; ✦</span>
     <div class="flex-1 h-px bg-amber-200"></div>
 </div>
 
-<section class="max-w-md mx-auto px-4 pb-6 mt-2">
+<section id="review-section" class="max-w-md mx-auto px-4 pb-6 mt-2">
     <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-5 text-center">
         <div class="text-3xl mb-2">⭐</div>
         <h3 class="brand-heading text-lg font-bold text-amber-950 uppercase tracking-wide">Enjoyed your visit?</h3>
@@ -253,8 +282,13 @@
 
 <div id="checkout-pill">
     <div class="pill-inner" id="checkout-pill-inner">
-        <span class="pill-count" id="pill-count">0 items</span>
-        <span class="pill-total" id="pill-total">$0.00</span>
+        <div class="pill-main">
+            <span class="pill-count" id="pill-count">0 items</span>
+            <span>
+                <span class="pill-label">Your order</span>
+                <span class="pill-total" id="pill-total">$0.00</span>
+            </span>
+        </div>
         <span class="pill-cta">Checkout →</span>
     </div>
 </div>
@@ -264,32 +298,41 @@
     <div id="sheet-body">
         <div class="sheet-handle"></div>
         <div class="sheet-header">
-            <div class="flex items-center justify-between">
+            <div class="sheet-title-row">
                 <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
-                <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                <div class="sheet-actions">
+                    <button id="clear-cart-btn" class="clear-cart-btn" type="button">Clear cart</button>
+                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                </div>
             </div>
         </div>
         <div class="sheet-scroll" id="sheet-scroll"></div>
     </div>
 </div>
 
-<div class="fixed bottom-0 left-0 right-0 p-4 z-50 max-w-md mx-auto">
-    <div id="contact-bubble" class="mb-3 bg-white rounded-2xl shadow-xl border border-amber-200 p-3 flex gap-3">
-        <a href="tel:+96176840244" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">📞 <span>Call</span></a>
-        <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-            <span>WhatsApp</span>
-        </a>
+<div class="bottom-dock">
+    <div class="bottom-dock-inner">
+    <div id="contact-bubble" class="bottom-contact-panel">
+        <div class="contact-window">
+            <div class="contact-head">
+                <div>
+                    <div class="contact-title">Contact Le Kiosk</div>
+                    <div class="contact-sub">Call us, message us, or find us in Wadi Chahrour.</div>
+                </div>
+                <button id="contact-close" class="contact-close" type="button">×</button>
+            </div>
+            <div class="contact-actions">
+                <a href="tel:+96176840244" class="contact-action bg-amber-500 hover:bg-amber-400 text-white transition shadow-sm">📞 Call +961 76 840 244</a>
+                <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="contact-action bg-green-500 hover:bg-green-400 text-white transition shadow-sm">WhatsApp</a>
+                <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="contact-action bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-200 transition">📍 Open Location</a>
+            </div>
+        </div>
     </div>
-    <div class="bg-amber-950 text-amber-50 rounded-2xl p-3 shadow-xl border border-amber-900 flex items-center justify-between gap-2">
-        <div>
-            <span class="block text-[10px] uppercase tracking-wider text-amber-300 font-bold">Need Delivery?</span>
-            <span class="text-sm font-bold tracking-wide brand-heading">+961 76 840 244</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <button id="order-mode-btn" class="bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md">🛒 Order</button>
-            <button id="contact-toggle" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs uppercase tracking-widest py-2.5 px-3 rounded-xl flex items-center gap-1.5 transition shadow-md"><span>📞</span> Contact</button>
-        </div>
+    <div class="bottom-bar" aria-label="Main actions">
+        <button id="menu-jump-btn" class="bottom-tab" type="button"><span class="tab-icon">☰</span><span>Menu</span></button>
+        <button id="order-mode-btn" class="bottom-tab" type="button"><span class="tab-icon">🛒</span><span>Order</span></button>
+        <button id="contact-toggle" class="bottom-tab" type="button"><span class="tab-icon">☎</span><span>Contact</span></button>
+    </div>
     </div>
 </div>
 
@@ -399,6 +442,7 @@ let orderMode=false,cart={},addonSel={},shishaSel={},itemMeta={};
 let selectedType=null,detectedZone=null,userGPS=null,deliveryAddress='',changeFor='';
 let customerName='',customerPhone='';
 let _addonMap=[];
+let bubbleOpen=false;
 
 function isOpen(){
     if(TESTING_MODE) return true;
@@ -451,20 +495,41 @@ async function dispatchOrder(order) {
 }
 
 // ORDER MODE
-function toggleOrderMode(){
+function renderOrderModeButton(){
+    const btn=document.getElementById('order-mode-btn');
+    const menuBtn=document.getElementById('menu-jump-btn');
+    if(!btn) return;
+    btn.classList.toggle('active',orderMode);
+    if(menuBtn) menuBtn.classList.toggle('active',!orderMode&&!bubbleOpen);
+    btn.innerHTML='<span class="tab-icon">🛒</span><span>Order</span>';
+}
+
+function openOrderPage(){
     if(!MENU_ORDERING_ENABLED) return;
     if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
-    orderMode=!orderMode;
-    document.body.classList.toggle('order-mode',orderMode);
-    const btn=document.getElementById('order-mode-btn');
-    btn.classList.toggle('active',orderMode);
-    btn.textContent=orderMode?'✕ Cancel':'🛒 Order';
-    if(!orderMode){
-        cart={};addonSel={};shishaSel={};
-        document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
-        document.querySelectorAll('.item-card-wrap').forEach(el=>el.classList.remove('has-qty'));
-        updatePill();closeSheet();
+    closeContactPanel();
+    orderMode=true;
+    document.body.classList.add('order-mode');
+    renderOrderModeButton();
+    updatePill();
+    document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function openMenuPage(){
+    closeContactPanel();
+    if(orderMode){
+        orderMode=false;
+        document.body.classList.remove('order-mode');
+        closeSheet();
+        updatePill();
     }
+    renderOrderModeButton();
+    document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleOrderMode(){
+    if(orderMode) openMenuPage();
+    else openOrderPage();
 }
 function changeQty(itemKey,delta,elId){
     if(!orderMode) return;
@@ -488,6 +553,7 @@ function getGrandTotal(){return getItemsSubtotal()+getDeliveryFee();}
 
 function updatePill(){
     const count=getTotalItems();
+    if(count>0&&orderMode) closeContactPanel();
     document.getElementById('checkout-pill').classList.toggle('show',count>0&&orderMode);
     if(count>0){
         document.getElementById('pill-count').textContent=count+' item'+(count!==1?'s':'');
@@ -495,9 +561,44 @@ function updatePill(){
     }
 }
 
+function clearCart(){
+    cart={};addonSel={};shishaSel={};
+    selectedType=null;detectedZone=null;userGPS=null;deliveryAddress='';changeFor='';
+    document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
+    document.querySelectorAll('.item-card-wrap').forEach(el=>el.classList.remove('has-qty'));
+    closeSheet();
+    updatePill();
+    showInboxToast('Cart cleared.','ok');
+}
+
 // SHEET
-function openSheet(){renderSheet();document.getElementById('checkout-sheet').classList.add('open');document.body.style.overflow='hidden';}
-function closeSheet(){document.getElementById('checkout-sheet').classList.remove('open');document.body.style.overflow='';}
+function openSheet(){
+    closeContactPanel();
+    renderSheet();
+    bindCheckoutSheetDrag();
+    clearTimeout(closeSheet.t);
+    var sheet=document.getElementById('checkout-sheet');
+    var body=document.getElementById('sheet-body');
+    if(body){body.style.transition='';body.style.transform='';}
+    sheet.classList.add('open');
+    document.body.classList.add('sheet-open');
+    document.body.style.overflow='hidden';
+}
+function closeSheet(){
+    var sheet=document.getElementById('checkout-sheet');
+    var body=document.getElementById('sheet-body');
+    clearTimeout(closeSheet.t);
+    if(body&&sheet.classList.contains('open')){
+        body.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';
+        body.style.transform='translateY(100%)';
+    }
+    document.body.style.overflow='';
+    closeSheet.t=setTimeout(function(){
+        sheet.classList.remove('open');
+        if(body){body.style.transition='';body.style.transform='';}
+        document.body.classList.remove('sheet-open');
+    },300);
+}
 
 function renderSheet(){
     _addonMap=[];
@@ -634,6 +735,7 @@ function resetLocation(){
     function syncMenuOrderingUI(){
   const btn = document.getElementById('order-mode-btn');
   if(btn) btn.style.display = MENU_ORDERING_ENABLED ? '' : 'none';
+  renderOrderModeButton();
 
   if(!MENU_ORDERING_ENABLED){
     orderMode = false;
@@ -763,8 +865,9 @@ async function sendOrder(){
     if (WORKER_URL && !WORKER_URL.includes('YOUR-SUBDOMAIN')) {
         showInboxToast('📥 Sending to POS…');
         try {
-            await dispatchOrder(order);
-            showInboxToast('✅ Order received by POS', 'ok');
+            const result = await dispatchOrder(order);
+            const trackUrl = `https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
+            showInboxToast(`✅ Order received! <a href="${trackUrl}" target="_blank" style="color:#fff;text-decoration:underline">Track your order</a>`, 'ok');
         } catch(e) {
             console.error('Worker dispatch failed:', e);
             showInboxToast('⚠️ POS sync failed — WhatsApp still sent', 'err');
@@ -791,7 +894,8 @@ async function sendOrder(){
     msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n`;
     if(changeForNum>subtotal) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}* (change back: $${(changeForNum-subtotal).toFixed(2)})\n`;
     else if(changeForNum>0) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}*\n`;
-    msg+=`\nPlease confirm my order 🙏`;
+    msg+=`\nPlease confirm my order 🙏
+🔗 Track: https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
 
     window.open('https://wa.me/76840244?text='+encodeURIComponent(msg),'_blank');
     closeSheet();
@@ -799,8 +903,11 @@ async function sendOrder(){
 
 // DELEGATED CLICKS
 document.addEventListener('click',function(e){
-    if(e.target.closest('#order-mode-btn')){toggleOrderMode();return;}
+    if(e.target.closest('#menu-jump-btn')){openMenuPage();return;}
+    if(e.target.closest('#order-mode-btn')){openOrderPage();return;}
     if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
+    if(e.target.closest('#contact-close')){closeContactPanel();return;}
+    if(e.target.closest('#clear-cart-btn')){clearCart();return;}
     if(e.target.closest('#close-sheet-btn')||e.target===document.getElementById('sheet-backdrop')){closeSheet();return;}
     if(e.target.closest('#send-order-btn')){sendOrder();return;}
     if(e.target.closest('#locate-btn')){detectLocation();return;}
@@ -895,18 +1002,71 @@ function initScrollSpy(menuData){
     menuData.forEach(c=>{const el=document.getElementById(c.key);if(el)observer.observe(el);});
 }
 
+function bindCheckoutSheetDrag(){
+    const sheet=document.getElementById('checkout-sheet');
+    const body=document.getElementById('sheet-body');
+    if(!sheet||!body||body.dataset.dragBound)return;
+    body.dataset.dragBound='1';
+    let startY=0,currentY=0,dragging=false;
+    function canDragFrom(target){
+        if(target.closest&&target.closest('.sheet-handle,.sheet-header'))return true;
+        const scroll=target.closest&&target.closest('#sheet-scroll');
+        return !scroll||scroll.scrollTop<=0;
+    }
+    body.addEventListener('pointerdown',function(e){
+        if(!sheet.classList.contains('open')||!canDragFrom(e.target))return;
+        dragging=true;startY=e.clientY;currentY=0;
+        body.style.transition='none';
+        body.setPointerCapture&&body.setPointerCapture(e.pointerId);
+    });
+    body.addEventListener('pointermove',function(e){
+        if(!dragging)return;
+        currentY=Math.max(0,e.clientY-startY);
+        if(currentY>0){
+            e.preventDefault();
+            body.style.transform='translateY('+currentY+'px)';
+        }
+    });
+    function endDrag(){
+        if(!dragging)return;
+        dragging=false;
+        body.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';
+        if(currentY>90)closeSheet();
+        else body.style.transform='';
+    }
+    body.addEventListener('pointerup',endDrag);
+    body.addEventListener('pointercancel',endDrag);
+}
+
 // Contact bubble
 const bubble = document.getElementById('contact-bubble');
 const ctoggle = document.getElementById('contact-toggle');
-let bubbleOpen = false;
-ctoggle.addEventListener('click', () => { bubbleOpen = !bubbleOpen; bubble.classList.toggle('open', bubbleOpen); });
-document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) { bubbleOpen = false; bubble.classList.remove('open'); } });
+function closeContactPanel(){
+    bubbleOpen=false;
+    if(bubble) bubble.classList.remove('open');
+    document.body.classList.remove('contact-open');
+    renderOrderModeButton();
+}
+function toggleContactPanel(){
+    bubbleOpen=true;
+    if(orderMode){
+        orderMode=false;
+        document.body.classList.remove('order-mode');
+        closeSheet();
+        updatePill();
+    }
+    if(bubble) bubble.classList.toggle('open',bubbleOpen);
+    document.body.classList.toggle('contact-open',bubbleOpen);
+    renderOrderModeButton();
+}
+ctoggle.addEventListener('click', toggleContactPanel);
+document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) closeContactPanel(); });
 
 // Scroll spy for status badge
 (function(){
     const badge = document.getElementById('status-badge');
     if(!badge) return;
-    function onScroll(){ badge.classList.toggle('hidden', window.scrollY > 60); }
+    function onScroll(){ badge.classList.toggle('hidden', document.body.classList.contains('order-mode') || window.scrollY > 60); }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 })();

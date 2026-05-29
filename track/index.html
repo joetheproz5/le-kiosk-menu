@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Order — Le Kiosk</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--amber:#f59e0b;--amber-d:#b45309;--amber-l:#fef3c7;--green:#16a34a;--green-l:#dcfce7;--gray:#d1d5db;--gray-l:#f3f4f6;--ink:#1f2937;--muted:#6b7280;--white:#fff}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 0%,#fff 40%,#fff 100%);color:var(--ink);min-height:100vh}
+.container{max-width:520px;margin:0 auto;padding:28px 20px 80px}
+.header{text-align:center;margin-bottom:32px}
+.header .logo{font-family:'Fredoka',sans-serif;font-size:36px;font-weight:800;color:var(--amber-d)}
+.header .sub{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-d);opacity:.6;margin-top:2px}
+.order-card{background:var(--white);border:1px solid #fde68a;border-radius:16px;padding:20px;margin-bottom:22px;box-shadow:0 4px 20px rgba(180,83,9,.06)}
+.order-id{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.order-type{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--amber-l);color:var(--amber-d);margin-bottom:14px}
+.order-items{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.order-item{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600;padding:6px 0;border-bottom:1px solid var(--gray-l)}
+.order-item .qty{color:var(--muted);font-size:12px;margin-right:6px}
+.order-item .name{flex:1}
+.order-item .price{font-weight:800;color:var(--amber-d)}
+.order-item .addon{font-size:11px;color:var(--muted);padding-left:12px;flex-basis:100%}
+.order-total{display:flex;justify-content:space-between;font-size:18px;font-weight:900;color:var(--amber-d);padding-top:8px;border-top:2px solid #fde68a}
+.timeline{margin-bottom:22px}
+.timeline-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:14px}
+.steps{position:relative;padding-left:34px;display:flex;flex-direction:column;gap:10px}
+.steps::before{content:'';position:absolute;left:9px;top:18px;bottom:18px;width:2px;background:var(--gray);border-radius:1px}
+.step{position:relative;min-height:56px;display:flex;align-items:center;transition:opacity .3s}
+.step:last-child{padding-bottom:0}
+.step .dot{position:absolute;left:-34px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:2px solid var(--gray);background:var(--white);z-index:1;transition:all .4s;flex-shrink:0}
+.step .dot.pulse{animation:pulse 1.5s infinite}
+.step.complete .dot{background:var(--green);border-color:var(--green);animation:none}
+.step.current .dot{background:var(--amber);border-color:var(--amber)}
+.step-body{width:100%;min-height:54px;display:grid;grid-template-columns:minmax(0,1fr) 76px;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--gray-l);border-radius:12px;background:#fff}
+.step.complete .step-body{border-color:#bbf7d0;background:#f0fdf4}
+.step.current .step-body{border-color:#fde68a;background:#fffbeb}
+.step-label{min-width:0;font-size:14px;font-weight:800;color:var(--muted);line-height:1.25}
+.step.complete .step-label{color:var(--green)}
+.step.current .step-label{color:var(--amber-d)}
+.step-state{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:3px}
+.step.complete .step-state{color:var(--green)}
+.step.current .step-state{color:var(--amber-d)}
+.step-time{min-width:76px;text-align:right;font-size:12px;font-weight:900;color:var(--muted)}
+.step.complete .step-time{color:var(--green)}
+.step.current .step-time{color:var(--amber-d)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.4)}50%{box-shadow:0 0 0 8px rgba(245,158,11,0)}}
+.map-card{background:var(--white);border:1px solid #fde68a;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(180,83,9,.06);margin-bottom:22px}
+.map-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:10px}
+.map-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.map-distance{font-size:14px;font-weight:900;color:var(--amber-d)}
+#map{height:280px;width:100%}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);font-weight:600}
+.spinner{width:36px;height:36px;border:3px solid #fde68a;border-top-color:var(--amber-d);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-card{text-align:center;padding:60px 20px}
+.error-card .emoji{font-size:48px;margin-bottom:12px}
+.error-card .msg{font-size:15px;font-weight:700;color:var(--muted)}
+.footer{text-align:center;margin-top:30px;font-size:12px;font-weight:600;color:var(--muted)}
+.footer a{color:var(--amber-d);text-decoration:none;font-weight:800}
+@media(max-width:480px){.container{padding:20px 14px 60px}.order-card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header"><div class="logo">Le Kiosk</div><div class="sub">Order Tracking</div></div>
+<div id="content"><div class="loading"><div class="spinner"></div>Loading your order...</div></div>
+<div id="map-area"></div>
+<div class="footer">Need help? <a href="tel:+96176840244">+961 76 840 244</a><br><a href="https://g.page/r/CVH0uR_N89RlEAg/review" target="_blank">Leave a Google Review</a></div>
+</div>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script>
+(function(){
+var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
+var RLAT=33.821091, RLNG=35.564961;
+var STEPS=[
+ {key:'received',label:'Order Received',icon:'📥'},
+ {key:'confirmed',label:'Order Confirmed',icon:'✅'},
+ {key:'preparing',label:'Preparing',icon:'👨‍🍳'},
+ {key:'delivering',label:'Out for Delivery',icon:'🛵'},
+ {key:'delivered',label:'Delivered',icon:'🍽️'}
+];
+
+var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true;
+var wasDelivering=false;
+var lastDriverLat=null,lastDriverLng=null,driverAnim=null;
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){return'$'+(Number(n)||0).toFixed(2);}
+function fmtDist(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(1)+' km';}
+function fmtTime(d){if(!d)return'--';var dt=new Date(d);return dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});}
+function haversine(a,b,c,d){var R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180;var z=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)*Math.sin(y/2);return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z));}
+
+function showError(msg){
+ document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(msg)+'\x3C/div\x3E\x3C/div\x3E';
+}
+
+function buildHTML(order,track){
+ var isDel=order.orderType==='delivery';
+ var items='';
+ (order.items||[]).forEach(function(it){
+  var row='\x3Cdiv class="order-item"\x3E\x3Cdiv style="width:100%"\x3E\x3Cspan class="qty"\x3E'+it.qty+'x\x3C/span\x3E\x3Cspan class="name"\x3E'+esc(it.name)+'\x3C/span\x3E';
+  if(it.flavor)row+='\x3Cdiv class="addon"\x3EFlavor: '+esc(it.flavor)+'\x3C/div\x3E';
+  (it.addons||[]).forEach(function(a){row+='\x3Cdiv class="addon"\x3E+ '+esc(a.label)+'\x3C/div\x3E'});
+  row+='\x3C/div\x3E\x3Cspan class="price"\x3E'+money(it.price*it.qty)+'\x3C/span\x3E\x3C/div\x3E';
+  items+=row;
+ });
+ return'\x3Cdiv class="order-card"\x3E'+
+  '\x3Cdiv class="order-id"\x3E'+esc(order.id)+'\x3C/div\x3E'+
+  '\x3Cdiv class="order-type"\x3E'+(order.orderType==='delivery'?'Delivery':order.orderType==='dinein'?'Dine In':'Takeaway')+'\x3C/div\x3E'+
+  '\x3Cdiv class="order-items"\x3E'+items+'\x3C/div\x3E'+
+  '\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/span\x3E\x3C/div\x3E'+
+  '\x3C/div\x3E'+
+  '\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E'+
+  '\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E';
+}
+
+function buildSteps(track,isDelivery){
+ var visible=isDelivery?STEPS:STEPS.filter(function(s){return s.key!=='delivering'});
+ var last=-1;
+ visible.forEach(function(s,i){if(track[s.key])last=i});
+ return visible.map(function(s,i){
+  var cls='step';
+  if(track[s.key])cls+=' complete';
+  else if(i===last+1)cls+=' current';
+  var time=track[s.key]?fmtTime(track[s.key]):'';
+  var dot='dot';
+  if(cls.indexOf('current')>=0)dot+=' pulse';
+  var state=track[s.key]?'Done':(i===last+1?'Now':'Waiting');
+  return'\x3Cdiv class="'+cls+'"\x3E\x3Cdiv class="'+dot+'"\x3E\x3C/div\x3E\x3Cdiv class="step-body"\x3E\x3Cdiv\x3E\x3Cdiv class="step-label"\x3E'+s.icon+' '+esc(s.label)+'\x3C/div\x3E\x3Cdiv class="step-state"\x3E'+state+'\x3C/div\x3E\x3C/div\x3E\x3Cdiv class="step-time"\x3E'+(time||'--')+'\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
+ }).join('');
+}
+
+function buildMapArea(){
+ return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3Cbutton id="map-recenter" style="display:none;width:100%;height:34px;border:0;border-radius:0;background:#f59e0b;color:#111827;font-size:12px;font-weight:800;text-transform:uppercase;cursor:pointer" onclick="recenterMap()"\x3ERecenter on Driver\x3C/button\x3E\x3C/div\x3E';
+}
+
+function recenterMap(){
+ if(!mapInst||!driverMarker)return;
+ var p=driverMarker.getLngLat();
+ mapInst.easeTo({center:[p.lng,p.lat],zoom:15.5,pitch:0,bearing:0,duration:450});
+}
+window.recenterMap=recenterMap;
+
+function pointFromGPS(gps){
+ if(!gps)return null;
+ var lat=Number(gps.lat),lng=Number(gps.lng);
+ if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
+ return{lat:lat,lng:lng};
+}
+
+function initMapOnce(track,gps){
+ var el=document.getElementById('map');
+ if(!el||mapInst)return;
+ var customerPoint=pointFromGPS(gps);
+ var clat=customerPoint?customerPoint.lat:RLAT;
+ var clng=customerPoint?customerPoint.lng:RLNG;
+ mapInst=new maplibregl.Map({
+  container:'map',
+  center:[clng,clat],
+  zoom:14,
+  pitch:0,
+  bearing:0,
+  attributionControl:false,
+  style:{
+   version:8,
+   sources:{
+    carto:{type:'raster',tiles:['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO'},
+    route:{type:'geojson',data:{type:'FeatureCollection',features:[]}},
+    storeLine:{type:'geojson',data:{type:'FeatureCollection',features:[]}}
+   },
+   layers:[
+    {id:'carto',type:'raster',source:'carto'},
+    {id:'store-line',type:'line',source:'storeLine',paint:{'line-color':'#b45309','line-width':2,'line-opacity':.45,'line-dasharray':[1.5,1.5]}},
+    {id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.95}}
+   ]
+  }
+ });
+ mapInst.addControl(new maplibregl.NavigationControl({showCompass:false,showZoom:true}),'top-right');
+ mapInst.on('load',function(){
+  addStoreMarker();
+  addCustMarker(gps);
+  var drvNow=pointFromGPS(track&&track.driverLocation);
+  if(drvNow){updateMap(track,gps);mapInst.easeTo({center:[drvNow.lng,drvNow.lat],zoom:(track.delivering&&!track.delivered)?15.5:14,duration:350})}
+ });
+ var drvNow=track&&track.driverLocation;
+ if(drvNow||(track.delivering&&!track.delivered)){var rb=document.getElementById('map-recenter');if(rb)rb.style.display='block'}
+ firstMapDone=true;
+ setTimeout(function(){if(document.getElementById('map'))mapInst.resize()},200);
+}
+
+function markerEl(html){
+ var el=document.createElement('div');
+ el.innerHTML=html;
+ return el.firstChild;
+}
+
+function addStoreMarker(){
+ var el=markerEl('\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E');
+ new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([RLNG,RLAT]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour')).addTo(mapInst);
+}
+
+function addCustMarker(gps){
+ var point=pointFromGPS(gps);
+ if(!point||!mapInst||custMarker)return;
+ var el=markerEl('\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E');
+ custMarker=new maplibregl.Marker({element:el}).setLngLat([point.lng,point.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ECustomer\x3C/b\x3E')).addTo(mapInst);
+ function drawStoreLine(){
+  if(mapInst.getSource('storeLine'))mapInst.getSource('storeLine').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:[[RLNG,RLAT],[point.lng,point.lat]]},properties:{}}]});
+ }
+ if(mapInst.getSource('storeLine'))drawStoreLine();
+ else mapInst.once('load',drawStoreLine);
+}
+
+function updateMap(track,gps){
+ if(!mapInst)return;
+ addCustMarker(gps);
+ var dl=track&&track.driverLocation;
+ dl=pointFromGPS(dl);
+ if(dl){
+  if(!driverMarker)routeNeeded=true;
+  if(driverMarker)animateDriverMarker(dl.lat,dl.lng);
+  else{
+   var el=markerEl('\x3Cdiv style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E');
+   driverMarker=new maplibregl.Marker({element:el}).setLngLat([dl.lng,dl.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EDriver\x3C/b\x3E')).addTo(mapInst);
+  }
+  var isDel=track.delivering&&!track.delivered;
+  if(isDel&&!wasDelivering){mapInst.easeTo({center:[dl.lng,dl.lat],zoom:15.5,duration:400});wasDelivering=true}
+  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(mapInst.stop)mapInst.stop();mapInst.easeTo({center:[dl.lng,dl.lat],zoom:Math.max(mapInst.getZoom(),15),duration:350})}
+  lastDriverLat=dl.lat;lastDriverLng=dl.lng;
+  if(!isDel)wasDelivering=false;
+  var rb=document.getElementById('map-recenter');
+  if(rb)rb.style.display=(isDel||driverMarker)?'block':'none';
+  if(custMarker&&(routeNeeded||Date.now()-routeLastFetched>6500)){
+   routeNeeded=false;
+   var c=custMarker.getLngLat();
+   fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
+  }
+ }
+}
+
+function animateDriverMarker(lat,lng){
+ if(!driverMarker)return;
+ if(driverAnim)cancelAnimationFrame(driverAnim);
+ var start=driverMarker.getLngLat();
+ var startTime=performance.now(),duration=700;
+ function tick(now){
+  var t=Math.min(1,(now-startTime)/duration);
+  var e=1-Math.pow(1-t,3);
+  driverMarker.setLngLat([start.lng+(lng-start.lng)*e,start.lat+(lat-start.lat)*e]);
+  if(t<1)driverAnim=requestAnimationFrame(tick);
+ }
+ driverAnim=requestAnimationFrame(tick);
+}
+
+async function fetchRoute(dLat,dLng,cLat,cLng){
+ function drawFallback(){
+  if(!mapInst)return;
+  setRouteGeometry({type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},true);
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=fmtDist(haversine(dLat,dLng,cLat,cLng));
+  routeLastFetched=Date.now();
+ }
+ try{
+  var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
+  var res=await fetch(url);
+  if(!res.ok){drawFallback();return}
+  var j=await res.json();
+  if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
+  var route=j.routes[0];
+  setRouteGeometry(route.geometry,false);
+  var eta=Math.round(route.duration/60);
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=eta+' min drive';
+  routeLastFetched=Date.now();
+ }catch(e){drawFallback()}
+}
+
+function setRouteGeometry(geometry,dashed){
+ if(!mapInst)return;
+ if(!mapInst.getSource('route')){mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});return}
+ mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
+ if(mapInst.getLayer('route-line'))mapInst.setPaintProperty('route-line','line-dasharray',dashed?[1.5,1.5]:[1,0]);
+ routeLine=true;
+}
+
+async function load(){
+ var id=new URLSearchParams(window.location.search).get('id');
+ if(!id){showError('No order ID. Use: /track/?id=ORD-123');return}
+ var ctrl=new AbortController(),tmr=setTimeout(function(){ctrl.abort()},10000);
+ try{
+  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:ctrl.signal});
+  clearTimeout(tmr);
+  if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Order not found')}
+  var j=await res.json();
+  if(!j.ok)throw new Error(j.error||'Invalid response');
+  var o=j.data,track=o.tracking||{};
+  if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
+   document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
+   document.getElementById('map-area').innerHTML='';return;
+  }
+  document.getElementById('content').innerHTML=buildHTML(o,track);
+  if(o.orderType==='delivery'){
+   if(!firstMapDone){document.getElementById('map-area').innerHTML=buildMapArea();setTimeout(function(){initMapOnce(track,o.gps);updateMap(track,o.gps)},60)}
+   else updateMap(track,o.gps);
+  }
+ }catch(e){
+  clearTimeout(tmr);
+  if(e.name==='AbortError')showError('Request timed out');
+  else showError(e.message||'Could not load order');
+ }
+}
+
+load();
+setInterval(load,3000);
+})();
+</script>
+</body>
+</html>

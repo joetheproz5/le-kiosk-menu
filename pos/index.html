@@ -554,10 +554,92 @@ overflow:hidden}
 .menu-tools{
 background:#fff;
 border-bottom:1px solid var(--line);
-padding:9px 18px;
+padding:12px 14px;
 display:flex;
 align-items:center;
 gap:10px}
+.active-orders-box{
+width:100%;
+min-width:0}
+.active-orders-head{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-bottom:9px}
+.active-orders-title{
+font-size:13px;
+font-weight:900;
+text-transform:uppercase;
+letter-spacing:.08em;
+color:#78350f}
+.active-orders-sub{
+font-size:10px;
+font-weight:800;
+color:#9ca3af;
+margin-top:1px}
+.active-orders-list{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+gap:9px;
+max-height:152px;
+overflow:auto;
+padding-right:2px}
+.active-order-card{
+background:#fffbeb;
+border:1.5px solid #fde68a;
+border-radius:10px;
+padding:10px;
+display:grid;
+grid-template-columns:minmax(0,1fr) auto;
+gap:8px;
+align-items:center}
+.active-order-name{
+font-size:13px;
+font-weight:900;
+color:#111827;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap}
+.active-order-meta{
+font-size:10px;
+font-weight:800;
+color:#92400e;
+margin-top:2px}
+.active-order-items{
+grid-column:1/-1;
+font-size:10px;
+font-weight:700;
+color:#6b7280;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap}
+.active-order-actions{
+display:flex;
+gap:6px;
+justify-content:flex-end;
+grid-column:1/-1}
+.active-empty{
+height:54px;
+display:flex;
+align-items:center;
+justify-content:center;
+border:1px dashed #fde68a;
+border-radius:10px;
+font-size:12px;
+font-weight:900;
+color:#92400e;
+background:#fffbeb}
+body.theme-dark .active-order-card,
+body.theme-dark .active-empty{
+background:#101722;
+border-color:#3f2c12}
+body.theme-dark .active-order-name{
+color:#f9fafb}
+body.theme-dark .active-orders-title,
+body.theme-dark .active-order-meta,
+body.theme-dark .active-empty{
+color:#fbbf24}
 .category-toggle{
 height:34px;
 border-radius:10px;
@@ -1195,6 +1277,12 @@ flex:1}
 min-width:74px;
 text-align:right;
 color:#9ca3af}
+.split-row{display:flex;flex-direction:column;gap:6px}
+.split-item{display:flex;align-items:center;gap:6px;background:#f9fafb;border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.split-item input{flex:1;height:30px;min-width:0}
+.split-item select{height:30px;border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:12px;font-weight:700;background:#fff}
+.split-item .del-btn{flex-shrink:0}
+body.theme-dark .split-item{background:#101722}
 .view{
 display:none;
 min-height:0;
@@ -1233,6 +1321,9 @@ text-transform:uppercase}
 .badge.pending{
 background:#fef3c7;
 color:#92400e}
+.badge.confirmed{
+background:#dbeafe;
+color:#1d4ed8}
 .badge.done{
 background:#dcfce7;
 color:#166534}
@@ -1684,7 +1775,18 @@ margin-left:auto}
 <section class="content">
 <div id="menu-view" class="content-view">
 <div class="menu-tools" id="menu-tools">
-<div class="category-drawer">
+<div class="active-orders-box">
+<div class="active-orders-head">
+<div>
+<div class="active-orders-title">Active Orders</div>
+<div class="active-orders-sub" id="active-orders-sub">Orders waiting for Done</div>
+</div>
+<button class="quick-btn" onclick="loadOrders(true)">Refresh</button>
+</div>
+<div class="active-orders-list" id="active-orders-list">
+</div>
+</div>
+<div class="category-drawer hidden">
 <div class="chip-row" id="category-chips">
 </div>
 </div>
@@ -1790,6 +1892,14 @@ margin-left:auto}
 <span>Cash</span>
 <input class="input" id="cash-input" type="number" step="0.01" min="0" placeholder="0.00" oninput="calcChange()">
 <span id="change-display">Change: --</span>
+<button class="quick-btn" id="split-toggle" onclick="toggleSplit()" style="margin-left:auto;flex-shrink:0">Split</button>
+</div>
+<div id="split-section" style="display:none;grid-column:1/-1">
+<div class="split-row" id="split-rows"></div>
+<div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+<span style="font-size:11px;font-weight:900;color:#92400e" id="split-remaining">Remaining: $0.00</span>
+<button class="quick-btn" onclick="addSplitRow()" style="margin-left:auto">+ Add</button>
+</div>
 </div>
 </div>
 <div class="profile-card" id="profile-card">
@@ -1828,10 +1938,11 @@ appetizers:'Fries',sandwiches:'Sandwiches',burgers:'Burgers',sajj:'Sajj',dessert
 ;
 let menuData=[],flatItems=[],cart=[],activeCat='all',searchQuery='',orderType='takeaway',deliveryZone=null;
 let ordersData=[],customersData=[],inboxData=[],ordersFilter='all',currentView='menu';
+let splitPayments=[],splitEnabled=false;
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
 ...r}
 ));
-let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
+let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,loadedSourceOrder=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
 let lastHydratedPhone='',lastAutoName='';
 let authSession=null;
 let audioCtx=null,alarmAudio=null,lastIncomingSoundAt=0,soundUnlocked=false;
@@ -2168,7 +2279,7 @@ renderAll();
 updateSyncPill();
 syncOfflineQueue(false);
 hideLoading();
-inboxPollInterval=setInterval(()=>pollInbox(false),15000);
+inboxPollInterval=setInterval(()=>pollInbox(false),3000);
 }
 async function loadConfig(){
 try{
@@ -2218,7 +2329,7 @@ loyaltyRewardRedeemedAt:c.loyalty_reward_redeemed_at||c.loyaltyRewardRedeemedAt|
 writeJson(CUSTOMERS_CACHE_KEY,customersData);
 }catch(_){customersData=readJson(CUSTOMERS_CACHE_KEY,[])}
 }
-function renderAll(){renderCategoryChips();renderItems();renderCart();renderOrdersList();renderInboxList();renderCustomers();setOrderType(orderType,false)}
+function renderAll(){renderCategoryChips();renderActiveOrders();renderItems();renderCart();renderOrdersList();renderInboxList();renderCustomers();setOrderType(orderType,false)}
 function switchView(view){
 currentView=view;
 document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -2245,6 +2356,29 @@ btn.setAttribute('aria-label',inInbox?'Back to menu':'Incoming orders');
 count.classList.toggle('hidden',inInbox);
 }
 function handleSearch(){searchQuery=$('search-input').value.trim().toLowerCase();if(currentView==='menu')renderItems();if(currentView==='orders')renderOrdersList();if(currentView==='customers')renderCustomers();}
+function activeOrderRows(){
+return ordersData.filter(o=>{
+const s=o.status==='confirmed'?'pending':o.status||'pending';
+return !['done','cancelled','declined','inbox'].includes(s);
+}).sort((a,b)=>new Date(a.timestamp||0)-new Date(b.timestamp||0));
+}
+function activeOrderCard(o){
+const dt=o.timestamp?new Date(o.timestamp):new Date(),items=(o.items||[]).slice(0,3).map(it=>`${it.qty}x ${it.name}`).join(', ');
+const more=(o.items||[]).length>3?` +${o.items.length-3}`:'';
+return `<div class="active-order-card">
+<div><div class="active-order-name">${esc(o.name||'Guest')}</div><div class="active-order-meta">${esc(o.id)} · ${dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})} · ${formatType(o.orderType)}${tableLabel(o)?` · ${tableLabel(o)}`:''}</div></div>
+<span class="badge ${o.status==='confirmed'?'confirmed':(o.status||'pending')}">${o.status==='confirmed'?'pending':(o.status||'pending')}</span>
+<div class="active-order-items">${esc(items+more)}</div>
+<div class="active-order-actions"><button class="small-btn green" onclick="quickStatus('${esc(o.id)}','done')">Done</button><button class="small-btn red" onclick="quickStatus('${esc(o.id)}','cancelled')">Cancel</button></div>
+</div>`;
+}
+function renderActiveOrders(){
+const el=$('active-orders-list'),sub=$('active-orders-sub');
+if(!el)return;
+const rows=activeOrderRows();
+if(sub)sub.textContent=rows.length?`${rows.length} order${rows.length===1?'':'s'} waiting for Done`:'No unfinished orders';
+el.innerHTML=rows.length?rows.map(activeOrderCard).join(''):'<div class="active-empty">No active orders right now</div>';
+}
 function renderCategoryChips(){
 $('category-chips').innerHTML=`<button class="cat-chip${
 activeCat==='all'?' active':''}
@@ -2321,7 +2455,8 @@ function toggleAddon(id,label,price){const l=cart.find(x=>x.id===id);if(!l)retur
 function toggleFlavor(id,flavor){const l=cart.find(x=>x.id===id);if(!l)return;l.flavor=l.flavor===flavor?null:flavor;renderCart()}
 function toggleLineOptions(id){const l=cart.find(x=>x.id===id);if(!l)return;l.optionsOpen=!l.optionsOpen;renderCart()}
 function clearOrder(){
-cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;currentCustomerProfile=null;selectedRewardType=null;checkoutOpen=false;
+cart=[];orderType='takeaway';deliveryZone=null;loadedInboxOrderId=null;loadedSourceOrder=null;currentCustomerProfile=null;selectedRewardType=null;checkoutOpen=false;
+splitPayments=[];splitEnabled=false;$('split-section').style.display='none';$('split-toggle').textContent='Split';
 lastHydratedPhone='';lastAutoName='';
 $('cust-name').value='Guest';$('cust-phone').value='';$('order-note').value='';$('cash-input').value='';$('profile-card').classList.remove('show');
 setOrderType('takeaway',false);syncCheckoutVisibility();renderCart();renderItems();
@@ -2401,12 +2536,44 @@ ${
 disc?` - ${money(disc)} reward`:''}
 `;
 calcChange();
+if(splitEnabled)updateSplitRemaining();
 }
 function calcChange(){const cash=parseFloat($('cash-input').value)||0,change=cash-grandTotal();$('change-display').textContent=!cash?'Change: --':change<0?`${
 money(Math.abs(change))}
 short`:`Give ${
 money(change)}
 `;$('change-display').style.color=!cash?'#9ca3af':change<0?'var(--red-d)':'var(--green-d)'}
+function toggleSplit(){
+  splitEnabled=!splitEnabled;
+  $('split-section').style.display=splitEnabled?'block':'none';
+  $('split-toggle').textContent=splitEnabled?'Single':'Split';
+  if(splitEnabled&&!splitPayments.length)addSplitRow();
+  if(!splitEnabled)splitPayments=[];
+  updateSplitRemaining();
+}
+function addSplitRow(){
+  splitPayments.push({amount:0,type:'cash'});
+  renderSplitRows();
+}
+function removeSplitRow(i){splitPayments.splice(i,1);renderSplitRows();if(!splitPayments.length){splitEnabled=false;$('split-section').style.display='none';$('split-toggle').textContent='Split'}}
+function updateSplitRow(i,field,value){
+  if(field==='amount')splitPayments[i].amount=parseFloat(value)||0;
+  else splitPayments[i].type=value;
+  updateSplitRemaining();
+}
+function updateSplitRemaining(){
+  const total=grandTotal(),assigned=splitPayments.reduce((s,p)=>s+p.amount,0),rem=total-assigned;
+  $('split-remaining').textContent=`Remaining: ${money(Math.max(0,rem))}`;
+  $('split-remaining').style.color=rem<-0.01?'var(--red-d)':rem<0.01?'var(--green-d)':'#92400e';
+}
+function renderSplitRows(){
+  $('split-rows').innerHTML=splitPayments.map((p,i)=>`<div class="split-item">
+    <input class="input" type="number" step="0.01" min="0" value="${p.amount||''}" placeholder="0.00" oninput="updateSplitRow(${i},'amount',this.value)">
+    <select onchange="updateSplitRow(${i},'type',this.value)"><option value="cash" ${p.type==='cash'?'selected':''}>Cash</option><option value="card" ${p.type==='card'?'selected':''}>Card</option></select>
+    <button class="del-btn" onclick="removeSplitRow(${i})">x</button>
+  </div>`).join('');
+  updateSplitRemaining();
+}
 function toggleCart(){$('cart-panel').classList.toggle('open')}
 function showCartOnMobile(){if(matchMedia('(max-width:900px)').matches)$('cart-panel').classList.add('open')}
 function normalizePhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d||'00000000'}
@@ -2476,22 +2643,39 @@ return ok;
 }
 function buildOrder(status='pending'){
 const phone=normalizePhone($('cust-phone').value),disc=rewardDiscount(),reward=disc&&selectedRewardType?{type:selectedRewardType,label:rewardById(selectedRewardType)?.label||selectedRewardType,discount:disc}:null;
-return {
-id:loadedInboxOrderId||'ORD-'+Date.now(),status,timestamp:new Date().toISOString(),
-name:$('cust-name').value.trim()||'Guest',phone,note:$('order-note').value.trim(),orderType,
+const source=loadedSourceOrder||{};
+const note=$('order-note').value.trim();
+const now=new Date().toISOString();
+const tracking=source.tracking?{...source.tracking}:{};
+tracking.received=tracking.received||now;
+tracking.confirmed=now;
+const order={
+id:loadedInboxOrderId||'ORD-'+Date.now(),status,timestamp:now,
+name:$('cust-name').value.trim()||'Guest',phone,note,orderType,
 deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:deliveryFee(),subtotal:itemsTotal(),rewardDiscount:disc,loyaltyReward:reward,total:grandTotal(),
-items:cart.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))}))
+items:cart.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),
+splitPayments:splitEnabled&&splitPayments.length?splitPayments.map(p=>({amount:p.amount,type:p.type})):null,
+tracking
 };
+if(orderType==='delivery'){
+  if(source.gps)order.gps=source.gps;
+  if(source.address||(!note&&source.note))order.address=source.address||source.note;
+  if(source.changeFor)order.changeFor=source.changeFor;
+}
+if(source.source)order.source=source.source;
+if(source.tableNumber)order.tableNumber=source.tableNumber;
+if(source.tableLabel)order.tableLabel=source.tableLabel;
+return order;
 }
 async function chargeOrder(){
 if(!validateOrder())return;
 const order=buildOrder('pending'),btn=$('charge-btn');btn.disabled=true;btn.textContent='Saving...';showLoading('Saving order...');
 try{
 await postOrder(order);
-ordersData.unshift(order);await upsertCustomer(order);showToast(`Order ${
+ordersData.unshift(order);await upsertCustomer(order);renderActiveOrders();showToast(`Order ${
 order.id}
 saved`,'success');clearOrder();renderOrdersList();
-}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList()}
+}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});renderActiveOrders();await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList()}
 btn.disabled=false;btn.textContent='Charge & Save';hideLoading();
 }
 async function upsertCustomer(order){
@@ -2512,8 +2696,9 @@ WORKER_URL}
 /supabase/orders`,{cache:'no-store'});if(!res.ok)throw new Error('Orders read '+res.status);
 const j=await res.json();ordersData=(j.data||[]).filter(r=>r.status!=='inbox').map(r=>({...r.payload,id:r.id,status:r.status||(r.payload&&r.payload.status)||'pending'}));
 mergeQueuedOrders();
+renderActiveOrders();
 renderOrdersList();
-}catch(e){mergeQueuedOrders();renderOrdersList();if(showUI)showToast('Load failed: '+e.message,'error')}
+}catch(e){mergeQueuedOrders();renderActiveOrders();renderOrdersList();if(showUI)showToast('Load failed: '+e.message,'error')}
 if(showUI)hideLoading();
 }
 function setOrderFilter(btn,filter){ordersFilter=filter;document.querySelectorAll('[data-order-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderOrdersList()}
@@ -2526,8 +2711,10 @@ if(q)rows=rows.filter(o=>String(o.id+' '+o.name+' '+o.phone).toLowerCase().inclu
 if(!rows.length){el.innerHTML='<div class="empty">No orders found.</div>';return}
 el.innerHTML=rows.map(orderCard).join('');
 }
+function quickStatus(id,status){updateOrderStatus(id,status)}
 function orderCard(o){
 const status=o.status==='confirmed'?'pending':o.status||'pending',dt=o.timestamp?new Date(o.timestamp):new Date();
+const delivered=!!(o.tracking&&o.tracking.delivered);
 const items=(o.items||[]).map(it=>`<div class="row"><span>${
 esc(it.name)}
 x${
@@ -2559,9 +2746,9 @@ ${
 tableLabel(o)?` · ${tableLabel(o)}`:''}
 ${
 o.phone?` · +961 ${esc(o.phone)}`:''}
-</div></div><span class="badge ${status}">${
+</div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="badge ${status}">${
 status}
-</span>${o.syncStatus==='offline'?'<span class="badge offline">Offline</span>':''}</div>
+</span>${delivered?'<span class="badge done">Delivered</span>':''}${o.syncStatus==='offline'?'<span class="badge offline">Offline</span>':''}</div></div>
 <div class="panel-body">${
 items}
 ${
@@ -2573,8 +2760,8 @@ money(o.total)}
 <div class="panel-actions">${
 status!=='done'?`<button class="small-btn green" onclick="confirmStatus('${esc(o.id)}','done')">Done</button>`:''}
 ${
-status!=='cancelled'?`<button class="small-btn red" onclick="confirmStatus('${esc(o.id)}','cancelled')">Cancel</button>`:''}
-<button class="small-btn amber" onclick="loadOrder('${esc(o.id)}')">Load</button><button class="small-btn dark" onclick="printLoggedOrder('${esc(o.id)}','thermal')">Thermal</button><button class="small-btn blue" onclick="printLoggedOrder('${esc(o.id)}','card')">Card</button><button class="small-btn blue" onclick="sendWhatsAppLoggedOrder('${esc(o.id)}')">WA</button></div></div>`;
+status!=='cancelled'&&status!=='done'?`<button class="small-btn red" onclick="confirmStatus('${esc(o.id)}','cancelled')">Cancel</button>`:''}
+<button class="small-btn amber" onclick="loadOrder('${esc(o.id)}')">Load</button><button class="small-btn blue" onclick="window.open('${esc(trackUrl(o.id))}','_blank')">Track</button><button class="small-btn dark" onclick="printLoggedOrder('${esc(o.id)}','thermal')">Thermal</button><button class="small-btn blue" onclick="printLoggedOrder('${esc(o.id)}','card')">Card</button><button class="small-btn blue" onclick="sendWhatsAppLoggedOrder('${esc(o.id)}')">WA</button></div></div>`;
 }
 function confirmStatus(id,status){openModal(status==='done'?'Mark order as done':'Cancel order',`Update ${
 id}
@@ -2583,11 +2770,17 @@ status}
 ?`,()=>updateOrderStatus(id,status))}
 async function updateOrderStatus(id,status){
 const o=getLoggedOrder(id);if(!o)return;o.status=status;showLoading('Updating...');
-if(status==='done')await applyLoyaltyCompletion(o).catch(()=>{});
+renderActiveOrders();
+o.tracking=o.tracking||{};
+var now=new Date().toISOString();
+if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});o.tracking.received=o.tracking.received||now;o.tracking.confirmed=o.tracking.confirmed||now;o.tracking.preparing=now;if(o.orderType!=='delivery')o.tracking.delivered=now}
 try{await fetch(`${
 WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error')}
+/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderActiveOrders();renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error');renderActiveOrders()}
 hideLoading();
+}
+async function updateTracking(id,step){
+  try{await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step})})}catch(e){console.warn('updateTracking failed:',e.message)}
 }
 async function applyLoyaltyCompletion(order){
 if(!loyaltyEnabled||!order.phone||order.phone==='00000000'||order.loyaltyProcessed)return;
@@ -2602,7 +2795,7 @@ WORKER_URL}
 function loadOrder(id){const o=getLoggedOrder(id);if(o)loadOrderIntoCurrent(o)}
 function loadOrderIntoCurrent(o){
 const phone=normalizePhone(o.phone);
-clearOrder();loadedInboxOrderId=o.id||null;$('cust-name').value=o.name||'Guest';$('cust-phone').value=phone==='00000000'?'':phone;$('order-note').value=o.note||o.address||'';setOrderType(o.orderType||'takeaway',false);
+clearOrder();loadedInboxOrderId=o.id||null;loadedSourceOrder=JSON.parse(JSON.stringify(o||{}));$('cust-name').value=o.name||'Guest';$('cust-phone').value=phone==='00000000'?'':phone;$('order-note').value=o.note||o.address||'';setOrderType(o.orderType||'takeaway',false);
 const zoneMatch=o.deliveryZone?String(o.deliveryZone).match(/[ABC]/i):null;if(zoneMatch)setZone(zoneMatch[0].toUpperCase());
 (o.items||[]).forEach(it=>{let found=null;menuData.forEach(c=>(c.items||[]).forEach((mi,idx)=>{if(mi.name===it.name)found={cat:c,idx,item:mi}}));cart.push({id:uid(),catKey:found?.cat?.key||'',itemIdx:found?.idx??-1,name:it.name,price:Number(it.price||0),priceStr:it.priceStr||money(it.price),qty:it.qty||1,flavor:it.flavor||null,addons:(it.addons||[]).map(a=>({label:a.label,price:Number(a.price||0)})),optionsOpen:false,meta:found?.item||{}})});
 hydrateCustomerFromPhone(phone);renderCart();renderItems();switchView('menu');showCartOnMobile();showToast('Order loaded','success');
@@ -2702,7 +2895,9 @@ if(phone==='00000000'||phone.length!==8){showToast('No valid phone for WhatsApp'
 const msg=`Hello ${o.name||'there'}, your order is confirmed. We are preparing it now. Thank you - Le Kiosk`;
 window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank');
 }
-async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;try{await fetch(`${
+async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;
+var now=new Date().toISOString();o.tracking=o.tracking||{};o.tracking.received=o.tracking.received||now;delete o.tracking.confirmed;
+try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
 async function declineInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='declined';inboxWritePending=true;try{await fetch(`${
@@ -2726,6 +2921,7 @@ c.favoriteItems?.length?`<div class="panel-body"><div class="row"><span>Usually<
 </div>`).join('');
 }
 function formatType(t){return t==='dinein'?'Dine In':t==='takeaway'?'Takeaway':t==='delivery'?'Delivery':(t||'')}
+function trackUrl(id){return`https://lekiosk.store/track/?id=${encodeURIComponent(id)}`}
 function printOrder(format){if(!validateOrder())return;doPrint(buildOrder('pending'),format)}
 function printLoggedOrder(id,format){const o=getLoggedOrder(id);if(o)doPrint(o,format)}
 function doPrint(o,format){$('print-area').innerHTML=format==='thermal'?thermalReceipt(o):cardReceipt(o);$('print-area').style.display='block';setTimeout(()=>{window.print();$('print-area').style.display='none'},120)}
@@ -2753,9 +2949,10 @@ tableLabel(o)?`<div>${tableLabel(o)}</div>`:''}
 rows}
 ${
 o.deliveryFee?`<div>Delivery <span style="float:right">${money(o.deliveryFee)}</span></div>`:''}
+${o.splitPayments?.length?`<div class="div"></div><div style="font-weight:bold">Split Payment</div>${o.splitPayments.map((p,i)=>`<div>${p.type==='cash'?'Cash':'Card'} ${i+1} <span style="float:right">${money(p.amount)}</span></div>`).join('')}`:''}
 <div class="div"></div><div class="bold">TOTAL <span style="float:right">${
 money(o.total)}
-</span></div><div class="div"></div><div class="center">Thank you!</div></div>`;
+</span></div><div class="div"></div><div class="center">Thank you!<br><small>Track: ${esc(trackUrl(o.id))}</small></div></div>`;
 }
 function cardReceipt(o){
 const dt=o.timestamp?new Date(o.timestamp):new Date();
@@ -2794,9 +2991,10 @@ hour:'2-digit',minute:'2-digit',hour12:true}
 rows}
 ${
 o.deliveryFee?`<div class="cr-row"><span>Delivery</span><span>${money(o.deliveryFee)}</span></div>`:''}
+${o.splitPayments?.length?`<div class="cr-meta" style="margin-top:12px"><div style="font-weight:900;margin-bottom:4px">Split Payment</div>${o.splitPayments.map((p,i)=>`<div>${p.type==='cash'?'Cash':'Card'} ${i+1}: <span>${money(p.amount)}</span></div>`).join('')}</div>`:''}
 <div class="cr-total"><span>Total</span><span>${
 money(o.total)}
-</span></div><div class="cr-footer">Thank you for visiting Le Kiosk. Leave us a Google review.</div></div>`;
+</span></div><div class="cr-footer">Track your order: ${esc(trackUrl(o.id))}<br>Leave us a Google review.</div></div>`;
 }
 function sendWhatsAppLoggedOrder(id){const o=getLoggedOrder(id);if(o)sendWhatsApp(o)}
 function sendWhatsApp(o){
@@ -2820,6 +3018,7 @@ it.flavor}
 \n`;});
 msg+=`Total: ${
 money(o.total)}
+\n\nTrack: ${trackUrl(o.id)}
 \n`;
 window.open(`https://wa.me/${o.phone?`961${o.phone}`:WA_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank');
 }

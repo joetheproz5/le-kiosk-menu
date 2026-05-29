@@ -277,39 +277,45 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .setting-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px}
 .dash-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.dash-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px}
+.dash-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.dash-card:hover{border-color:var(--brand-line);box-shadow:0 8px 24px rgba(17,24,39,.06)}
+.dash-icon{position:absolute;top:-6px;right:6px;font-size:44px;opacity:.08;font-weight:900;pointer-events:none}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
-.dashboard-section{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;margin:-6px 0 18px;box-shadow:0 8px 24px rgba(17,24,39,.04)}
-.dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.dashboard-section-title{font-size:13px;font-weight:900;color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
-.dashboard-section-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
-.product-sales-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.product-sales-card{border:1px solid var(--line);border-radius:8px;padding:13px;background:var(--panel-2)}
-.product-sales-name{font-size:13px;font-weight:900;color:var(--ink)}
+.hero-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.hero-card{border-radius:14px;padding:22px 20px;position:relative;overflow:hidden;border:0;display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 20px rgba(17,24,39,.08)}
+.hero-card.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
+.hero-card.amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#451a03}
+.hero-card.emerald{background:linear-gradient(135deg,#059669,#047857);color:#fff}
+.hero-card .hero-icon{position:absolute;right:14px;top:14px;font-size:38px;opacity:.22}
+.hero-card .hero-label{font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;opacity:.75}
+.hero-card .hero-value{font-size:36px;font-weight:900;line-height:1;font-family:var(--brandfont)}
+.hero-card .hero-sub{font-size:12px;font-weight:700;opacity:.7;line-height:1.35}
+.dashboard-section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;box-shadow:0 2px 8px rgba(17,24,39,.03)}
+.dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.dashboard-section-title{font-size:14px;font-weight:900;color:var(--ink)}
+.dashboard-section-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px}
+.product-sales-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.product-sales-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel-2)}
+.product-sales-name{font-size:14px;font-weight:900;color:var(--ink)}
 .product-sales-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-.product-sales-metric{border-radius:7px;background:#fff;border:1px solid var(--line);padding:9px;text-align:center}
-.product-sales-number{font-size:23px;font-weight:900;color:var(--brand-dark);line-height:1}
+.product-sales-metric{border-radius:8px;background:#fff;border:1px solid var(--line);padding:10px;text-align:center}
+.product-sales-number{font-size:24px;font-weight:900;color:var(--brand-dark);line-height:1}
 .product-sales-sub{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
-.today-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-4px 0 18px}
-.today-card{background:#eff6ff;color:#1e3a8a;border:1px solid #bfdbfe;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.06)}
-.today-card:nth-child(2){background:#fffbeb;border-color:#fde68a;color:#78350f}
-.today-card:nth-child(3){background:#ecfdf5;border-color:#bbf7d0;color:#14532d}
-.today-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:currentColor;opacity:.7}
-.today-value{font-size:28px;font-weight:900;line-height:1;margin-top:7px;color:currentColor}
-.today-note{font-size:11px;font-weight:700;color:currentColor;opacity:.68;margin-top:6px}
-.today-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.62);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:currentColor;flex-shrink:0}
-.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.chart-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0;box-shadow:0 8px 24px rgba(17,24,39,.05);overflow:hidden}
-.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-.chart-title{font-size:13px;font-weight:900;color:var(--ink)}
-.chart-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.today-bar{display:none}
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;box-shadow:0 2px 8px rgba(17,24,39,.03);overflow:hidden}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.chart-title{font-size:14px;font-weight:900;color:var(--ink)}
+.chart-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px}
 .chart-total-wrap{text-align:right;min-width:86px}
 .chart-total{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1}
 .chart-delta{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:5px}
-.chart-canvas{width:100%;height:260px;display:block;border-radius:8px;background:linear-gradient(180deg,#fffbeb 0%,#fff 72%)}
+.chart-canvas{width:100%;height:280px;display:block;border-radius:10px;background:transparent}
 .chart-foot{display:none}
+body.theme-dark .hero-card.amber{color:#451a03}
+body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .chart-card{background:var(--panel);color:var(--ink);border-color:var(--line)}
 .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
@@ -446,6 +452,14 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .gallery-admin-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
 .gallery-admin-delete{grid-column:1/-1;display:flex;justify-content:flex-end}
 
+.bulk-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:8px;margin:8px 0}
+.bulk-bar.show{display:flex}
+.bulk-bar .bulk-count{font-size:12px;font-weight:900;color:var(--brand);white-space:nowrap}
+.bulk-bar input[type=number]{width:80px;height:30px;border:1.5px solid var(--line);border-radius:7px;padding:0 8px;font-size:12px;font-weight:700;text-align:center;color:var(--ink)}
+.bulk-chk{width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;cursor:pointer}
+.mini-row .bulk-chk{margin-right:4px}
+body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink);border-color:var(--line)}
+
 @media(max-width:980px){
   body{overflow:auto}
   #admin-screen{height:auto;min-height:100vh}
@@ -555,8 +569,12 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
           <input class="mega-input" id="mega-search" type="text" placeholder="Search menu, categories, customers, orders..." autocomplete="off" oninput="renderMegaSearch()" onkeydown="handleMegaSearchKey(event)" onfocus="renderMegaSearch()">
           <div class="mega-results" id="mega-results"></div>
         </div>
+        <div class="top-actions" id="recent-items" style="display:flex;align-items:center;gap:6px"></div>
         <div class="top-actions">
           <button class="btn btn-soft theme-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
+          <button class="btn btn-soft" onclick="exportMenu()">Export</button>
+          <button class="btn btn-soft" onclick="document.getElementById('import-file').click()">Import</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importMenu(this)">
           <button class="btn btn-soft" onclick="togglePreview()">Preview</button>
           <button class="btn btn-add" onclick="addCategory()">Add Category</button>
           <button class="btn btn-save" id="save-btn" onclick="saveMenu()">Save Menu</button>
@@ -565,18 +583,19 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 
       <section class="content">
         <div class="view active" id="view-dashboard">
+          <div class="hero-bar" id="dashboard-hero"></div>
           <div class="dash-grid" id="dashboard-stats"></div>
           <div class="dashboard-section">
             <div class="dashboard-section-head">
               <div>
-                <div class="dashboard-section-title">Key Sandwich Sales</div>
-                <div class="dashboard-section-sub">Today, weekly, and total quantities from active orders</div>
+                <div class="dashboard-section-title">Top Selling Items</div>
+                <div class="dashboard-section-sub">Today, weekly, and total quantities</div>
               </div>
             </div>
             <div class="product-sales-grid" id="dashboard-product-sales"></div>
           </div>
-          <div class="today-bar" id="dashboard-today"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
+          <div class="dashboard-section" id="dashboard-recent-orders"></div>
         </div>
 
         <div class="view" id="view-menu">
@@ -631,6 +650,14 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
               <div class="table-toolbar">
                 <input class="search-input" id="items-search" type="text" placeholder="Search items, category, price..." oninput="renderItemsHub()">
                 <button class="btn btn-add" onclick="switchView('menu');addItem()">Add Item</button>
+              </div>
+              <div class="bulk-bar" id="bulk-bar">
+                <span class="bulk-count" id="bulk-count">0 selected</span>
+                <button class="btn btn-soft btn-sm" onclick="selectAllItems()">Select All</button>
+                <button class="btn btn-soft btn-sm" onclick="clearBulkSelection()">Clear</button>
+                <input type="number" id="bulk-amount" step="0.01" placeholder="1.00" value="1.00" min="0.01">
+                <button class="btn btn-add btn-sm" onclick="applyBulkPrice('add')">+$</button>
+                <button class="btn btn-add btn-sm" onclick="applyBulkPrice('pct')">%</button>
               </div>
               <div class="mini-list" id="items-hub"></div>
             </div>
@@ -963,8 +990,9 @@ const DEFAULT_LOYALTY_REWARDS=[
   {id:'ice_cream_cup',label:'Free Ice Cream Cup',kind:'fixed',value:3}
 ];
 
-let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
-let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false;
+let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,dragItemSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
+let selectedItems=new Set();
+let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false,dashboardRefreshTimer=null;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false,galleryAdminData=[],galleryFilter='pending';
 let dashboardOrdersData=[],menuVisitorData=[];
 let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,galleryEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
@@ -984,6 +1012,8 @@ function toggleTheme(){
   const next=activeTheme()==='dark'?'light':'dark';
   localStorage.setItem(THEME_STORAGE_KEY,next);
   applyTheme();
+  configData.theme=next;
+  saveConfig().catch(()=>{});
 }
 applyTheme();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!savedTheme())applyTheme()});
@@ -1099,7 +1129,7 @@ function updateSessionBadge(){
 }
 function logout(){
   clearAuthSession();
-  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);
+  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);clearInterval(dashboardRefreshTimer);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
@@ -1119,8 +1149,9 @@ async function initAdmin(){
     scheduleBasketballExpiryPrune();
     await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders(),fetchMenuVisitors()]);
     renderStatus();
-    renderAll();
-  }catch(e){
+  renderAll();
+  dashboardRefreshTimer=setInterval(refreshDashboard,60000);
+}catch(e){
     showToast('Load failed: '+e.message,'error');
     document.getElementById('editor-root').innerHTML=`<div class="empty-state">Could not load menu. <button class="btn btn-save btn-sm" onclick="initAdmin()">Retry</button></div>`;
   }
@@ -2326,6 +2357,11 @@ async function fetchDashboardOrders(){
     dashboardOrdersData=[];
   }
 }
+async function refreshDashboard(){
+  if(currentView!=='dashboard')return;
+  await Promise.all([fetchDashboardOrders(),fetchMenuVisitors()]);
+  renderDashboard();
+}
 async function fetchMenuVisitors(){
   try{
     const res=await fetch(`${WORKER_URL}/supabase/menu-visits`,{cache:'no-store'});
@@ -2544,7 +2580,6 @@ function switchView(view){
   };
   document.getElementById('page-kicker').textContent=titles[view][0];
   document.getElementById('page-title').textContent=titles[view][1];
-  document.querySelector('.top-actions').style.display=['dashboard','menu','categories','items','addons'].includes(view)?'flex':'none';
   if(view==='basketball'||view==='settings'){
     pruneExpiredBasketballMatches({persist:true,silent:true}).catch(e=>showToast('Expired match cleanup failed: '+e.message,'error'));
   }
@@ -2582,7 +2617,7 @@ function renderAll(){
 }
 function markUnsaved(){hasUnsaved=true;document.getElementById('unsaved-indicator').classList.add('show');}
 function markSaved(){hasUnsaved=false;document.getElementById('unsaved-indicator').classList.remove('show');}
-window.addEventListener('beforeunload',e=>{if(hasUnsaved){e.preventDefault();e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(hasUnsaved||rewardsDirty||customersAdminDirty||blockDirty){e.preventDefault();e.returnValue='';}});
 
 function menuStats(){
   let regular=0,addonCats=0,items=0,active=0,itemAddons=0,globalGroups=0;
@@ -2641,19 +2676,62 @@ function dashboardProductSalesStats(){
   return DASHBOARD_PRODUCT_TARGETS.map(t=>stats[t.id]);
 }
 function renderDashboard(){
-  const statsEl=document.getElementById('dashboard-stats');
-  if(!statsEl)return;
   const s=menuStats();
   const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
-  statsEl.innerHTML=`
-    <div class="dash-card"><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} item groups · ${s.addonCats} add-on groups</div></div>
-    <div class="dash-card"><div class="dash-label">Menu Items</div><div class="dash-value">${s.items}</div><div class="dash-note">${s.active} active on the POS/menu</div></div>
-    <div class="dash-card"><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} item extras · ${s.globalGroups} group options</div></div>
-    <div class="dash-card"><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty is enabled':'Loyalty is disabled'}</div></div>
-  `;
+  renderDashboardHero();
+  renderDashboardStats(s,ready);
   renderDashboardProductSales();
-  renderTodayBar();
   renderDashboardCharts();
+  renderRecentOrders();
+}
+function renderDashboardHero(){
+  const el=document.getElementById('dashboard-hero');
+  if(!el)return;
+  const t=todayDashboardStats();
+  const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
+  el.innerHTML=`
+    <div class="hero-card blue">
+      <div class="hero-icon">&#9744;</div>
+      <div class="hero-label">Today's Orders</div>
+      <div class="hero-value">${t.orders}</div>
+      <div class="hero-sub">${t.posOrders} POS &middot; ${t.menuOrders} online</div>
+    </div>
+    <div class="hero-card amber">
+      <div class="hero-icon">$</div>
+      <div class="hero-label">Today's Revenue</div>
+      <div class="hero-value">$${Number(t.sales||0).toFixed(0)}</div>
+      <div class="hero-sub">${t.orders?`Avg $${Number(t.sales/t.orders||0).toFixed(0)}/order`:'No orders yet'}</div>
+    </div>
+    <div class="hero-card emerald">
+      <div class="hero-icon">&#9823;</div>
+      <div class="hero-label">Today's Customers</div>
+      <div class="hero-value">${t.customers}</div>
+      <div class="hero-sub">${ready} with rewards ready</div>
+    </div>`;
+}
+function renderDashboardStats(s,ready){
+  const el=document.getElementById('dashboard-stats');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="dash-card"><div class="dash-icon">&#9776;</div><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} menu &middot; ${s.addonCats} add-on</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9881;</div><div class="dash-label">Menu Items</div><div class="dash-value">${s.active}</div><div class="dash-note">${s.items} total &middot; ${s.items-s.active} hidden</div></div>
+    <div class="dash-card"><div class="dash-icon">+</div><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} per-item &middot; ${s.globalGroups} groups</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9733;</div><div class="dash-label">Loyalty</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Active':'Disabled'}</div></div>`;
+}
+function renderRecentOrders(){
+  const el=document.getElementById('dashboard-recent-orders');
+  if(!el)return;
+  const recent=dashboardOrdersData.slice(0,5);
+  if(!recent.length){el.innerHTML='';return}
+  el.innerHTML=`<div class="dashboard-section-head"><div><div class="dashboard-section-title">Recent Orders</div><div class="dashboard-section-sub">Last 5 processed orders</div></div></div>`+
+    recent.map(row=>{
+      const p=row.payload||{},dt=orderStatDate(row);
+      return `<div class="mini-row">
+        <div class="mini-img" style="display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--brand)">${(p.orderType||'POS').slice(0,1).toUpperCase()}</div>
+        <div><div class="mini-name">${esc(p.name||'Guest')}</div><div class="mini-meta">${esc(p.id||row.id||'')} · ${dt?dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'-'} · ${p.orderType||''}</div></div>
+        <span style="font-size:13px;font-weight:900;color:var(--brand-dark)">$${Number(p.total||0).toFixed(2)}</span>
+      </div>`;
+    }).join('');
 }
 function renderDashboardProductSales(){
   const el=document.getElementById('dashboard-product-sales');
@@ -2900,9 +2978,28 @@ function buildMegaSearchResults(){
   });
   dashboardOrdersData.forEach(row=>{
     const p=row.payload||{},dt=orderStatDate(row),name=p.name||p.customerName||'Guest';
-    results.push({type:'Order',title:row.id||p.id||'Order',meta:`${name} · ${p.orderType||'order'} · $${Number(p.total||0).toFixed(2)}${dt?' · '+dt.toLocaleDateString('en-GB'):''}`,text:`${row.id||''} ${p.id||''} ${name} ${p.phone||''} ${p.orderType||''} ${row.status||''}`,action:()=>{switchView('dashboard');showToast(`Order ${row.id||p.id||''} · ${name} · $${Number(p.total||0).toFixed(2)}`,'success');}});
+    results.push({type:'Order',title:row.id||p.id||'Order',meta:`${name} · ${p.orderType||'order'} · $${Number(p.total||0).toFixed(2)}${dt?' · '+dt.toLocaleDateString('en-GB'):''}`,text:`${row.id||''} ${p.id||''} ${name} ${p.phone||''} ${p.orderType||''} ${row.status||''}`,action:()=>{openOrderDetail(row);}});
   });
   return results;
+}
+function openOrderDetail(row){
+  const p=row.payload||{},items=Array.isArray(p.items)?p.items:[],dt=orderStatDate(row);
+  const itemsHtml=items.map(it=>`<div class="cr-row"><span>${esc(it.name||'Item')} x${it.qty||1}</span><span>$${Number((it.price||0)*(it.qty||1)).toFixed(2)}</span></div>${it.flavor?`<div class="cr-addon"><span>Flavor: ${esc(it.flavor)}</span><span></span></div>`:''}${(it.addons||[]).map(a=>`<div class="cr-addon"><span>+ ${esc(a.label||a.name||'')}</span><span>$${Number(a.price||0).toFixed(2)}</span></div>`).join('')}`).join('');
+  const html=`<div class="card-receipt" style="max-width:100%;margin:0"><div class="cr-head"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Order Detail</div></div>
+    <div class="cr-meta">
+      <div>Order: <span>${esc(row.id||p.id||'')}</span></div>
+      <div>Status: <span>${esc(row.status||'unknown')}</span></div>
+      <div>Customer: <span>${esc(p.name||'Guest')}</span></div>
+      ${p.phone?`<div>Phone: <span>+961 ${esc(p.phone)}</span></div>`:''}
+      <div>Type: <span>${esc(p.orderType||'')}</span></div>
+      ${p.deliveryZone?`<div>Zone: <span>${esc(p.deliveryZone)}</span></div>`:''}
+      ${p.note?`<div>Note: <span>${esc(p.note)}</span></div>`:''}
+      ${dt?`<div>Time: <span>${dt.toLocaleString()}</span></div>`:''}
+    </div>
+    ${itemsHtml}
+    <div class="cr-total"><span>Total</span><span>$${Number(p.total||0).toFixed(2)}</span></div>
+  </div>`;
+  openEditorModal(`Order ${row.id||p.id||''}`,html,'Close',null);
 }
 function renderMegaSearch(){
   const input=document.getElementById('mega-search'),box=document.getElementById('mega-results');
@@ -2972,15 +3069,52 @@ function renderItemsHub(){
       if(!q||hay.includes(q))rows.push({sec,si,item,ii});
     });
   });
+  const bar=document.getElementById('bulk-bar');
+  const countEl=document.getElementById('bulk-count');
+  const selected=rows.filter(r=>selectedItems.has(`${r.si}-${r.ii}`));
+  if(bar)bar.classList.toggle('show',selected.length>0);
+  if(countEl)countEl.textContent=selected.length+' selected';
   if(!rows.length){el.innerHTML='<div class="empty-state">No menu items found.</div>';return;}
   el.innerHTML=rows.map(({sec,si,item,ii})=>{
+    const key=`${si}-${ii}`;
     const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
     return `<div class="mini-row">
+      <input type="checkbox" class="bulk-chk" ${selectedItems.has(key)?'checked':''} onclick="toggleSelectItem('${si}','${ii}')">
       ${img?`<img class="mini-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="mini-img"></div>`}
       <div><div class="mini-name">${esc(item.name||'Untitled')}</div><div class="mini-meta">${esc(sec.title||'Category')} · ${esc(item.price||'$0')} · ${item.active===false?'Inactive':'Active'}</div></div>
       <button class="btn btn-soft btn-sm" onclick="openItem(${si},${ii})">Edit</button>
     </div>`;
   }).join('');
+}
+function toggleSelectItem(si,ii){
+  const key=`${si}-${ii}`;
+  if(selectedItems.has(key))selectedItems.delete(key);
+  else selectedItems.add(key);
+  renderItemsHub();
+}
+function selectAllItems(){
+  menuData.forEach((sec,si)=>{if(sec.type!=='addons')(sec.items||[]).forEach((item,ii)=>{selectedItems.add(`${si}-${ii}`)});});
+  renderItemsHub();
+}
+function clearBulkSelection(){selectedItems.clear();renderItemsHub();}
+function applyBulkPrice(mode){
+  const amt=parseFloat(document.getElementById('bulk-amount')?.value);
+  if(!amt||amt<=0){showToast('Enter a valid amount','error');return}
+  let changed=0;
+  selectedItems.forEach(key=>{
+    const [si,ii]=key.split('-').map(Number);
+    const item=menuData[si]?.items?.[ii];
+    if(!item)return;
+    const current=parseFloat(String(item.price||'0').replace(/[^0-9.]/g,''))||0;
+    let next=mode==='add'?current+amt:current*(1+amt/100);
+    if(next<0)next=0;
+    item.price='$'+next.toFixed(2).replace(/\.00$/,'');
+    changed++;
+  });
+  markUnsaved();
+  clearBulkSelection();
+  renderItemsHub();
+  showToast(`${changed} item${changed===1?'':'s'} updated`,'success');
 }
 function renderAddonsHub(){
   const el=document.getElementById('addons-hub');
@@ -3131,7 +3265,7 @@ function renderItems(sec){
 }
 function renderItem(item,i){
   const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
-  return `<div class="edit-row${item.active===false?' inactive':''}" id="item-${i}">
+  return `<div class="edit-row${item.active===false?' inactive':''}" id="item-${i}" draggable="true" ondragstart="dragItemStart(event,${i})" ondragover="dragItemOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropItem(event,${i})">
     ${img?`<img class="edit-row-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="edit-row-img">I</div>`}
     <div>
       <div class="edit-row-title">${esc(item.name||'Untitled item')}</div>
@@ -3142,6 +3276,16 @@ function renderItem(item,i){
       <button class="btn btn-soft btn-sm" onclick="openItemEditor(${i})">Edit</button>
     </div>
   </div>`;
+}
+function dragItemStart(e,i){dragItemSrcIdx=i;e.dataTransfer.effectAllowed='move';}
+function dragItemOver(e,i){e.preventDefault();if(i!==dragItemSrcIdx)e.currentTarget.classList.add('drag-over');}
+function dropItem(e,i){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragItemSrcIdx===null||dragItemSrcIdx===i)return;
+  const sec=getSec();if(!sec||!sec.items)return;
+  const moved=sec.items.splice(dragItemSrcIdx,1)[0];
+  sec.items.splice(i,0,moved);
+  dragItemSrcIdx=null;markUnsaved();renderEditor();
 }
 function itemEditorHtml(item,i){
   const color=item.flavorColor||'amber',pc=PILL_PRESETS.find(p=>p.id===color)||PILL_PRESETS[0];
@@ -3179,6 +3323,7 @@ function itemEditorHtml(item,i){
 function openItemEditor(i){
   const item=getSec()?.items?.[i];
   if(!item)return;
+  trackRecent(activeTab,i,item);
   openEditorModal(item.name||'Menu Item',itemEditorHtml(item,i),'Done',()=>renderEditor());
 }
 function renderItemAddons(item,i){
@@ -3487,6 +3632,41 @@ function closeModal(){
 }
 document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
+let recentItems=[];
+function trackRecent(si,ii,item){
+  recentItems=recentItems.filter(r=>!(r.si===si&&r.ii===ii));
+  recentItems.unshift({si,ii,name:item.name||'Untitled',price:item.price||'$0'});
+  if(recentItems.length>5)recentItems.pop();
+  renderRecentItems();
+}
+function renderRecentItems(){
+  const el=document.getElementById('recent-items');
+  if(!el)return;
+  if(!recentItems.length){el.innerHTML='';return}
+  el.innerHTML=`<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:auto">Recent</span>`+
+    recentItems.map(r=>`<button class="btn btn-soft btn-sm" onclick="openItem(${r.si},${r.ii})">${esc(r.name)}</button>`).join('');
+}
+function exportMenu(){
+  const clean=menuData.map(sec=>JSON.parse(JSON.stringify(sec)));
+  const blob=new Blob([JSON.stringify(clean,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='menu-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();showToast('Menu exported','success');
+}
+async function importMenu(input){
+  const file=input.files[0];
+  if(!file)return;
+  showLoading('Importing menu...');
+  try{
+    const text=await file.text(),data=JSON.parse(text);
+    if(!Array.isArray(data))throw new Error('Invalid menu format');
+    menuData=data;activeTab=0;hasUnsaved=true;
+    markUnsaved();renderAll();switchView('menu');
+    showToast(`Imported ${menuData.length} categories`,'success');
+  }catch(e){showToast('Import failed: '+e.message,'error')}
+  input.value='';hideLoading();
+}
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3300);}
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading...';document.getElementById('loading-overlay').classList.add('show');}

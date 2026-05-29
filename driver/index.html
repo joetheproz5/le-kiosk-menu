@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Driver — Le Kiosk</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:#111827;color:#f9fafb;min-height:100vh}
+.container{max-width:480px;margin:0 auto;padding:20px 16px 100px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.top h1{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:700;color:#fbbf24}
+.top .badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;background:rgba(34,197,94,.15);color:#86efac;margin-left:auto}
+.order-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.order-card:hover{border-color:rgba(251,191,36,.3)}
+.order-card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.order-card .name{font-size:15px;font-weight:900;color:#fff}
+.order-card .total{font-size:16px;font-weight:900;color:#fbbf24;white-space:nowrap}
+.order-card .meta{font-size:12px;font-weight:600;color:#9ca3af;margin-top:4px;line-height:1.45}
+.order-card .items-preview{font-size:11px;color:#6b7280;margin-top:6px}
+.empty{text-align:center;padding:60px 20px;color:#6b7280}
+.empty .emoji{font-size:48px;margin-bottom:12px}
+.empty .msg{font-size:14px;font-weight:700}
+.refresh-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
+.refresh-bar span{font-size:11px;font-weight:700;color:#6b7280}
+.refresh-bar button{background:rgba(255,255,255,.08);border:0;color:#e5e7eb;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}
+.gps-bar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);margin-bottom:16px;cursor:pointer}
+.gps-bar.active{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3)}
+.gps-dot{width:10px;height:10px;border-radius:50%;background:#6b7280;flex-shrink:0}
+.gps-bar.active .gps-dot{background:#22c55e;animation:pulse2 1.5s infinite}
+.gps-text{flex:1;font-size:12px;font-weight:700;color:#9ca3af}
+.gps-bar.active .gps-text{color:#86efac}
+.gps-coords{font-size:10px;font-weight:600;color:#6b7280;text-align:right}
+.gps-bar.active .gps-coords{color:#86efac}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+#map{height:260px;width:100%;border-radius:14px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:height .25s ease}
+.map-card.delivering #map{height:min(58vh,520px);min-height:380px}
+.map-actions{display:flex;align-items:center;gap:8px}
+.nav-btn{height:30px;border:0;border-radius:9px;background:#22c55e;color:#052e16;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;padding:0 10px;cursor:pointer;white-space:nowrap}
+.nav-btn:active{transform:translateY(1px)}
+.driver-heading{width:34px;height:34px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 4px 14px rgba(0,0,0,.35);position:relative;transition:transform .45s cubic-bezier(.22,.61,.36,1);will-change:transform}
+.driver-heading .tip{position:absolute;left:50%;top:-9px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:13px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}
+.driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}
+.detail-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;margin-bottom:14px}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.order-id{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b7280}
+.order-type{font-size:10px;font-weight:900;padding:3px 8px;border-radius:999px;background:rgba(251,191,36,.15);color:#fbbf24}
+.customer-name{font-size:18px;font-weight:900;color:#fff;margin-bottom:4px}
+.customer-info{font-size:13px;font-weight:600;color:#9ca3af;line-height:1.5;margin-bottom:12px}
+.customer-info span{color:#e5e7eb}
+.items-list{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;padding:10px;background:rgba(255,255,255,.03);border-radius:10px}
+.item-row{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#d1d5db}
+.item-row .qty{color:#6b7280;min-width:24px}
+.item-addon{font-size:11px;color:#6b7280;padding-left:24px}
+.total-row{display:flex;justify-content:space-between;font-size:16px;font-weight:900;color:#fbbf24;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+.warn{font-size:11px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.1);padding:8px 12px;border-radius:8px;margin-bottom:8px;text-align:center}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.action-btn{height:52px;border-radius:12px;border:0;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.action-btn.delivering{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
+.action-btn.delivering:active{background:#1d4ed8}
+.action-btn.delivered{background:linear-gradient(135deg,#059669,#047857);color:#fff;grid-column:1/-1}
+.action-btn.delivered:active{background:#047857}
+.action-btn:disabled{opacity:.35;cursor:not-allowed}
+.action-btn.done{background:rgba(255,255,255,.08);color:#9ca3af}
+.back-btn{height:36px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:18px;font-weight:900;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 12px;gap:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(90px);background:#1f2937;color:#fff;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:100;transition:transform .25s;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#047857}
+.last-updated{text-align:center;font-size:10px;color:#4b5563;margin-top:16px}
+.tab-bar{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:3px;margin-bottom:16px}
+.tab-bar button{flex:1;height:38px;border-radius:10px;border:0;background:transparent;color:#9ca3af;font-size:13px;font-weight:800;letter-spacing:.02em;cursor:pointer;transition:all .15s}
+.tab-bar button.active{background:rgba(245,158,11,.25);color:#fbbf24}
+.tab-count{font-size:10px;font-weight:900;margin-left:4px;opacity:.6}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<div class="toast" id="toast"></div>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script>
+(function(){
+var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
+var RLAT=33.821091, RLNG=35.564961;
+var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
+var FOLLOW_ZOOM=17;
+var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=280, LOCATION_SEND_MS=3500;
+var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0;
+var autoRefresh=null;
+var listTab='pending';
+var allOrders=[];
+var markingStep=null;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null;
+var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null;
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
+function money(n){return'$'+(Number(n)||0).toFixed(2);}
+function toast(msg,ok){var t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(ok?' ok':'');clearTimeout(toast.tid);toast.tid=setTimeout(function(){t.className='toast'},3000);}
+
+function haversine(lat1,lon1,lat2,lon2){
+ var R=6371000,a=Math.sin((lat2-lat1)*Math.PI/360)*Math.sin((lat2-lat1)*Math.PI/360)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin((lon2-lon1)*Math.PI/360)*Math.sin((lon2-lon1)*Math.PI/360);
+ return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function bearingBetween(lat1,lng1,lat2,lng2){
+ var y=Math.sin((lng2-lng1)*Math.PI/180)*Math.cos(lat2*Math.PI/180);
+ var x=Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)-Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos((lng2-lng1)*Math.PI/180);
+ return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+
+function pointAhead(lat,lng,bearing,meters){
+ if(!Number.isFinite(Number(bearing)))return{lat:lat,lng:lng};
+ var R=6371000,d=meters/R,br=Number(bearing)*Math.PI/180,la1=lat*Math.PI/180,ln1=lng*Math.PI/180;
+ var la2=Math.asin(Math.sin(la1)*Math.cos(d)+Math.cos(la1)*Math.sin(d)*Math.cos(br));
+ var ln2=ln1+Math.atan2(Math.sin(br)*Math.sin(d)*Math.cos(la1),Math.cos(d)-Math.sin(la1)*Math.sin(la2));
+ return{lat:la2*180/Math.PI,lng:ln2*180/Math.PI};
+}
+
+function pointFromGPS(gps){
+ if(!gps)return null;
+ var lat=Number(gps.lat),lng=Number(gps.lng);
+ if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
+ return{lat:lat,lng:lng};
+}
+
+function readActiveDelivery(){
+ try{
+  var saved=JSON.parse(localStorage.getItem(ACTIVE_DELIVERY_KEY)||'null');
+  if(!saved||!saved.orderId||Date.now()-Number(saved.updatedAt||0)>12*60*60*1000)return null;
+  return saved;
+ }catch(e){return null}
+}
+
+function saveActiveDelivery(active){
+ if(!orderData||!orderData.id)return;
+ try{
+  localStorage.setItem(ACTIVE_DELIVERY_KEY,JSON.stringify({
+   orderId:orderData.id,
+   lat:driverLat,
+   lng:driverLng,
+   heading:driverHeading,
+   gpsActive:active!==undefined?!!active:!!gpsActive,
+   updatedAt:Date.now()
+  }));
+ }catch(e){}
+}
+
+function clearActiveDelivery(){
+ try{localStorage.removeItem(ACTIVE_DELIVERY_KEY)}catch(e){}
+}
+
+function restoreDriverPosition(id,track){
+ var serverPoint=pointFromGPS(track&&track.driverLocation);
+ var saved=readActiveDelivery();
+ if(saved&&saved.orderId===id){
+  var savedPoint=pointFromGPS({lat:saved.lat,lng:saved.lng});
+  if(savedPoint){driverLat=savedPoint.lat;driverLng=savedPoint.lng;driverHeading=Number.isFinite(Number(saved.heading))?Number(saved.heading):driverHeading}
+  return !!saved.gpsActive;
+ }
+ if(serverPoint){driverLat=serverPoint.lat;driverLng=serverPoint.lng}
+ return false;
+}
+
+function routeShouldRefresh(lat,lng){
+ if(routeNeeded||Date.now()-routeLastFetched>6500)return true;
+ if(lastRouteLat===null||lastRouteLng===null)return true;
+ return haversine(lat,lng,lastRouteLat,lastRouteLng)>12;
+}
+
+function smoothHeading(raw){
+ var h=Number(raw);
+ if(!Number.isFinite(h))return displayedHeading===null?0:displayedHeading;
+ h=((h%360)+360)%360;
+ if(displayedHeading===null)return h;
+ var prev=((displayedHeading%360)+360)%360;
+ var delta=((h-prev+540)%360)-180;
+ return displayedHeading+(delta*.55);
+}
+
+function updateDriverMarkerHeading(){
+ if(!driverMarker)return;
+ displayedHeading=smoothHeading(driverHeading);
+ var el=driverMarker.getElement&&driverMarker.getElement();
+ var headingEl=el&&el.querySelector('.driver-heading');
+ if(headingEl)headingEl.style.transform='rotate(0deg)';
+}
+
+function markerEl(html){
+ var el=document.createElement('div');
+ el.innerHTML=html;
+ return el.firstChild;
+}
+
+function followDriver(lat,lng){
+ if(!mapInst)return;
+ var moved=lastFollowLat===null?999:haversine(lastFollowLat,lastFollowLng,lat,lng);
+ if(moved<2)return;
+ var h=smoothHeading(Number.isFinite(Number(driverHeading))?Number(driverHeading):lastFollowHeading);
+ var turn=(lastFollowHeading===null||!Number.isFinite(Number(h)))?999:Math.abs((((h-lastFollowHeading)+540)%360)-180);
+ if(moved<3&&turn<4)return;
+ clearTimeout(followTimer);
+ followTimer=setTimeout(function(){
+  var ahead=pointAhead(lat,lng,h,FOLLOW_AHEAD_METERS);
+  if(mapInst.stop)mapInst.stop();
+  mapInst.easeTo({
+   center:[ahead.lng,ahead.lat],
+   zoom:Math.max(mapInst.getZoom()||0,FOLLOW_ZOOM),
+   bearing:Number.isFinite(Number(h))?Number(h):mapInst.getBearing(),
+   pitch:60,
+   duration:FOLLOW_DURATION,
+   essential:true,
+   easing:function(t){return 1-Math.pow(1-t,3)}
+  });
+  lastFollowLat=lat;lastFollowLng=lng;lastFollowHeading=Number.isFinite(Number(h))?Number(h):lastFollowHeading;
+ },30);
+}
+
+function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,10000);}
+function sleep(ms){return new Promise(function(resolve){setTimeout(resolve,ms)})}
+
+async function keepAwake(){
+ if(!('wakeLock' in navigator)||document.visibilityState!=='visible'||wakeLock)return;
+ try{
+  wakeLock=await navigator.wakeLock.request('screen');
+  wakeLock.addEventListener('release',function(){wakeLock=null});
+ }catch(e){}
+}
+
+function bindWakeLock(){
+ keepAwake();
+ document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){keepAwake();load()}
+ });
+ window.addEventListener('focus',function(){keepAwake();load()});
+ document.addEventListener('click',keepAwake);
+ document.addEventListener('touchstart',keepAwake,{passive:true});
+}
+
+async function fetchJSON(url,options,tries){
+ var lastErr=null;
+ tries=tries||2;
+ for(var i=0;i<tries;i++){
+  var ctrl=new AbortController();
+  var t=setTimeout(function(){ctrl.abort()},10000);
+  try{
+   var res=await fetch(url,Object.assign({cache:'no-store'},options||{},{signal:ctrl.signal}));
+   clearTimeout(t);
+   var text=await res.text();
+   var data=text?JSON.parse(text):{};
+   if(!res.ok)throw new Error(data.error||('Request failed '+res.status));
+   return data;
+  }catch(e){
+   clearTimeout(t);
+   lastErr=e;
+   if(i<tries-1)await sleep(500+i*700);
+  }
+ }
+ throw lastErr||new Error('Failed to fetch');
+}
+
+async function fetchRoute(dLat,dLng,cLat,cLng){
+ function drawFallback(){
+  if(!mapInst)return;
+  setRouteGeometry({type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},true);
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=(haversine(dLat,dLng,cLat,cLng)/1000).toFixed(1)+' km';
+  lastRouteLat=dLat;
+  lastRouteLng=dLng;
+  routeLastFetched=Date.now();
+ }
+ try{
+  var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
+  var res=await fetch(url);
+  if(!res.ok){drawFallback();return}
+  var j=await res.json();
+  if(j.code!=='Ok'||!j.routes||!j.routes[0]){drawFallback();return}
+  var route=j.routes[0];
+  if(!mapInst)return;
+  setRouteGeometry(route.geometry,false);
+  var eta=Math.round(route.duration/60);
+  var el=document.querySelector('.map-distance');
+  if(el)el.textContent=eta+' min drive';
+  lastRouteLat=dLat;
+  lastRouteLng=dLng;
+  routeLastFetched=Date.now();
+ }catch(e){drawFallback()}
+}
+
+function setRouteGeometry(geometry,dashed){
+ if(!mapInst)return;
+ if(!mapInst.getSource('route')){
+  mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});
+  return;
+ }
+ mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
+ if(mapInst.getLayer('route-line')){
+  mapInst.setPaintProperty('route-line','line-dasharray',dashed?[1.5,1.5]:[1,0]);
+ }
+ routeLine=true;
+}
+
+function renderList(data){
+ allOrders=data||[];
+ var active=data.filter(function(o){return !(o.tracking||{}).delivered});
+ var done=data.filter(function(o){return !!(o.tracking||{}).delivered});
+ var html='\x3Cdiv class="top"\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E';
+ html+='\x3Cdiv class="tab-bar"\x3E'+
+  '\x3Cbutton class="'+(listTab==='pending'?'active':'')+'" onclick="D.switchTab(\x27pending\x27)"\x3EPending\x3Cspan class="tab-count"\x3E'+active.length+'\x3C/span\x3E\x3C/button\x3E'+
+  '\x3Cbutton class="'+(listTab==='done'?'active':'')+'" onclick="D.switchTab(\x27done\x27)"\x3EDone\x3Cspan class="tab-count"\x3E'+done.length+'\x3C/span\x3E\x3C/button\x3E'+
+  '\x3C/div\x3E';
+
+ function card(o){
+  var track=o.tracking||{};
+  var status=track.delivered?'Delivered':track.delivering?'Out for Delivery':'Ready';
+  var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
+  if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
+  return'\x3Cdiv class="order-card" onclick="location.href=\x27?id=\x27+encodeURIComponent(\x27'+esc(o.id)+'\x27)"\x3E'+
+   '\x3Cdiv class="head"\x3E\x3Cspan class="name"\x3E'+esc(o.name||'Guest')+'\x3C/span\x3E\x3Cspan class="total"\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E'+
+   '\x3Cdiv class="meta"\x3E'+status+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+(o.address?' · '+esc(o.address):'')+'\x3C/div\x3E'+
+   '\x3Cdiv class="items-preview"\x3E'+esc(items)+'\x3C/div\x3E'+
+   '\x3C/div\x3E';
+ }
+
+ var list=listTab==='done'?done:active;
+ if(!list.length){
+  html+='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E'+(listTab==='done'?'✅':'🛵')+'\x3C/div\x3E\x3Cdiv class="msg"\x3E'+(listTab==='done'?'No completed deliveries yet':'No pending deliveries')+'\x3C/div\x3E\x3C/div\x3E';
+ }else{
+  list.forEach(function(o){html+=card(o)});
+ }
+ html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
+ document.getElementById('app').innerHTML=html;
+}
+
+function renderDetail(o){
+ var track=o.tracking||{};
+ var shouldResumeGPS=restoreDriverPosition(o.id,track)&&track.delivering&&!track.delivered;
+ var customerPoint=pointFromGPS(o.gps);
+ var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
+ var items='';
+ (o.items||[]).forEach(function(it){
+  items+='\x3Cdiv class="item-row"\x3E\x3Cspan class="qty"\x3E'+it.qty+'x\x3C/span\x3E\x3Cspan\x3E'+esc(it.name)+'\x3C/span\x3E\x3Cspan\x3E'+money(it.price*it.qty)+'\x3C/span\x3E\x3C/div\x3E';
+  if(it.flavor)items+='\x3Cdiv class="item-addon"\x3EFlavor: '+esc(it.flavor)+'\x3C/div\x3E';
+  (it.addons||[]).forEach(function(a){items+='\x3Cdiv class="item-addon"\x3E+ '+esc(a.label)+' '+money(a.price)+'\x3C/div\x3E'});
+ });
+
+ var canDeliver=!!track.preparing;
+ var canDelivered=!!track.delivering;
+
+ var html='\x3Cbutton class="back-btn" onclick="location.href=\x27?\x27"\x3E← Back\x3C/button\x3E';
+
+ if(o.orderType==='delivery'&&!firstMapDone){
+ var gpsCls=gpsActive?' active':'';
+  html+='\x3Cdiv class="gps-bar'+gpsCls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?'Sharing location…':'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(driverLat?driverLat.toFixed(5)+', '+driverLng.toFixed(5):'')+'\x3C/div\x3E\x3C/div\x3E';
+  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-actions"\x3E'+(customerPoint?'\x3Cbutton class="nav-btn" onclick="D.openGoogleNav(event)"\x3EGoogle Maps\x3C/button\x3E':'')+'\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+  if(!customerPoint)html+='\x3Cdiv class="warn"\x3ECustomer GPS is missing for this order\x3C/div\x3E';
+ }
+
+ html+='\x3Cdiv id="detail-info"\x3E\x3Cdiv class="detail-card"\x3E'+
+  '\x3Cdiv class="order-header"\x3E\x3Cspan class="order-id"\x3E'+esc(o.id)+'\x3C/span\x3E\x3Cspan class="order-type"\x3E'+stepLabel+'\x3C/span\x3E\x3C/div\x3E'+
+  '\x3Cdiv class="customer-name"\x3E'+esc(o.name||'Guest')+'\x3C/div\x3E'+
+  '\x3Cdiv class="customer-info"\x3E'+(o.phone?'\x3Cspan\x3E+961 '+esc(o.phone)+'\x3C/span\x3E':'')+' · Delivery'+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+'\x3C/div\x3E'+
+  (o.address?'\x3Cdiv class="customer-info"\x3EAddress: \x3Cspan\x3E'+esc(o.address)+'\x3C/span\x3E\x3C/div\x3E':'')+
+  '\x3Cdiv class="items-list"\x3E'+items+'\x3C/div\x3E'+
+  '\x3Cdiv class="total-row"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E';
+
+ if(!canDeliver&&!track.delivering&&!track.delivered){
+  html+='\x3Cdiv class="warn"\x3EWaiting for kitchen to finish preparing\x3C/div\x3E';
+ }
+
+ html+='\x3Cdiv class="actions"\x3E'+
+  (track.delivering?'\x3Cbutton class="action-btn done" disabled\x3EPicked Up\x3C/button\x3E':'\x3Cbutton class="action-btn delivering" id="btn-delivering" onclick="D.mark(\x27delivering\x27)" '+(canDeliver?'':'disabled')+'\x3EDelivering\x3C/button\x3E')+
+  (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" '+(canDelivered?'':'disabled')+'\x3EDelivered\x3C/button\x3E')+
+  '\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
+ html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
+
+ if(!firstMapDone){
+  document.getElementById('app').innerHTML=html;
+  if(o.orderType==='delivery')setTimeout(function(){initMapOnce(o.gps);updateMapView(track,o.gps)},60);
+ }else{
+  var info=document.getElementById('detail-info');
+  if(info)info.innerHTML=html.split('id="detail-info"\x3E')[1].split('\x3Cdiv class="last-updated"\x3E')[0];
+  updateMapView(track,o.gps);
+ }
+ firstMapDone=true;
+ var mapCard=document.querySelector('.map-card');
+ if(mapCard)mapCard.classList.toggle('delivering',!!(track.delivering&&!track.delivered));
+ if(mapInst)setTimeout(function(){mapInst.resize();if(driverLat)followDriver(driverLat,driverLng)},280);
+ if(shouldResumeGPS&&!gpsActive)setTimeout(function(){startGPS()},250);
+}
+
+function initMapOnce(gps){
+ var el=document.getElementById('map');
+ if(!el||mapInst)return;
+ var customerPoint=pointFromGPS(gps);
+ var cLat=customerPoint?customerPoint.lat:RLAT;
+ var cLng=customerPoint?customerPoint.lng:RLNG;
+ mapInst=new maplibregl.Map({
+  container:'map',
+  center:[cLng,cLat],
+  zoom:14,
+  pitch:42,
+  bearing:0,
+  attributionControl:false,
+  style:{
+   version:8,
+   sources:{
+    carto:{type:'raster',tiles:['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png','https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'],tileSize:256,attribution:'© OpenStreetMap © CARTO'},
+    route:{type:'geojson',data:{type:'FeatureCollection',features:[]}},
+    storeLine:{type:'geojson',data:{type:'FeatureCollection',features:[]}}
+   },
+   layers:[
+    {id:'carto',type:'raster',source:'carto'},
+    {id:'store-line',type:'line',source:'storeLine',paint:{'line-color':'#b45309','line-width':2,'line-opacity':.45,'line-dasharray':[1.5,1.5]}},
+    {id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.95}}
+   ]
+  }
+ });
+ mapInst.addControl(new maplibregl.NavigationControl({showCompass:true,showZoom:true}),'top-right');
+ mapInst.on('load',function(){
+  drawStoreMarker();
+  if(customerPoint)drawCustMarker(customerPoint);
+  if(driverLat){drawDriverMarker(driverLat,driverLng);followDriver(driverLat,driverLng)}
+ });
+ setTimeout(function(){if(document.getElementById('map'))mapInst.resize()},200);
+}
+
+function drawStoreMarker(){
+ var el=markerEl('\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E');
+ new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([RLNG,RLAT]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ELe Kiosk\x3C/b\x3E')).addTo(mapInst);
+}
+
+function drawCustMarker(gps){
+ var point=pointFromGPS(gps);
+ if(!point||custMarker)return;
+ var el=markerEl('\x3Cdiv style="width:22px;height:22px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E');
+ custMarker=new maplibregl.Marker({element:el}).setLngLat([point.lng,point.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3ECustomer\x3C/b\x3E')).addTo(mapInst);
+ function drawStoreLine(){
+  if(mapInst.getSource('storeLine'))mapInst.getSource('storeLine').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:[[RLNG,RLAT],[point.lng,point.lat]]},properties:{}}]});
+ }
+ if(mapInst.getSource('storeLine'))drawStoreLine();
+ else mapInst.once('load',drawStoreLine);
+}
+
+function drawDriverMarker(lat,lng){
+ if(!mapInst)return;
+ if(driverMarker){driverMarker.setLngLat([lng,lat]);updateDriverMarkerHeading()}
+ else{
+  var el=markerEl('\x3Cdiv class="driver-heading"\x3E\x3Cdiv class="tip"\x3E\x3C/div\x3E\x3Cdiv class="core"\x3E\x3C/div\x3E\x3C/div\x3E');
+  driverMarker=new maplibregl.Marker({element:el}).setLngLat([lng,lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EYou\x3C/b\x3E')).addTo(mapInst);
+  setTimeout(updateDriverMarkerHeading,0);
+ }
+}
+
+function updateMapView(track,gps){
+ if(!mapInst)return;
+ var serverPoint=pointFromGPS(track&&track.driverLocation);
+ if(serverPoint&&!driverLat){driverLat=serverPoint.lat;driverLng=serverPoint.lng}
+ var customerPoint=pointFromGPS(gps);
+ if(customerPoint)drawCustMarker(customerPoint);
+ if(driverLat)drawDriverMarker(driverLat,driverLng);
+ if(driverLat&&custMarker){
+  var c=custMarker.getLngLat();
+  if(routeShouldRefresh(driverLat,driverLng)){
+   routeNeeded=false;
+   fetchRoute(driverLat,driverLng,c.lat,c.lng);
+  }
+  followDriver(driverLat,driverLng);
+ }
+}
+
+function moveDriver(lat,lng,heading){
+ var h=Number(heading);
+ var movedFromLast=driverLat===null?999:haversine(driverLat,driverLng,lat,lng);
+ var movedFromGood=lastGoodLat===null?999:haversine(lastGoodLat,lastGoodLng,lat,lng);
+ if(movedFromLast<1.5&&movedFromGood<3)return false;
+ if(movedFromGood>=3){lastGoodLat=lat;lastGoodLng=lng;lastMoveAt=Date.now()}
+ if(Number.isFinite(h)&&movedFromLast>2.5)driverHeading=h;
+ else if(driverLat!==null&&movedFromLast>2.5)driverHeading=bearingBetween(driverLat,driverLng,lat,lng);
+  driverLat=lat;driverLng=lng;
+ saveActiveDelivery(true);
+ if(!mapInst)return;
+ drawDriverMarker(lat,lng);
+ var el=document.getElementById('gps-coords');
+ if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
+ if(custMarker){
+  var c=custMarker.getLngLat();
+  if(routeShouldRefresh(lat,lng)){
+   routeNeeded=false;
+   fetchRoute(lat,lng,c.lat,c.lng);
+  }
+  followDriver(lat,lng);
+ }else{
+  followDriver(lat,lng);
+ }
+ return true;
+}
+
+function moveDriverFromPosition(pos){
+ var accuracy=Number(pos.coords.accuracy);
+ if(Number.isFinite(accuracy)&&accuracy>80)return false;
+ var speed=Number(pos.coords.speed);
+ var heading=Number(pos.coords.heading);
+ var lat=pos.coords.latitude,lng=pos.coords.longitude;
+ var moved=driverLat===null?999:haversine(driverLat,driverLng,lat,lng);
+ if(Number.isFinite(speed)&&speed<0.8&&moved<4)heading=NaN;
+ return moveDriver(lat,lng,heading);
+}
+
+async function sendLocation(lat,lng){
+ try{
+  await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/location',{
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:lat,lng:lng,heading:driverHeading})
+  });
+  lastSent=Date.now();
+ }catch(e){}
+}
+
+function startGPS(){
+ if(!navigator.geolocation){toast('GPS not available');return}
+ if(gpsActive)return;
+ gpsActive=true;
+ saveActiveDelivery(true);
+ updateGPSBar();
+  sendNow();
+ watchId=navigator.geolocation.watchPosition(
+  function(pos){
+   var accepted=moveDriverFromPosition(pos);
+   if(accepted&&Date.now()-lastSent>LOCATION_SEND_MS)sendLocation(pos.coords.latitude,pos.coords.longitude);
+  },
+  function(){toast('GPS error — check permissions');gpsActive=false;updateGPSBar()},
+  {enableHighAccuracy:true,maximumAge:800,timeout:10000}
+ );
+}
+
+function stopGPS(){
+ if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null}
+ gpsActive=false;
+ saveActiveDelivery(false);
+ updateGPSBar();
+}
+
+function updateGPSBar(){
+ var bar=document.getElementById('gps-bar');
+ var text=document.getElementById('gps-text');
+ if(!bar||!text)return;
+ if(gpsActive){bar.classList.add('active');text.textContent='Sharing location…'}
+ else{bar.classList.remove('active');text.textContent='Tap to share your location'}
+}
+
+function sendNow(){
+ if(!navigator.geolocation)return;
+ navigator.geolocation.getCurrentPosition(function(pos){
+  if(moveDriverFromPosition(pos))sendLocation(pos.coords.latitude,pos.coords.longitude);
+ },function(){},{enableHighAccuracy:true,maximumAge:800,timeout:8000});
+}
+
+window.D={
+ switchTab:function(tab){listTab=tab;renderList(allOrders)},
+ reload:function(){load()},
+ openGoogleNav:function(e){
+  if(e){e.preventDefault();e.stopPropagation()}
+  var p=pointFromGPS(orderData&&orderData.gps);
+  if(!p){toast('Customer GPS missing');return}
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat+','+p.lng)+'&travelmode=driving','_blank');
+ },
+ toggleGPS:function(){
+  if(gpsActive){stopGPS();return}
+  startGPS();
+ },
+ mark:async function(step){
+  if(markingStep)return;
+  markingStep=step;
+  var btn=document.getElementById('btn-'+step);
+   if(btn){btn.disabled=true;btn.textContent=step==='delivering'?'Starting...':'Saving...'}
+   if(step==='delivering'&&!gpsActive)startGPS();
+   try{
+    var j=await fetchJSON(W+'/driver/'+encodeURIComponent(orderData.id)+'/status',{
+     method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:step})
+    },3);
+    if(!j.ok)throw new Error(j.error||'Failed');
+    if(!orderData.tracking)orderData.tracking={};
+    orderData.tracking[step]=j.time||new Date().toISOString();
+    toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
+    if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);markingStep=null}
+    if(step==='delivered'){stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},900)}
+   else setTimeout(function(){load()},1200);
+  }catch(e){if(step==='delivering')stopGPS();toast(e.message);if(btn){btn.disabled=false;btn.textContent=step==='delivering'?'Delivering':'Delivered'};markingStep=null}
+ }
+};
+
+async function load(){
+ if(loadBusy)return;
+ loadBusy=true;
+ var params=new URLSearchParams(window.location.search);
+ var id=params.get('id');
+ try{
+  if(id){
+   startRefresh();
+   try{
+    var j=await fetchJSON(W+'/driver/'+encodeURIComponent(id),{},3);
+    if(!j.ok)throw new Error(j.error||'Invalid response');
+    orderData=j.data;
+    lastDetailLoaded=true;
+    renderDetail(orderData);
+   }catch(e){
+    if(lastDetailLoaded)toast('Connection issue. Keeping current order on screen.');
+    else document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(e.message||'Could not load order')+'\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="D.reload()"\x3ERetry\x3C/button\x3E\x3C/div\x3E';
+   }
+  }else{
+   var active=readActiveDelivery();
+   if(active&&active.orderId&&active.gpsActive){location.href='?id='+encodeURIComponent(active.orderId);return}
+   clearInterval(autoRefresh);
+   startRefresh();
+   firstMapDone=false;mapInst=null;driverMarker=null;custMarker=null;routeLine=null;
+   try{
+    var j2=await fetchJSON(W+'/driver',{},3);
+    allOrders=j2.data||[];
+    lastListLoaded=true;
+    renderList(allOrders);
+   }catch(e){
+    if(lastListLoaded)toast('Connection issue. Keeping deliveries on screen.');
+    else document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E⚠️\x3C/div\x3E\x3Cdiv class="msg"\x3ECould not load deliveries. Check internet and retry.\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="D.reload()"\x3ERetry\x3C/button\x3E\x3C/div\x3E';
+   }
+  }
+ }finally{
+  loadBusy=false;
+ }
+}
+
+bindWakeLock();
+load();
+})();
+</script>
+</body>
+</html>
