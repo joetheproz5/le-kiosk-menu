@@ -108,12 +108,18 @@ function isMenuOrder(o){
  return source==='menu'||source.indexOf('menu')>=0||id.indexOf('MENU-')===0;
 }
 function unlockAlertSound(){
+ requestNotificationPermission();
  try{
   var AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)return;
   if(!alertAudioCtx)alertAudioCtx=new AC();
   if(alertAudioCtx.state==='suspended')alertAudioCtx.resume();
   alertAudioUnlocked=true;
+ }catch(e){}
+}
+function requestNotificationPermission(){
+ try{
+  if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
  }catch(e){}
 }
 function beep(freq,start,duration,gain){
@@ -130,7 +136,22 @@ function beep(freq,start,duration,gain){
  osc.start(alertAudioCtx.currentTime+start);
  osc.stop(alertAudioCtx.currentTime+start+duration+0.03);
 }
-function playOrderAlert(){
+function sendOrderNotification(order){
+ var title='New delivery order';
+ var body=(order&&order.name?order.name:'Customer')+(order&&order.total?' · '+money(order.total):'');
+ try{
+  if(window.LekioskAndroid&&typeof window.LekioskAndroid.notifyNewOrder==='function'){
+   window.LekioskAndroid.notifyNewOrder(title,body);
+   return;
+  }
+ }catch(e){}
+ try{
+  if('Notification' in window&&Notification.permission==='granted'){
+   new Notification(title,{body:body,tag:'lekiosk-driver-order',renotify:true});
+  }
+ }catch(e){}
+}
+function playOrderAlert(order){
  if(Date.now()-lastOrderAlertAt<1800)return;
  lastOrderAlertAt=Date.now();
  unlockAlertSound();
@@ -144,14 +165,14 @@ function playOrderAlert(){
   }
  }catch(e){toast('New delivery order','ok')}
  if(navigator.vibrate)navigator.vibrate([220,90,220,90,320]);
+ sendOrderNotification(order);
 }
 function checkNewOrders(rows){
  var ids=new Set((rows||[]).filter(function(o){return !(o.tracking||{}).delivered}).map(function(o){return String(o.id||'')}).filter(Boolean));
  if(knownOrderIds===null){knownOrderIds=ids;return}
- var hasNew=false;
- ids.forEach(function(id){if(!knownOrderIds.has(id))hasNew=true});
+ var newOrder=(rows||[]).find(function(o){return !(o.tracking||{}).delivered&&o.id&&!knownOrderIds.has(String(o.id))});
  knownOrderIds=ids;
- if(hasNew)playOrderAlert();
+ if(newOrder)playOrderAlert(newOrder);
 }
 
 function haversine(lat1,lon1,lat2,lon2){
