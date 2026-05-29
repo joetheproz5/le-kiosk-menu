@@ -277,7 +277,9 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .setting-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px}
 .dash-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.dash-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px}
+.dash-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.dash-card:hover{border-color:var(--brand-line);box-shadow:0 8px 24px rgba(17,24,39,.06)}
+.dash-icon{position:absolute;top:-6px;right:6px;font-size:44px;opacity:.08;font-weight:900;pointer-events:none}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
@@ -563,8 +565,12 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
           <input class="mega-input" id="mega-search" type="text" placeholder="Search menu, categories, customers, orders..." autocomplete="off" oninput="renderMegaSearch()" onkeydown="handleMegaSearchKey(event)" onfocus="renderMegaSearch()">
           <div class="mega-results" id="mega-results"></div>
         </div>
+        <div class="top-actions" id="recent-items" style="display:flex;align-items:center;gap:6px"></div>
         <div class="top-actions">
           <button class="btn btn-soft theme-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
+          <button class="btn btn-soft" onclick="exportMenu()">Export</button>
+          <button class="btn btn-soft" onclick="document.getElementById('import-file').click()">Import</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importMenu(this)">
           <button class="btn btn-soft" onclick="togglePreview()">Preview</button>
           <button class="btn btn-add" onclick="addCategory()">Add Category</button>
           <button class="btn btn-save" id="save-btn" onclick="saveMenu()">Save Menu</button>
@@ -585,6 +591,7 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
           </div>
           <div class="today-bar" id="dashboard-today"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
+          <div class="dashboard-section" id="dashboard-recent-orders"></div>
         </div>
 
         <div class="view" id="view-menu">
@@ -979,7 +986,7 @@ const DEFAULT_LOYALTY_REWARDS=[
   {id:'ice_cream_cup',label:'Free Ice Cream Cup',kind:'fixed',value:3}
 ];
 
-let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
+let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,dragItemSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
 let selectedItems=new Set();
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false,dashboardRefreshTimer=null;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false,galleryAdminData=[],galleryFilter='pending';
@@ -1001,6 +1008,8 @@ function toggleTheme(){
   const next=activeTheme()==='dark'?'light':'dark';
   localStorage.setItem(THEME_STORAGE_KEY,next);
   applyTheme();
+  configData.theme=next;
+  saveConfig().catch(()=>{});
 }
 applyTheme();
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!savedTheme())applyTheme()});
@@ -2567,7 +2576,6 @@ function switchView(view){
   };
   document.getElementById('page-kicker').textContent=titles[view][0];
   document.getElementById('page-title').textContent=titles[view][1];
-  document.querySelector('.top-actions').style.display=['dashboard','menu','categories','items','addons'].includes(view)?'flex':'none';
   if(view==='basketball'||view==='settings'){
     pruneExpiredBasketballMatches({persist:true,silent:true}).catch(e=>showToast('Expired match cleanup failed: '+e.message,'error'));
   }
@@ -2669,14 +2677,30 @@ function renderDashboard(){
   const s=menuStats();
   const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
   statsEl.innerHTML=`
-    <div class="dash-card"><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} item groups · ${s.addonCats} add-on groups</div></div>
-    <div class="dash-card"><div class="dash-label">Menu Items</div><div class="dash-value">${s.items}</div><div class="dash-note">${s.active} active on the POS/menu</div></div>
-    <div class="dash-card"><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} item extras · ${s.globalGroups} group options</div></div>
-    <div class="dash-card"><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty is enabled':'Loyalty is disabled'}</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9776;</div><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} menu · ${s.addonCats} add-on</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9758;</div><div class="dash-label">Menu Items</div><div class="dash-value">${s.active}</div><div class="dash-note">${s.items} total · ${s.items-s.active} hidden</div></div>
+    <div class="dash-card"><div class="dash-icon">$</div><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} extras · ${s.globalGroups} groups</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9733;</div><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty ON':'Loyalty OFF'}</div></div>
   `;
   renderDashboardProductSales();
   renderTodayBar();
   renderDashboardCharts();
+  renderRecentOrders();
+}
+function renderRecentOrders(){
+  const el=document.getElementById('dashboard-recent-orders');
+  if(!el)return;
+  const recent=dashboardOrdersData.slice(0,5);
+  if(!recent.length){el.innerHTML='';return}
+  el.innerHTML=`<div class="dashboard-section-head"><div><div class="dashboard-section-title">Recent Orders</div><div class="dashboard-section-sub">Last 5 processed orders</div></div></div>`+
+    recent.map(row=>{
+      const p=row.payload||{},dt=orderStatDate(row);
+      return `<div class="mini-row">
+        <div class="mini-img" style="display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--brand)">${(p.orderType||'POS').slice(0,1).toUpperCase()}</div>
+        <div><div class="mini-name">${esc(p.name||'Guest')}</div><div class="mini-meta">${esc(p.id||row.id||'')} · ${dt?dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}):'-'} · ${p.orderType||''}</div></div>
+        <span style="font-size:13px;font-weight:900;color:var(--brand-dark)">$${Number(p.total||0).toFixed(2)}</span>
+      </div>`;
+    }).join('');
 }
 function renderDashboardProductSales(){
   const el=document.getElementById('dashboard-product-sales');
@@ -2923,9 +2947,28 @@ function buildMegaSearchResults(){
   });
   dashboardOrdersData.forEach(row=>{
     const p=row.payload||{},dt=orderStatDate(row),name=p.name||p.customerName||'Guest';
-    results.push({type:'Order',title:row.id||p.id||'Order',meta:`${name} · ${p.orderType||'order'} · $${Number(p.total||0).toFixed(2)}${dt?' · '+dt.toLocaleDateString('en-GB'):''}`,text:`${row.id||''} ${p.id||''} ${name} ${p.phone||''} ${p.orderType||''} ${row.status||''}`,action:()=>{switchView('dashboard');showToast(`Order ${row.id||p.id||''} · ${name} · $${Number(p.total||0).toFixed(2)}`,'success');}});
+    results.push({type:'Order',title:row.id||p.id||'Order',meta:`${name} · ${p.orderType||'order'} · $${Number(p.total||0).toFixed(2)}${dt?' · '+dt.toLocaleDateString('en-GB'):''}`,text:`${row.id||''} ${p.id||''} ${name} ${p.phone||''} ${p.orderType||''} ${row.status||''}`,action:()=>{openOrderDetail(row);}});
   });
   return results;
+}
+function openOrderDetail(row){
+  const p=row.payload||{},items=Array.isArray(p.items)?p.items:[],dt=orderStatDate(row);
+  const itemsHtml=items.map(it=>`<div class="cr-row"><span>${esc(it.name||'Item')} x${it.qty||1}</span><span>$${Number((it.price||0)*(it.qty||1)).toFixed(2)}</span></div>${it.flavor?`<div class="cr-addon"><span>Flavor: ${esc(it.flavor)}</span><span></span></div>`:''}${(it.addons||[]).map(a=>`<div class="cr-addon"><span>+ ${esc(a.label||a.name||'')}</span><span>$${Number(a.price||0).toFixed(2)}</span></div>`).join('')}`).join('');
+  const html=`<div class="card-receipt" style="max-width:100%;margin:0"><div class="cr-head"><div class="cr-logo">Le Kiosk</div><div class="cr-sub">Order Detail</div></div>
+    <div class="cr-meta">
+      <div>Order: <span>${esc(row.id||p.id||'')}</span></div>
+      <div>Status: <span>${esc(row.status||'unknown')}</span></div>
+      <div>Customer: <span>${esc(p.name||'Guest')}</span></div>
+      ${p.phone?`<div>Phone: <span>+961 ${esc(p.phone)}</span></div>`:''}
+      <div>Type: <span>${esc(p.orderType||'')}</span></div>
+      ${p.deliveryZone?`<div>Zone: <span>${esc(p.deliveryZone)}</span></div>`:''}
+      ${p.note?`<div>Note: <span>${esc(p.note)}</span></div>`:''}
+      ${dt?`<div>Time: <span>${dt.toLocaleString()}</span></div>`:''}
+    </div>
+    ${itemsHtml}
+    <div class="cr-total"><span>Total</span><span>$${Number(p.total||0).toFixed(2)}</span></div>
+  </div>`;
+  openEditorModal(`Order ${row.id||p.id||''}`,html,'Close',null);
 }
 function renderMegaSearch(){
   const input=document.getElementById('mega-search'),box=document.getElementById('mega-results');
@@ -3191,7 +3234,7 @@ function renderItems(sec){
 }
 function renderItem(item,i){
   const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
-  return `<div class="edit-row${item.active===false?' inactive':''}" id="item-${i}">
+  return `<div class="edit-row${item.active===false?' inactive':''}" id="item-${i}" draggable="true" ondragstart="dragItemStart(event,${i})" ondragover="dragItemOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropItem(event,${i})">
     ${img?`<img class="edit-row-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="edit-row-img">I</div>`}
     <div>
       <div class="edit-row-title">${esc(item.name||'Untitled item')}</div>
@@ -3202,6 +3245,16 @@ function renderItem(item,i){
       <button class="btn btn-soft btn-sm" onclick="openItemEditor(${i})">Edit</button>
     </div>
   </div>`;
+}
+function dragItemStart(e,i){dragItemSrcIdx=i;e.dataTransfer.effectAllowed='move';}
+function dragItemOver(e,i){e.preventDefault();if(i!==dragItemSrcIdx)e.currentTarget.classList.add('drag-over');}
+function dropItem(e,i){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragItemSrcIdx===null||dragItemSrcIdx===i)return;
+  const sec=getSec();if(!sec||!sec.items)return;
+  const moved=sec.items.splice(dragItemSrcIdx,1)[0];
+  sec.items.splice(i,0,moved);
+  dragItemSrcIdx=null;markUnsaved();renderEditor();
 }
 function itemEditorHtml(item,i){
   const color=item.flavorColor||'amber',pc=PILL_PRESETS.find(p=>p.id===color)||PILL_PRESETS[0];
@@ -3239,6 +3292,7 @@ function itemEditorHtml(item,i){
 function openItemEditor(i){
   const item=getSec()?.items?.[i];
   if(!item)return;
+  trackRecent(activeTab,i,item);
   openEditorModal(item.name||'Menu Item',itemEditorHtml(item,i),'Done',()=>renderEditor());
 }
 function renderItemAddons(item,i){
@@ -3547,7 +3601,41 @@ function closeModal(){
 }
 document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+let recentItems=[];
+function trackRecent(si,ii,item){
+  recentItems=recentItems.filter(r=>!(r.si===si&&r.ii===ii));
+  recentItems.unshift({si,ii,name:item.name||'Untitled',price:item.price||'$0'});
+  if(recentItems.length>5)recentItems.pop();
+  renderRecentItems();
+}
+function renderRecentItems(){
+  const el=document.getElementById('recent-items');
+  if(!el)return;
+  if(!recentItems.length){el.innerHTML='';return}
+  el.innerHTML=`<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:auto">Recent</span>`+
+    recentItems.map(r=>`<button class="btn btn-soft btn-sm" onclick="openItem(${r.si},${r.ii})">${esc(r.name)}</button>`).join('');
+}
+function exportMenu(){
+  const clean=menuData.map(sec=>JSON.parse(JSON.stringify(sec)));
+  const blob=new Blob([JSON.stringify(clean,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='menu-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();showToast('Menu exported','success');
+}
+async function importMenu(input){
+  const file=input.files[0];
+  if(!file)return;
+  showLoading('Importing menu...');
+  try{
+    const text=await file.text(),data=JSON.parse(text);
+    if(!Array.isArray(data))throw new Error('Invalid menu format');
+    menuData=data;activeTab=0;hasUnsaved=true;
+    markUnsaved();renderAll();switchView('menu');
+    showToast(`Imported ${menuData.length} categories`,'success');
+  }catch(e){showToast('Import failed: '+e.message,'error')}
+  input.value='';hideLoading();
+}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3300);}
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading...';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
