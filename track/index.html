@@ -149,7 +149,7 @@ function buildMapArea(){
 function recenterMap(){
  if(!mapInst||!driverMarker)return;
  var p=driverMarker.getLngLat();
- mapInst.easeTo({center:[p.lng,p.lat],zoom:15.5,pitch:0,bearing:0,duration:450});
+ mapInst.easeTo({center:[p.lng,p.lat],zoom:Math.max(mapInst.getZoom(),16.7),pitch:0,bearing:0,duration:350});
 }
 window.recenterMap=recenterMap;
 
