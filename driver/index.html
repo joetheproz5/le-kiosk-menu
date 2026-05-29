@@ -196,7 +196,9 @@ function renderDetail(o){
 function initMapOnce(gps){
  var el=document.getElementById('map');
  if(!el||mapInst)return;
- mapInst=L.map('map',{zoomControl:false,attributionControl:false}).setView([RLAT,RLNG],14);
+ var cLat=gps&&typeof gps.lat==='number'?gps.lat:RLAT;
+ var cLng=gps&&typeof gps.lng==='number'?gps.lng:RLNG;
+ mapInst=L.map('map',{zoomControl:true,zoomControlOptions:{position:'topright'},attributionControl:false}).setView([cLat,cLng],14);
  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInst);
  var rIcon=L.divIcon({className:'',html:'\x3Cdiv style="width:28px;height:28px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)"\x3E\x3C/div\x3E',iconSize:[28,28],iconAnchor:[14,28]});
  L.marker([RLAT,RLNG],{icon:rIcon}).addTo(mapInst).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E');
@@ -224,20 +226,18 @@ function updateMapView(track,gps){
  if(!mapInst)return;
  if(gps&&typeof gps.lat==='number')drawCustMarker(gps);
  if(driverLat)drawDriverMarker(driverLat,driverLng);
- var dl=track&&track.driverLocation;
- if(dl&&custMarker&&(Date.now()-routeLastFetched>10000)){
+ if(driverLat&&custMarker&&Date.now()-routeLastFetched>10000){
   var c=custMarker.getLatLng();
-  fetchRoute(dl.lat,dl.lng,c.lat,c.lng);
+  fetchRoute(driverLat,driverLng,c.lat,c.lng);
  }
 }
 
 function moveDriver(lat,lng){
  driverLat=lat;driverLng=lng;
  drawDriverMarker(lat,lng);
- if(mapInst)mapInst.panTo([lat,lng],{animate:true,duration:.5});
  var el=document.getElementById('gps-coords');
  if(el)el.textContent=lat.toFixed(5)+', '+lng.toFixed(5);
- if(custMarker&&mapInst&&Date.now()-routeLastFetched>10000){
+ if(custMarker&&mapInst){
   var c=custMarker.getLatLng();
   fetchRoute(lat,lng,c.lat,c.lng);
  }
