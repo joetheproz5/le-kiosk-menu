@@ -121,15 +121,16 @@ function buildHTML(order,track){
  html+='\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/span\x3E\x3C/div\x3E';
  html+='\x3C/div\x3E';
  html+='\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E';
- html+='\x3Cdiv class="steps"\x3E'+buildSteps(track)+'\x3C/div\x3E\x3C/div\x3E';
+ html+='\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E';
  if(isDel)html+=buildMap(order);
  return html;
 }
 
-function buildSteps(track){
+function buildSteps(track,isDelivery){
+ var visible=isDelivery?STEPS:STEPS.filter(function(s){return s.key!=='delivering'});
  var last=-1;
- STEPS.forEach(function(s,i){if(track[s.key])last=i});
- return STEPS.map(function(s,i){
+ visible.forEach(function(s,i){if(track[s.key])last=i});
+ return visible.map(function(s,i){
   var cls='step';
   if(track[s.key])cls+=' complete';
   else if(i===last+1)cls+=' current';
