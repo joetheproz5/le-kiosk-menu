@@ -87,14 +87,20 @@ function formatTime(d){if(!d)return'--';const dt=new Date(d);return dt.toLocaleT
 async function loadOrder(){
 const params=new URLSearchParams(window.location.search);
 const id=params.get('id');
-if(!id){showError('No order ID provided');return}
+if(!id){showError('No order ID provided. Use: /track/?id=ORD-123');return}
 try{
-const res=await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`);
+const controller=new AbortController();
+const timeout=setTimeout(()=>controller.abort(),10000);
+const res=await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`,{signal:controller.signal});
+clearTimeout(timeout);
 if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Order not found');}
 const j=await res.json();
 if(!j.ok)throw new Error(j.error||'Invalid response');
 renderOrder(j.data);
-}catch(e){showError(e.message)}
+}catch(e){
+if(e.name==='AbortError')showError('Request timed out. Is the Worker deployed?');
+else showError(e.message||'Could not load order');
+}
 }
 function showError(msg){
 document.getElementById('content').innerHTML=`<div class="error-card"><div class="emoji">🔍</div><div class="msg">${esc(msg)}</div></div>`;
