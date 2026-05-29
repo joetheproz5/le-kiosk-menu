@@ -3636,6 +3636,7 @@ async function importMenu(input){
   }catch(e){showToast('Import failed: '+e.message,'error')}
   input.value='';hideLoading();
 }
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3300);}
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading...';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
