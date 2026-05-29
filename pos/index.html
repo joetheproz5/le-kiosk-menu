@@ -2529,7 +2529,8 @@ id:loadedInboxOrderId||'ORD-'+Date.now(),status,timestamp:new Date().toISOString
 name:$('cust-name').value.trim()||'Guest',phone,note:$('order-note').value.trim(),orderType,
 deliveryZone:orderType==='delivery'?deliveryZone:null,deliveryFee:deliveryFee(),subtotal:itemsTotal(),rewardDiscount:disc,loyaltyReward:reward,total:grandTotal(),
 items:cart.map(l=>({name:l.name,price:l.price,priceStr:l.priceStr,qty:l.qty,flavor:l.flavor||null,addons:l.addons.map(a=>({label:a.label,price:a.price}))})),
-splitPayments:splitEnabled&&splitPayments.length?splitPayments.map(p=>({amount:p.amount,type:p.type})):null
+splitPayments:splitEnabled&&splitPayments.length?splitPayments.map(p=>({amount:p.amount,type:p.type})):null,
+tracking:{received:new Date().toISOString()}
 };
 }
 async function chargeOrder(){
@@ -2632,11 +2633,14 @@ status}
 ?`,()=>updateOrderStatus(id,status))}
 async function updateOrderStatus(id,status){
 const o=getLoggedOrder(id);if(!o)return;o.status=status;showLoading('Updating...');
-if(status==='done')await applyLoyaltyCompletion(o).catch(()=>{});
+if(status==='done'){await applyLoyaltyCompletion(o).catch(()=>{});updateTracking(id,'ready')}
 try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});showToast('Status updated','success');renderOrdersList()}catch(e){showToast('Update failed: '+e.message,'error')}
 hideLoading();
+}
+async function updateTracking(id,step){
+  try{await fetch(`${WORKER_URL}/track/${encodeURIComponent(id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step})})}catch(_){}
 }
 async function applyLoyaltyCompletion(order){
 if(!loyaltyEnabled||!order.phone||order.phone==='00000000'||order.loyaltyProcessed)return;
@@ -2753,7 +2757,7 @@ window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank'
 }
 async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;try{await fetch(`${
 WORKER_URL}
-/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
+/supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();loadOrderIntoCurrent(o);updateTracking(id,'preparing');setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Confirm failed: '+e.message,'error')}inboxWritePending=false}
 async function declineInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='declined';inboxWritePending=true;try{await fetch(`${
 WORKER_URL}
 /supabase/order`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)});rememberHandledInbox(id);inboxData=inboxData.filter(x=>x.id!==id);syncInboxBadge();renderInboxList();showToast('Order declined');setTimeout(()=>pollInbox(true),1200)}catch(e){showToast('Decline failed: '+e.message,'error')}inboxWritePending=false}
@@ -2775,6 +2779,7 @@ c.favoriteItems?.length?`<div class="panel-body"><div class="row"><span>Usually<
 </div>`).join('');
 }
 function formatType(t){return t==='dinein'?'Dine In':t==='takeaway'?'Takeaway':t==='delivery'?'Delivery':(t||'')}
+function trackUrl(id){return`https://lekiosk.store/track/?id=${encodeURIComponent(id)}`}
 function printOrder(format){if(!validateOrder())return;doPrint(buildOrder('pending'),format)}
 function printLoggedOrder(id,format){const o=getLoggedOrder(id);if(o)doPrint(o,format)}
 function doPrint(o,format){$('print-area').innerHTML=format==='thermal'?thermalReceipt(o):cardReceipt(o);$('print-area').style.display='block';setTimeout(()=>{window.print();$('print-area').style.display='none'},120)}
@@ -2805,7 +2810,7 @@ o.deliveryFee?`<div>Delivery <span style="float:right">${money(o.deliveryFee)}</
 ${o.splitPayments?.length?`<div class="div"></div><div style="font-weight:bold">Split Payment</div>${o.splitPayments.map((p,i)=>`<div>${p.type==='cash'?'Cash':'Card'} ${i+1} <span style="float:right">${money(p.amount)}</span></div>`).join('')}`:''}
 <div class="div"></div><div class="bold">TOTAL <span style="float:right">${
 money(o.total)}
-</span></div><div class="div"></div><div class="center">Thank you!</div></div>`;
+</span></div><div class="div"></div><div class="center">Thank you!<br><small>Track: ${esc(trackUrl(o.id))}</small></div></div>`;
 }
 function cardReceipt(o){
 const dt=o.timestamp?new Date(o.timestamp):new Date();
@@ -2847,7 +2852,7 @@ o.deliveryFee?`<div class="cr-row"><span>Delivery</span><span>${money(o.delivery
 ${o.splitPayments?.length?`<div class="cr-meta" style="margin-top:12px"><div style="font-weight:900;margin-bottom:4px">Split Payment</div>${o.splitPayments.map((p,i)=>`<div>${p.type==='cash'?'Cash':'Card'} ${i+1}: <span>${money(p.amount)}</span></div>`).join('')}</div>`:''}
 <div class="cr-total"><span>Total</span><span>${
 money(o.total)}
-</span></div><div class="cr-footer">Thank you for visiting Le Kiosk. Leave us a Google review.</div></div>`;
+</span></div><div class="cr-footer">Track your order: ${esc(trackUrl(o.id))}<br>Leave us a Google review.</div></div>`;
 }
 function sendWhatsAppLoggedOrder(id){const o=getLoggedOrder(id);if(o)sendWhatsApp(o)}
 function sendWhatsApp(o){
@@ -2871,6 +2876,7 @@ it.flavor}
 \n`;});
 msg+=`Total: ${
 money(o.total)}
+\n\nTrack: ${trackUrl(o.id)}
 \n`;
 window.open(`https://wa.me/${o.phone?`961${o.phone}`:WA_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank');
 }
