@@ -85,7 +85,7 @@ var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var FOLLOW_ZOOM=17;
 var FOLLOW_AHEAD_METERS=90, FOLLOW_DURATION=280, LOCATION_SEND_MS=3500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
@@ -194,9 +194,10 @@ function markerEl(html){
 function followDriver(lat,lng){
  if(!mapInst)return;
  var moved=lastFollowLat===null?999:haversine(lastFollowLat,lastFollowLng,lat,lng);
+ if(moved<2)return;
  var h=smoothHeading(Number.isFinite(Number(driverHeading))?Number(driverHeading):lastFollowHeading);
  var turn=(lastFollowHeading===null||!Number.isFinite(Number(h)))?999:Math.abs((((h-lastFollowHeading)+540)%360)-180);
- if(moved<1.2&&turn<2.5)return;
+ if(moved<3&&turn<4)return;
  clearTimeout(followTimer);
  followTimer=setTimeout(function(){
   var ahead=pointAhead(lat,lng,h,FOLLOW_AHEAD_METERS);
@@ -468,8 +469,12 @@ function updateMapView(track,gps){
 
 function moveDriver(lat,lng,heading){
  var h=Number(heading);
- if(Number.isFinite(h))driverHeading=h;
- else if(driverLat!==null&&haversine(driverLat,driverLng,lat,lng)>2.5)driverHeading=bearingBetween(driverLat,driverLng,lat,lng);
+ var movedFromLast=driverLat===null?999:haversine(driverLat,driverLng,lat,lng);
+ var movedFromGood=lastGoodLat===null?999:haversine(lastGoodLat,lastGoodLng,lat,lng);
+ if(movedFromLast<1.5&&movedFromGood<3)return false;
+ if(movedFromGood>=3){lastGoodLat=lat;lastGoodLng=lng;lastMoveAt=Date.now()}
+ if(Number.isFinite(h)&&movedFromLast>2.5)driverHeading=h;
+ else if(driverLat!==null&&movedFromLast>2.5)driverHeading=bearingBetween(driverLat,driverLng,lat,lng);
   driverLat=lat;driverLng=lng;
  saveActiveDelivery(true);
  if(!mapInst)return;
@@ -486,6 +491,18 @@ function moveDriver(lat,lng,heading){
  }else{
   followDriver(lat,lng);
  }
+ return true;
+}
+
+function moveDriverFromPosition(pos){
+ var accuracy=Number(pos.coords.accuracy);
+ if(Number.isFinite(accuracy)&&accuracy>80)return false;
+ var speed=Number(pos.coords.speed);
+ var heading=Number(pos.coords.heading);
+ var lat=pos.coords.latitude,lng=pos.coords.longitude;
+ var moved=driverLat===null?999:haversine(driverLat,driverLng,lat,lng);
+ if(Number.isFinite(speed)&&speed<0.8&&moved<4)heading=NaN;
+ return moveDriver(lat,lng,heading);
 }
 
 async function sendLocation(lat,lng){
@@ -506,8 +523,8 @@ function startGPS(){
   sendNow();
  watchId=navigator.geolocation.watchPosition(
   function(pos){
-   moveDriver(pos.coords.latitude,pos.coords.longitude,pos.coords.heading);
-   if(Date.now()-lastSent>LOCATION_SEND_MS)sendLocation(pos.coords.latitude,pos.coords.longitude);
+   var accepted=moveDriverFromPosition(pos);
+   if(accepted&&Date.now()-lastSent>LOCATION_SEND_MS)sendLocation(pos.coords.latitude,pos.coords.longitude);
   },
   function(){toast('GPS error — check permissions');gpsActive=false;updateGPSBar()},
   {enableHighAccuracy:true,maximumAge:800,timeout:10000}
@@ -532,8 +549,7 @@ function updateGPSBar(){
 function sendNow(){
  if(!navigator.geolocation)return;
  navigator.geolocation.getCurrentPosition(function(pos){
-  moveDriver(pos.coords.latitude,pos.coords.longitude,pos.coords.heading);
-  sendLocation(pos.coords.latitude,pos.coords.longitude);
+  if(moveDriverFromPosition(pos))sendLocation(pos.coords.latitude,pos.coords.longitude);
  },function(){},{enableHighAccuracy:true,maximumAge:800,timeout:8000});
 }
 
