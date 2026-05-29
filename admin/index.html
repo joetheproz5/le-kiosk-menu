@@ -283,35 +283,39 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .dash-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .dash-value{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1;margin-top:8px}
 .dash-note{font-size:11px;font-weight:700;color:var(--muted);margin-top:6px}
-.dashboard-section{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;margin:-6px 0 18px;box-shadow:0 8px 24px rgba(17,24,39,.04)}
-.dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.dashboard-section-title{font-size:13px;font-weight:900;color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
-.dashboard-section-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
-.product-sales-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.product-sales-card{border:1px solid var(--line);border-radius:8px;padding:13px;background:var(--panel-2)}
-.product-sales-name{font-size:13px;font-weight:900;color:var(--ink)}
+.hero-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.hero-card{border-radius:14px;padding:22px 20px;position:relative;overflow:hidden;border:0;display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 20px rgba(17,24,39,.08)}
+.hero-card.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff}
+.hero-card.amber{background:linear-gradient(135deg,#f59e0b,#d97706);color:#451a03}
+.hero-card.emerald{background:linear-gradient(135deg,#059669,#047857);color:#fff}
+.hero-card .hero-icon{position:absolute;right:14px;top:14px;font-size:38px;opacity:.22}
+.hero-card .hero-label{font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;opacity:.75}
+.hero-card .hero-value{font-size:36px;font-weight:900;line-height:1;font-family:var(--brandfont)}
+.hero-card .hero-sub{font-size:12px;font-weight:700;opacity:.7;line-height:1.35}
+.dashboard-section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;box-shadow:0 2px 8px rgba(17,24,39,.03)}
+.dashboard-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.dashboard-section-title{font-size:14px;font-weight:900;color:var(--ink)}
+.dashboard-section-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px}
+.product-sales-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.product-sales-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel-2)}
+.product-sales-name{font-size:14px;font-weight:900;color:var(--ink)}
 .product-sales-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
-.product-sales-metric{border-radius:7px;background:#fff;border:1px solid var(--line);padding:9px;text-align:center}
-.product-sales-number{font-size:23px;font-weight:900;color:var(--brand-dark);line-height:1}
+.product-sales-metric{border-radius:8px;background:#fff;border:1px solid var(--line);padding:10px;text-align:center}
+.product-sales-number{font-size:24px;font-weight:900;color:var(--brand-dark);line-height:1}
 .product-sales-sub{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
-.today-bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:-4px 0 18px}
-.today-card{background:#eff6ff;color:#1e3a8a;border:1px solid #bfdbfe;border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 24px rgba(17,24,39,.06)}
-.today-card:nth-child(2){background:#fffbeb;border-color:#fde68a;color:#78350f}
-.today-card:nth-child(3){background:#ecfdf5;border-color:#bbf7d0;color:#14532d}
-.today-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:currentColor;opacity:.7}
-.today-value{font-size:28px;font-weight:900;line-height:1;margin-top:7px;color:currentColor}
-.today-note{font-size:11px;font-weight:700;color:currentColor;opacity:.68;margin-top:6px}
-.today-icon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.62);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:currentColor;flex-shrink:0}
-.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.chart-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0;box-shadow:0 8px 24px rgba(17,24,39,.05);overflow:hidden}
-.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
-.chart-title{font-size:13px;font-weight:900;color:var(--ink)}
-.chart-sub{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.today-bar{display:none}
+.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;box-shadow:0 2px 8px rgba(17,24,39,.03);overflow:hidden}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.chart-title{font-size:14px;font-weight:900;color:var(--ink)}
+.chart-sub{font-size:11px;font-weight:600;color:var(--muted);margin-top:3px}
 .chart-total-wrap{text-align:right;min-width:86px}
 .chart-total{font-size:28px;font-weight:900;color:var(--brand-dark);line-height:1}
 .chart-delta{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:5px}
-.chart-canvas{width:100%;height:260px;display:block;border-radius:8px;background:linear-gradient(180deg,#fffbeb 0%,#fff 72%)}
+.chart-canvas{width:100%;height:280px;display:block;border-radius:10px;background:transparent}
 .chart-foot{display:none}
+body.theme-dark .hero-card.amber{color:#451a03}
+body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .chart-card{background:var(--panel);color:var(--ink);border-color:var(--line)}
 .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .feature-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:15px;text-align:left;display:flex;flex-direction:column;gap:10px;min-height:150px}
 .feature-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
@@ -579,17 +583,17 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
 
       <section class="content">
         <div class="view active" id="view-dashboard">
+          <div class="hero-bar" id="dashboard-hero"></div>
           <div class="dash-grid" id="dashboard-stats"></div>
           <div class="dashboard-section">
             <div class="dashboard-section-head">
               <div>
-                <div class="dashboard-section-title">Key Sandwich Sales</div>
-                <div class="dashboard-section-sub">Today, weekly, and total quantities from active orders</div>
+                <div class="dashboard-section-title">Top Selling Items</div>
+                <div class="dashboard-section-sub">Today, weekly, and total quantities</div>
               </div>
             </div>
             <div class="product-sales-grid" id="dashboard-product-sales"></div>
           </div>
-          <div class="today-bar" id="dashboard-today"></div>
           <div class="chart-grid" id="dashboard-charts"></div>
           <div class="dashboard-section" id="dashboard-recent-orders"></div>
         </div>
@@ -2672,20 +2676,46 @@ function dashboardProductSalesStats(){
   return DASHBOARD_PRODUCT_TARGETS.map(t=>stats[t.id]);
 }
 function renderDashboard(){
-  const statsEl=document.getElementById('dashboard-stats');
-  if(!statsEl)return;
   const s=menuStats();
   const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
-  statsEl.innerHTML=`
-    <div class="dash-card"><div class="dash-icon">&#9776;</div><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} menu · ${s.addonCats} add-on</div></div>
-    <div class="dash-card"><div class="dash-icon">&#9758;</div><div class="dash-label">Menu Items</div><div class="dash-value">${s.active}</div><div class="dash-note">${s.items} total · ${s.items-s.active} hidden</div></div>
-    <div class="dash-card"><div class="dash-icon">$</div><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} extras · ${s.globalGroups} groups</div></div>
-    <div class="dash-card"><div class="dash-icon">&#9733;</div><div class="dash-label">Rewards Ready</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Loyalty ON':'Loyalty OFF'}</div></div>
-  `;
+  renderDashboardHero();
+  renderDashboardStats(s,ready);
   renderDashboardProductSales();
-  renderTodayBar();
   renderDashboardCharts();
   renderRecentOrders();
+}
+function renderDashboardHero(){
+  const el=document.getElementById('dashboard-hero');
+  if(!el)return;
+  const t=todayDashboardStats();
+  el.innerHTML=`
+    <div class="hero-card blue">
+      <div class="hero-icon">&#9744;</div>
+      <div class="hero-label">Today's Orders</div>
+      <div class="hero-value">${t.orders}</div>
+      <div class="hero-sub">${t.posOrders} POS &middot; ${t.menuOrders} online</div>
+    </div>
+    <div class="hero-card amber">
+      <div class="hero-icon">$</div>
+      <div class="hero-label">Today's Revenue</div>
+      <div class="hero-value">$${Number(t.sales||0).toFixed(0)}</div>
+      <div class="hero-sub">${t.orders?`Avg $${Number(t.sales/t.orders||0).toFixed(0)}/order`:'No orders yet'}</div>
+    </div>
+    <div class="hero-card emerald">
+      <div class="hero-icon">&#9823;</div>
+      <div class="hero-label">Today's Customers</div>
+      <div class="hero-value">${t.customers}</div>
+      <div class="hero-sub">${ready} with rewards ready</div>
+    </div>`;
+}
+function renderDashboardStats(s,ready){
+  const el=document.getElementById('dashboard-stats');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="dash-card"><div class="dash-icon">&#9776;</div><div class="dash-label">Categories</div><div class="dash-value">${menuData.length}</div><div class="dash-note">${s.regular} menu &middot; ${s.addonCats} add-on</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9881;</div><div class="dash-label">Menu Items</div><div class="dash-value">${s.active}</div><div class="dash-note">${s.items} total &middot; ${s.items-s.active} hidden</div></div>
+    <div class="dash-card"><div class="dash-icon">+</div><div class="dash-label">Add-ons</div><div class="dash-value">${s.itemAddons+s.globalGroups}</div><div class="dash-note">${s.itemAddons} per-item &middot; ${s.globalGroups} groups</div></div>
+    <div class="dash-card"><div class="dash-icon">&#9733;</div><div class="dash-label">Loyalty</div><div class="dash-value">${ready}</div><div class="dash-note">${configData.loyaltyEnabled?'Active':'Disabled'}</div></div>`;
 }
 function renderRecentOrders(){
   const el=document.getElementById('dashboard-recent-orders');
