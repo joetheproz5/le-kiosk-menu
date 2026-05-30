@@ -161,10 +161,10 @@ function nearestPointOnSegment(px,py,ax,ay,bx,by){
 }
 function snapToRoute(lat,lng){
  // Road snapping is visual only; server GPS values still drive route refresh decisions.
- if(!currentRouteCoords||currentRouteCoords.length<2)return{lat:lat,lng:lng};
+ if(!fullRouteCoords||fullRouteCoords.length<2)return{lat:lat,lng:lng};
  var bestDist=Infinity,bestPoint={lat:lat,lng:lng};
- for(var i=1;i<currentRouteCoords.length;i++){
-  var a=currentRouteCoords[i-1],b=currentRouteCoords[i];
+ for(var i=1;i<fullRouteCoords.length;i++){
+  var a=fullRouteCoords[i-1],b=fullRouteCoords[i];
   var p=nearestPointOnSegment(lng,lat,a[0],a[1],b[0],b[1]);
   var d=haversine(lat,lng,p.lat,p.lng);
   if(d<bestDist){bestDist=d;bestPoint=p}
@@ -184,6 +184,15 @@ function trimRouteToProgress(lat,lng){
  var snapped=nearestPointOnSegment(lng,lat,fullRouteCoords[bestIdx][0],fullRouteCoords[bestIdx][1],fullRouteCoords[bestIdx+1][0],fullRouteCoords[bestIdx+1][1]);
  var trimmed=[[snapped.lng,snapped.lat]].concat(fullRouteCoords.slice(bestIdx+1));
  if(mapInst&&mapInst.getSource('route'))mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:trimmed},properties:{}}]});
+}
+function moveMarkerTo(lat,lng){
+ // Single visual-position writer: snap, move marker, trim route, then store visual coords.
+ if(!driverMarker||!mapInst)return;
+ var snapped=snapToRoute(lat,lng);
+ visualDriverLat=snapped.lat;
+ visualDriverLng=snapped.lng;
+ driverMarker.setLngLat([snapped.lng,snapped.lat]);
+ trimRouteToProgress(snapped.lat,snapped.lng);
 }
 function headingFromRoute(lat,lng){
  // Predictive heading comes from the road segment ahead when the driver is still on route.
@@ -364,13 +373,13 @@ function updateMap(track,gps){
   if(lastDriverLat===null){
    kfLat.filter(dl.lat);
    kfLng.filter(dl.lng);
-   visualDriverLat=dl.lat;visualDriverLng=dl.lng;
    noteServerDriverPosition(dl,track&&track.driverLocation);
    if(!driverMarker){
     var firstEl=markerEl('\x3Cdiv class="driver-dot" style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E');
     driverMarker=new maplibregl.Marker({element:firstEl}).setLngLat([dl.lng,dl.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EDriver\x3C/b\x3E')).addTo(mapInst);
     routeNeeded=true;
    }
+   moveMarkerTo(dl.lat,dl.lng);
    lastDriverLat=dl.lat;lastDriverLng=dl.lng;
    var firstRb=document.getElementById('map-recenter');
    if(firstRb)firstRb.style.display='block';
@@ -381,28 +390,27 @@ function updateMap(track,gps){
   kfLat.setR(accuracy);kfLng.setR(accuracy);
   var filteredLat=kfLat.filter(dl.lat),filteredLng=kfLng.filter(dl.lng);
   var MIN_MOVE_METERS=3;
-  var distMoved=visualDriverLat===null?999:haversine(visualDriverLat,visualDriverLng,filteredLat,filteredLng);
+  var distMoved=lastDriverLat===null?999:haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng);
   if(distMoved<MIN_MOVE_METERS&&lastDriverLat!==null){
    noteServerDriverPosition(dl,track&&track.driverLocation);
    lastDriverLat=dl.lat;lastDriverLng=dl.lng;
    return;
   }
-  trimRouteToProgress(filteredLat,filteredLng);
-  var visual=snapToRoute(filteredLat,filteredLng);
-  visualDriverLat=visual.lat;visualDriverLng=visual.lng;
   var hadDriverMarker=!!driverMarker;
   noteServerDriverPosition(dl,track&&track.driverLocation);
-  var routeHeading=headingFromRoute(visual.lat,visual.lng);
+  var routePoint=snapToRoute(filteredLat,filteredLng);
+  var routeHeading=headingFromRoute(routePoint.lat,routePoint.lng);
   if(routeHeading!==null)driverHeading=routeHeading;
   if(!driverMarker)routeNeeded=true;
-  if(driverMarker)animateDriverMarker(visual.lat,visual.lng);
+  if(driverMarker)animateDriverMarker(filteredLat,filteredLng);
   else{
    var el=markerEl('\x3Cdiv class="driver-dot" style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E');
-   driverMarker=new maplibregl.Marker({element:el}).setLngLat([visual.lng,visual.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EDriver\x3C/b\x3E')).addTo(mapInst);
+   driverMarker=new maplibregl.Marker({element:el}).setLngLat([filteredLng,filteredLat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EDriver\x3C/b\x3E')).addTo(mapInst);
+   moveMarkerTo(filteredLat,filteredLng);
   }
   var isDel=track.delivering&&!track.delivered;
-  if(isDel&&!wasDelivering){mapInst.easeTo({center:[visual.lng,visual.lat],zoom:15.5,duration:400});wasDelivering=true}
-  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(mapInst.stop)mapInst.stop();mapInst.easeTo({center:[visual.lng,visual.lat],zoom:Math.max(mapInst.getZoom(),15),duration:350})}
+  if(isDel&&!wasDelivering){mapInst.easeTo({center:[visualDriverLng||filteredLng,visualDriverLat||filteredLat],zoom:15.5,duration:400});wasDelivering=true}
+  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(mapInst.stop)mapInst.stop();mapInst.easeTo({center:[visualDriverLng||filteredLng,visualDriverLat||filteredLat],zoom:Math.max(mapInst.getZoom(),15),duration:350})}
   lastDriverLat=dl.lat;lastDriverLng=dl.lng;
   if(!hadDriverMarker)startDeadReckoning();
   if(!isDel)wasDelivering=false;
@@ -445,9 +453,7 @@ function startDeadReckoning(){
    return;
   }
   var pos=pointAhead(baseLat,baseLng,driverHeading,deadReckonSpeed*age);
-  var visual=snapToRoute(pos.lat,pos.lng);
-  visualDriverLat=visual.lat;visualDriverLng=visual.lng;
-  if(driverMarker)driverMarker.setLngLat([visual.lng,visual.lat]);
+  moveMarkerTo(pos.lat,pos.lng);
   deadReckonTimer=requestAnimationFrame(tick);
  }
  deadReckonTimer=requestAnimationFrame(tick);
@@ -482,19 +488,9 @@ function checkArrival(dLat,dLng,cLat,cLng){
 function animateDriverMarker(lat,lng){
  if(!driverMarker)return;
  if(driverAnim)cancelAnimationFrame(driverAnim);
- visualDriverLat=lat;
- visualDriverLng=lng;
- trimRouteToProgress(lat,lng);
+ driverAnim=null;
+ moveMarkerTo(lat,lng);
  startDeadReckoning();
- var start=driverMarker.getLngLat();
- var startTime=performance.now(),duration=260;
- function tick(now){
-  var t=Math.min(1,(now-startTime)/duration);
-  var e=1-Math.pow(1-t,3);
-  driverMarker.setLngLat([start.lng+(lng-start.lng)*e,start.lat+(lat-start.lat)*e]);
-  if(t<1)driverAnim=requestAnimationFrame(tick);
- }
- driverAnim=requestAnimationFrame(tick);
 }
 
 function animateRouteDraw(){
@@ -570,7 +566,7 @@ function setRouteGeometry(geometry,dashed){
  if(!mapInst)return;
  if(geometry&&geometry.coordinates){
   currentRouteCoords=geometry.coordinates;
-  if(!dashed)fullRouteCoords=geometry.coordinates;
+  fullRouteCoords=geometry.coordinates;
  }
  if(!mapInst.getSource('route')){mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});return}
  mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
