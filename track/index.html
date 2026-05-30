@@ -87,7 +87,7 @@ var STEPS=[
 ];
 
 var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var firstMapDone=false, routeLastFetched=0, routeNeeded=true, routeFetchBusy=false, pendingRoute=null, lastRouteLat=null, lastRouteLng=null, routeFetchSeq=0, currentRouteCoords=null, routeDrawTimer=null, arrivalTriggered=false, signalTimer=null;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true, routeFetchBusy=false, pendingRoute=null, lastRouteLat=null, lastRouteLng=null, routeFetchSeq=0, currentRouteCoords=null, fullRouteCoords=null, routeDrawTimer=null, arrivalTriggered=false, signalTimer=null;
 var TRACK_REFRESH_MS=800, ROUTE_REFRESH_MS=20000, ROUTE_REFRESH_METERS=25;
 var STATUS_REFRESH_MS=8000;
 var wasDelivering=false;
@@ -172,17 +172,17 @@ function snapToRoute(lat,lng){
  return bestDist<25?bestPoint:{lat:lat,lng:lng};
 }
 function trimRouteToProgress(lat,lng){
- // Progress trimming only changes the displayed line; currentRouteCoords remains the full route.
- if(!currentRouteCoords||currentRouteCoords.length<2)return;
+ // Progress trimming searches the preserved full route but only changes the displayed line.
+ if(!fullRouteCoords||fullRouteCoords.length<2)return;
  var bestIdx=0,bestDist=Infinity;
- for(var i=0;i<currentRouteCoords.length-1;i++){
-  var a=currentRouteCoords[i],b=currentRouteCoords[i+1];
+ for(var i=0;i<fullRouteCoords.length-1;i++){
+  var a=fullRouteCoords[i],b=fullRouteCoords[i+1];
   var p=nearestPointOnSegment(lng,lat,a[0],a[1],b[0],b[1]);
   var d=haversine(lat,lng,p.lat,p.lng);
   if(d<bestDist){bestDist=d;bestIdx=i}
  }
- var snapped=nearestPointOnSegment(lng,lat,currentRouteCoords[bestIdx][0],currentRouteCoords[bestIdx][1],currentRouteCoords[bestIdx+1][0],currentRouteCoords[bestIdx+1][1]);
- var trimmed=[[snapped.lng,snapped.lat]].concat(currentRouteCoords.slice(bestIdx+1));
+ var snapped=nearestPointOnSegment(lng,lat,fullRouteCoords[bestIdx][0],fullRouteCoords[bestIdx][1],fullRouteCoords[bestIdx+1][0],fullRouteCoords[bestIdx+1][1]);
+ var trimmed=[[snapped.lng,snapped.lat]].concat(fullRouteCoords.slice(bestIdx+1));
  if(mapInst&&mapInst.getSource('route'))mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:trimmed},properties:{}}]});
 }
 function headingFromRoute(lat,lng){
@@ -484,6 +484,7 @@ function animateDriverMarker(lat,lng){
  if(driverAnim)cancelAnimationFrame(driverAnim);
  visualDriverLat=lat;
  visualDriverLng=lng;
+ trimRouteToProgress(lat,lng);
  startDeadReckoning();
  var start=driverMarker.getLngLat();
  var startTime=performance.now(),duration=260;
@@ -551,6 +552,8 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   var route=j.routes[0];
   if(seq!==routeFetchSeq){finishRoute();return}
   arrivalTriggered=false;
+  fullRouteCoords=null;
+  currentRouteCoords=null;
   setRouteGeometry(route.geometry,false);
   animateRouteDraw();
   var eta=Math.round(route.duration/60);
@@ -565,7 +568,10 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
 
 function setRouteGeometry(geometry,dashed){
  if(!mapInst)return;
- if(geometry&&geometry.coordinates)currentRouteCoords=geometry.coordinates;
+ if(geometry&&geometry.coordinates){
+  currentRouteCoords=geometry.coordinates;
+  if(!dashed)fullRouteCoords=geometry.coordinates;
+ }
  if(!mapInst.getSource('route')){mapInst.once('load',function(){setRouteGeometry(geometry,dashed)});return}
  mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
  if(mapInst.getLayer('route-line'))mapInst.setPaintProperty('route-line','line-dasharray',dashed?[1.5,1.5]:[1,0]);
