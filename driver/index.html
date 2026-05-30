@@ -48,7 +48,7 @@ var listTab='pending';
 var allOrders=[];
 var markingStep=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null, currentRouteCoords=null, routeFetchSeq=0, routeDrawTimer=null, turnZoomActive=false, turnZoomTimer=null, lastTurnCheckAt=0, lastTurnAngle=0, arrivalTriggered=false, signalTimer=null;
-var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null, lastTrackingJSON=null;
+var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null, manualRecenterUntil=0, lastTrackingJSON=null;
 var knownOrderIds=null, alertAudioCtx=null, alertAudioUnlocked=false, lastOrderAlertAt=0;
 var driverWS=null, wsReconnectTimer=null, lastETAMinutes=null;
 
@@ -451,6 +451,7 @@ function markerEl(html){
 
 function followDriver(lat,lng){
  if(!mapInst)return;
+ if(Date.now()<manualRecenterUntil)return;
  // Smooth camera follow: only move when the driver meaningfully moved or turned.
  var moved=lastFollowLat===null?999:haversine(lastFollowLat,lastFollowLng,lat,lng);
  var h=Number.isFinite(Number(animatedHeading))?animatedHeading:lastFollowHeading;
@@ -495,8 +496,9 @@ function recenterDriver(){
  }
  if(lat===null||lng===null)return;
  clearTimeout(followTimer);
- lastFollowLat=null;
- lastFollowLng=null;
+ manualRecenterUntil=Date.now()+3500;
+ lastFollowLat=lat;
+ lastFollowLng=lng;
  lastFollowHeading=null;
  mapInst.easeTo({
   center:[lng,lat],
