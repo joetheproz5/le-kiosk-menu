@@ -42,7 +42,7 @@ var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=800;
 var FOLLOW_MIN_MOVE=12, FOLLOW_MIN_TURN=20;
 var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, gpsPollTimer=null, slowSpeedSince=null, gpsMode='watch', lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=true, driverSpeed=0, currentZoom=17, currentPitch=0;
+var watchId=null, gpsPollTimer=null, gpsWatchdogTimer=null, slowSpeedSince=null, gpsMode='watch', gpsForceLocked=false, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=true, driverSpeed=0, currentZoom=17, currentPitch=0;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
@@ -790,6 +790,7 @@ function renderDetail(o){
  o.tracking=o.tracking||{};
  var track=o.tracking;
  if(isDeliveredOrder(o)&&!track.delivered)track.delivered=new Date().toISOString();
+ gpsForceLocked=!!(track.delivering&&!track.delivered);
  restoreDriverPosition(o.id,track);
  var shouldResumeGPS=track.delivering&&!track.delivered;
  var customerPoint=pointFromGPS(o.gps);
@@ -1037,7 +1038,7 @@ function moveDriver(lat,lng,heading){
 }
 
 function deliveryGPSLocked(){
- return !!(orderData&&orderData.tracking&&orderData.tracking.delivering&&!orderData.tracking.delivered);
+ return gpsForceLocked||!!(orderData&&orderData.tracking&&orderData.tracking.delivering&&!orderData.tracking.delivered);
 }
 
 function moveDriverFromPosition(pos){
@@ -1047,15 +1048,21 @@ function moveDriverFromPosition(pos){
  updateGPSBar();
  // Do not drop normal weak mobile GPS; dropping it stops both driver and customer maps.
  if(Number.isFinite(accuracy)&&accuracy>120)return false;
+ var prevGPSAt=lastGPSTime;
+ var prevLat=driverLat,prevLng=driverLng;
  lastGPSTime=lastGPSAt;
  var speed=Number(pos.coords.speed);
- driverSpeed=Number.isFinite(speed)&&speed>0?speed:0;
+ var heading=Number(pos.coords.heading);
+ var lat=pos.coords.latitude,lng=pos.coords.longitude;
+ var movedRaw=(prevLat===null||prevLng===null)?0:haversine(prevLat,prevLng,lat,lng);
+ var seconds=prevGPSAt?Math.max(.25,(lastGPSAt-prevGPSAt)/1000):0;
+ driverSpeed=Number.isFinite(speed)&&speed>0?speed:(seconds&&movedRaw>1?Math.min(12,movedRaw/seconds):0);
  updateSpeedometer(driverSpeed);
  updateAdaptiveGPS();
  deadReckonSpeed=driverSpeed>.8?driverSpeed:0;
- var heading=Number(pos.coords.heading);
- var lat=pos.coords.latitude,lng=pos.coords.longitude;
- kfLat.setR(accuracy);kfLng.setR(accuracy);
+ // Cap Kalman noise so walking movement does not get over-smoothed into looking frozen.
+ var filterNoise=Number.isFinite(accuracy)?Math.max(3,Math.min(12,accuracy/4)):3;
+ kfLat.setR(filterNoise);kfLng.setR(filterNoise);
  var filteredLat=kfLat.filter(lat),filteredLng=kfLng.filter(lng);
  filteredDriverLat=filteredLat;filteredDriverLng=filteredLng;
  var moved=driverLat===null?999:haversine(driverLat,driverLng,filteredLat,filteredLng);
@@ -1122,15 +1129,31 @@ function updateAdaptiveGPS(){
  }
 }
 
+function startGPSWatchdog(){
+ // Some phones pause watchPosition at walking speed; this keeps active deliveries moving.
+ if(gpsWatchdogTimer)return;
+ gpsWatchdogTimer=setInterval(function(){
+  if(!gpsActive||!deliveryGPSLocked())return;
+  if(Date.now()-lastGPSAt>2500)sendNow();
+ },2500);
+}
+
 function startGPS(){
  if(!navigator.geolocation){toast('GPS not available');return}
- if(gpsActive)return;
+ if(gpsActive){
+  startWatchGPS();
+  startGPSWatchdog();
+  sendNow();
+  updateGPSBar();
+  return;
+ }
  gpsActive=true;
  slowSpeedSince=null;
  saveActiveDelivery(true);
  updateGPSBar();
  sendNow();
  startWatchGPS();
+ startGPSWatchdog();
 }
 
 function stopGPS(force){
@@ -1140,6 +1163,7 @@ function stopGPS(force){
  }
  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null}
  if(gpsPollTimer){clearInterval(gpsPollTimer);gpsPollTimer=null}
+ if(gpsWatchdogTimer){clearInterval(gpsWatchdogTimer);gpsWatchdogTimer=null}
  gpsMode='watch';
  slowSpeedSince=null;
  gpsActive=false;
@@ -1162,7 +1186,7 @@ function sendNow(){
  if(!navigator.geolocation)return;
  navigator.geolocation.getCurrentPosition(function(pos){
   if(moveDriverFromPosition(pos))sendLocation(pos.coords.latitude,pos.coords.longitude);
- },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:6000});
+ },function(){if(deliveryGPSLocked())setTimeout(sendNow,2500)},{enableHighAccuracy:true,maximumAge:1000,timeout:8000});
 }
 
 window.D={
@@ -1197,14 +1221,14 @@ window.D={
   var btn=document.getElementById('btn-'+step);
   document.querySelectorAll('.action-btn').forEach(function(b){b.disabled=true});
    if(btn){btn.textContent=step==='delivering'?'Starting...':'Saving...'}
-   if(step==='delivering'&&!gpsActive)startGPS();
+   if(step==='delivering'){gpsForceLocked=true;if(!gpsActive)startGPS()}
    try{
     var j=await postDriverStatus(orderData.id,step);
     if(!j.ok)throw new Error(j.error||'Failed');
     orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;connectDriverWS(orderData.id);sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);markingStep=null}
-    if(step==='delivered'){rememberDelivered(orderData.id);closeDriverWS();stopGPS(true);clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250)}
+    if(step==='delivered'){gpsForceLocked=false;rememberDelivered(orderData.id);closeDriverWS();stopGPS(true);clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250)}
    else setTimeout(function(){load()},1200);
   }catch(e){
    if(isNetworkError(e)){
@@ -1212,9 +1236,9 @@ window.D={
     orderData.tracking[step]=new Date().toISOString();
     toast('Saved offline — will sync automatically','ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;connectDriverWS(orderData.id);sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);setReconnecting(true);markingStep=null;return}
-    if(step==='delivered'){rememberDelivered(orderData.id);closeDriverWS();stopGPS(true);clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250);return}
+    if(step==='delivered'){gpsForceLocked=false;rememberDelivered(orderData.id);closeDriverWS();stopGPS(true);clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250);return}
    }
-   if(step==='delivering')stopGPS();
+   if(step==='delivering'){gpsForceLocked=false;stopGPS()}
    toast(friendlyError(e));
    markingStep=null;
    renderDetail(orderData);
