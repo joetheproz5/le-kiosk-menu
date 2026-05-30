@@ -790,7 +790,8 @@ function renderDetail(o){
  o.tracking=o.tracking||{};
  var track=o.tracking;
  if(isDeliveredOrder(o)&&!track.delivered)track.delivered=new Date().toISOString();
- var shouldResumeGPS=restoreDriverPosition(o.id,track)&&track.delivering&&!track.delivered;
+ restoreDriverPosition(o.id,track);
+ var shouldResumeGPS=track.delivering&&!track.delivered;
  var customerPoint=pointFromGPS(o.gps);
  var stepLabel=track.delivered?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'Pending';
  var gq=gpsQuality();
@@ -1035,12 +1036,17 @@ function moveDriver(lat,lng,heading){
  return true;
 }
 
+function deliveryGPSLocked(){
+ return !!(orderData&&orderData.tracking&&orderData.tracking.delivering&&!orderData.tracking.delivered);
+}
+
 function moveDriverFromPosition(pos){
  var accuracy=Number(pos.coords.accuracy);
  gpsAccuracy=Number.isFinite(accuracy)?accuracy:gpsAccuracy;
  lastGPSAt=Date.now();
  updateGPSBar();
- if(Number.isFinite(accuracy)&&accuracy>45)return false;
+ // Do not drop normal weak mobile GPS; dropping it stops both driver and customer maps.
+ if(Number.isFinite(accuracy)&&accuracy>120)return false;
  lastGPSTime=lastGPSAt;
  var speed=Number(pos.coords.speed);
  driverSpeed=Number.isFinite(speed)&&speed>0?speed:0;
@@ -1063,7 +1069,7 @@ function moveDriverFromPosition(pos){
 async function sendLocation(lat,lng){
  try{
   await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/location',{
-   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:lat,lng:lng,heading:driverHeading})
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:lat,lng:lng,heading:driverHeading,speed:driverSpeed,accuracy:gpsAccuracy})
   });
   lastSent=Date.now();
  }catch(e){}
@@ -1076,7 +1082,12 @@ function handleGPSPosition(pos){
 
 function handleGPSError(){
  toast('GPS error — check permissions');
- gpsActive=false;
+ if(deliveryGPSLocked()){
+  gpsActive=true;
+  setTimeout(sendNow,2000);
+ }else{
+  gpsActive=false;
+ }
  updateGPSBar();
 }
 
@@ -1122,7 +1133,11 @@ function startGPS(){
  startWatchGPS();
 }
 
-function stopGPS(){
+function stopGPS(force){
+ if(deliveryGPSLocked()&&!force){
+  toast('GPS stays on while delivering');
+  return;
+ }
  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null}
  if(gpsPollTimer){clearInterval(gpsPollTimer);gpsPollTimer=null}
  gpsMode='watch';
@@ -1139,7 +1154,7 @@ function updateGPSBar(){
  if(!bar||!text)return;
  var q=gpsQuality();
  bar.className='gps-bar'+(gpsActive?' active':'')+(gpsActive?q.cls:'');
- if(gpsActive){text.textContent=q.label;if(coords)coords.textContent=q.value}
+ if(gpsActive){text.textContent=deliveryGPSLocked()?'GPS locked for delivery':q.label;if(coords)coords.textContent=q.value}
  else{text.textContent='Tap to share your location';if(coords)coords.textContent=''}
 }
 
@@ -1170,6 +1185,7 @@ window.D={
   recenterDriver();
  },
  toggleGPS:function(){
+  if(deliveryGPSLocked()){toast('GPS stays on while delivering');startGPS();return}
   if(gpsActive){stopGPS();return}
   startGPS();
  },
@@ -1188,7 +1204,7 @@ window.D={
     orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;connectDriverWS(orderData.id);sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);markingStep=null}
-    if(step==='delivered'){rememberDelivered(orderData.id);closeDriverWS();stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250)}
+    if(step==='delivered'){rememberDelivered(orderData.id);closeDriverWS();stopGPS(true);clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250)}
    else setTimeout(function(){load()},1200);
   }catch(e){
    if(isNetworkError(e)){
@@ -1196,7 +1212,7 @@ window.D={
     orderData.tracking[step]=new Date().toISOString();
     toast('Saved offline — will sync automatically','ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;connectDriverWS(orderData.id);sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);setReconnecting(true);markingStep=null;return}
-    if(step==='delivered'){rememberDelivered(orderData.id);closeDriverWS();stopGPS();clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250);return}
+    if(step==='delivered'){rememberDelivered(orderData.id);closeDriverWS();stopGPS(true);clearActiveDelivery();clearInterval(autoRefresh);setTimeout(function(){location.href='?'},250);return}
    }
    if(step==='delivering')stopGPS();
    toast(friendlyError(e));

@@ -1939,6 +1939,8 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
       const lng = parseFloat(body.lng);
       if (isNaN(lat) || isNaN(lng)) return json({ error: 'Invalid lat/lng' }, 400);
       const heading = Number(body.heading);
+      const speed = Number(body.speed);
+      const accuracy = Number(body.accuracy);
 
       try {
         const rows = await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
@@ -1951,6 +1953,8 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
           lat,
           lng,
           heading: Number.isFinite(heading) ? heading : payload.tracking.driverLocation?.heading ?? null,
+          speed: Number.isFinite(speed) ? speed : payload.tracking.driverLocation?.speed ?? null,
+          accuracy: Number.isFinite(accuracy) ? accuracy : payload.tracking.driverLocation?.accuracy ?? null,
           updatedAt: new Date().toISOString(),
         };
 
