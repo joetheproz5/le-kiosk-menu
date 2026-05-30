@@ -93,7 +93,7 @@ var TRACK_REFRESH_MS=5000, ROUTE_REFRESH_MS=20000, ROUTE_REFRESH_METERS=25;
 var STATUS_REFRESH_MS=8000;
 var wasDelivering=false;
 var lastDriverLat=null,lastDriverLng=null,visualDriverLat=null,visualDriverLng=null,driverAnim=null,driverHeading=null,deadReckonTimer=null,lastGPSTime=null,deadReckonSpeed=0,lastServerPointTime=null;
-var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0, lastKnownETA=null, originalTitle=document.title, titleFlashTimer=null, statusAudioCtx=null;
+var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0, lastKnownETA=null, originalTitle=document.title, titleFlashTimer=null, statusAudioCtx=null, pendingWSConnect=false, mapInitInProgress=false;
 
 /* shared util */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
@@ -375,9 +375,16 @@ function ensureMapReady(track,gps){
  // Live updates can arrive before the map card exists; build it and replay the update after MapLibre mounts.
  var mapEl=document.getElementById('map');
  if(mapInst&&mapEl)return true;
+ if(mapInitInProgress)return false;
+ mapInitInProgress=true;
  resetMapState();
  document.getElementById('map-area').innerHTML=buildMapArea();
- setTimeout(function(){initMapOnce(track,gps);updateMap(track,gps)},60);
+ setTimeout(function(){
+  initMapOnce(track,gps);
+  updateMap(track,gps);
+  mapInitInProgress=false;
+  if(pendingWSConnect&&currentOrderId){pendingWSConnect=false;connectCustomerWS(currentOrderId)}
+ },60);
  return false;
 }
 
@@ -486,7 +493,7 @@ function updateMap(track,gps){
   var accuracy=Number((track&&track.driverLocation&&track.driverLocation.accuracy)||0);
   kfLat.setR(accuracy);kfLng.setR(accuracy);
   var filteredLat=kfLat.filter(dl.lat),filteredLng=kfLng.filter(dl.lng);
-  var MIN_MOVE_METERS=5;
+   var MIN_MOVE_METERS=2;
   var distMoved=lastDriverLat===null?999:haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng);
   if(distMoved<MIN_MOVE_METERS&&lastDriverLat!==null){
    noteServerDriverPosition(dl,track&&track.driverLocation);
@@ -536,9 +543,28 @@ function noteServerDriverPosition(dl,raw){
 }
 
 function startDeadReckoning(){
- // Customer tracker uses real server/WS pings only; animation handles smoothing.
+ // Project the driver marker between real position updates so it glides instead of jumping.
  if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
- deadReckonTimer=null;
+ if(!driverMarker||!mapInst){deadReckonTimer=null;return}
+ var baseLat=visualDriverLat!==null?visualDriverLat:lastDriverLat;
+ var baseLng=visualDriverLng!==null?visualDriverLng:lastDriverLng;
+ if(baseLat===null||baseLng===null){deadReckonTimer=null;return}
+ var baseTime=Date.now();
+ var baseHeading=driverHeading;
+ var baseSpeed=deadReckonSpeed;
+ function tick(){
+  if(!driverMarker||!mapInst||!baseSpeed||baseSpeed<0.8){deadReckonTimer=null;return}
+  var age=(Date.now()-baseTime)/1000;
+  if(age>8){deadReckonTimer=null;return}
+  var pos=pointAhead(baseLat,baseLng,baseHeading,baseSpeed*age);
+  var visual=snapToRoute(pos.lat,pos.lng);
+  visualDriverLat=visual.lat;
+  visualDriverLng=visual.lng;
+  driverMarker.setLngLat([visual.lng,visual.lat]);
+  trimRouteToProgress(visual.lat,visual.lng);
+  deadReckonTimer=requestAnimationFrame(tick);
+ }
+ deadReckonTimer=requestAnimationFrame(tick);
 }
 
 function setMarkerSignalLoss(lost){
@@ -718,7 +744,7 @@ async function load(){
     if(mapInst)resetMapState();
     document.getElementById('map-area').innerHTML=buildMapPlaceholder();
    }
-   if(track.delivering&&!track.delivered){customerWSReconnect=true;connectCustomerWS(currentOrderId)}
+   if(track.delivering&&!track.delivered){customerWSReconnect=true;if(mapInst)connectCustomerWS(currentOrderId);else pendingWSConnect=true}
    if(track.delivered){customerWSReconnect=false;if(customerWS){try{customerWS.close()}catch(e){}}}
   }
  }catch(e){

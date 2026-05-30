@@ -243,7 +243,7 @@ function closeDriverWS(){
 function sendWSUpdate(lat,lng,eta){
  // Sends only lightweight map data; order status still comes from normal fetches.
  if(!driverWS||driverWS.readyState!==WebSocket.OPEN)return;
- driverWS.send(JSON.stringify({type:'position',lat:lat,lng:lng,heading:driverHeading,eta:eta,speed:driverSpeed,ts:Date.now()}));
+ driverWS.send(JSON.stringify({type:'position',lat:lat,lng:lng,heading:displayedHeading,eta:eta,speed:driverSpeed,ts:Date.now()}));
 }
 
 // Lightweight Kalman smoothing calms GPS wobble before it reaches the marker/camera.
@@ -1069,7 +1069,7 @@ function moveDriverFromPosition(pos){
  if(Number.isFinite(speed)&&speed<0.8&&moved<4)heading=NaN;
  pendingVisualLat=filteredLat;pendingVisualLng=filteredLng;
  var accepted=moveDriver(lat,lng,heading);
- if(accepted){startDeadReckoning();sendWSUpdate(lat,lng,lastETAMinutes)}
+ if(accepted){startDeadReckoning();sendWSUpdate(visualDriverLat,visualDriverLng,lastETAMinutes)}
  return accepted;
 }
 
