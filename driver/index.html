@@ -39,7 +39,7 @@ var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
 var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=800;
-var FOLLOW_MIN_MOVE=8, FOLLOW_MIN_TURN=14;
+var FOLLOW_MIN_MOVE=12, FOLLOW_MIN_TURN=20;
 var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
 var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=false, driverSpeed=0, currentZoom=17, currentPitch=0;
@@ -496,10 +496,10 @@ function recenterDriver(){
  }
  if(lat===null||lng===null)return;
  clearTimeout(followTimer);
- manualRecenterUntil=Date.now()+3500;
+ manualRecenterUntil=Date.now()+6000;
  lastFollowLat=lat;
  lastFollowLng=lng;
- lastFollowHeading=null;
+ lastFollowHeading=animatedHeading;
  mapInst.easeTo({
   center:[lng,lat],
   zoom:Math.max(mapInst.getZoom()||0,17),
@@ -531,6 +531,7 @@ function startDeadReckoning(){
   var visual=snapToRoute(pos.lat,pos.lng);
   visualDriverLat=visual.lat;visualDriverLng=visual.lng;
   if(driverMarker)driverMarker.setLngLat([visual.lng,visual.lat]);
+  trimRouteToProgress(visual.lat,visual.lng);
   updateSpeedometer(driverSpeed);
   deadReckonTimer=requestAnimationFrame(tick);
  }
@@ -782,7 +783,7 @@ function renderDetail(o){
  if(mapCard)mapCard.classList.toggle('delivering',!!(track.delivering&&!track.delivered));
  updateSpeedometer(driverSpeed);
  if(track.delivering&&!track.delivered&&o.id)connectDriverWS(o.id);
- if(mapInst)setTimeout(function(){mapInst.resize();if(visualDriverLat!==null)followDriver(visualDriverLat,visualDriverLng)},280);
+ if(mapInst)setTimeout(function(){mapInst.resize()},280);
  if(shouldResumeGPS&&!gpsActive)setTimeout(function(){startGPS()},250);
 }
 
@@ -819,7 +820,7 @@ function initMapOnce(gps){
   if(customerPoint)drawCustMarker(customerPoint);
   sync3DBuildings(orderData&&orderData.tracking);
   updateCompassNeedle();
-  if(visualDriverLat!==null){drawDriverMarker(visualDriverLat,visualDriverLng);followDriver(visualDriverLat,visualDriverLng)}
+  if(visualDriverLat!==null)drawDriverMarker(visualDriverLat,visualDriverLng);
  });
  setTimeout(function(){if(document.getElementById('map'))mapInst.resize()},200);
 }
@@ -927,7 +928,6 @@ function updateMapView(track,gps){
    routeNeeded=false;
    fetchRoute(routeLat,routeLng,c.lat,c.lng);
   }
-  if(visualDriverLat!==null)followDriver(visualDriverLat,visualDriverLng);
  }
 }
 
@@ -983,7 +983,6 @@ function moveDriverFromPosition(pos){
  kfLat.setR(accuracy);kfLng.setR(accuracy);
  var filteredLat=kfLat.filter(lat),filteredLng=kfLng.filter(lng);
  filteredDriverLat=filteredLat;filteredDriverLng=filteredLng;
- trimRouteToProgress(filteredLat,filteredLng);
  var moved=driverLat===null?999:haversine(driverLat,driverLng,filteredLat,filteredLng);
  if(Number.isFinite(speed)&&speed<0.8&&moved<4)heading=NaN;
  pendingVisualLat=filteredLat;pendingVisualLng=filteredLng;
