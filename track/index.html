@@ -61,6 +61,7 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 .error-card{text-align:center;padding:60px 20px}
 .error-card .emoji{font-size:48px;margin-bottom:12px}
 .error-card .msg{font-size:15px;font-weight:700;color:var(--muted)}
+.last-updated{text-align:center;font-size:10px;color:var(--muted);font-weight:700;margin:12px 0 20px}
 .footer{text-align:center;margin-top:30px;font-size:12px;font-weight:600;color:var(--muted)}
 .footer a{color:var(--amber-d);text-decoration:none;font-weight:800}
 @media(max-width:480px){.container{padding:20px 14px 60px}.order-card{padding:16px}}
@@ -88,11 +89,11 @@ var STEPS=[
 
 var mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, routeFetchBusy=false, pendingRoute=null, lastRouteLat=null, lastRouteLng=null, routeFetchSeq=0, currentRouteCoords=null, fullRouteCoords=null, routeDrawTimer=null, arrivalTriggered=false, signalTimer=null;
-var TRACK_REFRESH_MS=800, ROUTE_REFRESH_MS=20000, ROUTE_REFRESH_METERS=25;
+var TRACK_REFRESH_MS=5000, ROUTE_REFRESH_MS=20000, ROUTE_REFRESH_METERS=25;
 var STATUS_REFRESH_MS=8000;
 var wasDelivering=false;
 var lastDriverLat=null,lastDriverLng=null,visualDriverLat=null,visualDriverLng=null,driverAnim=null,driverHeading=null,deadReckonTimer=null,lastGPSTime=null,deadReckonSpeed=0,lastServerPointTime=null;
-var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0;
+var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0, lastKnownETA=null, originalTitle=document.title, titleFlashTimer=null, statusAudioCtx=null;
 
 /* shared util */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
@@ -213,6 +214,60 @@ function showError(msg){
  document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(msg)+'\x3C/div\x3E\x3C/div\x3E';
 }
 
+function friendlyError(e){
+ if(!navigator.onLine)return'No internet connection';
+ if(e&&e.name==='AbortError')return'Request timed out — retrying';
+ return'Something went wrong. Please retry.';
+}
+
+function setReconnecting(active){
+ document.querySelectorAll('.last-updated').forEach(function(el){
+  el.textContent=active?'Reconnecting…':'Auto-refreshing…';
+  el.style.color=active?'#f59e0b':'';
+ });
+}
+
+function setMapDistance(text){
+ var el=document.querySelector('.map-distance');
+ if(!el)return;
+ if(text){
+  lastKnownETA=text;
+  el.textContent=text;
+ }else if(lastKnownETA){
+  el.textContent=lastKnownETA+' (last known)';
+ }
+}
+
+function playStatusUpdateSound(){
+ try{
+  var AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return;
+  if(!statusAudioCtx)statusAudioCtx=new AC();
+  if(statusAudioCtx.state==='suspended')statusAudioCtx.resume();
+  [660,880].forEach(function(freq,i){
+   var osc=statusAudioCtx.createOscillator(),gain=statusAudioCtx.createGain();
+   osc.frequency.value=freq;
+   gain.gain.setValueAtTime(0.001,statusAudioCtx.currentTime+i*.18);
+   gain.gain.exponentialRampToValueAtTime(.16,statusAudioCtx.currentTime+i*.18+.025);
+   gain.gain.exponentialRampToValueAtTime(0.001,statusAudioCtx.currentTime+i*.18+.16);
+   osc.connect(gain);gain.connect(statusAudioCtx.destination);
+   osc.start(statusAudioCtx.currentTime+i*.18);
+   osc.stop(statusAudioCtx.currentTime+i*.18+.18);
+  });
+ }catch(e){}
+}
+
+function startTitleFlash(){
+ if(titleFlashTimer)return;
+ titleFlashTimer=setInterval(function(){document.title=document.title===originalTitle?'⚡ Update — Le Kiosk':originalTitle},900);
+}
+
+function stopTitleFlash(){
+ if(titleFlashTimer)clearInterval(titleFlashTimer);
+ titleFlashTimer=null;
+ document.title=originalTitle;
+}
+
 function connectCustomerWS(orderId){
  // WebSocket handles live map movement; fetch polling stays as fallback/status refresh.
  if(!orderId||typeof WebSocket==='undefined'||customerWS)return;
@@ -220,6 +275,7 @@ function connectCustomerWS(orderId){
  customerWS=new WebSocket(wsUrl);
  customerWS.addEventListener('open',function(){
   wsAlive=true;
+  setReconnecting(false);
   wsRetryCount=0;
   clearInterval(customerWSPingTimer);
   customerWSPingTimer=setInterval(function(){
@@ -240,20 +296,21 @@ function connectCustomerWS(orderId){
  customerWSPingTimer=null;
  startRefresh();
   if(customerWSReconnect&&wsRetryCount<10){
+   setReconnecting(true);
    var delay=Math.min(30000,3000*Math.pow(1.4,wsRetryCount));
    wsRetryCount++;
    setTimeout(function(){connectCustomerWS(orderId)},delay);
   }
  });
- customerWS.addEventListener('error',function(){try{customerWS.close()}catch(e){}});
+ customerWS.addEventListener('error',function(){setReconnecting(true);try{customerWS.close()}catch(e){}});
 }
 
 function handleWSPosition(msg){
  // Live WS updates touch only map position/ETA, not the status timeline DOM.
  var track={driverLocation:{lat:msg.lat,lng:msg.lng,heading:msg.heading,speed:msg.speed},delivering:true};
  updateMap(track,currentOrderGPS);
- var el=document.querySelector('.map-distance');
- if(el&&msg.eta!=null)el.textContent=msg.eta+' min away';
+ if(msg.eta!=null)setMapDistance(msg.eta+' min away');
+ else setMapDistance(null);
 }
 
 function buildHTML(order,track){
@@ -273,7 +330,8 @@ function buildHTML(order,track){
   '\x3Cdiv class="order-total"\x3E\x3Cspan\x3ETotal\x3C/span\x3E\x3Cspan\x3E'+money(order.total)+'\x3C/span\x3E\x3C/div\x3E'+
   '\x3C/div\x3E'+
   '\x3Cdiv class="timeline"\x3E\x3Cdiv class="timeline-title"\x3EStatus\x3C/div\x3E'+
-  '\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E';
+  '\x3Cdiv class="steps"\x3E'+buildSteps(track,isDel)+'\x3C/div\x3E\x3C/div\x3E'+
+  '\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
 }
 
 function buildSteps(track,isDelivery){
@@ -294,6 +352,10 @@ function buildSteps(track,isDelivery){
 
 function buildMapArea(){
  return'\x3Cdiv class="map-card"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3EDelivery Route\x3C/span\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3Cbutton id="map-recenter" style="display:none;width:100%;height:34px;border:0;border-radius:0;background:#f59e0b;color:#111827;font-size:12px;font-weight:800;text-transform:uppercase;cursor:pointer" onclick="recenterMap()"\x3ERecenter on Driver\x3C/button\x3E\x3C/div\x3E';
+}
+
+function buildMapPlaceholder(){
+ return'\x3Cdiv class="map-card" style="border-color:rgba(245,158,11,.45);min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;color:#8b6f36;font-size:13px;font-weight:800;padding:18px;background:#fff"\x3EMap will appear when your order is out for delivery\x3C/div\x3E';
 }
 
 function recenterMap(){
@@ -552,8 +614,7 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   if(seq!==routeFetchSeq){finishRoute();return}
   if(!mapInst){finishRoute();return}
   setRouteGeometry({type:'LineString',coordinates:[[dLng,dLat],[cLng,cLat]]},true);
-  var el=document.querySelector('.map-distance');
-  if(el)el.textContent=fmtDist(haversine(dLat,dLng,cLat,cLng));
+  setMapDistance(fmtDist(haversine(dLat,dLng,cLat,cLng)));
   lastRouteLat=dLat;
   lastRouteLng=dLng;
   routeLastFetched=Date.now();
@@ -575,8 +636,7 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   setRouteGeometry(route.geometry,false);
   animateRouteDraw();
   var eta=Math.round(route.duration/60);
-  var el=document.querySelector('.map-distance');
-  if(el)el.textContent=eta+' min drive';
+  setMapDistance(eta+' min drive');
   lastRouteLat=dLat;
   lastRouteLng=dLng;
   routeLastFetched=Date.now();
@@ -608,6 +668,7 @@ async function load(){
   if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Order not found')}
   var j=await res.json();
   if(!j.ok)throw new Error(j.error||'Invalid response');
+  setReconnecting(false);
   var o=j.data,track=o.tracking||{};
   currentOrderId=o.id||id;
   currentOrderGPS=o.gps||currentOrderGPS;
@@ -618,20 +679,29 @@ async function load(){
    document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
    document.getElementById('map-area').innerHTML='';return;
   }
+  var previousTrackingJSON=lastTrackingJSON;
   if(trackingJSON!==lastTrackingJSON){
    lastTrackingJSON=trackingJSON;
    document.getElementById('content').innerHTML=buildHTML(o,track);
+   if(previousTrackingJSON!==null&&document.visibilityState!=='visible'){
+    playStatusUpdateSound();
+    startTitleFlash();
+   }
   }
   if(o.orderType==='delivery'){
-   if(!firstMapDone){document.getElementById('map-area').innerHTML=buildMapArea();setTimeout(function(){initMapOnce(track,o.gps);updateMap(track,o.gps)},60)}
-   else updateMap(track,o.gps);
+   if(track.delivering){
+    if(!firstMapDone){document.getElementById('map-area').innerHTML=buildMapArea();setTimeout(function(){initMapOnce(track,o.gps);updateMap(track,o.gps)},60)}
+    else updateMap(track,o.gps);
+   }else{
+    document.getElementById('map-area').innerHTML=buildMapPlaceholder();
+   }
    if(track.delivering&&!track.delivered){customerWSReconnect=true;connectCustomerWS(currentOrderId)}
    if(track.delivered){customerWSReconnect=false;if(customerWS){try{customerWS.close()}catch(e){}}}
   }
  }catch(e){
   clearTimeout(tmr);
-  if(e.name==='AbortError')showError('Request timed out');
-  else showError(e.message||'Could not load order');
+  setReconnecting(true);
+  showError(friendlyError(e));
  }finally{
   loadBusy=false;
  }
@@ -640,6 +710,8 @@ async function load(){
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,wsAlive?STATUS_REFRESH_MS:TRACK_REFRESH_MS);}
 window.addEventListener('offline',function(){clearInterval(autoRefresh)});
 window.addEventListener('online',function(){load();startRefresh()});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')stopTitleFlash()});
+window.addEventListener('focus',stopTitleFlash);
 startSignalWatch();
 load();
 startRefresh();
