@@ -1,0 +1,11 @@
+name = "lekiosk-order-inbox"
+main = "worker/index.js"
+compatibility_date = "2026-05-30"
+
+[[durable_objects.bindings]]
+name = "ORDER_ROOM"
+class_name = "OrderRoom"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["OrderRoom"]
