@@ -487,9 +487,26 @@ function followDriver(lat,lng){
  },30);
 }
 function recenterDriver(){
- if(visualDriverLat===null||visualDriverLng===null)return;
+ if(!mapInst)return;
+ var lat=visualDriverLat,lng=visualDriverLng;
+ if((lat===null||lng===null)&&driverMarker){
+  var p=driverMarker.getLngLat();
+  lat=p.lat;lng=p.lng;
+ }
+ if(lat===null||lng===null)return;
+ clearTimeout(followTimer);
  lastFollowLat=null;
- followDriver(visualDriverLat,visualDriverLng);
+ lastFollowLng=null;
+ lastFollowHeading=null;
+ mapInst.easeTo({
+  center:[lng,lat],
+  zoom:Math.max(mapInst.getZoom()||0,17),
+  bearing:getMapBearing(),
+  pitch:smoothPitch(getAdaptivePitch(driverSpeed)),
+  duration:350,
+  essential:true,
+  easing:followEasing
+ });
 }
 
 function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,DRIVER_REFRESH_MS);}
