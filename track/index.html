@@ -308,6 +308,11 @@ function connectCustomerWS(orderId){
 function handleWSPosition(msg){
  // Live WS updates touch only map position/ETA, not the status timeline DOM.
  var track={driverLocation:{lat:msg.lat,lng:msg.lng,heading:msg.heading,speed:msg.speed},delivering:true};
+ if(!ensureMapReady(track,currentOrderGPS)){
+  if(msg.eta!=null)setMapDistance(msg.eta+' min away');
+  else setMapDistance(null);
+  return;
+ }
  updateMap(track,currentOrderGPS);
  if(msg.eta!=null)setMapDistance(msg.eta+' min away');
  else setMapDistance(null);
@@ -356,6 +361,24 @@ function buildMapArea(){
 
 function buildMapPlaceholder(){
  return'\x3Cdiv class="map-card" style="border-color:rgba(245,158,11,.45);min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;color:#8b6f36;font-size:13px;font-weight:800;padding:18px;background:#fff"\x3EMap will appear when your order is out for delivery\x3C/div\x3E';
+}
+
+function resetMapState(){
+ mapInst=null;
+ driverMarker=null;
+ custMarker=null;
+ routeLine=null;
+ firstMapDone=false;
+}
+
+function ensureMapReady(track,gps){
+ // Live updates can arrive before the map card exists; build it and replay the update after MapLibre mounts.
+ var mapEl=document.getElementById('map');
+ if(mapInst&&mapEl)return true;
+ resetMapState();
+ document.getElementById('map-area').innerHTML=buildMapArea();
+ setTimeout(function(){initMapOnce(track,gps);updateMap(track,gps)},60);
+ return false;
 }
 
 function recenterMap(){
@@ -690,9 +713,9 @@ async function load(){
   }
   if(o.orderType==='delivery'){
    if(track.delivering){
-    if(!firstMapDone){document.getElementById('map-area').innerHTML=buildMapArea();setTimeout(function(){initMapOnce(track,o.gps);updateMap(track,o.gps)},60)}
-    else updateMap(track,o.gps);
+    if(ensureMapReady(track,o.gps))updateMap(track,o.gps);
    }else{
+    if(mapInst)resetMapState();
     document.getElementById('map-area').innerHTML=buildMapPlaceholder();
    }
    if(track.delivering&&!track.delivered){customerWSReconnect=true;connectCustomerWS(currentOrderId)}
@@ -707,10 +730,10 @@ async function load(){
  }
 }
 
-function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,wsAlive?STATUS_REFRESH_MS:TRACK_REFRESH_MS);}
+function startRefresh(){clearInterval(autoRefresh);autoRefresh=setInterval(load,TRACK_REFRESH_MS);}
 window.addEventListener('offline',function(){clearInterval(autoRefresh)});
 window.addEventListener('online',function(){load();startRefresh()});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')stopTitleFlash()});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){stopTitleFlash();load();startRefresh()}});
 window.addEventListener('focus',stopTitleFlash);
 startSignalWatch();
 load();
