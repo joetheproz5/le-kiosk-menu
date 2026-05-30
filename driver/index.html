@@ -39,10 +39,10 @@ var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
 var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=800;
-var FOLLOW_MIN_MOVE=4, FOLLOW_MIN_TURN=6;
+var FOLLOW_MIN_MOVE=8, FOLLOW_MIN_TURN=14;
 var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=true, driverSpeed=0, currentZoom=17, currentPitch=0;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=false, driverSpeed=0, currentZoom=17, currentPitch=0;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
@@ -456,8 +456,8 @@ function followDriver(lat,lng){
  var h=Number.isFinite(Number(animatedHeading))?animatedHeading:lastFollowHeading;
  var turn=(lastFollowHeading===null||!Number.isFinite(Number(h)))?999:Math.abs((((h-lastFollowHeading)+540)%360)-180);
  if(moved<FOLLOW_MIN_MOVE&&turn<FOLLOW_MIN_TURN)return;
- clearTimeout(followTimer);
- followTimer=setTimeout(function(){
+  clearTimeout(followTimer);
+  followTimer=setTimeout(function(){
   var ahead=pointAhead(lat,lng,h,FOLLOW_AHEAD_METERS);
   var center=mapInst.getCenter();
   var duration=getFollowDuration(center.lat,center.lng,ahead.lat,ahead.lng);
@@ -474,7 +474,6 @@ function followDriver(lat,lng){
   if(turnZoomActive)targetZoom-=.8;
   var zoom=smoothZoom(targetZoom);
   var pitch=smoothPitch(getAdaptivePitch(driverSpeed));
-  if(mapInst.stop)mapInst.stop();
   mapInst.easeTo({
    center:[ahead.lng,ahead.lat],
    zoom:zoom,
@@ -501,11 +500,15 @@ function sleep(ms){return new Promise(function(resolve){setTimeout(resolve,ms)})
 function startDeadReckoning(){
  // Dead reckoning keeps the marker moving between real GPS pings.
  if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
+ var baseLat=visualDriverLat===null?driverLat:visualDriverLat;
+ var baseLng=visualDriverLng===null?driverLng:visualDriverLng;
+ var baseTime=Date.now();
  function tick(){
-  if(!lastGPSTime||driverLat===null||driverLng===null){deadReckonTimer=null;return}
-  var age=(Date.now()-lastGPSTime)/1000;
+  if(!lastGPSTime||baseLat===null||baseLng===null){deadReckonTimer=null;return}
+  var age=(Date.now()-baseTime)/1000;
   if(age>8){deadReckonTimer=null;return}
-  var pos=pointAhead(driverLat,driverLng,driverHeading,deadReckonSpeed*age);
+  if(deadReckonSpeed<.8){deadReckonTimer=requestAnimationFrame(tick);return}
+  var pos=pointAhead(baseLat,baseLng,driverHeading,deadReckonSpeed*age);
   var visual=snapToRoute(pos.lat,pos.lng);
   visualDriverLat=visual.lat;visualDriverLng=visual.lng;
   if(driverMarker)driverMarker.setLngLat([visual.lng,visual.lat]);
@@ -955,7 +958,7 @@ function moveDriverFromPosition(pos){
  var speed=Number(pos.coords.speed);
  driverSpeed=Number.isFinite(speed)&&speed>0?speed:0;
  updateSpeedometer(driverSpeed);
- deadReckonSpeed=driverSpeed>0?driverSpeed:1.5;
+ deadReckonSpeed=driverSpeed>.8?driverSpeed:0;
  var heading=Number(pos.coords.heading);
  var lat=pos.coords.latitude,lng=pos.coords.longitude;
  kfLat.setR(accuracy);kfLng.setR(accuracy);

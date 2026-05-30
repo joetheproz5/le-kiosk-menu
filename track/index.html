@@ -186,13 +186,12 @@ function trimRouteToProgress(lat,lng){
  if(mapInst&&mapInst.getSource('route'))mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:trimmed},properties:{}}]});
 }
 function moveMarkerTo(lat,lng){
- // Single visual-position writer: snap, move marker, trim route, then store visual coords.
+ // Single visual-position writer: move to filtered real position and trim route.
  if(!driverMarker||!mapInst)return;
- var snapped=snapToRoute(lat,lng);
- visualDriverLat=snapped.lat;
- visualDriverLng=snapped.lng;
- driverMarker.setLngLat([snapped.lng,snapped.lat]);
- trimRouteToProgress(snapped.lat,snapped.lng);
+ visualDriverLat=lat;
+ visualDriverLng=lng;
+ driverMarker.setLngLat([lng,lat]);
+ trimRouteToProgress(lat,lng);
 }
 function headingFromRoute(lat,lng){
  // Predictive heading comes from the road segment ahead when the driver is still on route.
@@ -439,25 +438,9 @@ function noteServerDriverPosition(dl,raw){
 }
 
 function startDeadReckoning(){
- // Dead reckoning keeps the marker moving between server-pushed GPS pings.
- if(driverAnim)return;
+ // Customer tracker uses real server/WS pings only; animation handles smoothing.
  if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
- var baseLat=visualDriverLat;
- var baseLng=visualDriverLng;
- var baseTime=Date.now();
- function tick(){
-  if(!lastGPSTime||baseLat===null||baseLng===null){deadReckonTimer=null;return}
-  var age=(Date.now()-baseTime)/1000;
-  if(age>8){deadReckonTimer=null;return}
-  if(deadReckonSpeed<.8){
-   deadReckonTimer=requestAnimationFrame(tick);
-   return;
-  }
-  var pos=pointAhead(baseLat,baseLng,driverHeading,deadReckonSpeed*age);
-  moveMarkerTo(pos.lat,pos.lng);
-  deadReckonTimer=requestAnimationFrame(tick);
- }
- deadReckonTimer=requestAnimationFrame(tick);
+ deadReckonTimer=null;
 }
 
 function setMarkerSignalLoss(lost){
@@ -492,7 +475,7 @@ function animateDriverMarker(lat,lng){
  if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
  driverAnim=null;
  deadReckonTimer=null;
- var snappedTarget=snapToRoute(lat,lng);
+ var snappedTarget={lat:lat,lng:lng};
  var startLat=visualDriverLat!==null?visualDriverLat:snappedTarget.lat;
  var startLng=visualDriverLng!==null?visualDriverLng:snappedTarget.lng;
  var startTime=performance.now();
