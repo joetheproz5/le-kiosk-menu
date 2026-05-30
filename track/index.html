@@ -92,7 +92,7 @@ var TRACK_REFRESH_MS=800, ROUTE_REFRESH_MS=20000, ROUTE_REFRESH_METERS=25;
 var STATUS_REFRESH_MS=8000;
 var wasDelivering=false;
 var lastDriverLat=null,lastDriverLng=null,visualDriverLat=null,visualDriverLng=null,driverAnim=null,driverHeading=null,deadReckonTimer=null,lastGPSTime=null,deadReckonSpeed=0,lastServerPointTime=null;
-var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, currentOrderGPS=null, currentOrderId=null;
+var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0;
 
 /* shared util */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
@@ -220,6 +220,11 @@ function connectCustomerWS(orderId){
  customerWS=new WebSocket(wsUrl);
  customerWS.addEventListener('open',function(){
   wsAlive=true;
+  wsRetryCount=0;
+  clearInterval(customerWSPingTimer);
+  customerWSPingTimer=setInterval(function(){
+   if(customerWS&&customerWS.readyState===WebSocket.OPEN)customerWS.send(JSON.stringify({type:'ping'}));
+  },30000);
   startRefresh();
  });
  customerWS.addEventListener('message',function(evt){
@@ -229,10 +234,16 @@ function connectCustomerWS(orderId){
   }catch(e){}
  });
  customerWS.addEventListener('close',function(){
-  wsAlive=false;
-  customerWS=null;
-  startRefresh();
-  if(customerWSReconnect)setTimeout(function(){connectCustomerWS(orderId)},3000);
+ wsAlive=false;
+ customerWS=null;
+ clearInterval(customerWSPingTimer);
+ customerWSPingTimer=null;
+ startRefresh();
+  if(customerWSReconnect&&wsRetryCount<10){
+   var delay=Math.min(30000,3000*Math.pow(1.4,wsRetryCount));
+   wsRetryCount++;
+   setTimeout(function(){connectCustomerWS(orderId)},delay);
+  }
  });
  customerWS.addEventListener('error',function(){try{customerWS.close()}catch(e){}});
 }
@@ -328,11 +339,13 @@ function initMapOnce(track,gps){
   }
  });
  mapInst.addControl(new maplibregl.NavigationControl({showCompass:false,showZoom:true}),'top-right');
+ mapInst.on('dragstart',function(){manualPanUntil=Date.now()+8000});
+ mapInst.on('zoomstart',function(e){if(e&&e.originalEvent)manualPanUntil=Date.now()+8000});
  mapInst.on('load',function(){
   addStoreMarker();
   addCustMarker(gps);
   var drvNow=pointFromGPS(track&&track.driverLocation);
-  if(drvNow){updateMap(track,gps);mapInst.easeTo({center:[drvNow.lng,drvNow.lat],zoom:(track.delivering&&!track.delivered)?15.5:14,duration:350})}
+  if(drvNow){updateMap(track,gps);if(Date.now()>manualPanUntil)mapInst.easeTo({center:[drvNow.lng,drvNow.lat],zoom:(track.delivering&&!track.delivered)?15.5:14,duration:350})}
  });
  var drvNow=track&&track.driverLocation;
  if(drvNow||(track.delivering&&!track.delivered)){var rb=document.getElementById('map-recenter');if(rb)rb.style.display='block'}
@@ -408,8 +421,8 @@ function updateMap(track,gps){
    moveMarkerTo(filteredLat,filteredLng);
   }
   var isDel=track.delivering&&!track.delivered;
-  if(isDel&&!wasDelivering){mapInst.easeTo({center:[visualDriverLng||filteredLng,visualDriverLat||filteredLat],zoom:15.5,duration:400});wasDelivering=true}
-  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(mapInst.stop)mapInst.stop();mapInst.easeTo({center:[visualDriverLng||filteredLng,visualDriverLat||filteredLat],zoom:Math.max(mapInst.getZoom(),15),duration:350})}
+  if(isDel&&!wasDelivering){if(Date.now()>manualPanUntil)mapInst.easeTo({center:[visualDriverLng||filteredLng,visualDriverLat||filteredLat],zoom:15.5,duration:400});wasDelivering=true}
+  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(Date.now()>manualPanUntil){if(mapInst.stop)mapInst.stop();mapInst.easeTo({center:[visualDriverLng||filteredLng,visualDriverLat||filteredLat],zoom:Math.max(mapInst.getZoom(),15),duration:350})}}
   lastDriverLat=dl.lat;lastDriverLng=dl.lng;
   if(!hadDriverMarker)startDeadReckoning();
   if(!isDel)wasDelivering=false;
@@ -476,8 +489,9 @@ function animateDriverMarker(lat,lng){
  driverAnim=null;
  deadReckonTimer=null;
  var snappedTarget={lat:lat,lng:lng};
- var startLat=visualDriverLat!==null?visualDriverLat:snappedTarget.lat;
- var startLng=visualDriverLng!==null?visualDriverLng:snappedTarget.lng;
+ var domPos=driverMarker.getLngLat();
+ var startLat=domPos.lat;
+ var startLng=domPos.lng;
  var startTime=performance.now();
  var dist=haversine(startLat,startLng,snappedTarget.lat,snappedTarget.lng);
  var duration=Math.min(600,Math.max(200,dist*8));

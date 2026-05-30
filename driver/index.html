@@ -42,15 +42,15 @@ var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=800;
 var FOLLOW_MIN_MOVE=12, FOLLOW_MIN_TURN=20;
 var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=false, driverSpeed=0, currentZoom=17, currentPitch=0;
+var watchId=null, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=true, driverSpeed=0, currentZoom=17, currentPitch=0;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
 var markingStep=null;
-var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null, currentRouteCoords=null, routeFetchSeq=0, routeDrawTimer=null, turnZoomActive=false, turnZoomTimer=null, lastTurnCheckAt=0, lastTurnAngle=0, arrivalTriggered=false, signalTimer=null;
+var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null, currentRouteCoords=null, routeFetchSeq=0, routeDrawTimer=null, turnZoomActive=false, turnZoomTimer=null, lastTurnCheckAt=0, lastTurnAngle=0, arrivalTriggered=false, signalTimer=null, lastTrimLat=null, lastTrimLng=null;
 var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null, manualRecenterUntil=0, lastTrackingJSON=null;
 var knownOrderIds=null, alertAudioCtx=null, alertAudioUnlocked=false, lastOrderAlertAt=0;
-var driverWS=null, wsReconnectTimer=null, lastETAMinutes=null;
+var driverWS=null, wsReconnectTimer=null, wsPingTimer=null, lastETAMinutes=null;
 
 /* shared util */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
@@ -163,8 +163,16 @@ function connectDriverWS(orderId){
  if(driverWS&&driverWS.readyState===WebSocket.OPEN)return;
  var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId);
  driverWS=new WebSocket(wsUrl);
- driverWS.addEventListener('open',function(){clearTimeout(wsReconnectTimer)});
+ driverWS.addEventListener('open',function(){
+  clearTimeout(wsReconnectTimer);
+  clearInterval(wsPingTimer);
+  wsPingTimer=setInterval(function(){
+   if(driverWS&&driverWS.readyState===WebSocket.OPEN)driverWS.send(JSON.stringify({type:'ping'}));
+  },30000);
+ });
  driverWS.addEventListener('close',function(){
+  clearInterval(wsPingTimer);
+  wsPingTimer=null;
   driverWS=null;
   if(orderData&&orderData.tracking&&orderData.tracking.delivering&&!orderData.tracking.delivered){
    clearTimeout(wsReconnectTimer);
@@ -176,7 +184,9 @@ function connectDriverWS(orderId){
 
 function closeDriverWS(){
  clearTimeout(wsReconnectTimer);
+ clearInterval(wsPingTimer);
  wsReconnectTimer=null;
+ wsPingTimer=null;
  if(driverWS){try{driverWS.close()}catch(e){}}
  driverWS=null;
 }
@@ -531,7 +541,12 @@ function startDeadReckoning(){
   var visual=snapToRoute(pos.lat,pos.lng);
   visualDriverLat=visual.lat;visualDriverLng=visual.lng;
   if(driverMarker)driverMarker.setLngLat([visual.lng,visual.lat]);
-  trimRouteToProgress(visual.lat,visual.lng);
+  var trimDist=lastTrimLat===null?999:haversine(visual.lat,visual.lng,lastTrimLat,lastTrimLng);
+  if(trimDist>2){
+   trimRouteToProgress(visual.lat,visual.lng);
+   lastTrimLat=visual.lat;
+   lastTrimLng=visual.lng;
+  }
   updateSpeedometer(driverSpeed);
   deadReckonTimer=requestAnimationFrame(tick);
  }
@@ -604,6 +619,8 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   if(!mapInst)return;
   if(seq!==routeFetchSeq)return;
   arrivalTriggered=false;
+  lastTrimLat=null;
+  lastTrimLng=null;
   setRouteGeometry(route.geometry,false);
   animateRouteDraw();
   currentRouteCoords=(route.geometry&&route.geometry.coordinates)||null;
@@ -923,10 +940,12 @@ function updateMapView(track,gps){
   var routeLat=filteredDriverLat===null?driverLat:filteredDriverLat;
   var routeLng=filteredDriverLng===null?driverLng:filteredDriverLng;
   checkArrival(routeLat,routeLng,c.lat,c.lng);
-  if(distanceToRouteMeters(routeLat,routeLng)>40)routeNeeded=true;
-  if(routeShouldRefresh(routeLat,routeLng)){
-   routeNeeded=false;
-   fetchRoute(routeLat,routeLng,c.lat,c.lng);
+  if(track&&track.delivering&&!track.delivered){
+   if(distanceToRouteMeters(routeLat,routeLng)>40)routeNeeded=true;
+   if(routeShouldRefresh(routeLat,routeLng)){
+    routeNeeded=false;
+    fetchRoute(routeLat,routeLng,c.lat,c.lng);
+   }
   }
  }
 }
