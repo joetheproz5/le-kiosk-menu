@@ -116,7 +116,7 @@ class KalmanFilter{
  }
  setR(r){if(Number.isFinite(Number(r))&&Number(r)>0)this.R=Number(r)}
 }
-var kfLat=new KalmanFilter(),kfLng=new KalmanFilter();
+var kfLat=new KalmanFilter(15,.01),kfLng=new KalmanFilter(15,.01);
 function pointAhead(lat,lng,bearing,meters){
  if(!Number.isFinite(Number(bearing)))return{lat:lat,lng:lng};
  var R=6371000,d=meters/R,br=Number(bearing)*Math.PI/180,la1=lat*Math.PI/180,ln1=lng*Math.PI/180;
@@ -380,6 +380,13 @@ function updateMap(track,gps){
   var accuracy=Number((track&&track.driverLocation&&track.driverLocation.accuracy)||0);
   kfLat.setR(accuracy);kfLng.setR(accuracy);
   var filteredLat=kfLat.filter(dl.lat),filteredLng=kfLng.filter(dl.lng);
+  var MIN_MOVE_METERS=3;
+  var distMoved=visualDriverLat===null?999:haversine(visualDriverLat,visualDriverLng,filteredLat,filteredLng);
+  if(distMoved<MIN_MOVE_METERS&&lastDriverLat!==null){
+   noteServerDriverPosition(dl,track&&track.driverLocation);
+   lastDriverLat=dl.lat;lastDriverLng=dl.lng;
+   return;
+  }
   trimRouteToProgress(filteredLat,filteredLng);
   var visual=snapToRoute(filteredLat,filteredLng);
   visualDriverLat=visual.lat;visualDriverLng=visual.lng;
@@ -418,7 +425,7 @@ function noteServerDriverPosition(dl,raw){
  var rawSpeed=raw&&Number(raw.speed);
  if(Number.isFinite(rawHeading))driverHeading=rawHeading;
  else if(lastDriverLat!==null&&moved>1.5)driverHeading=bearingBetween(lastDriverLat,lastDriverLng,dl.lat,dl.lng);
- deadReckonSpeed=Number.isFinite(rawSpeed)&&rawSpeed>0?rawSpeed:(seconds&&moved>0?Math.min(18,moved/seconds):1.5);
+ deadReckonSpeed=Number.isFinite(rawSpeed)&&rawSpeed>.8?rawSpeed:(seconds&&moved>2?Math.min(18,moved/seconds):0);
  lastGPSTime=now;
  lastServerPointTime=now;
 }
@@ -433,6 +440,10 @@ function startDeadReckoning(){
   if(!lastGPSTime||baseLat===null||baseLng===null){deadReckonTimer=null;return}
   var age=(Date.now()-baseTime)/1000;
   if(age>8){deadReckonTimer=null;return}
+  if(deadReckonSpeed<.8){
+   deadReckonTimer=requestAnimationFrame(tick);
+   return;
+  }
   var pos=pointAhead(baseLat,baseLng,driverHeading,deadReckonSpeed*age);
   var visual=snapToRoute(pos.lat,pos.lng);
   visualDriverLat=visual.lat;visualDriverLng=visual.lng;
