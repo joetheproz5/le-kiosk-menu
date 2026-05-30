@@ -361,6 +361,22 @@ function updateMap(track,gps){
  var dl=track&&track.driverLocation;
  dl=pointFromGPS(dl);
  if(dl){
+  if(lastDriverLat===null){
+   kfLat.filter(dl.lat);
+   kfLng.filter(dl.lng);
+   visualDriverLat=dl.lat;visualDriverLng=dl.lng;
+   noteServerDriverPosition(dl,track&&track.driverLocation);
+   if(!driverMarker){
+    var firstEl=markerEl('\x3Cdiv class="driver-dot" style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(34,197,94,.3)"\x3E\x3C/div\x3E');
+    driverMarker=new maplibregl.Marker({element:firstEl}).setLngLat([dl.lng,dl.lat]).setPopup(new maplibregl.Popup().setHTML('\x3Cb\x3EDriver\x3C/b\x3E')).addTo(mapInst);
+    routeNeeded=true;
+   }
+   lastDriverLat=dl.lat;lastDriverLng=dl.lng;
+   var firstRb=document.getElementById('map-recenter');
+   if(firstRb)firstRb.style.display='block';
+   startDeadReckoning();
+   return;
+  }
   var accuracy=Number((track&&track.driverLocation&&track.driverLocation.accuracy)||0);
   kfLat.setR(accuracy);kfLng.setR(accuracy);
   var filteredLat=kfLat.filter(dl.lat),filteredLng=kfLng.filter(dl.lng);
@@ -410,11 +426,14 @@ function noteServerDriverPosition(dl,raw){
 function startDeadReckoning(){
  // Dead reckoning keeps the marker moving between server-pushed GPS pings.
  if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
+ var baseLat=visualDriverLat;
+ var baseLng=visualDriverLng;
+ var baseTime=Date.now();
  function tick(){
-  if(!lastGPSTime||lastDriverLat===null||lastDriverLng===null){deadReckonTimer=null;return}
-  var age=(Date.now()-lastGPSTime)/1000;
+  if(!lastGPSTime||baseLat===null||baseLng===null){deadReckonTimer=null;return}
+  var age=(Date.now()-baseTime)/1000;
   if(age>8){deadReckonTimer=null;return}
-  var pos=pointAhead(lastDriverLat,lastDriverLng,driverHeading,deadReckonSpeed*age);
+  var pos=pointAhead(baseLat,baseLng,driverHeading,deadReckonSpeed*age);
   var visual=snapToRoute(pos.lat,pos.lng);
   visualDriverLat=visual.lat;visualDriverLng=visual.lng;
   if(driverMarker)driverMarker.setLngLat([visual.lng,visual.lat]);
@@ -452,6 +471,9 @@ function checkArrival(dLat,dLng,cLat,cLng){
 function animateDriverMarker(lat,lng){
  if(!driverMarker)return;
  if(driverAnim)cancelAnimationFrame(driverAnim);
+ visualDriverLat=lat;
+ visualDriverLng=lng;
+ startDeadReckoning();
  var start=driverMarker.getLngLat();
  var startTime=performance.now(),duration=260;
  function tick(now){
@@ -459,7 +481,6 @@ function animateDriverMarker(lat,lng){
   var e=1-Math.pow(1-t,3);
   driverMarker.setLngLat([start.lng+(lng-start.lng)*e,start.lat+(lat-start.lat)*e]);
   if(t<1)driverAnim=requestAnimationFrame(tick);
-  else startDeadReckoning();
  }
  driverAnim=requestAnimationFrame(tick);
 }
