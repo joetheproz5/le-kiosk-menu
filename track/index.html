@@ -117,7 +117,7 @@ class KalmanFilter{
  }
  setR(r){if(Number.isFinite(Number(r))&&Number(r)>0)this.R=Number(r)}
 }
-var kfLat=new KalmanFilter(25,.01),kfLng=new KalmanFilter(25,.01);
+var kfLat=new KalmanFilter(8,.05),kfLng=new KalmanFilter(8,.05);
 function pointAhead(lat,lng,bearing,meters){
  if(!Number.isFinite(Number(bearing)))return{lat:lat,lng:lng};
  var R=6371000,d=meters/R,br=Number(bearing)*Math.PI/180,la1=lat*Math.PI/180,ln1=lng*Math.PI/180;
@@ -161,16 +161,7 @@ function nearestPointOnSegment(px,py,ax,ay,bx,by){
  return{lat:ay+t*dy,lng:ax+t*dx};
 }
 function snapToRoute(lat,lng){
- // Road snapping is visual only; server GPS values still drive route refresh decisions.
- if(!fullRouteCoords||fullRouteCoords.length<2)return{lat:lat,lng:lng};
- var bestDist=Infinity,bestPoint={lat:lat,lng:lng};
- for(var i=1;i<fullRouteCoords.length;i++){
-  var a=fullRouteCoords[i-1],b=fullRouteCoords[i];
-  var p=nearestPointOnSegment(lng,lat,a[0],a[1],b[0],b[1]);
-  var d=haversine(lat,lng,p.lat,p.lng);
-  if(d<bestDist){bestDist=d;bestPoint=p}
- }
- return bestDist<25?bestPoint:{lat:lat,lng:lng};
+ return{lat:lat,lng:lng};
 }
 function trimRouteToProgress(lat,lng){
  // Progress trimming searches the preserved full route but only changes the displayed line.
@@ -493,7 +484,7 @@ function updateMap(track,gps){
   var accuracy=Number((track&&track.driverLocation&&track.driverLocation.accuracy)||0);
   kfLat.setR(accuracy);kfLng.setR(accuracy);
   var filteredLat=kfLat.filter(dl.lat),filteredLng=kfLng.filter(dl.lng);
-   var MIN_MOVE_METERS=2;
+   var MIN_MOVE_METERS=4;
   var distMoved=lastDriverLat===null?999:haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng);
   if(distMoved<MIN_MOVE_METERS&&lastDriverLat!==null){
    noteServerDriverPosition(dl,track&&track.driverLocation);
@@ -605,7 +596,7 @@ function animateDriverMarker(lat,lng){
  var startLng=domPos.lng;
  var startTime=performance.now();
  var dist=haversine(startLat,startLng,snappedTarget.lat,snappedTarget.lng);
- var duration=Math.min(600,Math.max(200,dist*8));
+ var duration=Math.min(900,Math.max(400,dist*12));
  function tick(now){
   var t=Math.min(1,(now-startTime)/duration);
   var e=1-Math.pow(1-t,3);
