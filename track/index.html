@@ -116,7 +116,7 @@ class KalmanFilter{
  }
  setR(r){if(Number.isFinite(Number(r))&&Number(r)>0)this.R=Number(r)}
 }
-var kfLat=new KalmanFilter(15,.01),kfLng=new KalmanFilter(15,.01);
+var kfLat=new KalmanFilter(25,.01),kfLng=new KalmanFilter(25,.01);
 function pointAhead(lat,lng,bearing,meters){
  if(!Number.isFinite(Number(bearing)))return{lat:lat,lng:lng};
  var R=6371000,d=meters/R,br=Number(bearing)*Math.PI/180,la1=lat*Math.PI/180,ln1=lng*Math.PI/180;
@@ -389,7 +389,7 @@ function updateMap(track,gps){
   var accuracy=Number((track&&track.driverLocation&&track.driverLocation.accuracy)||0);
   kfLat.setR(accuracy);kfLng.setR(accuracy);
   var filteredLat=kfLat.filter(dl.lat),filteredLng=kfLng.filter(dl.lng);
-  var MIN_MOVE_METERS=3;
+  var MIN_MOVE_METERS=5;
   var distMoved=lastDriverLat===null?999:haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng);
   if(distMoved<MIN_MOVE_METERS&&lastDriverLat!==null){
    noteServerDriverPosition(dl,track&&track.driverLocation);
@@ -440,6 +440,7 @@ function noteServerDriverPosition(dl,raw){
 
 function startDeadReckoning(){
  // Dead reckoning keeps the marker moving between server-pushed GPS pings.
+ if(driverAnim)return;
  if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
  var baseLat=visualDriverLat;
  var baseLng=visualDriverLng;
@@ -488,9 +489,33 @@ function checkArrival(dLat,dLng,cLat,cLng){
 function animateDriverMarker(lat,lng){
  if(!driverMarker)return;
  if(driverAnim)cancelAnimationFrame(driverAnim);
+ if(deadReckonTimer)cancelAnimationFrame(deadReckonTimer);
  driverAnim=null;
- moveMarkerTo(lat,lng);
- startDeadReckoning();
+ deadReckonTimer=null;
+ var snappedTarget=snapToRoute(lat,lng);
+ var startLat=visualDriverLat!==null?visualDriverLat:snappedTarget.lat;
+ var startLng=visualDriverLng!==null?visualDriverLng:snappedTarget.lng;
+ var startTime=performance.now();
+ var dist=haversine(startLat,startLng,snappedTarget.lat,snappedTarget.lng);
+ var duration=Math.min(600,Math.max(200,dist*8));
+ function tick(now){
+  var t=Math.min(1,(now-startTime)/duration);
+  var e=1-Math.pow(1-t,3);
+  var curLat=startLat+(snappedTarget.lat-startLat)*e;
+  var curLng=startLng+(snappedTarget.lng-startLng)*e;
+  driverMarker.setLngLat([curLng,curLat]);
+  visualDriverLat=curLat;
+  visualDriverLng=curLng;
+  trimRouteToProgress(curLat,curLng);
+  if(t<1)driverAnim=requestAnimationFrame(tick);
+  else{
+   driverAnim=null;
+   visualDriverLat=snappedTarget.lat;
+   visualDriverLng=snappedTarget.lng;
+   startDeadReckoning();
+  }
+ }
+ driverAnim=requestAnimationFrame(tick);
 }
 
 function animateRouteDraw(){
