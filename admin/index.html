@@ -46,7 +46,7 @@ select{outline:none}
 
 #admin-screen{display:none;height:100vh}
 .app-shell{height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr);background:var(--bg)}
-.sidebar{background:#111827;color:#f9fafb;display:flex;flex-direction:column;border-right:1px solid #0f172a}
+.sidebar{background:#111827;color:#f9fafb;display:flex;flex-direction:column;border-right:1px solid #0f172a;overflow-y:auto}
 .side-brand{height:66px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand-stack{min-width:0}
 .brand-name{font-family:var(--brandfont);font-size:24px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
@@ -473,9 +473,6 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
   body{overflow:auto}
   #admin-screen{height:auto;min-height:100vh}
   .app-shell{height:auto;min-height:100vh;grid-template-columns:1fr}
-  .sidebar{position:static}
-  .side-nav{display:grid;grid-template-columns:repeat(4,1fr)}
-  .side-footer{display:none}
   .topbar{height:auto;align-items:flex-start;padding:16px;flex-direction:column}
   .mega-search{width:100%;max-width:none;min-width:0}
   .content{padding:16px 14px 110px}
@@ -501,8 +498,8 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
 }
 
 /* COLLAPSIBLE SIDEBAR */
-.sidebar-toggle{display:none;position:absolute;top:8px;left:8px;z-index:200;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer;align-items:center;justify-content:center}
-.sidebar.collapsed{width:68px}
+.sidebar-toggle{display:none;position:fixed;top:8px;left:8px;z-index:200;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer;align-items:center;justify-content:center}
+.sidebar.collapsed{width:68px;overflow-y:hidden}
 .sidebar.collapsed .brand-name,.sidebar.collapsed .brand-sub,
 .sidebar.collapsed .nav-btn span:not(.nav-icon),
 .sidebar.collapsed .side-footer,.sidebar.collapsed .unsaved-dot{display:none}
@@ -510,7 +507,7 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
 .sidebar.collapsed .nav-btn{justify-content:center;padding:10px}
 .sidebar.collapsed .nav-icon{margin:0}
 .sidebar.collapsed + .main{margin-left:68px}
-@media(max-width:980px){.sidebar-toggle{display:flex}.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:150;transform:translateX(-100%);transition:transform .22s ease}.sidebar.open{transform:translateX(0)}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:149}.sidebar-overlay.show{display:block}}
+@media(max-width:980px){.sidebar-toggle{display:flex}.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:150;width:250px;max-width:85vw;transform:translateX(-100%);transition:transform .22s ease;flex-direction:column;display:flex}.sidebar.open{transform:translateX(0);box-shadow:4px 0 30px rgba(0,0,0,.35)}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:149}.sidebar-overlay.show{display:block}}
 
 /* NAV GROUPING */
 .nav-group-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.3);padding:8px 11px 4px;margin-top:4px}
