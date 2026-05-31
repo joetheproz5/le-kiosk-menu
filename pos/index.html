@@ -559,31 +559,23 @@ display:flex;
 align-items:center;
 gap:10px}
 .active-orders-box{width:100%;min-width:0}
-.active-orders-head{display:flex;align-items:center;gap:8px;height:18px;margin-bottom:2px}
+.active-orders-head{display:flex;align-items:center;gap:8px;height:14px;margin-bottom:2px}
 .active-orders-title{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#78350f;white-space:nowrap;flex-shrink:0}
 .active-orders-sub{display:none}
-.active-orders-list{display:flex;gap:6px;overflow-x:auto;overflow-y:visible;padding:2px 0;scrollbar-width:none;align-items:center;min-height:28px}
+.active-orders-list{display:flex;gap:6px;overflow-x:auto;overflow-y:visible;padding:2px 0;scrollbar-width:none;align-items:center;min-height:36px}
 .active-orders-list::-webkit-scrollbar{display:none}
-.active-order-pill{position:relative;flex-shrink:0;display:flex;align-items:center;gap:5px;height:28px;border-radius:14px;padding:0 10px;background:var(--white);border:1px solid var(--line);cursor:pointer;font-size:11px;font-weight:800;white-space:nowrap;user-select:none;transition:border-color .12s,background .12s;outline:none}
-.active-order-pill:hover{border-color:#fcd34d;background:var(--brand-soft)}
-.active-order-pill:focus-within{border-color:var(--brand);background:var(--brand-soft);z-index:5}
-.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.pill-dot.pending{background:#f59e0b;animation:pillPulse 2s infinite}
-.pill-dot.confirmed{background:#f59e0b}
-.pill-dot.delivering{background:#3b82f6;animation:pillPulse 2s infinite}
-@keyframes pillPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.7)}70%{box-shadow:0 0 0 4px rgba(245,158,11,0)}}
-.pill-name{color:var(--ink);max-width:72px;overflow:hidden;text-overflow:ellipsis}
-.pill-id{color:var(--muted);font-size:10px;max-width:54px;overflow:hidden;text-overflow:ellipsis}
-.pill-popover{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:8px;background:var(--side);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px;z-index:20;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.active-order-pill:focus-within .pill-popover{display:flex;gap:4px}
-.pill-action{height:26px;border-radius:6px;border:0;padding:0 10px;font-size:10px;font-weight:900;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:opacity .12s}
-.pill-action:hover{opacity:.85}
-.pill-action.done{background:#22c55e;color:#fff}
-.pill-action.cancel{background:#ef4444;color:#fff}
-.active-empty{height:28px;display:flex;align-items:center;padding:0 2px;font-size:11px;font-weight:700;color:var(--muted);border:none;background:none}
-body.theme-dark .active-order-pill{background:var(--white);border-color:var(--line)}
-body.theme-dark .active-order-pill:hover{border-color:#b45309}
-body.theme-dark .pill-name{color:var(--ink)}
+.active-order-card{flex-shrink:0;display:flex;align-items:center;gap:6px;height:36px;min-width:176px;max-width:210px;border-radius:10px;padding:0 7px 0 10px;background:var(--white);border:1.5px solid #fde68a}
+.active-order-name{font-size:12px;font-weight:900;color:var(--ink);max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:1}
+.active-order-type{font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0;text-transform:uppercase}
+.active-order-items{display:none}
+.active-order-meta{display:none}
+.active-order-actions{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.active-order-actions .small-btn{height:24px;min-width:24px;width:24px;border-radius:6px;padding:0;font-size:14px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.active-order-actions .small-btn.green{background:#22c55e;color:#fff}
+.active-order-actions .small-btn.red{background:#ef4444;color:#fff}
+.active-empty{height:36px;display:flex;align-items:center;padding:0 2px;font-size:11px;font-weight:700;color:var(--muted);border:none;background:none}
+body.theme-dark .active-order-card{background:var(--white);border-color:var(--line)}
+body.theme-dark .active-order-name{color:var(--ink)}
 body.theme-dark .active-empty{color:var(--muted);background:none}
 .category-toggle{
 height:34px;
@@ -2334,17 +2326,14 @@ return !['done','cancelled','declined','inbox'].includes(s);
 }).sort((a,b)=>new Date(a.timestamp||0)-new Date(b.timestamp||0));
 }
 function activeOrderCard(o){
-const dt=o.timestamp?new Date(o.timestamp):new Date(),items=(o.items||[]).slice(0,3).map(it=>`${it.qty}x ${it.name}`).join(', ');
-const more=(o.items||[]).length>3?` +${o.items.length-3}`:'';
-const status=o.status==='confirmed'?'confirmed':(o.status||'pending');
-const shortId=String(o.id||'').slice(-8);
-return `<div class="active-order-pill" tabindex="0">
-<span class="pill-dot ${status}"></span>
-<span class="pill-name">${esc(o.name||'Guest')}</span>
-<span class="pill-id">${esc(shortId)}</span>
-<div class="pill-popover">
-<button class="pill-action done" onclick="event.stopPropagation();quickStatus('${esc(o.id)}','done')">Done</button>
-<button class="pill-action cancel" onclick="event.stopPropagation();quickStatus('${esc(o.id)}','cancelled')">Cancel</button>
+const shortName=String(o.name||'Guest').slice(0,10);
+const typeCode={dinein:'D',takeaway:'T',delivery:'I'}[o.orderType]||'?';
+return `<div class="active-order-card">
+<span class="active-order-name" title="${esc(o.name||'Guest')}">${esc(shortName)}</span>
+<span class="active-order-type">${typeCode}</span>
+<div class="active-order-actions">
+<button class="small-btn green" onclick="event.stopPropagation();quickStatus('${esc(o.id)}','done')" aria-label="Done">&#10003;</button>
+<button class="small-btn red" onclick="event.stopPropagation();quickStatus('${esc(o.id)}','cancelled')" aria-label="Cancel">&#10007;</button>
 </div>
 </div>`;
 }
