@@ -51,8 +51,9 @@ var markingStep=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null, currentRouteCoords=null, routeFetchSeq=0, routeDrawTimer=null, turnZoomActive=false, turnZoomTimer=null, lastTurnCheckAt=0, lastTurnAngle=0, arrivalTriggered=false, signalTimer=null, lastTrimLat=null, lastTrimLng=null;
 var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null, manualRecenterUntil=0, lastTrackingJSON=null;
 var knownOrderIds=null, alertAudioCtx=null, alertAudioUnlocked=false, lastOrderAlertAt=0;
-var driverWS=null, wsReconnectTimer=null, wsPingTimer=null, lastETAMinutes=null;
+var driverWS=null, driverWSOrderId=null, wsReconnectTimer=null, wsPingTimer=null, lastETAMinutes=null;
 var PENDING_ACTIONS_KEY='lk_driver_pending_actions';
+var gpsErrorRetryTimer=null, lastGPSErrorAt=0;
 
 /* shared util */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
@@ -206,11 +207,13 @@ function checkNewOrders(rows){
 }
 
 function connectDriverWS(orderId){
- // WebSocket pushes live driver position to the customer map; REST polling remains the fallback.
- if(!orderId||typeof WebSocket==='undefined')return;
- if(driverWS&&driverWS.readyState===WebSocket.OPEN)return;
- var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId);
- driverWS=new WebSocket(wsUrl);
+  // WebSocket pushes live driver position to the customer map; REST polling remains the fallback.
+  if(!orderId||typeof WebSocket==='undefined')return;
+  if(driverWS&&driverWSOrderId===orderId&&driverWS.readyState!==WebSocket.CLOSED)return;
+  if(driverWS&&driverWSOrderId!==orderId)closeDriverWS();
+  driverWSOrderId=orderId;
+  var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId);
+  driverWS=new WebSocket(wsUrl);
  driverWS.addEventListener('open',function(){
   setReconnecting(false);
   clearTimeout(wsReconnectTimer);
@@ -219,9 +222,10 @@ function connectDriverWS(orderId){
    if(driverWS&&driverWS.readyState===WebSocket.OPEN)driverWS.send(JSON.stringify({type:'ping'}));
   },30000);
  });
- driverWS.addEventListener('close',function(){
-  clearInterval(wsPingTimer);
-  wsPingTimer=null;
+  driverWS.addEventListener('close',function(){
+   if(driverWSOrderId!==orderId)return;
+   clearInterval(wsPingTimer);
+   wsPingTimer=null;
   driverWS=null;
   if(orderData&&orderData.tracking&&orderData.tracking.delivering&&!orderData.tracking.delivered){
    setReconnecting(true);
@@ -234,11 +238,12 @@ function connectDriverWS(orderId){
 
 function closeDriverWS(){
  clearTimeout(wsReconnectTimer);
- clearInterval(wsPingTimer);
- wsReconnectTimer=null;
- wsPingTimer=null;
- if(driverWS){try{driverWS.close()}catch(e){}}
- driverWS=null;
+  clearInterval(wsPingTimer);
+  wsReconnectTimer=null;
+  wsPingTimer=null;
+  if(driverWS){try{driverWS.close()}catch(e){}}
+  driverWS=null;
+  driverWSOrderId=null;
 }
 
 function sendWSUpdate(lat,lng,eta){
@@ -769,10 +774,12 @@ function setRouteGeometry(geometry,dashed){
 }
 
 function renderList(data){
- syncStickyDelivered(false);
- allOrders=(data||[]).filter(isMenuOrder);
- var active=allOrders.filter(function(o){return !isDeliveredOrder(o)});
- var done=allOrders.filter(isDeliveredOrder);
+  syncStickyDelivered(false);
+  allOrders=(data||[]).filter(isMenuOrder);
+  function orderTime(o){return new Date(o.createdAt||o.time||o.tracking&&o.tracking.received||0).getTime()||0}
+  function activeRank(o){var t=o.tracking||{};return t.delivering?0:t.preparing?1:2}
+  var active=allOrders.filter(function(o){return !isDeliveredOrder(o)}).sort(function(a,b){return activeRank(a)-activeRank(b)||orderTime(a)-orderTime(b)});
+  var done=allOrders.filter(isDeliveredOrder).sort(function(a,b){return orderTime(b)-orderTime(a)});
  checkNewOrders(allOrders);
  var html='\x3Cdiv class="top"\x3E\x3Cdiv class="brand-dot"\x3E\x3C/div\x3E\x3Cdiv class="top-copy"\x3E\x3Cdiv class="kicker"\x3ELe Kiosk Driver\x3C/div\x3E\x3Ch1\x3EDeliveries\x3C/h1\x3E\x3C/div\x3E\x3Cdiv class="badge"\x3ELive\x3C/div\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="tab-bar"\x3E'+
@@ -785,7 +792,7 @@ function renderList(data){
   var status=isDeliveredOrder(o)?'Delivered':track.delivering?'Out for Delivery':'Ready';
   var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
   if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
-  return'\x3Cdiv class="order-card" onclick="location.href=\x27?id=\x27+encodeURIComponent(\x27'+esc(o.id)+'\x27)"\x3E'+
+   return'\x3Cdiv class="order-card" data-order-id="'+esc(o.id)+'" onclick="D.openOrder(this)"\x3E'+
    '\x3Cdiv class="head"\x3E\x3Cspan class="name"\x3E'+esc(o.name||'Guest')+'\x3C/span\x3E\x3Cspan class="total"\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E'+
    '\x3Cdiv class="meta"\x3E'+status+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+(o.address?' · '+esc(o.address):'')+'\x3C/div\x3E'+
    '\x3Cdiv class="items-preview"\x3E'+esc(items)+'\x3C/div\x3E'+
@@ -828,7 +835,7 @@ function renderDetail(o){
  if(o.orderType==='delivery'&&!firstMapDone){
  var gpsCls=gpsActive?' active':'';
   html+='\x3Cdiv class="gps-bar'+gpsCls+gq.cls+'" id="gps-bar" onclick="D.toggleGPS()"\x3E\x3Cdiv class="gps-dot" id="gps-dot"\x3E\x3C/div\x3E\x3Cdiv class="gps-text" id="gps-text"\x3E'+(gpsActive?gq.label:'Tap to share your location')+'\x3C/div\x3E\x3Cdiv class="gps-coords" id="gps-coords"\x3E'+(gpsActive?gq.value:'')+'\x3C/div\x3E\x3C/div\x3E';
-  html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3ENavigation\x3C/span\x3E\x3Cspan class="map-actions"\x3E\x3Cbutton class="nav-btn" onclick="D.recenter(event)"\x3ERecenter\x3C/button\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/span\x3E\x3C/div\x3E\x3Cbutton class="compass-btn" id="compass-btn" onclick="D.toggleHeadingMode(event)" aria-label="Toggle heading mode"\x3E\x3Csvg viewBox="0 0 24 24" aria-hidden="true"\x3E\x3Cg class="compass-needle"\x3E\x3Cpath d="M12 3l4 15-4-2-4 2 4-15z" fill="#ef4444"/\x3E\x3Cpath d="M12 3v13l-4 2 4-15z" fill="#111827"/\x3E\x3C/g\x3E\x3C/svg\x3E\x3C/button\x3E\x3Cdiv id="speedometer" style="position:absolute;bottom:14px;left:14px;z-index:10;width:64px;height:64px;border-radius:50%;background:rgba(7,11,18,.82);border:2px solid rgba(255,255,255,.12);backdrop-filter:blur(10px);display:'+(track.delivering&&!track.delivered?'flex':'none')+';flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity .6s,border-color .4s"\x3E\x3Cspan id="speed-value" style="font-size:18px;font-weight:900;color:#fff;line-height:1"\x3E0\x3C/span\x3E\x3Cspan id="speed-unit" style="font-size:9px;font-weight:800;color:#8d9aab;text-transform:uppercase;letter-spacing:.06em"\x3Ekm/h\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
+   html+='\x3Cdiv class="map-card'+(track.delivering&&!track.delivered?' delivering':'')+'"\x3E\x3Cdiv class="map-head"\x3E\x3Cspan class="map-title"\x3ENavigation\x3C/span\x3E\x3Cspan class="map-actions"\x3E\x3Cbutton class="nav-btn" onclick="D.openGoogleNav(event)"\x3EGoogle Maps\x3C/button\x3E\x3Cbutton class="nav-btn" onclick="D.recenter(event)"\x3ERecenter\x3C/button\x3E\x3Cspan class="map-distance"\x3E\x3C/span\x3E\x3C/span\x3E\x3C/div\x3E\x3Cbutton class="compass-btn" id="compass-btn" onclick="D.toggleHeadingMode(event)" aria-label="Toggle heading mode"\x3E\x3Csvg viewBox="0 0 24 24" aria-hidden="true"\x3E\x3Cg class="compass-needle"\x3E\x3Cpath d="M12 3l4 15-4-2-4 2 4-15z" fill="#ef4444"/\x3E\x3Cpath d="M12 3v13l-4 2 4-15z" fill="#111827"/\x3E\x3C/g\x3E\x3C/svg\x3E\x3C/button\x3E\x3Cdiv id="speedometer" style="position:absolute;bottom:14px;left:14px;z-index:10;width:64px;height:64px;border-radius:50%;background:rgba(7,11,18,.82);border:2px solid rgba(255,255,255,.12);backdrop-filter:blur(10px);display:'+(track.delivering&&!track.delivered?'flex':'none')+';flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity .6s,border-color .4s"\x3E\x3Cspan id="speed-value" style="font-size:18px;font-weight:900;color:#fff;line-height:1"\x3E0\x3C/span\x3E\x3Cspan id="speed-unit" style="font-size:9px;font-weight:800;color:#8d9aab;text-transform:uppercase;letter-spacing:.06em"\x3Ekm/h\x3C/span\x3E\x3C/div\x3E\x3Cdiv id="map"\x3E\x3C/div\x3E\x3C/div\x3E';
   if(!customerPoint)html+='\x3Cdiv class="warn"\x3ECustomer GPS is missing for this order\x3C/div\x3E';
  }
 
@@ -1104,12 +1111,13 @@ function handleGPSPosition(pos){
 }
 
 function handleGPSError(){
- toast('GPS error — check permissions');
- if(deliveryGPSLocked()){
-  gpsActive=true;
-  setTimeout(sendNow,2000);
- }else{
-  gpsActive=false;
+  if(Date.now()-lastGPSErrorAt>10000){toast('GPS error — check permissions/location settings');lastGPSErrorAt=Date.now()}
+  if(deliveryGPSLocked()){
+   gpsActive=true;
+   clearTimeout(gpsErrorRetryTimer);
+   gpsErrorRetryTimer=setTimeout(function(){gpsErrorRetryTimer=null;sendNow()},4000);
+  }else{
+   gpsActive=false;
  }
  updateGPSBar();
 }
@@ -1179,12 +1187,19 @@ function stopGPS(force){
  }
  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null}
  if(gpsPollTimer){clearInterval(gpsPollTimer);gpsPollTimer=null}
- if(gpsWatchdogTimer){clearInterval(gpsWatchdogTimer);gpsWatchdogTimer=null}
+  if(gpsWatchdogTimer){clearInterval(gpsWatchdogTimer);gpsWatchdogTimer=null}
+  if(gpsErrorRetryTimer){clearTimeout(gpsErrorRetryTimer);gpsErrorRetryTimer=null}
  gpsMode='watch';
  slowSpeedSince=null;
  gpsActive=false;
  saveActiveDelivery(false);
- updateGPSBar();
+  updateGPSBar();
+}
+
+function cleanupMap(){
+ if(mapInst){try{mapInst.remove()}catch(e){}}
+ mapInst=null;driverMarker=null;custMarker=null;routeLine=null;
+ firstMapDone=false;
 }
 
 function updateGPSBar(){
@@ -1199,13 +1214,17 @@ function updateGPSBar(){
 }
 
 function sendNow(){
- if(!navigator.geolocation)return;
- navigator.geolocation.getCurrentPosition(function(pos){
-  if(moveDriverFromPosition(pos))sendLocation(filteredDriverLat||pos.coords.latitude,filteredDriverLng||pos.coords.longitude);
- },function(){if(deliveryGPSLocked())setTimeout(sendNow,2500)},{enableHighAccuracy:true,maximumAge:1000,timeout:8000});
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(function(pos){
+   if(moveDriverFromPosition(pos))sendLocation(filteredDriverLat||pos.coords.latitude,filteredDriverLng||pos.coords.longitude);
+  },handleGPSError,{enableHighAccuracy:true,maximumAge:1000,timeout:8000});
 }
 
 window.D={
+ openOrder:function(el){
+  var id=el&&el.getAttribute('data-order-id');
+  if(id)location.href='?id='+encodeURIComponent(id);
+ },
  switchTab:function(tab){listTab=tab;renderList(allOrders)},
  reload:function(){load()},
  toggleHeadingMode:function(e){
@@ -1299,7 +1318,7 @@ async function load(){
    clearInterval(autoRefresh);
    startRefresh();
    lastTrackingJSON=null;
-   firstMapDone=false;mapInst=null;driverMarker=null;custMarker=null;routeLine=null;
+    cleanupMap();
    try{
     var j2=await fetchJSON(W+'/driver',{},3);
     allOrders=j2.data||[];

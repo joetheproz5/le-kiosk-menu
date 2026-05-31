@@ -94,7 +94,7 @@ var POSITION_STALE_MS=15000, LIVE_MIN_MOVE_METERS=1.1, POLL_MIN_MOVE_METERS=3.5;
 var STATUS_REFRESH_MS=8000;
 var wasDelivering=false;
 var lastDriverLat=null,lastDriverLng=null,visualDriverLat=null,visualDriverLng=null,driverAnim=null,driverHeading=null,deadReckonTimer=null,lastGPSTime=null,deadReckonSpeed=0,lastServerPointTime=null,lastPositionTs=0,lastPositionSource='poll';
-var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0, lastKnownETA=null, originalTitle=document.title, titleFlashTimer=null, statusAudioCtx=null, pendingWSConnect=false, mapInitInProgress=false;
+var loadBusy=false, autoRefresh=null, lastTrackingJSON=null, customerWS=null, wsAlive=false, customerWSReconnect=true, wsRetryCount=0, customerWSPingTimer=null, customerWSReconnectTimer=null, currentOrderGPS=null, currentOrderId=null, manualPanUntil=0, lastKnownETA=null, originalTitle=document.title, titleFlashTimer=null, statusAudioCtx=null, pendingWSConnect=false, mapInitInProgress=false, hasLoadedOrder=false;
 
 /* shared util */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/\x3C/g,'&lt;').replace(/>/g,'&gt;');}
@@ -219,6 +219,17 @@ function setReconnecting(active){
  });
 }
 
+function closeCustomerWS(){
+ customerWSReconnect=false;
+ clearTimeout(customerWSReconnectTimer);
+ customerWSReconnectTimer=null;
+ clearInterval(customerWSPingTimer);
+ customerWSPingTimer=null;
+ if(customerWS){try{customerWS.close()}catch(e){}}
+ customerWS=null;
+ wsAlive=false;
+}
+
 function setMapDistance(text){
  var el=document.querySelector('.map-distance');
  if(!el)return;
@@ -265,10 +276,12 @@ function connectCustomerWS(orderId){
  if(!orderId||typeof WebSocket==='undefined'||customerWS)return;
  var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=customer&orderId='+encodeURIComponent(orderId);
  customerWS=new WebSocket(wsUrl);
- customerWS.addEventListener('open',function(){
-  wsAlive=true;
-  setReconnecting(false);
-  wsRetryCount=0;
+  customerWS.addEventListener('open',function(){
+   wsAlive=true;
+   setReconnecting(false);
+   wsRetryCount=0;
+   clearTimeout(customerWSReconnectTimer);
+   customerWSReconnectTimer=null;
   clearInterval(customerWSPingTimer);
   customerWSPingTimer=setInterval(function(){
    if(customerWS&&customerWS.readyState===WebSocket.OPEN)customerWS.send(JSON.stringify({type:'ping'}));
@@ -291,7 +304,8 @@ function connectCustomerWS(orderId){
    setReconnecting(true);
    var delay=Math.min(30000,3000*Math.pow(1.4,wsRetryCount));
    wsRetryCount++;
-   setTimeout(function(){connectCustomerWS(orderId)},delay);
+    clearTimeout(customerWSReconnectTimer);
+    customerWSReconnectTimer=setTimeout(function(){customerWSReconnectTimer=null;connectCustomerWS(orderId)},delay);
   }
  });
  customerWS.addEventListener('error',function(){setReconnecting(true);try{customerWS.close()}catch(e){}});
@@ -356,7 +370,7 @@ function buildMapArea(){
 }
 
 function buildMapPlaceholder(){
- return'\x3Cdiv class="map-card" style="border-color:rgba(245,158,11,.45);min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;color:#8b6f36;font-size:13px;font-weight:800;padding:18px;background:#fff"\x3EMap will appear when your order is out for delivery\x3C/div\x3E';
+  return'\x3Cdiv class="map-card" style="border-color:rgba(245,158,11,.45);min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;color:#8b6f36;font-size:13px;font-weight:800;padding:18px;background:#fff"\x3EKitchen is preparing your order. Live map starts when the driver picks it up.\x3C/div\x3E';
 }
 
 function resetMapState(){
@@ -726,11 +740,10 @@ async function load(){
   currentOrderId=o.id||id;
   currentOrderGPS=o.gps||currentOrderGPS;
   var trackingJSON=JSON.stringify(track);
-  if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
-   customerWSReconnect=false;
-   if(customerWS){try{customerWS.close()}catch(e){}}
-   document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
-   document.getElementById('map-area').innerHTML='';return;
+   if(track.delivered&&Date.now()-new Date(track.delivered).getTime()>600000){
+    closeCustomerWS();
+    document.getElementById('content').innerHTML='\x3Cdiv class="error-card"\x3E\x3Cdiv class="emoji"\x3E🍽️\x3C/div\x3E\x3Cdiv class="msg"\x3EOrder delivered — tracking expired\x3C/div\x3E\x3C/div\x3E';
+    document.getElementById('map-area').innerHTML='';return;
   }
   var previousTrackingJSON=lastTrackingJSON;
   if(trackingJSON!==lastTrackingJSON){
@@ -738,10 +751,11 @@ async function load(){
    document.getElementById('content').innerHTML=buildHTML(o,track);
    if(previousTrackingJSON!==null&&document.visibilityState!=='visible'){
     playStatusUpdateSound();
-    startTitleFlash();
+     startTitleFlash();
+    }
    }
-  }
-  if(o.orderType==='delivery'){
+   hasLoadedOrder=true;
+   if(o.orderType==='delivery'){
    if(track.delivering){
     lastPositionSource='poll';
     if(ensureMapReady(track,o.gps))updateMap(track,o.gps);
@@ -750,13 +764,18 @@ async function load(){
     document.getElementById('map-area').innerHTML=buildMapPlaceholder();
    }
    if(track.delivering&&!track.delivered){customerWSReconnect=true;if(mapInst)connectCustomerWS(currentOrderId);else pendingWSConnect=true}
-   if(track.delivered){customerWSReconnect=false;if(customerWS){try{customerWS.close()}catch(e){}}}
-  }
- }catch(e){
-  clearTimeout(tmr);
-  setReconnecting(true);
-  showError(friendlyError(e));
- }finally{
+    if(track.delivered)closeCustomerWS();
+   }
+  }catch(e){
+   clearTimeout(tmr);
+   setReconnecting(true);
+   if(hasLoadedOrder){
+    var status=document.querySelector('.last-updated');
+    if(status){status.textContent=friendlyError(e)+' — showing last known status';status.style.color='#f59e0b'}
+   }else{
+    showError(friendlyError(e));
+   }
+  }finally{
   loadBusy=false;
  }
 }
