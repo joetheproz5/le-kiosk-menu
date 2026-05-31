@@ -235,7 +235,8 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .color-dot{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer}
 .color-dot.active{transform:scale(1.18)}
 .pill-preview{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.pill-preview span{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;border:1px solid}
+.pill-preview span{font-size:10px;font-weight:800;padding:3px 22px 3px 8px;border-radius:999px;border:1px solid;position:relative;cursor:default}
+.pill-del{position:absolute;right:3px;top:50%;transform:translateY(-50%);width:15px;height:15px;border-radius:50%;border:0;background:rgba(0,0,0,.15);color:inherit;font-size:9px;font-weight:900;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .addons-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .addons-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .addon-entry{display:grid;grid-template-columns:minmax(0,1fr) 88px 32px;gap:6px;margin-bottom:6px}
@@ -432,7 +433,7 @@ body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .c
 .editor-section-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .inline-list{display:flex;flex-direction:column;gap:7px}
 .inline-row{display:grid;grid-template-columns:minmax(0,1fr) 100px 42px 34px;gap:7px;align-items:center}
-.addon-req{display:flex;align-items:center;justify-content:center;height:32px;border-radius:7px;background:var(--soft);cursor:pointer;font-size:10px;font-weight:900;color:var(--muted);user-select:none}
+.addon-req{display:flex;align-items:center;justify-content:center;height:32px;border-radius:7px;background:var(--soft);cursor:pointer;font-size:14px;font-weight:900;color:var(--muted);user-select:none}
 .addon-req.on{background:#fef3c7;color:#92400e}
 .settings-section-title{font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);grid-column:1/-1;margin:2px 0 -4px}
 .table-qr-form{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:8px;align-items:end;margin-bottom:12px}
@@ -3316,7 +3317,7 @@ function itemEditorHtml(item,i){
           <span class="field-label" style="margin:0">Color</span>
           ${PILL_PRESETS.map(p=>`<button class="color-dot${p.id===color?' active':''}" style="background:${p.bg};border-color:${p.id===color?p.text:p.border}" title="${p.label}" onclick="setPillColor(${i},'${p.id}')"></button>`).join('')}
         </div>
-        <div class="pill-preview">${(item.flavors||[]).map(f=>`<span style="background:${pc.bg};border-color:${pc.border};color:${pc.text}">${esc(f)}</span>`).join('')}</div>
+        <div class="pill-preview">${(item.flavors||[]).map((f,fi)=>`<span style="background:${pc.bg};border-color:${pc.border};color:${pc.text}">${esc(f)}<button class="pill-del" onclick="event.stopPropagation();deletePill(${i},${fi})" title="Remove">×</button></span>`).join('')}</div>
     </div>
     ${renderItemAddons(item,i)}
     <div class="modal-actions"><button class="btn btn-danger btn-sm" onclick="confirmDeleteItem(${i})">Delete Item</button></div>
@@ -3335,7 +3336,7 @@ function renderItemAddons(item,i){
     <div class="inline-list">${addons.map((a,ai)=>`<div class="inline-row">
       <input class="addon-input" value="${esc(a.label||'')}" placeholder="Addon name" oninput="editAddonEntry(${i},${ai},'label',this.value)">
       <input class="addon-input" value="${esc(a.price||'')}" placeholder="$0" oninput="editAddonEntry(${i},${ai},'price',this.value)">
-      <div class="addon-req${a.required?' on':''}" onclick="toggleAddonRequired(${i},${ai})" title="Required add-on">req</div>
+      <div class="addon-req${a.required?' on':''}" onclick="toggleAddonRequired(${i},${ai})" title="Required">${a.required?'☑':'☐'}</div>
       <button class="icon-btn danger" onclick="removeAddonEntry(${i},${ai})">x</button>
     </div>`).join('')||'<div class="panel-sub">No item add-ons.</div>'}</div>
   </div>`;
@@ -3343,6 +3344,7 @@ function renderItemAddons(item,i){
 function editItem(i,field,value){const sec=getSec();if(!sec||!sec.items[i])return;sec.items[i][field]=value;markUnsaved();if(field==='name')renderCategoryList();}
 function editItemFlavors(i,value){const item=getSec().items[i];const arr=value.split(',').map(s=>s.trim()).filter(Boolean);if(arr.length)item.flavors=arr;else delete item.flavors;markUnsaved();}
 function setPillColor(i,color){const item=getSec().items[i];item.flavorColor=color;markUnsaved();openItemEditor(i);}
+function deletePill(i,fi){const item=getSec().items[i];if(!item.flavors)return;item.flavors.splice(fi,1);if(!item.flavors.length)delete item.flavors;markUnsaved();openItemEditor(i);}
 function addItem(){const sec=getSec();if(!sec.items)sec.items=[];sec.items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',active:true,addons:[]});markUnsaved();renderCategoryList();renderEditor();openItemEditor(sec.items.length-1);}
 function confirmDeleteItem(i){const item=getSec().items[i];openConfirm('Delete Item',`Delete "${item.name||'this item'}"?`,'Delete',()=>{getSec().items.splice(i,1);markUnsaved();renderCategoryList();renderEditor();});}
 function addAddonEntry(i){const item=getSec().items[i];if(!item.addons)item.addons=[];item.addons.push({label:'',price:'$0',required:false});markUnsaved();openItemEditor(i);}
