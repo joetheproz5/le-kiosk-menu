@@ -2638,8 +2638,8 @@ try{
 await postOrder(order);
 ordersData.unshift(order);await upsertCustomer(order);renderActiveOrders();showToast(`Order ${
 order.id}
-saved`,'success');clearOrder();renderOrdersList();
-}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});renderActiveOrders();await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList()}
+saved`,'success');clearOrder();renderOrdersList();$('cart-panel').classList.remove('open');
+}catch(e){queueOfflineOrder(order,e);ordersData.unshift({...order,syncStatus:'offline'});renderActiveOrders();await upsertCustomer(order).catch(()=>{});showToast('Saved offline. It will sync automatically.','error');clearOrder();renderOrdersList();$('cart-panel').classList.remove('open')}
 btn.disabled=false;btn.textContent='Charge & Save';hideLoading();
 }
 async function upsertCustomer(order){
