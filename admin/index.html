@@ -304,6 +304,16 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .product-sales-metric{border-radius:8px;background:#fff;border:1px solid var(--line);padding:10px;text-align:center}
 .product-sales-number{font-size:24px;font-weight:900;color:var(--brand-dark);line-height:1}
 .product-sales-sub{font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px}
+.sales-table-header{display:grid;grid-template-columns:44px minmax(0,1fr) 90px 90px 100px;gap:10px;align-items:center;padding:8px 12px;border-bottom:2px solid var(--line);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sales-row{display:grid;grid-template-columns:44px minmax(0,1fr) 90px 90px 100px;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 12px;margin-bottom:6px}
+.sales-row:hover{border-color:var(--brand-line)}
+.sales-img{width:44px;height:44px;border-radius:7px;background:var(--soft);object-fit:cover}
+.sales-name{font-size:13px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sales-cat{font-size:10px;font-weight:700;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sales-num{font-size:18px;font-weight:900;color:var(--brand-dark);text-align:center}
+.sales-rev{font-size:13px;font-weight:700;color:var(--brand-mid);text-align:center}
+body.theme-dark .sales-row{background:var(--panel);border-color:var(--line)}
+body.theme-dark .sales-row:hover{border-color:var(--brand-line)}
 .today-bar{display:none}
 .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
 .chart-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;box-shadow:0 2px 8px rgba(17,24,39,.03);overflow:hidden}
@@ -621,6 +631,7 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
         <div class="nav-group-label">Data</div>
         <button class="nav-btn" id="nav-customers" onclick="switchView('customers')"><span class="nav-icon">♙</span>Customers</button>
         <button class="nav-btn" id="nav-blocklist" onclick="switchView('blocklist')"><span class="nav-icon">!</span>Block List</button>
+        <button class="nav-btn" id="nav-sales" onclick="switchView('sales')"><span class="nav-icon">↗</span>Sales Analytics</button>
         <button class="nav-btn" id="nav-settings" onclick="switchView('settings')"><span class="nav-icon">⚙</span>Settings</button>
       </nav>
       <div class="side-footer">
@@ -660,15 +671,6 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
         <div class="view active" id="view-dashboard">
           <div class="hero-bar" id="dashboard-hero"></div>
           <div class="dash-grid" id="dashboard-stats"></div>
-          <div class="dashboard-section">
-            <div class="dashboard-section-head">
-              <div>
-                <div class="dashboard-section-title">Top Selling Items</div>
-                <div class="dashboard-section-sub">Today, weekly, and total quantities</div>
-              </div>
-            </div>
-            <div class="product-sales-grid" id="dashboard-product-sales"></div>
-          </div>
           <div class="chart-grid" id="dashboard-charts"></div>
           <div class="dashboard-section" id="dashboard-recent-orders"></div>
         </div>
@@ -929,6 +931,28 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
           </div>
         </div>
 
+        <div class="view" id="view-sales">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Sales Analytics</div>
+                <div class="panel-sub">Per-item sales breakdown across every menu item</div>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="table-toolbar" style="margin-bottom:16px">
+                <div class="segment" id="sales-filter-segment">
+                  <button class="active" data-filter="today" onclick="setSalesFilter('today')">Today</button>
+                  <button data-filter="week" onclick="setSalesFilter('week')">This Week</button>
+                  <button data-filter="total" onclick="setSalesFilter('total')">Total</button>
+                </div>
+                <input class="search-input" id="sales-search" type="text" placeholder="Search items..." oninput="renderSalesAnalytics()">
+              </div>
+              <div id="sales-table"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="view" id="view-settings">
           <div class="settings-grid">
             <div class="settings-section-title">Switches</div>
@@ -1070,6 +1094,7 @@ let selectedItems=new Set();
 let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false,dashboardRefreshTimer=null;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false,galleryAdminData=[],galleryFilter='pending';
 let dashboardOrdersData=[],menuVisitorData=[];
+let salesFilter='today';
 let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,galleryEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
@@ -2677,6 +2702,7 @@ function switchView(view){
     gallery:['Community','Guest Gallery'],
     customers:['Customer CRM','Customers'],
     blocklist:['Risk Control','Block List'],
+    sales:['Sales Analytics','Sales Analytics'],
     settings:['System Config','Settings']
   };
   document.getElementById('page-kicker').textContent=titles[view][0];
@@ -2695,6 +2721,7 @@ function switchView(view){
   if(view==='customers')openCustomersAdmin();
   if(view==='loyalty')openCustomersAdmin();
   if(view==='blocklist')openBlockList();
+  if(view==='sales')renderSalesAnalytics();
   if(view==='basketball')renderBasketballManager();
   if(view==='tables')renderTablesManager();
   if(view==='gallery')loadGalleryAdmin();
@@ -2745,44 +2772,11 @@ function orderItemsForStats(row){
   const p=row.payload||{};
   return Array.isArray(p.items)?p.items:[];
 }
-const DASHBOARD_PRODUCT_TARGETS=[
-  {id:'fajita',label:'Fajita',aliases:['fajita','fahita']},
-  {id:'taouk',label:'Taouk',aliases:['taouk','tawouk']},
-  {id:'crispy_burger',label:'Crispy Burger',aliases:['crispy burger','crispyburger']},
-  {id:'loaded_fries',label:'Loaded Fries',aliases:['loaded fries','loadedfries']}
-];
-function dashboardProductSalesStats(){
-  const stats=Object.fromEntries(DASHBOARD_PRODUCT_TARGETS.map(t=>[t.id,{...t,today:0,week:0,total:0}]));
-  const today=dateKey(new Date());
-  const weekStart=new Date();
-  weekStart.setHours(0,0,0,0);
-  weekStart.setDate(weekStart.getDate()-6);
-
-  dashboardOrdersData.filter(isActiveOrder).forEach(row=>{
-    const d=orderStatDate(row);
-    orderItemsForStats(row).forEach(item=>{
-      const rawName=item.name||item.itemName||item.title||item.label||'';
-      const name=soldItemName(rawName);
-      const target=DASHBOARD_PRODUCT_TARGETS.find(t=>t.aliases.some(alias=>name.includes(alias)));
-      if(!target)return;
-      const qty=Math.max(1,Number(item.qty??item.quantity??item.count??1)||1);
-      const current=stats[target.id];
-      current.total+=qty;
-      if(d){
-        if(dateKey(d)===today)current.today+=qty;
-        if(d>=weekStart)current.week+=qty;
-      }
-    });
-  });
-
-  return DASHBOARD_PRODUCT_TARGETS.map(t=>stats[t.id]);
-}
 function renderDashboard(){
   const s=menuStats();
   const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
   renderDashboardHero();
   renderDashboardStats(s,ready);
-  renderDashboardProductSales();
   renderDashboardCharts();
   renderRecentOrders();
 }
@@ -2835,28 +2829,92 @@ function renderRecentOrders(){
       </div>`;
     }).join('');
 }
-function renderDashboardProductSales(){
-  const el=document.getElementById('dashboard-product-sales');
+function setSalesFilter(filter){
+  salesFilter=filter;
+  document.querySelectorAll('#sales-filter-segment button').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
+  renderSalesAnalytics();
+}
+function allSalesItems(){
+  const items=[];
+  menuData.forEach((sec,si)=>{
+    if(sec.type==='addons')return;
+    (sec.items||[]).forEach((item,ii)=>{
+      if(item.active===false)return;
+      const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
+      items.push({si,ii,name:item.name||'',price:parseFloat(String(item.price||'0').replace(/[^0-9.]/g,''))||0,img,cat:sec.title||sec.key||''});
+    });
+  });
+  return items;
+}
+function salesAnalyticsStats(){
+  const items=allSalesItems();
+  const today=dateKey(new Date());
+  const weekStart=new Date();
+  weekStart.setHours(0,0,0,0);
+  weekStart.setDate(weekStart.getDate()-6);
+  const map=new Map();
+  items.forEach(item=>{map.set(item.si+'-'+item.ii,{...item,todayQty:0,todayRev:0,weekQty:0,weekRev:0,totalQty:0,totalRev:0});});
+  dashboardOrdersData.filter(isActiveOrder).forEach(row=>{
+    const d=orderStatDate(row);
+    orderItemsForStats(row).forEach(oi=>{
+      const rawName=oi.name||oi.itemName||oi.title||oi.label||'';
+      const norm=soldItemName(rawName);
+      const qty=Math.max(1,Number(oi.qty??oi.quantity??oi.count??1)||1);
+      const price=parseFloat(String(oi.price||'0').replace(/[^0-9.]/g,''))||0;
+      let best=null,bestScore=0;
+      for(const item of items){
+        const itemNorm=soldItemName(item.name);
+        if(norm===itemNorm){best=item;break;}
+        if(norm.includes(itemNorm)||itemNorm.includes(norm)){
+          const score=Math.min(norm.length,itemNorm.length)/Math.max(norm.length,itemNorm.length);
+          if(score>bestScore){bestScore=score;best=item;}
+        }
+      }
+      if(!best)return;
+      const entry=map.get(best.si+'-'+best.ii);
+      if(!entry)return;
+      entry.totalQty+=qty;
+      entry.totalRev+=price*qty;
+      if(d){
+        if(dateKey(d)===today){entry.todayQty+=qty;entry.todayRev+=price*qty;}
+        if(d>=weekStart){entry.weekQty+=qty;entry.weekRev+=price*qty;}
+      }
+    });
+  });
+  return Array.from(map.values());
+}
+function renderSalesAnalytics(){
+  const el=document.getElementById('sales-table');
   if(!el)return;
-  el.innerHTML=dashboardProductSalesStats().map(item=>`
-    <div class="product-sales-card">
-      <div class="product-sales-name">${esc(item.label)}</div>
-      <div class="product-sales-row">
-        <div class="product-sales-metric">
-          <div class="product-sales-number">${item.today}</div>
-          <div class="product-sales-sub">Today</div>
-        </div>
-        <div class="product-sales-metric">
-          <div class="product-sales-number">${item.week}</div>
-          <div class="product-sales-sub">Weekly</div>
-        </div>
-        <div class="product-sales-metric">
-          <div class="product-sales-number">${item.total}</div>
-          <div class="product-sales-sub">Total</div>
-        </div>
-      </div>
+  const stats=salesAnalyticsStats();
+  const q=(document.getElementById('sales-search')?.value||'').toLowerCase();
+  const filtered=stats.filter(s=>!q||s.name.toLowerCase().includes(q)||s.cat.toLowerCase().includes(q));
+  let sortKey,revKey;
+  if(salesFilter==='today'){sortKey='todayQty';revKey='todayRev';}
+  else if(salesFilter==='week'){sortKey='weekQty';revKey='weekRev';}
+  else{sortKey='totalQty';revKey='totalRev';}
+  filtered.sort((a,b)=>b[sortKey]-a[sortKey]||b[revKey]-a[revKey]);
+  if(!filtered.length){el.innerHTML='<div class="empty-state">No items with sales data for this period.</div>';return;}
+  el.innerHTML=`
+    <div class="sales-table-header">
+      <span></span>
+      <span>Item</span>
+      <span style="text-align:center">Sold</span>
+      <span style="text-align:center">Revenue</span>
+      <span style="text-align:center">Category</span>
     </div>
-  `).join('');
+    ${filtered.map(s=>`
+    <div class="sales-row">
+      ${s.img?`<img class="sales-img" src="${s.img}" alt="${esc(s.name)}">`:`<div class="sales-img"></div>`}
+      <div>
+        <div class="sales-name">${esc(s.name)}</div>
+        <div class="sales-cat">${esc(s.cat)}</div>
+      </div>
+      <div class="sales-num">${s[sortKey]}</div>
+      <div class="sales-rev">$${s[revKey].toFixed(2)}</div>
+      <div class="sales-cat" style="text-align:center">${esc(s.cat)}</div>
+    </div>`).join('')}
+  `;
 }
 const DASHBOARD_DAYS=20;
 function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
