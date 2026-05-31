@@ -314,6 +314,17 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .sales-rev{font-size:13px;font-weight:700;color:var(--brand-mid);text-align:center}
 body.theme-dark .sales-row{background:var(--panel);border-color:var(--line)}
 body.theme-dark .sales-row:hover{border-color:var(--brand-line)}
+.sales-options-dropdown{display:none;position:absolute;top:100%;left:0;z-index:50;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(17,24,39,.14);overflow:hidden;margin-top:6px;padding:6px}
+.sales-options-dropdown.show{display:block}
+.sales-dd-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:6px 10px 3px}
+.sales-dd-divider{height:1px;background:var(--line);margin:4px 8px}
+.sales-dd-item{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:7px;border:0;background:transparent;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;transition:background .1s}
+.sales-dd-item:hover{background:var(--soft)}
+.sales-dd-item.active{background:var(--brand-soft);color:var(--brand)}
+body.theme-dark .sales-options-dropdown{background:var(--panel);border-color:var(--line)}
+body.theme-dark .sales-dd-item{color:var(--ink)}
+body.theme-dark .sales-dd-item:hover{background:var(--soft)}
+body.theme-dark .sales-dd-item.active{background:#2c1d07;color:var(--brand)}
 .today-bar{display:none}
 .chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
 .chart-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;min-width:0;box-shadow:0 2px 8px rgba(17,24,39,.03);overflow:hidden}
@@ -941,10 +952,23 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
             </div>
             <div class="panel-body">
               <div class="table-toolbar" style="margin-bottom:16px">
-                <div class="segment" id="sales-filter-segment">
-                  <button class="active" data-filter="today" onclick="setSalesFilter('today')">Today</button>
-                  <button data-filter="week" onclick="setSalesFilter('week')">This Week</button>
-                  <button data-filter="total" onclick="setSalesFilter('total')">Total</button>
+                <div style="position:relative;display:inline-block">
+                  <button class="btn btn-soft" id="sales-options-btn" onclick="toggleSalesOptions(event)">
+                    <span id="sales-options-label">Today · Top Selling</span>
+                    <span style="font-size:10px">&#9660;</span>
+                  </button>
+                  <div class="sales-options-dropdown" id="sales-options-dropdown">
+                    <div class="sales-dd-label">Period</div>
+                    <button class="sales-dd-item active" data-period="today" onclick="setSalesPeriod('today')">Today</button>
+                    <button class="sales-dd-item" data-period="week" onclick="setSalesPeriod('week')">This Week</button>
+                    <button class="sales-dd-item" data-period="total" onclick="setSalesPeriod('total')">Total</button>
+                    <div class="sales-dd-divider"></div>
+                    <div class="sales-dd-label">Sort</div>
+                    <button class="sales-dd-item active" data-sort="sales-desc" onclick="setSalesSort('sales-desc')">Top Selling &#8595;</button>
+                    <button class="sales-dd-item" data-sort="sales-asc" onclick="setSalesSort('sales-asc')">Top Selling &#8593;</button>
+                    <button class="sales-dd-item" data-sort="price-desc" onclick="setSalesSort('price-desc')">Pricer &#8595;</button>
+                    <button class="sales-dd-item" data-sort="price-asc" onclick="setSalesSort('price-asc')">Pricer &#8593;</button>
+                  </div>
                 </div>
                 <input class="search-input" id="sales-search" type="text" placeholder="Search items..." oninput="renderSalesAnalytics()">
               </div>
@@ -1095,6 +1119,7 @@ let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false,galleryAdminData=[],galleryFilter='pending';
 let dashboardOrdersData=[],menuVisitorData=[];
 let salesFilter='today';
+let salesSort='sales-desc';
 let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,galleryEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
@@ -2829,10 +2854,37 @@ function renderRecentOrders(){
       </div>`;
     }).join('');
 }
-function setSalesFilter(filter){
+function setSalesPeriod(filter){
   salesFilter=filter;
-  document.querySelectorAll('#sales-filter-segment button').forEach(b=>b.classList.toggle('active',b.dataset.filter===filter));
+  document.querySelectorAll('.sales-dd-item[data-period]').forEach(b=>b.classList.toggle('active',b.dataset.period===filter));
+  updateSalesOptionsLabel();
+  document.getElementById('sales-options-dropdown')?.classList.remove('show');
   renderSalesAnalytics();
+}
+function setSalesSort(sort){
+  salesSort=sort;
+  document.querySelectorAll('.sales-dd-item[data-sort]').forEach(b=>b.classList.toggle('active',b.dataset.sort===sort));
+  updateSalesOptionsLabel();
+  document.getElementById('sales-options-dropdown')?.classList.remove('show');
+  renderSalesAnalytics();
+}
+function updateSalesOptionsLabel(){
+  const el=document.getElementById('sales-options-label');
+  if(!el)return;
+  const periodLabels={today:'Today',week:'This Week',total:'Total'};
+  const sortLabels={'sales-desc':'Top Selling','sales-asc':'Top Selling','price-desc':'Pricer','price-asc':'Pricer'};
+  const arrows={'sales-desc':'↓','sales-asc':'↑','price-desc':'↓','price-asc':'↑'};
+  el.textContent=`${periodLabels[salesFilter]||'Today'} · ${sortLabels[salesSort]||'Top Selling'} ${arrows[salesSort]||''}`;
+}
+function toggleSalesOptions(e){
+  e.stopPropagation();
+  const dd=document.getElementById('sales-options-dropdown');
+  if(!dd)return;
+  dd.classList.toggle('show');
+  if(dd.classList.contains('show')){
+    const close=function(ev){if(!dd.contains(ev.target)&&ev.target!==document.getElementById('sales-options-btn')){dd.classList.remove('show');document.removeEventListener('click',close)}};
+    setTimeout(()=>document.addEventListener('click',close),10);
+  }
 }
 function allSalesItems(){
   const items=[];
@@ -2893,7 +2945,11 @@ function renderSalesAnalytics(){
   if(salesFilter==='today'){sortKey='todayQty';revKey='todayRev';}
   else if(salesFilter==='week'){sortKey='weekQty';revKey='weekRev';}
   else{sortKey='totalQty';revKey='totalRev';}
-  filtered.sort((a,b)=>b[sortKey]-a[sortKey]||b[revKey]-a[revKey]);
+  if(salesSort.startsWith('price')){
+    filtered.sort((a,b)=>salesSort==='price-desc'?b.price-a.price:a.price-b.price);
+  }else{
+    filtered.sort((a,b)=>salesSort==='sales-desc'?b[sortKey]-a[sortKey]:a[sortKey]-b[sortKey]);
+  }
   if(!filtered.length){el.innerHTML='<div class="empty-state">No items with sales data for this period.</div>';return;}
   el.innerHTML=`
     <div class="sales-table-header">
