@@ -38,11 +38,12 @@ var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 var RLAT=33.821091, RLNG=35.564961;
 var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
 var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
-var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=800;
+var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=900;
+var GPS_MAX_ACCURACY=160, GPS_JUMP_SPEED=45, GPS_HARD_JUMP=220;
 var FOLLOW_MIN_MOVE=12, FOLLOW_MIN_TURN=20;
 var DRIVER_REFRESH_MS=2500;
 var orderData=null, mapInst=null, driverMarker=null, custMarker=null, routeLine=null;
-var watchId=null, gpsPollTimer=null, gpsWatchdogTimer=null, slowSpeedSince=null, gpsMode='watch', gpsForceLocked=false, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=true, driverSpeed=0, currentZoom=17, currentPitch=0;
+var watchId=null, gpsPollTimer=null, gpsWatchdogTimer=null, slowSpeedSince=null, gpsMode='watch', gpsForceLocked=false, lastSent=0, gpsActive=false, driverLat=null, driverLng=null, filteredDriverLat=null, filteredDriverLng=null, visualDriverLat=null, visualDriverLng=null, pendingVisualLat=null, pendingVisualLng=null, driverHeading=null, displayedHeading=null, lastGoodLat=null, lastGoodLng=null, lastMoveAt=0, gpsAccuracy=null, lastGPSAt=0, deadReckonTimer=null, lastGPSTime=null, lastAcceptedGPSAt=null, deadReckonSpeed=0, targetHeading=0, animatedHeading=0, headingAnimStarted=false, headingUpMode=true, driverSpeed=0, currentZoom=17, currentPitch=0;
 var autoRefresh=null;
 var listTab='pending';
 var allOrders=[];
@@ -243,7 +244,7 @@ function closeDriverWS(){
 function sendWSUpdate(lat,lng,eta){
  // Sends only lightweight map data; order status still comes from normal fetches.
  if(!driverWS||driverWS.readyState!==WebSocket.OPEN)return;
- driverWS.send(JSON.stringify({type:'position',lat:lat,lng:lng,heading:displayedHeading,eta:eta,speed:driverSpeed,ts:Date.now()}));
+ driverWS.send(JSON.stringify({type:'position',lat:lat,lng:lng,heading:displayedHeading,eta:eta,speed:driverSpeed,accuracy:gpsAccuracy,ts:Date.now()}));
 }
 
 // Lightweight Kalman smoothing calms GPS wobble before it reaches the marker/camera.
@@ -404,6 +405,21 @@ function gpsQuality(){
  if(acc<=20)return{label:'GPS strong',cls:'',value:Math.round(acc)+'m'};
  if(acc<=55)return{label:'GPS okay',cls:'',value:Math.round(acc)+'m'};
  return{label:'GPS weak',cls:' gps-weak',value:Math.round(acc)+'m'};
+}
+function gpsFilterNoise(accuracy){
+ accuracy=Number(accuracy);
+ return Number.isFinite(accuracy)?Math.max(3,Math.min(14,accuracy/4)):4;
+}
+function gpsLooksPlausible(lat,lng,accuracy){
+ if(!Number.isFinite(lat)||!Number.isFinite(lng))return false;
+ if(!Number.isFinite(Number(accuracy)))accuracy=GPS_MAX_ACCURACY;
+ if(driverLat===null||driverLng===null||!lastAcceptedGPSAt)return accuracy<=Math.max(GPS_MAX_ACCURACY,220);
+ var dt=Math.max(.25,(Date.now()-lastAcceptedGPSAt)/1000);
+ var dist=haversine(driverLat,driverLng,lat,lng);
+ var impliedSpeed=dist/dt;
+ if(dist>GPS_HARD_JUMP&&accuracy>35)return false;
+ if(impliedSpeed>GPS_JUMP_SPEED&&accuracy>25)return false;
+ return accuracy<=GPS_MAX_ACCURACY;
 }
 /* shared util */
 function fmtKm(m){return Number.isFinite(m)?(m<1000?Math.round(m)+'m':(m/1000).toFixed(1)+'km'):'--'}
@@ -1046,8 +1062,7 @@ function moveDriverFromPosition(pos){
  gpsAccuracy=Number.isFinite(accuracy)?accuracy:gpsAccuracy;
  lastGPSAt=Date.now();
  updateGPSBar();
- // Do not drop normal weak mobile GPS; dropping it stops both driver and customer maps.
- if(Number.isFinite(accuracy)&&accuracy>120)return false;
+ if(!gpsLooksPlausible(pos.coords.latitude,pos.coords.longitude,accuracy))return false;
  var prevGPSAt=lastGPSTime;
  var prevLat=driverLat,prevLng=driverLng;
  lastGPSTime=lastGPSAt;
@@ -1061,14 +1076,15 @@ function moveDriverFromPosition(pos){
  updateAdaptiveGPS();
  deadReckonSpeed=driverSpeed>.8?driverSpeed:0;
  // Cap Kalman noise so walking movement does not get over-smoothed into looking frozen.
- var filterNoise=Number.isFinite(accuracy)?Math.max(3,Math.min(12,accuracy/4)):3;
+ var filterNoise=gpsFilterNoise(accuracy);
  kfLat.setR(filterNoise);kfLng.setR(filterNoise);
  var filteredLat=kfLat.filter(lat),filteredLng=kfLng.filter(lng);
  filteredDriverLat=filteredLat;filteredDriverLng=filteredLng;
  var moved=driverLat===null?999:haversine(driverLat,driverLng,filteredLat,filteredLng);
  if(Number.isFinite(speed)&&speed<0.8&&moved<4)heading=NaN;
  pendingVisualLat=filteredLat;pendingVisualLng=filteredLng;
- var accepted=moveDriver(lat,lng,heading);
+ var accepted=moveDriver(filteredLat,filteredLng,heading);
+ if(accepted)lastAcceptedGPSAt=Date.now();
  if(accepted){startDeadReckoning();sendWSUpdate(visualDriverLat,visualDriverLng,lastETAMinutes)}
  return accepted;
 }
@@ -1084,7 +1100,7 @@ async function sendLocation(lat,lng){
 
 function handleGPSPosition(pos){
  var accepted=moveDriverFromPosition(pos);
- if(accepted&&Date.now()-lastSent>LOCATION_SEND_MS)sendLocation(pos.coords.latitude,pos.coords.longitude);
+ if(accepted&&Date.now()-lastSent>LOCATION_SEND_MS)sendLocation(filteredDriverLat||pos.coords.latitude,filteredDriverLng||pos.coords.longitude);
 }
 
 function handleGPSError(){
@@ -1185,7 +1201,7 @@ function updateGPSBar(){
 function sendNow(){
  if(!navigator.geolocation)return;
  navigator.geolocation.getCurrentPosition(function(pos){
-  if(moveDriverFromPosition(pos))sendLocation(pos.coords.latitude,pos.coords.longitude);
+  if(moveDriverFromPosition(pos))sendLocation(filteredDriverLat||pos.coords.latitude,filteredDriverLng||pos.coords.longitude);
  },function(){if(deliveryGPSLocked())setTimeout(sendNow,2500)},{enableHighAccuracy:true,maximumAge:1000,timeout:8000});
 }
 
