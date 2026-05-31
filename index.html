@@ -2682,23 +2682,34 @@ Requires Worker routes from:
 
     const visiblePhotos = photos.slice(0, 10);
     let activePhoto = 0;
-
-    function showPhoto(index) {
-      activePhoto = (index + visiblePhotos.length) % visiblePhotos.length;
-      const item = visiblePhotos[activePhoto];
+    let html = '';
+    visiblePhotos.forEach((item, i) => {
       const src = /^https?:\/\//.test(item.image || '') ? item.image : `${STORAGE_BASE}/${item.image || ''}`;
       const label = item.caption || (item.customerName ? `Shared by ${item.customerName}` : '');
-      strip.innerHTML = `<article class="guest-gallery-photo">
-        <img src="${esc(src)}" alt="${esc(label || 'Le Kiosk guest photo')}" loading="lazy">
+      html += `<article class="guest-gallery-photo${i === 0 ? ' active' : ''}" data-gallery-idx="${i}">
+        <img src="${esc(src)}" alt="${esc(label || 'Le Kiosk guest photo')}" loading="${i === 0 ? 'eager' : 'lazy'}">
         ${label ? `<div class="guest-gallery-caption">${esc(label)}</div>` : ''}
       </article>`;
+    });
+    strip.innerHTML = html;
+    const slides = strip.querySelectorAll('.guest-gallery-photo');
+
+    function showPhoto(index) {
+      const prev = activePhoto;
+      activePhoto = (index + slides.length) % slides.length;
+      if (slides[prev]) slides[prev].classList.remove('active');
+      if (slides[activePhoto]) slides[activePhoto].classList.add('active');
+      const next = (activePhoto + 1) % slides.length;
+      if (slides[next]) {
+        const img = slides[next].querySelector('img');
+        if (img && img.loading === 'lazy') img.loading = 'eager';
+      }
     }
 
-    showPhoto(0);
     insertBeforeReviews();
     section.classList.add('show');
     if (window.__lkGuestGalleryTimer) clearInterval(window.__lkGuestGalleryTimer);
-    if (visiblePhotos.length > 1) {
+    if (slides.length > 1) {
       window.__lkGuestGalleryTimer = setInterval(() => showPhoto(activePhoto + 1), 3700);
     }
   }
