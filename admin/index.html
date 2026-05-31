@@ -432,9 +432,14 @@ body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .c
 .editor-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .editor-section-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .inline-list{display:flex;flex-direction:column;gap:7px}
-.inline-row{display:grid;grid-template-columns:minmax(0,1fr) 100px 42px 34px;gap:7px;align-items:center}
-.addon-req{display:flex;align-items:center;justify-content:center;height:32px;border-radius:7px;background:var(--soft);cursor:pointer;font-size:14px;font-weight:900;color:var(--muted);user-select:none}
-.addon-req.on{background:#fef3c7;color:#92400e}
+.inline-row{display:grid;grid-template-columns:minmax(0,1fr) 100px 34px 34px;gap:7px;align-items:center}
+.addon-dropdown-wrap{position:relative;display:inline-block}
+.addon-dropdown{display:none;position:absolute;top:100%;left:0;z-index:50;min-width:220px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.12);overflow:hidden;margin-top:4px}
+.addon-dropdown.show{display:block}
+.addon-dropdown-item{padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;border-bottom:1px solid var(--soft);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.addon-dropdown-item:hover{background:var(--brand-soft)}
+.addon-dropdown-item:last-child{border-bottom:0}
+.addon-req-check{width:16px;height:16px;margin:0;cursor:pointer;accent-color:#f59e0b}
 .settings-section-title{font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);grid-column:1/-1;margin:2px 0 -4px}
 .table-qr-form{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:8px;align-items:end;margin-bottom:12px}
 .tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
@@ -3329,28 +3334,62 @@ function openItemEditor(i){
   trackRecent(activeTab,i,item);
   openEditorModal(item.name||'Menu Item',itemEditorHtml(item,i),'Done',()=>renderEditor());
 }
+function getAllGlobalAddonGroups(){
+  const list=[];
+  menuData.forEach(sec=>{
+    if(sec.type==='addons'&&sec.addonGroups){
+      sec.addonGroups.forEach(g=>{list.push({label:g.label||'',price:g.price||'$0',emoji:g.emoji||'*'});});
+    }
+  });
+  return list;
+}
+
 function renderItemAddons(item,i){
   const addons=item.addons||[];
+  const existingLabels=new Set(addons.map(a=>a.label));
+  const available=getAllGlobalAddonGroups().filter(g=>!existingLabels.has(g.label));
   return `<div class="editor-section">
-    <div class="editor-section-head"><div class="editor-section-title">Order Add-ons</div><button class="btn btn-soft btn-sm" onclick="addAddonEntry(${i})">Add</button></div>
+    <div class="editor-section-head"><div class="editor-section-title">Order Add-ons</div>
+      <div class="addon-dropdown-wrap">
+        <button class="btn btn-soft btn-sm" onclick="toggleAddonDropdown(event,${i})">+ Add</button>
+        <div class="addon-dropdown" id="addon-dd-${i}">${available.map(g=>`<div class="addon-dropdown-item" onclick="pickAddonFromDropdown(${i},'${esc(g.label)}','${esc(g.price)}')"><span>${esc(g.emoji)} ${esc(g.label)}</span><span style="color:var(--muted);font-size:10px">${esc(g.price)}</span></div>`).join('')||'<div class="addon-dropdown-item" style="color:var(--muted)">No global add-ons available. Create one in Add-ons view.</div>'}</div>
+      </div>
+    </div>
     <div class="inline-list">${addons.map((a,ai)=>`<div class="inline-row">
-      <input class="addon-input" value="${esc(a.label||'')}" placeholder="Addon name" oninput="editAddonEntry(${i},${ai},'label',this.value)">
+      <input class="addon-input" value="${esc(a.label||'')}" placeholder="Addon name" oninput="editAddonEntry(${i},${ai},'label',this.value)" style="font-weight:700">
       <input class="addon-input" value="${esc(a.price||'')}" placeholder="$0" oninput="editAddonEntry(${i},${ai},'price',this.value)">
-      <div class="addon-req${a.required?' on':''}" onclick="toggleAddonRequired(${i},${ai})" title="Required">${a.required?'☑':'☐'}</div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-size:9px;font-weight:900;color:var(--muted)"><input type="checkbox" class="addon-req-check" ${a.required?'checked':''} onchange="toggleAddonRequired(${i},${ai},this.checked)">req</label>
       <button class="icon-btn danger" onclick="removeAddonEntry(${i},${ai})">x</button>
     </div>`).join('')||'<div class="panel-sub">No item add-ons.</div>'}</div>
   </div>`;
 }
+function toggleAddonDropdown(e,i){
+  e.stopPropagation();
+  const dd=document.getElementById('addon-dd-'+i);
+  if(!dd)return;
+  document.querySelectorAll('.addon-dropdown.show').forEach(d=>{if(d!==dd)d.classList.remove('show')});
+  dd.classList.toggle('show');
+  if(dd.classList.contains('show')){
+    const close=function(ev){if(!dd.contains(ev.target)){dd.classList.remove('show');document.removeEventListener('click',close)}};
+    setTimeout(()=>document.addEventListener('click',close),10);
+  }
+}
+function pickAddonFromDropdown(i,label,price){
+  const item=getSec().items[i];
+  if(!item.addons)item.addons=[];
+  item.addons.push({label:label,price:price,required:false});
+  markUnsaved();
+  const modalBody=document.getElementById('modal-body');
+  if(modalBody)modalBody.innerHTML=itemEditorHtml(item,i);
+}
 function editItem(i,field,value){const sec=getSec();if(!sec||!sec.items[i])return;sec.items[i][field]=value;markUnsaved();if(field==='name')renderCategoryList();}
 function editItemFlavors(i,value){const item=getSec().items[i];const arr=value.split(',').map(s=>s.trim()).filter(Boolean);if(arr.length)item.flavors=arr;else delete item.flavors;markUnsaved();}
 function setPillColor(i,color){const item=getSec().items[i];item.flavorColor=color;markUnsaved();openItemEditor(i);}
-function deletePill(i,fi){const item=getSec().items[i];if(!item.flavors)return;item.flavors.splice(fi,1);if(!item.flavors.length)delete item.flavors;markUnsaved();openItemEditor(i);}
-function addItem(){const sec=getSec();if(!sec.items)sec.items=[];sec.items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',active:true,addons:[]});markUnsaved();renderCategoryList();renderEditor();openItemEditor(sec.items.length-1);}
-function confirmDeleteItem(i){const item=getSec().items[i];openConfirm('Delete Item',`Delete "${item.name||'this item'}"?`,'Delete',()=>{getSec().items.splice(i,1);markUnsaved();renderCategoryList();renderEditor();});}
-function addAddonEntry(i){const item=getSec().items[i];if(!item.addons)item.addons=[];item.addons.push({label:'',price:'$0',required:false});markUnsaved();openItemEditor(i);}
+function deletePill(i,fi){const item=getSec().items[i];if(!item.flavors)return;item.flavors.splice(fi,1);if(!item.flavors.length)delete item.flavors;markUnsaved();const modalBody=document.getElementById('modal-body');if(modalBody)modalBody.innerHTML=itemEditorHtml(item,i);}
+function addAddonEntry(i){const item=getSec().items[i];if(!item.addons)item.addons=[];item.addons.push({label:'',price:'$0',required:false});markUnsaved();const modalBody=document.getElementById('modal-body');if(modalBody)modalBody.innerHTML=itemEditorHtml(item,i);}
 function editAddonEntry(i,ai,field,value){getSec().items[i].addons[ai][field]=value;markUnsaved();}
-function toggleAddonRequired(i,ai){const a=getSec().items[i].addons[ai];a.required=!a.required;markUnsaved();openItemEditor(i);}
-function removeAddonEntry(i,ai){getSec().items[i].addons.splice(ai,1);markUnsaved();openItemEditor(i);}
+function toggleAddonRequired(i,ai,val){getSec().items[i].addons[ai].required=!!val;markUnsaved();}
+function removeAddonEntry(i,ai){getSec().items[i].addons.splice(ai,1);markUnsaved();const modalBody=document.getElementById('modal-body');if(modalBody)modalBody.innerHTML=itemEditorHtml(item,i);}
 function confirmDeleteSection(){const sec=getSec();openConfirm('Delete Category',`Delete "${sec.title||'this category'}" and everything inside?`,'Delete',()=>{menuData.splice(activeTab,1);activeTab=Math.max(0,activeTab-1);markUnsaved();renderCategoryList();renderEditor();});}
 
 function renderAddonGroups(sec){
