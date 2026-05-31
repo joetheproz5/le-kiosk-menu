@@ -168,6 +168,29 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        Intent bgIntent = new Intent(this, DriverBackgroundService.class);
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            startForegroundService(bgIntent);
+        } else {
+            startService(bgIntent);
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        stopService(new Intent(this, DriverBackgroundService.class));
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(new Intent(this, DriverBackgroundService.class));
+        super.onDestroy();
+    }
+
+    @Override
     public void onBackPressed() {
         if (webView != null && webView.canGoBack()) {
             webView.goBack();

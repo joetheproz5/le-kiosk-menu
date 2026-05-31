@@ -623,18 +623,30 @@ function startDeadReckoning(){
  deadReckonTimer=requestAnimationFrame(tick);
 }
 
-async function keepAwake(){
- if(!('wakeLock' in navigator)||document.visibilityState!=='visible'||wakeLock)return;
- try{
-  wakeLock=await navigator.wakeLock.request('screen');
-  wakeLock.addEventListener('release',function(){wakeLock=null});
- }catch(e){}
+function keepAwake(){
+ if(!('wakeLock' in navigator)||wakeLock)return;
+ navigator.wakeLock.request('screen').then(function(wl){
+  wakeLock=wl;
+  wl.addEventListener('release',function(){wakeLock=null});
+ }).catch(function(){});
 }
 
 function bindWakeLock(){
  keepAwake();
  document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible'){keepAwake();load()}
+  if(document.visibilityState==='visible'){
+   keepAwake();
+   load();
+   if(gpsActive&&deliveryGPSLocked()){
+    resumeWatchGPS();
+    startGPSWatchdog();
+   }
+  }else{
+   if(gpsActive&&deliveryGPSLocked()){
+    keepAwake();
+    if(gpsMode!=='watch')startWatchGPS();
+   }
+  }
  });
  window.addEventListener('focus',function(){keepAwake();load()});
 document.addEventListener('click',keepAwake);
