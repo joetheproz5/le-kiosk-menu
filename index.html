@@ -621,13 +621,6 @@ function renderSheet(){
         const pn=parseFloat(price.replace('$',''))||0;
         html+=`<div class="sheet-item"><div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div><div class="sheet-item-price">$${(pn*qty).toFixed(2)}</div></div>`;
         const meta=itemMeta[key];
-        if(meta&&meta.flavors&&meta.flavors.length){
-            const shSel=shishaSel[key],ki=_addonMap.length;_addonMap.push({key,type:'shisha'});
-            const flavorErr=(!shSel)?'show':'';
-            html+=`<div class="addon-section" id="flavor-err-wrap-${ki}"><div class="addon-section-title">💨 Choose flavor <span style="color:#ef4444;font-size:10px;font-weight:800">* required</span></div><div class="addon-chips">`;
-            meta.flavors.forEach((f,fi)=>{ html+=`<button class="addon-chip${shSel===f?' selected':''}" data-type="shisha" data-ki="${ki}" data-fi="${fi}">${f}</button>`; });
-            html+=`</div><div class="err-text ${flavorErr}" id="err-flavor-${ki}" style="margin-top:4px">⚠️ Please choose a flavor before ordering.</div></div>`;
-        }
         if(meta&&meta.addons&&meta.addons.length){
             const selArr=addonSel[key]||[],ki=_addonMap.length;_addonMap.push({key,type:'addon'});
             const hasReq=meta.addons.some(a=>a.required);
@@ -779,26 +772,6 @@ async function sendOrder(){
         if(phoneEl) phoneEl.classList.remove('error');
     }
 
-    // Flavors (mandatory if applicable)
-    const flavorErrors=[];
-    Object.entries(cart).filter(([,v])=>v>0).forEach(([key])=>{
-        const meta=itemMeta[key];
-        if(meta&&meta.flavors&&meta.flavors.length&&!shishaSel[key]){
-            valid=false;
-            flavorErrors.push(key);
-        }
-    });
-    if(flavorErrors.length){
-        _addonMap.forEach((entry,ki)=>{
-            if(entry.type==='shisha'&&flavorErrors.includes(entry.key)){
-                const errEl=document.getElementById('err-flavor-'+ki);
-                if(errEl) errEl.classList.add('show');
-                const wrap=document.getElementById('flavor-err-wrap-'+ki);
-                if(wrap) setTimeout(()=>wrap.scrollIntoView({behavior:'smooth',block:'center'}),50);
-            }
-        });
-    }
-
     // Required add-ons
     const addonErrors=[];
     Object.entries(cart).filter(([,v])=>v>0).forEach(([key])=>{
@@ -867,7 +840,7 @@ async function sendOrder(){
         const pn=parseFloat(price.replace('$',''))||0;
         subtotal+=pn*qty;
         const addonsForItem=(addonSel[key]||[]).map(a=>{subtotal+=a.price;return{label:a.label,price:a.price};});
-        return{name:itemName,price:pn,priceStr:price,qty,flavor:shishaSel[key]||null,addons:addonsForItem};
+        return{name:itemName,price:pn,priceStr:price,qty,flavor:null,addons:addonsForItem};
     });
     subtotal+=fee;
 
@@ -913,7 +886,6 @@ async function sendOrder(){
     msg+='━━━━━━━━━━━━━━━━━━\n';
     orderItems.forEach(it=>{
         msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
-        if(it.flavor) msg+=`  ↳ Flavor: ${it.flavor}\n`;
         (it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;});
     });
     if(fee>0) msg+=`• 🛵 Delivery — $${fee.toFixed(2)}\n`;
