@@ -431,7 +431,9 @@ body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .c
 .editor-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .editor-section-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .inline-list{display:flex;flex-direction:column;gap:7px}
-.inline-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 34px;gap:7px;align-items:center}
+.inline-row{display:grid;grid-template-columns:minmax(0,1fr) 100px 42px 34px;gap:7px;align-items:center}
+.addon-req{display:flex;align-items:center;justify-content:center;height:32px;border-radius:7px;background:var(--soft);cursor:pointer;font-size:10px;font-weight:900;color:var(--muted);user-select:none}
+.addon-req.on{background:#fef3c7;color:#92400e}
 .settings-section-title{font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);grid-column:1/-1;margin:2px 0 -4px}
 .table-qr-form{display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:8px;align-items:end;margin-bottom:12px}
 .tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
@@ -3333,6 +3335,7 @@ function renderItemAddons(item,i){
     <div class="inline-list">${addons.map((a,ai)=>`<div class="inline-row">
       <input class="addon-input" value="${esc(a.label||'')}" placeholder="Addon name" oninput="editAddonEntry(${i},${ai},'label',this.value)">
       <input class="addon-input" value="${esc(a.price||'')}" placeholder="$0" oninput="editAddonEntry(${i},${ai},'price',this.value)">
+      <div class="addon-req${a.required?' on':''}" onclick="toggleAddonRequired(${i},${ai})" title="Required add-on">req</div>
       <button class="icon-btn danger" onclick="removeAddonEntry(${i},${ai})">x</button>
     </div>`).join('')||'<div class="panel-sub">No item add-ons.</div>'}</div>
   </div>`;
@@ -3342,8 +3345,9 @@ function editItemFlavors(i,value){const item=getSec().items[i];const arr=value.s
 function setPillColor(i,color){const item=getSec().items[i];item.flavorColor=color;markUnsaved();openItemEditor(i);}
 function addItem(){const sec=getSec();if(!sec.items)sec.items=[];sec.items.push({name:'New Item',price:'$0',desc:'Description here.',image:'',active:true,addons:[]});markUnsaved();renderCategoryList();renderEditor();openItemEditor(sec.items.length-1);}
 function confirmDeleteItem(i){const item=getSec().items[i];openConfirm('Delete Item',`Delete "${item.name||'this item'}"?`,'Delete',()=>{getSec().items.splice(i,1);markUnsaved();renderCategoryList();renderEditor();});}
-function addAddonEntry(i){const item=getSec().items[i];if(!item.addons)item.addons=[];item.addons.push({label:'',price:'$0'});markUnsaved();openItemEditor(i);}
+function addAddonEntry(i){const item=getSec().items[i];if(!item.addons)item.addons=[];item.addons.push({label:'',price:'$0',required:false});markUnsaved();openItemEditor(i);}
 function editAddonEntry(i,ai,field,value){getSec().items[i].addons[ai][field]=value;markUnsaved();}
+function toggleAddonRequired(i,ai){const a=getSec().items[i].addons[ai];a.required=!a.required;markUnsaved();openItemEditor(i);}
 function removeAddonEntry(i,ai){getSec().items[i].addons.splice(ai,1);markUnsaved();openItemEditor(i);}
 function confirmDeleteSection(){const sec=getSec();openConfirm('Delete Category',`Delete "${sec.title||'this category'}" and everything inside?`,'Delete',()=>{menuData.splice(activeTab,1);activeTab=Math.max(0,activeTab-1);markUnsaved();renderCategoryList();renderEditor();});}
 

@@ -630,9 +630,10 @@ function renderSheet(){
         }
         if(meta&&meta.addons&&meta.addons.length){
             const selArr=addonSel[key]||[],ki=_addonMap.length;_addonMap.push({key,type:'addon'});
-            html+=`<div class="addon-section"><div class="addon-section-title">➕ Add extras</div><div class="addon-chips">`;
-            meta.addons.forEach((addon,ai)=>{ const on=selArr.some(s=>s.label===addon.label); html+=`<button class="addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label} <span style="opacity:.65">${addon.price}</span></button>`; });
-            html+=`</div></div>`;
+            const hasReq=meta.addons.some(a=>a.required);
+            html+=`<div class="addon-section" id="addon-err-wrap-${ki}"><div class="addon-section-title">➕ Add extras${hasReq?' <span style="color:#ef4444;font-size:10px;font-weight:800">* required</span>':''}</div><div class="addon-chips">`;
+            meta.addons.forEach((addon,ai)=>{ const on=selArr.some(s=>s.label===addon.label); html+=`<button class="addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label}${addon.required?'*':''} <span style="opacity:.65">${addon.price}</span></button>`; });
+            html+=`</div><div class="err-text" id="err-addon-${ki}" style="margin-top:4px">⚠️ Please select the required add-ons (marked with *).</div></div>`;
         }
     });
     html+='</div>';
@@ -793,6 +794,31 @@ async function sendOrder(){
                 const errEl=document.getElementById('err-flavor-'+ki);
                 if(errEl) errEl.classList.add('show');
                 const wrap=document.getElementById('flavor-err-wrap-'+ki);
+                if(wrap) setTimeout(()=>wrap.scrollIntoView({behavior:'smooth',block:'center'}),50);
+            }
+        });
+    }
+
+    // Required add-ons
+    const addonErrors=[];
+    Object.entries(cart).filter(([,v])=>v>0).forEach(([key])=>{
+        const meta=itemMeta[key];
+        const selArr=addonSel[key]||[];
+        if(meta&&meta.addons&&meta.addons.length){
+            meta.addons.forEach(a=>{
+                if(a.required&&!selArr.some(s=>s.label===a.label)){
+                    valid=false;
+                    if(!addonErrors.includes(key))addonErrors.push(key);
+                }
+            });
+        }
+    });
+    if(addonErrors.length){
+        _addonMap.forEach((entry,ki)=>{
+            if(entry.type==='addon'&&addonErrors.includes(entry.key)){
+                const errEl=document.getElementById('err-addon-'+ki);
+                if(errEl) errEl.classList.add('show');
+                const wrap=document.getElementById('addon-err-wrap-'+ki);
                 if(wrap) setTimeout(()=>wrap.scrollIntoView({behavior:'smooth',block:'center'}),50);
             }
         });
