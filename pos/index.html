@@ -2411,7 +2411,7 @@ const found=findMenuItem(catKey,idx);if(!found||!found.item)return;
 const existing=cart.find(l=>l.catKey===catKey&&l.itemIdx===idx);
 if(existing)existing.qty++;
 else cart.push({id:uid(),catKey,itemIdx:idx,name:found.item.name,price:priceNum(found.item.price),priceStr:found.item.price,qty:1,addons:[],flavor:null,optionsOpen:false,meta:found.item});
-renderCart();renderItems();showCartOnMobile();
+renderCart();renderItems();
 }
 function changeQty(id,delta){const l=cart.find(x=>x.id===id);if(!l)return;l.qty+=delta;if(l.qty<=0)cart=cart.filter(x=>x.id!==id);renderCart();renderItems()}
 function removeLine(id){cart=cart.filter(x=>x.id!==id);renderCart();renderItems()}
