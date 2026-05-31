@@ -46,7 +46,7 @@ select{outline:none}
 
 #admin-screen{display:none;height:100vh}
 .app-shell{height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr);background:var(--bg)}
-.sidebar{background:#111827;color:#f9fafb;display:flex;flex-direction:column;border-right:1px solid #0f172a;overflow-y:auto}
+.sidebar{background:#111827;color:#f9fafb;display:flex;flex-direction:column;border-right:1px solid #0f172a;overflow-y:auto;z-index:1}
 .side-brand{height:66px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:12px}
 .brand-stack{min-width:0}
 .brand-name{font-family:var(--brandfont);font-size:24px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
@@ -499,7 +499,7 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
 
 /* COLLAPSIBLE SIDEBAR */
 .sidebar-toggle{display:none;position:fixed;top:8px;left:8px;z-index:200;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:18px;cursor:pointer;align-items:center;justify-content:center}
-.sidebar.collapsed{width:68px;overflow-y:hidden}
+.sidebar.collapsed{width:68px;overflow-y:hidden}.app-shell .sidebar.collapsed + .main{margin-left:68px}
 .sidebar.collapsed .brand-name,.sidebar.collapsed .brand-sub,
 .sidebar.collapsed .nav-btn span:not(.nav-icon),
 .sidebar.collapsed .side-footer,.sidebar.collapsed .unsaved-dot{display:none}
@@ -507,7 +507,7 @@ body.theme-dark .bulk-bar input[type=number]{background:#101722;color:var(--ink)
 .sidebar.collapsed .nav-btn{justify-content:center;padding:10px}
 .sidebar.collapsed .nav-icon{margin:0}
 .sidebar.collapsed + .main{margin-left:68px}
-@media(max-width:980px){.sidebar-toggle{display:flex}.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:150;width:250px;max-width:85vw;transform:translateX(-100%);transition:transform .22s ease;flex-direction:column;display:flex}.sidebar.open{transform:translateX(0);box-shadow:4px 0 30px rgba(0,0,0,.35)}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:149}.sidebar-overlay.show{display:block}}
+@media(max-width:980px){.sidebar-toggle{display:flex}.sidebar{position:fixed!important;left:0;top:0;bottom:0;z-index:150;width:250px;max-width:85vw;transform:translateX(-100%);transition:transform .22s ease;flex-direction:column;display:flex!important;overflow-y:auto;grid-row:auto;grid-column:auto}.sidebar.open{transform:translateX(0);box-shadow:4px 0 30px rgba(0,0,0,.35)}.sidebar.open.collapsed{width:250px!important}.sidebar.collapsed.open{width:250px!important}.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:149}.sidebar-overlay.show{display:block}}
 
 /* NAV GROUPING */
 .nav-group-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.3);padding:8px 11px 4px;margin-top:4px}
@@ -589,7 +589,7 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
   </div>
 </div>
 
-<button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">☰</button>
+<button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">☰</button>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
 <div id="admin-screen">
@@ -1089,9 +1089,16 @@ loadSidebarState();
 document.getElementById('sidebar-toggle').addEventListener('click',function(e){
   e.stopPropagation();
   const s=document.getElementById('sidebar'),o=document.getElementById('sidebar-overlay');
-  if(s&&window.innerWidth<=980){
-    s.classList.toggle('open');o.classList.toggle('show');this.classList.toggle('open');
-  }else{toggleSidebar();}
+  if(window.innerWidth<=980){
+    if(!s)return;
+    const willOpen=!s.classList.contains('open');
+    s.classList.toggle('open',willOpen);
+    if(o)o.classList.toggle('show',willOpen);
+    this.classList.toggle('open',willOpen);
+    if(willOpen){s.classList.remove('collapsed');}
+  }else{
+    toggleSidebar();
+  }
 });
 
 /* ── THEME ── */
