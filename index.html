@@ -137,6 +137,8 @@
         .menu-grid > .item-card-wrap:nth-child(n+6), .menu-grid > .addon-card:nth-child(n+6) { animation-delay: .22s; }
         .menu-card { min-height: 136px; background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-left: 0 solid transparent; border-radius: 20px; box-shadow: 0 12px 30px rgba(69,26,3,.09); overflow: hidden; display: flex; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, border-left-width .18s ease; }
         .menu-card:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(69,26,3,.16); border-color: rgba(217,119,6,.34); border-left: 3px solid #f59e0b; }
+        .menu-card.unavailable { opacity: .58; filter: grayscale(.16); }
+        .menu-card.unavailable:hover { transform: none; box-shadow: 0 12px 30px rgba(69,26,3,.09); border-left: 0 solid transparent; }
         .menu-image { width: 118px; flex-shrink: 0; border-right: 1px solid rgba(120,53,15,.08); border-radius: 20px 0 0 20px; position: relative; overflow: hidden; background: #fef3c7; }
         .menu-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transform: scale(1.01); }
         .menu-info { padding: 13px; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; min-width: 0; background: linear-gradient(180deg, #fff, #fffaf0); }
@@ -144,6 +146,7 @@
         .menu-name { font-weight: 900; color: #3b1f05; font-size: 16px; line-height: 1.15; }
         .menu-price { flex-shrink: 0; background: #d97706; color: #fff8ea; border-radius: 999px; padding: 6px 10px; font-size: 12px; line-height: 1; font-weight: 900; box-shadow: 0 7px 17px rgba(217,119,6,.24), inset 0 1px 0 rgba(255,255,255,.22); border: 1px solid rgba(254,243,199,.48); }
         .menu-desc { color: #6b5b4c; font-size: 12px; margin-top: 7px; line-height: 1.45; padding-right: 3px; }
+        .unavailable-btn { margin-top: 9px; align-self: flex-start; border: 1px solid rgba(120,53,15,.18); background: #f3f4f6; color: #6b5b4c; border-radius: 999px; padding: 7px 12px; font-size: 10px; line-height: 1; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; cursor: not-allowed; }
         .addon-card { background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-radius: 18px; box-shadow: 0 12px 30px rgba(69,26,3,.08); padding: 14px; display: flex; align-items: center; gap: 14px; animation: fadeSlideUp .44s ease both; }
         .addon-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 25px; flex-shrink: 0; background: #fef3c7; border: 1px solid rgba(217,119,6,.24); }
         body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section, body.order-mode #status-badge, body.order-mode #basketball-bubble { display: none !important; }
@@ -1023,7 +1026,7 @@ function renderPills(item){
 }
 function renderSectionHead(category,count){
     const label=count===1?'1 item':count+' items';
-    return `<div class="section-head"><div><div class="section-kicker">Fresh picks</div><h2 class="section-title">${esc(category.title)}</h2></div><span class="section-count">${label}</span></div>`;
+    return `<div class="section-head"><div><div class="section-kicker">Fresh picks</div><h2 class="section-title">${esc(category.title)}</h2></div><span class="section-count">${category.active===false?'Unavailable':label}</span></div>`;
 }
 async function loadMenu(){
     try{
@@ -1063,16 +1066,17 @@ function initMenu(menuData){
     container.innerHTML='';
     menuData.forEach(category=>{
         if(category.type==='addons'){container.innerHTML+=renderAddonSection(category);return;}
-        const activeItems=(category.items||[]).filter(item => item.active !== false);
-        let html=`<section id="${esc(category.key)}" class="scroll-mt-24">${renderSectionHead(category,activeItems.length)}`;
-        if(activeItems.length){
+        const items=category.items||[];
+        let html=`<section id="${esc(category.key)}" class="scroll-mt-24">${renderSectionHead(category,items.length)}`;
+        if(items.length){
             html+='<div class="menu-grid">';
-            activeItems.forEach((item,idx)=>{
+            items.forEach((item,idx)=>{
+                const unavailable=category.active===false||item.active===false;
                 const itemKey=`${category.key}|${item.name}|${item.price}`;
                 const qtyId=`qty-${category.key}-${idx}`,cardId=`card-${qtyId}`;
                 const itemKeyArg=jsStr(itemKey), safeQty=esc(qtyId), safeCard=esc(cardId);
                 const img=item.image ? `${STORAGE_PUBLIC_BASE}/${String(item.image).replace(/^\/+/,'')}` : '';
-                html+=`<div class="item-card-wrap" id="${safeCard}"><div class="menu-card"><div class="menu-image"><img src="${esc(img)}" alt="${esc(item.name)}"></div><div class="menu-info"><div class="menu-title-row"><h3 class="menu-name line-clamp-2">${esc(item.name)}</h3><span class="menu-price">${esc(item.price)}</span></div><p class="menu-desc line-clamp-3">${esc(item.desc)}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKeyArg}',-1,'${safeQty}')">-</button><div class="qty-num" id="${safeQty}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKeyArg}',1,'${safeQty}')">+</button></div></div></div></div>`;
+                html+=`<div class="item-card-wrap" id="${safeCard}"><div class="menu-card${unavailable?' unavailable':''}"><div class="menu-image"><img src="${esc(img)}" alt="${esc(item.name)}"></div><div class="menu-info"><div class="menu-title-row"><h3 class="menu-name line-clamp-2">${esc(item.name)}</h3><span class="menu-price">${esc(item.price)}</span></div><p class="menu-desc line-clamp-3">${esc(item.desc)}</p>${renderPills(item)}${unavailable?'<button class="unavailable-btn" type="button" disabled>Unavailable</button>':`<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKeyArg}',-1,'${safeQty}')">-</button><div class="qty-num" id="${safeQty}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKeyArg}',1,'${safeQty}')">+</button></div>`}</div></div></div>`;
             });
             html+='</div>';
         }
@@ -1186,6 +1190,7 @@ fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
       itemMeta = {};
       data.forEach(cat => {
         if(cat.type === 'addons') return;
+        if(cat.active===false) return;
         (cat.items || []).filter(item => item.active !== false).forEach(item => {
           itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
         });

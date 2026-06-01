@@ -540,8 +540,10 @@ export default {
     }
 
     async function menuProducts() {
+      const categories = await supabaseFetch('/categories?select=key&active=eq.true');
+      const activeCategoryKeys = new Set((Array.isArray(categories) ? categories : []).map(cat => String(cat.key || '')));
       const products = await supabaseFetch('/products?select=*&active=eq.true&order=sort_order.asc');
-      return Array.isArray(products) ? products : [];
+      return Array.isArray(products) ? products.filter(product => activeCategoryKeys.has(String(product.category_key || ''))) : [];
     }
 
     function findProduct(products, item) {
@@ -1588,15 +1590,8 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
     // ── GET /supabase/menu — public/admin ──
     if (request.method === 'GET' && url.pathname === '/supabase/menu') {
       try {
-        let isAdmin = false;
-        if (bearerToken(request)) {
-          try {
-            await requireAuth(request, ['admin']);
-            isAdmin = true;
-          } catch (_) {}
-        }
-        const categories = await supabaseFetch(isAdmin ? '/categories?select=*&order=sort_order.asc' : '/categories?select=*&active=eq.true&order=sort_order.asc');
-        const products = await supabaseFetch(isAdmin ? '/products?select=*&order=sort_order.asc' : '/products?select=*&active=eq.true&order=sort_order.asc');
+        const categories = await supabaseFetch('/categories?select=*&order=sort_order.asc');
+        const products = await supabaseFetch('/products?select=*&order=sort_order.asc');
 
         const menu = categories.map(cat => {
           const items = products
