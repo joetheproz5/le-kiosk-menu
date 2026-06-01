@@ -81,7 +81,12 @@ public class DriverBackgroundService extends Service {
             .setPriority(Notification.PRIORITY_LOW)
             .setOngoing(true);
 
-        startForeground(NOTIFICATION_ID, builder.build());
+        try {
+            startForeground(NOTIFICATION_ID, builder.build());
+        } catch (RuntimeException ignored) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         startOrderPolling();
         return START_STICKY;
     }
@@ -160,6 +165,7 @@ public class DriverBackgroundService extends Service {
         try {
             JSONArray orders = fetchDriverOrders(pin.trim());
             Set<String> known = parseIdSet(prefs().getString(MainActivity.PREF_KNOWN_ORDER_IDS, ""));
+            boolean baselineReady = prefs().getBoolean(MainActivity.PREF_KNOWN_ORDER_IDS_READY, false);
             Set<String> current = new LinkedHashSet<>();
             JSONObject firstNewOrder = null;
 
@@ -171,13 +177,14 @@ public class DriverBackgroundService extends Service {
                 if (id.isEmpty()) continue;
                 current.add(id);
 
-                if (!known.isEmpty() && !known.contains(id) && firstNewOrder == null) {
+                if (baselineReady && !known.contains(id) && firstNewOrder == null) {
                     firstNewOrder = order;
                 }
             }
 
-            if (known.isEmpty()) {
+            if (!baselineReady) {
                 saveKnownIds(current);
+                prefs().edit().putBoolean(MainActivity.PREF_KNOWN_ORDER_IDS_READY, true).apply();
                 return;
             }
 

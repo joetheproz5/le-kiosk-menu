@@ -838,7 +838,7 @@ function renderList(data){
 
  function card(o){
  var track=o.tracking||{};
-  var status=isDeliveredOrder(o)?'Delivered':track.delivering?'Out for Delivery':'Ready';
+  var status=isDeliveredOrder(o)?'Delivered':track.delivering?'Out for Delivery':track.preparing?'Ready':'New Order';
   var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
   if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
 		   if(o.driverToken)rememberDriverToken(o.id,o.driverToken);

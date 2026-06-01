@@ -2723,8 +2723,7 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
         const all = (Array.isArray(rows) ? rows : [])
           .filter(row => {
             const p = row.payload || {};
-            const track = p.tracking || {};
-            return p.orderType === 'delivery' && (track.preparing || track.delivered);
+            return p.orderType === 'delivery';
           })
           .map(row => {
             const p = row.payload || {};

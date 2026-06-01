@@ -30,6 +30,7 @@ public class MainActivity extends Activity {
     static final String PREFS_NAME = "lekiosk_driver";
     static final String PREF_DRIVER_PIN = "driver_pin";
     static final String PREF_KNOWN_ORDER_IDS = "known_order_ids";
+    static final String PREF_KNOWN_ORDER_IDS_READY = "known_order_ids_ready";
     private WebView webView;
 
     @Override
@@ -212,6 +213,7 @@ public class MainActivity extends Activity {
                 .edit()
                 .remove(PREF_DRIVER_PIN)
                 .remove(PREF_KNOWN_ORDER_IDS)
+                .remove(PREF_KNOWN_ORDER_IDS_READY)
                 .apply();
             stopService(new Intent(MainActivity.this, DriverBackgroundService.class));
         }
@@ -221,6 +223,7 @@ public class MainActivity extends Activity {
             getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit()
                 .putString(PREF_KNOWN_ORDER_IDS, orderIds == null ? "" : orderIds)
+                .putBoolean(PREF_KNOWN_ORDER_IDS_READY, true)
                 .apply();
         }
     }
@@ -228,11 +231,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        String pin = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(PREF_DRIVER_PIN, "");
+        if (pin == null || pin.trim().isEmpty()) return;
+
         Intent bgIntent = new Intent(this, DriverBackgroundService.class);
-        if (android.os.Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(bgIntent);
-        } else {
-            startService(bgIntent);
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(bgIntent);
+            } else {
+                startService(bgIntent);
+            }
+        } catch (RuntimeException ignored) {
+            // Some Android builds reject foreground-service starts during app transitions.
         }
     }
 
