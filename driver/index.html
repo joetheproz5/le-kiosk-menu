@@ -90,7 +90,6 @@ function setReconnecting(active){
 	function rememberDriverToken(id,token){if(!id||!token)return;var map=tokenMap();map[id]=token;saveTokenMap(map)}
 	function driverToken(id){return (orderData&&orderData.id===id&&orderData.driverToken)||tokenMap()[id]||''}
 	function authUrl(path){return path}
-	function wsTokenProtocol(token){return /^[A-Za-z0-9._~+-]+$/.test(token||'')?'lk-token-'+token:''}
 	function renderPinGate(message){
 	 document.getElementById('app').innerHTML='\x3Cdiv class="pin-card"\x3E\x3Cdiv class="pin-box"\x3E\x3Cdiv class="pin-title"\x3EDriver PIN\x3C/div\x3E\x3Cdiv class="pin-copy"\x3EEnter the driver PIN to view deliveries.\x3C/div\x3E\x3Cinput class="pin-input" id="driver-pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="one-time-code"\x3E\x3Cbutton class="pin-btn" onclick="D.savePin()"\x3EUnlock Driver\x3C/button\x3E\x3Cdiv class="pin-error'+(message?' show':'')+'" id="driver-pin-error"\x3E'+esc(message||'')+'\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
 	 setTimeout(function(){var i=document.getElementById('driver-pin-input');if(i){i.focus();i.onkeydown=function(e){if(e.key==='Enter')D.savePin()}}},50);
@@ -233,9 +232,8 @@ function connectDriverWS(orderId){
   if(driverWS&&driverWSOrderId===orderId&&driverWS.readyState!==WebSocket.CLOSED)return;
   if(driverWS&&driverWSOrderId!==orderId)closeDriverWS();
   driverWSOrderId=orderId;
-	 var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId);
-  var protocol=wsTokenProtocol(driverToken(orderId));
-  driverWS=protocol?new WebSocket(wsUrl,protocol):new WebSocket(wsUrl);
+	 var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId)+'&token='+encodeURIComponent(driverToken(orderId));
+  driverWS=new WebSocket(wsUrl);
  driverWS.addEventListener('open',function(){
   setReconnecting(false);
   clearTimeout(wsReconnectTimer);

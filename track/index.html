@@ -90,7 +90,6 @@ if(TRACK_PARAMS.get('token')||TRACK_PARAMS.get('t')){
  cleanTrackUrl.hash=TRACK_TOKEN?'t='+encodeURIComponent(TRACK_TOKEN):'';
  history.replaceState(null,'',cleanTrackUrl.toString());
 }
-function wsTokenProtocol(token){return /^[A-Za-z0-9._~+-]+$/.test(token||'')?'lk-token-'+token:''}
 var RLAT=33.821091, RLNG=35.564961;
 var STEPS=[
  {key:'received',label:'Order Received',icon:'📥'},
@@ -365,9 +364,8 @@ function stopTitleFlash(){
 function connectCustomerWS(orderId){
  // WebSocket handles live map movement; fetch polling stays as fallback/status refresh.
  if(!orderId||typeof WebSocket==='undefined'||customerWS)return;
- var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=customer&orderId='+encodeURIComponent(orderId);
- var protocol=wsTokenProtocol(TRACK_TOKEN);
- customerWS=protocol?new WebSocket(wsUrl,protocol):new WebSocket(wsUrl);
+ var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=customer&orderId='+encodeURIComponent(orderId)+'&token='+encodeURIComponent(TRACK_TOKEN);
+ customerWS=new WebSocket(wsUrl);
   customerWS.addEventListener('open',function(){
    wsAlive=true;
    setReconnecting(false);

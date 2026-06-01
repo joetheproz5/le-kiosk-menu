@@ -12,6 +12,8 @@ const ALLOWED_ORIGINS = [
 const ALLOWED_FILES = ['orders.json','inbox.json','menu.json','blocklist.json','customers.json','config.json'];
 
 function wsAccessToken(request, url) {
+  const queryToken = url.searchParams.get('token') || '';
+  if (queryToken) return queryToken;
   const protocols = String(request.headers.get('Sec-WebSocket-Protocol') || '')
     .split(',')
     .map(p => p.trim());
@@ -659,11 +661,11 @@ export default {
     }
 
     function trackTokenFromRequest(request) {
-      return request.headers.get('X-Track-Token') || '';
+      return request.headers.get('X-Track-Token') || url.searchParams.get('token') || url.searchParams.get('t') || '';
     }
 
     function driverTokenFromRequest(request, body = null) {
-      return request.headers.get('X-Driver-Token') || (body && body.token) || '';
+      return request.headers.get('X-Driver-Token') || (body && body.token) || url.searchParams.get('token') || '';
     }
 
     function requireTrackAccess(payload, request) {
