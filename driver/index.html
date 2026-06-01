@@ -93,6 +93,13 @@ function syncKnownOrdersToAndroid(ids){
   }
  }catch(e){}
 }
+function markOrderNotifiedToAndroid(order){
+ try{
+  if(order&&order.id&&window.LekioskAndroid&&typeof window.LekioskAndroid.markOrderNotified==='function'){
+   window.LekioskAndroid.markOrderNotified(String(order.id));
+  }
+ }catch(e){}
+}
 		function driverHeaders(extra,token){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;if(token)h['X-Driver-Token']=token;return h}
 		function tokenMap(){try{return Object.assign({},JSON.parse(sessionStorage.getItem(DRIVER_SESSION_TOKEN_KEY)||'{}')||{},driverTokensMemory||{})}catch(e){return driverTokensMemory||{}}}
 		function saveTokenMap(map){driverTokensMemory=map||{};try{sessionStorage.setItem(DRIVER_SESSION_TOKEN_KEY,JSON.stringify(driverTokensMemory))}catch(e){}}
@@ -200,7 +207,12 @@ function sendOrderNotification(order){
  var title='New delivery order';
  var body=(order&&order.name?order.name:'Customer')+(order&&order.total?' · '+money(order.total):'');
  try{
+  if(window.LekioskAndroid&&typeof window.LekioskAndroid.notifyNewOrderForOrder==='function'){
+   window.LekioskAndroid.notifyNewOrderForOrder(order&&order.id?String(order.id):'',title,body);
+   return;
+  }
   if(window.LekioskAndroid&&typeof window.LekioskAndroid.notifyNewOrder==='function'){
+   markOrderNotifiedToAndroid(order);
    window.LekioskAndroid.notifyNewOrder(title,body);
    return;
   }

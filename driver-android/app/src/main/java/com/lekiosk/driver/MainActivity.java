@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
     static final String PREF_DRIVER_PIN = "driver_pin";
     static final String PREF_KNOWN_ORDER_IDS = "known_order_ids";
     static final String PREF_KNOWN_ORDER_IDS_READY = "known_order_ids_ready";
+    static final String PREF_NOTIFIED_ORDER_IDS = "notified_order_ids";
     private WebView webView;
 
     @Override
@@ -117,6 +118,10 @@ public class MainActivity extends Activity {
     }
 
     private void showOrderNotification(String title, String body) {
+        showOrderNotification(title, body, "");
+    }
+
+    private void showOrderNotification(String title, String body, String orderId) {
         if (android.os.Build.VERSION.SDK_INT >= 33 &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestNotificationPermission();
@@ -148,8 +153,28 @@ public class MainActivity extends Activity {
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {
-            manager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
+            String id = orderId == null ? "" : orderId.trim();
+            markOrderNotified(id);
+            if (id.isEmpty()) {
+                manager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
+            } else {
+                manager.notify(id, 300, builder.build());
+            }
         }
+    }
+
+    private void markOrderNotified(String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) return;
+
+        String raw = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(PREF_NOTIFIED_ORDER_IDS, "");
+        String id = orderId.trim();
+        if (("," + raw + ",").contains("," + id + ",")) return;
+
+        getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(PREF_NOTIFIED_ORDER_IDS, raw == null || raw.isEmpty() ? id : raw + "," + id)
+            .apply();
     }
 
     @Override
@@ -200,6 +225,16 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void notifyNewOrderForOrder(final String orderId, final String title, final String body) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showOrderNotification(title, body, orderId);
+                }
+            });
+        }
+
+        @JavascriptInterface
         public void setDriverPin(final String pin) {
             getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit()
@@ -214,6 +249,7 @@ public class MainActivity extends Activity {
                 .remove(PREF_DRIVER_PIN)
                 .remove(PREF_KNOWN_ORDER_IDS)
                 .remove(PREF_KNOWN_ORDER_IDS_READY)
+                .remove(PREF_NOTIFIED_ORDER_IDS)
                 .apply();
             stopService(new Intent(MainActivity.this, DriverBackgroundService.class));
         }
@@ -225,6 +261,11 @@ public class MainActivity extends Activity {
                 .putString(PREF_KNOWN_ORDER_IDS, orderIds == null ? "" : orderIds)
                 .putBoolean(PREF_KNOWN_ORDER_IDS_READY, true)
                 .apply();
+        }
+
+        @JavascriptInterface
+        public void markOrderNotified(final String orderId) {
+            markOrderNotified(orderId);
         }
     }
 

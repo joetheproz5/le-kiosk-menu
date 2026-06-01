@@ -30,7 +30,7 @@ public class DriverBackgroundService extends Service {
     private static final String ORDER_CHANNEL_ID = "driver_orders";
     private static final String DRIVER_API_URL = "https://lekiosk-order-inbox.lekiosklb.workers.dev/driver";
     private static final int NOTIFICATION_ID = 200;
-    private static final long ORDER_POLL_MS = 20000L;
+    private static final long ORDER_POLL_MS = 5000L;
     private PowerManager.WakeLock bgWakeLock;
     private volatile boolean polling;
     private Thread pollingThread;
@@ -165,6 +165,7 @@ public class DriverBackgroundService extends Service {
         try {
             JSONArray orders = fetchDriverOrders(pin.trim());
             Set<String> known = parseIdSet(prefs().getString(MainActivity.PREF_KNOWN_ORDER_IDS, ""));
+            Set<String> notified = parseIdSet(prefs().getString(MainActivity.PREF_NOTIFIED_ORDER_IDS, ""));
             boolean baselineReady = prefs().getBoolean(MainActivity.PREF_KNOWN_ORDER_IDS_READY, false);
             Set<String> current = new LinkedHashSet<>();
             JSONObject firstNewOrder = null;
@@ -177,7 +178,7 @@ public class DriverBackgroundService extends Service {
                 if (id.isEmpty()) continue;
                 current.add(id);
 
-                if (baselineReady && !known.contains(id) && firstNewOrder == null) {
+                if (baselineReady && !known.contains(id) && !notified.contains(id) && firstNewOrder == null) {
                     firstNewOrder = order;
                 }
             }
@@ -186,7 +187,8 @@ public class DriverBackgroundService extends Service {
                 if (!current.isEmpty() && firstNewOrder == null) {
                     for (int i = 0; i < orders.length(); i++) {
                         JSONObject order = orders.optJSONObject(i);
-                        if (order != null && !isDelivered(order) && current.contains(order.optString("id", ""))) {
+                        String id = order == null ? "" : order.optString("id", "");
+                        if (order != null && !isDelivered(order) && current.contains(id) && !notified.contains(id)) {
                             showOrderNotification(order);
                             break;
                         }
@@ -211,9 +213,9 @@ public class DriverBackgroundService extends Service {
         conn.setRequestMethod("GET");
         conn.setRequestProperty("X-Driver-Pin", pin);
         conn.setRequestProperty("Accept", "application/json");
-        conn.setRequestProperty("User-Agent", "LeKioskDriverAndroid/1.1");
-        conn.setConnectTimeout(10000);
-        conn.setReadTimeout(10000);
+        conn.setRequestProperty("User-Agent", "LeKioskDriverAndroid/1.4");
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(5000);
 
         try {
             int code = conn.getResponseCode();
@@ -275,7 +277,9 @@ public class DriverBackgroundService extends Service {
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) {
-            manager.notify((int) (System.currentTimeMillis() % Integer.MAX_VALUE), builder.build());
+            String orderId = order.optString("id", "");
+            markOrderNotified(orderId);
+            manager.notify(orderId.isEmpty() ? "driver_order" : orderId, 300, builder.build());
         }
     }
 
@@ -301,5 +305,19 @@ public class DriverBackgroundService extends Service {
             out.append(id);
         }
         prefs().edit().putString(MainActivity.PREF_KNOWN_ORDER_IDS, out.toString()).apply();
+    }
+
+    private void markOrderNotified(String id) {
+        if (id == null || id.trim().isEmpty()) return;
+        String cleanId = id.trim();
+        Set<String> notified = parseIdSet(prefs().getString(MainActivity.PREF_NOTIFIED_ORDER_IDS, ""));
+        if (notified.contains(cleanId)) return;
+        notified.add(cleanId);
+        StringBuilder out = new StringBuilder();
+        for (String notifiedId : notified) {
+            if (out.length() > 0) out.append(',');
+            out.append(notifiedId);
+        }
+        prefs().edit().putString(MainActivity.PREF_NOTIFIED_ORDER_IDS, out.toString()).apply();
     }
 }
