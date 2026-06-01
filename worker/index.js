@@ -11,6 +11,21 @@ const ALLOWED_ORIGINS = [
 
 const ALLOWED_FILES = ['orders.json','inbox.json','menu.json','blocklist.json','customers.json','config.json'];
 
+function wsAccessToken(request, url) {
+  const protocols = String(request.headers.get('Sec-WebSocket-Protocol') || '')
+    .split(',')
+    .map(p => p.trim());
+  const tokenProtocol = protocols.find(p => p.startsWith('lk-token-'));
+  return tokenProtocol ? tokenProtocol.slice('lk-token-'.length) : '';
+}
+
+function wsSelectedProtocol(request) {
+  return String(request.headers.get('Sec-WebSocket-Protocol') || '')
+    .split(',')
+    .map(p => p.trim())
+    .find(p => p.startsWith('lk-token-')) || '';
+}
+
 function safeCompare(a, b) {
   a = String(a || '');
   b = String(b || '');
@@ -60,7 +75,10 @@ export class OrderRoom {
     server.addEventListener('close', cleanup);
     server.addEventListener('error', cleanup);
 
-    return new Response(null, { status: 101, webSocket: client });
+    const selectedProtocol = wsSelectedProtocol(request);
+    const init = { status: 101, webSocket: client };
+    if (selectedProtocol) init.headers = { 'Sec-WebSocket-Protocol': selectedProtocol };
+    return new Response(null, init);
   }
 }
 
@@ -92,7 +110,7 @@ export default {
         return new Response('Invalid role', { status: 400, headers: corsHeaders });
       }
 
-      const token = url.searchParams.get('token') || '';
+      const token = wsAccessToken(request, url);
       const orderRes = await fetch(
         `${env.SUPABASE_URL}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=payload&limit=1`,
         {
@@ -375,7 +393,7 @@ export default {
     }
 
     function backupKeyOk(request) {
-      const key = request.headers.get('X-Backup-Key') || url.searchParams.get('key') || '';
+      const key = request.headers.get('X-Backup-Key') || '';
       return !!(env.BACKUP_KEY && safeCompare(key, env.BACKUP_KEY));
     }
 
@@ -641,11 +659,11 @@ export default {
     }
 
     function trackTokenFromRequest(request) {
-      return url.searchParams.get('token') || request.headers.get('X-Track-Token') || '';
+      return request.headers.get('X-Track-Token') || '';
     }
 
     function driverTokenFromRequest(request, body = null) {
-      return url.searchParams.get('token') || request.headers.get('X-Driver-Token') || (body && body.token) || '';
+      return request.headers.get('X-Driver-Token') || (body && body.token) || '';
     }
 
     function requireTrackAccess(payload, request) {
@@ -1479,7 +1497,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           ok: true,
           id: cleanOrder.id,
           customerToken: cleanOrder.access.customerToken,
-          trackUrl: `https://lekiosk.store/track/?id=${encodeURIComponent(cleanOrder.id)}&token=${encodeURIComponent(cleanOrder.access.customerToken)}`,
+          trackUrl: `https://lekiosk.store/track/?id=${encodeURIComponent(cleanOrder.id)}#t=${encodeURIComponent(cleanOrder.access.customerToken)}`,
         });
       } catch (e) {
         return json({ error: e.message }, /Invalid|Unavailable|Required|outside|disabled|blocked|open/i.test(e.message || '') ? 400 : 502);
@@ -1789,6 +1807,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
     // ── POST /supabase/menu-visit — public ──
     if (request.method === 'POST' && url.pathname === '/supabase/menu-visit') {
+      const limited = rateLimit('menu-visit', 60, 60 * 1000);
+      if (limited) return limited;
+
       let body;
       try {
         body = await request.json();
@@ -1812,8 +1833,8 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           body: JSON.stringify({
             visitor_id: visitorId,
             visit_date: visitDate,
-            path: body.path || '',
-            referrer: body.referrer || '',
+            path: String(body.path || '').slice(0, 250),
+            referrer: String(body.referrer || '').slice(0, 500),
           }),
         });
 

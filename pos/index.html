@@ -2939,7 +2939,7 @@ c.favoriteItems?.length?`<div class="panel-body"><div class="row"><span>Usually<
 </div>`).join('');
 }
 function formatType(t){return t==='dinein'?'Dine In':t==='takeaway'?'Takeaway':t==='delivery'?'Delivery':(t||'')}
-function trackUrl(orderOrId){const o=typeof orderOrId==='object'?orderOrId:null,id=o?o.id:orderOrId,token=o?.access?.customerToken;return`https://lekiosk.store/track/?id=${encodeURIComponent(id||'')}${token?`&token=${encodeURIComponent(token)}`:''}`}
+function trackUrl(orderOrId){const o=typeof orderOrId==='object'?orderOrId:null,id=o?o.id:orderOrId,token=o?.access?.customerToken;return`https://lekiosk.store/track/?id=${encodeURIComponent(id||'')}${token?`#t=${encodeURIComponent(token)}`:''}`}
 function printOrder(format){if(!validateOrder())return;doPrint(buildOrder('pending'),format)}
 function printLoggedOrder(id,format){const o=getLoggedOrder(id);if(o)doPrint(o,format)}
 function doPrint(o,format){$('print-area').innerHTML=format==='thermal'?thermalReceipt(o):cardReceipt(o);$('print-area').style.display='block';setTimeout(()=>{window.print();$('print-area').style.display='none'},120)}

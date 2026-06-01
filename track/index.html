@@ -81,7 +81,16 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
 var TRACK_PARAMS=new URLSearchParams(window.location.search);
-var TRACK_TOKEN=TRACK_PARAMS.get('token')||TRACK_PARAMS.get('t')||'';
+var TRACK_HASH_PARAMS=new URLSearchParams(String(window.location.hash||'').replace(/^#/,''));
+var TRACK_TOKEN=TRACK_HASH_PARAMS.get('t')||TRACK_HASH_PARAMS.get('token')||TRACK_PARAMS.get('token')||TRACK_PARAMS.get('t')||'';
+if(TRACK_PARAMS.get('token')||TRACK_PARAMS.get('t')){
+ var cleanTrackUrl=new URL(window.location.href);
+ cleanTrackUrl.searchParams.delete('token');
+ cleanTrackUrl.searchParams.delete('t');
+ cleanTrackUrl.hash=TRACK_TOKEN?'t='+encodeURIComponent(TRACK_TOKEN):'';
+ history.replaceState(null,'',cleanTrackUrl.toString());
+}
+function wsTokenProtocol(token){return /^[A-Za-z0-9._~+-]+$/.test(token||'')?'lk-token-'+token:''}
 var RLAT=33.821091, RLNG=35.564961;
 var STEPS=[
  {key:'received',label:'Order Received',icon:'📥'},
@@ -356,8 +365,9 @@ function stopTitleFlash(){
 function connectCustomerWS(orderId){
  // WebSocket handles live map movement; fetch polling stays as fallback/status refresh.
  if(!orderId||typeof WebSocket==='undefined'||customerWS)return;
- var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=customer&orderId='+encodeURIComponent(orderId)+'&token='+encodeURIComponent(TRACK_TOKEN);
- customerWS=new WebSocket(wsUrl);
+ var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=customer&orderId='+encodeURIComponent(orderId);
+ var protocol=wsTokenProtocol(TRACK_TOKEN);
+ customerWS=protocol?new WebSocket(wsUrl,protocol):new WebSocket(wsUrl);
   customerWS.addEventListener('open',function(){
    wsAlive=true;
    setReconnecting(false);
@@ -835,7 +845,7 @@ async function load(){
  if(!id){showError('No order ID. Use: /track/?id=ORD-123');loadBusy=false;return}
  var ctrl=new AbortController(),tmr=setTimeout(function(){ctrl.abort()},10000);
  try{
-  var res=await fetch(W+'/track/'+encodeURIComponent(id)+'?token='+encodeURIComponent(TRACK_TOKEN),{signal:ctrl.signal,cache:'no-store'});
+  var res=await fetch(W+'/track/'+encodeURIComponent(id),{signal:ctrl.signal,cache:'no-store',headers:{'X-Track-Token':TRACK_TOKEN}});
   clearTimeout(tmr);
   if(!res.ok){var e=await res.json().catch(function(){return{}});throw new Error(e.error||'Order not found')}
   var j=await res.json();

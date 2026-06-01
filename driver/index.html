@@ -42,6 +42,7 @@ body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg
 	var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
 	var DRIVER_PIN_KEY='lk_driver_pin_v1';
 	var DRIVER_TOKEN_KEY='lk_driver_tokens_v1';
+	var DRIVER_SESSION_TOKEN_KEY='lk_driver_session_tokens_v1';
 	var driverPinMemory='', driverTokensMemory={};
 var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=900;
 var GPS_MAX_ACCURACY=160, GPS_JUMP_SPEED=45, GPS_HARD_JUMP=220;
@@ -82,13 +83,14 @@ function setReconnecting(active){
 	}
 		function driverPin(){return driverPinMemory||''}
 		function saveDriverPin(pin){driverPinMemory=String(pin||'')}
-		function clearDriverPin(){driverPinMemory='';driverTokensMemory={};try{localStorage.removeItem(DRIVER_PIN_KEY);localStorage.removeItem(DRIVER_TOKEN_KEY)}catch(e){}}
-		function driverHeaders(extra){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;return h}
-		function tokenMap(){return driverTokensMemory||{}}
-		function saveTokenMap(map){driverTokensMemory=map||{}}
+		function clearDriverPin(){driverPinMemory='';driverTokensMemory={};try{localStorage.removeItem(DRIVER_PIN_KEY);localStorage.removeItem(DRIVER_TOKEN_KEY);sessionStorage.removeItem(DRIVER_SESSION_TOKEN_KEY)}catch(e){}}
+		function driverHeaders(extra,token){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;if(token)h['X-Driver-Token']=token;return h}
+		function tokenMap(){try{return Object.assign({},JSON.parse(sessionStorage.getItem(DRIVER_SESSION_TOKEN_KEY)||'{}')||{},driverTokensMemory||{})}catch(e){return driverTokensMemory||{}}}
+		function saveTokenMap(map){driverTokensMemory=map||{};try{sessionStorage.setItem(DRIVER_SESSION_TOKEN_KEY,JSON.stringify(driverTokensMemory))}catch(e){}}
 	function rememberDriverToken(id,token){if(!id||!token)return;var map=tokenMap();map[id]=token;saveTokenMap(map)}
 	function driverToken(id){return (orderData&&orderData.id===id&&orderData.driverToken)||tokenMap()[id]||''}
-	function authUrl(path,token){return path+(path.indexOf('?')>=0?'&':'?')+'token='+encodeURIComponent(token||'')}
+	function authUrl(path){return path}
+	function wsTokenProtocol(token){return /^[A-Za-z0-9._~+-]+$/.test(token||'')?'lk-token-'+token:''}
 	function renderPinGate(message){
 	 document.getElementById('app').innerHTML='\x3Cdiv class="pin-card"\x3E\x3Cdiv class="pin-box"\x3E\x3Cdiv class="pin-title"\x3EDriver PIN\x3C/div\x3E\x3Cdiv class="pin-copy"\x3EEnter the driver PIN to view deliveries.\x3C/div\x3E\x3Cinput class="pin-input" id="driver-pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="one-time-code"\x3E\x3Cbutton class="pin-btn" onclick="D.savePin()"\x3EUnlock Driver\x3C/button\x3E\x3Cdiv class="pin-error'+(message?' show':'')+'" id="driver-pin-error"\x3E'+esc(message||'')+'\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
 	 setTimeout(function(){var i=document.getElementById('driver-pin-input');if(i){i.focus();i.onkeydown=function(e){if(e.key==='Enter')D.savePin()}}},50);
@@ -231,8 +233,9 @@ function connectDriverWS(orderId){
   if(driverWS&&driverWSOrderId===orderId&&driverWS.readyState!==WebSocket.CLOSED)return;
   if(driverWS&&driverWSOrderId!==orderId)closeDriverWS();
   driverWSOrderId=orderId;
-	 var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId)+'&token='+encodeURIComponent(driverToken(orderId));
-  driverWS=new WebSocket(wsUrl);
+	 var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId);
+  var protocol=wsTokenProtocol(driverToken(orderId));
+  driverWS=protocol?new WebSocket(wsUrl,protocol):new WebSocket(wsUrl);
  driverWS.addEventListener('open',function(){
   setReconnecting(false);
   clearTimeout(wsReconnectTimer);
@@ -1265,7 +1268,7 @@ window.D={
 	 openOrder:function(el){
 	  var id=el&&el.getAttribute('data-order-id');
 	  var token=el&&el.getAttribute('data-driver-token');
-	  if(id)location.href='?id='+encodeURIComponent(id)+(token?'&token='+encodeURIComponent(token):'');
+	  if(id){if(token)rememberDriverToken(id,token);location.href='?id='+encodeURIComponent(id)}
 	 },
 	 savePin:function(){
 	  var input=document.getElementById('driver-pin-input');
@@ -1340,10 +1343,15 @@ async function load(){
 	  if(!id&&!driverPin()){renderPinGate('');return}
 	  if(id){
 	   var token=params.get('token')||driverToken(id);
+	   if(params.get('token')){
+	    rememberDriverToken(id,token);
+	    params.delete('token');
+	    history.replaceState(null,'','?'+params.toString());
+	   }
 	   if(!token&&!driverPin()){renderPinGate('');return}
 	   startRefresh();
 	   try{
-	    var j=await fetchJSON(authUrl(W+'/driver/'+encodeURIComponent(id),token),{headers:driverHeaders()},3);
+	    var j=await fetchJSON(authUrl(W+'/driver/'+encodeURIComponent(id)),{headers:driverHeaders({},token)},3);
 	    if(!j.ok)throw new Error(j.error||'Invalid response');
 	    orderData=j.data;
 	    if(orderData.driverToken)rememberDriverToken(orderData.id,orderData.driverToken);
