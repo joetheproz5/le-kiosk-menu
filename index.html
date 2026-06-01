@@ -369,7 +369,7 @@
                 <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
                 <div class="sheet-actions">
                     <button id="clear-cart-btn" class="clear-cart-btn" type="button">Clear cart</button>
-                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2" type="button" aria-label="Close cart">✕</button>
                 </div>
             </div>
         </div>
@@ -1102,6 +1102,7 @@ function bindCheckoutSheetDrag(){
     body.dataset.dragBound='1';
     let startY=0,currentY=0,dragging=false;
     function canDragFrom(target){
+        if(target.closest&&target.closest('button,a,input,textarea,select,.sheet-actions'))return false;
         if(target.closest&&target.closest('.sheet-handle,.sheet-header'))return true;
         const scroll=target.closest&&target.closest('#sheet-scroll');
         return !scroll||scroll.scrollTop<=0;
@@ -3115,7 +3116,6 @@ Requires Worker routes from:
   .menu-price,
   .pill-count,
   .pill-cta,
-  .qty-plus,
   .locate-main-btn,
   #send-order-btn {
     background: var(--classic-gold-deep) !important;
@@ -3136,8 +3136,6 @@ Requires Worker routes from:
   .addon-icon,
   .menu-info .text-\[10px\],
   .addon-card .bg-amber-50,
-  .qty-minus,
-  .qty-num,
   .sheet-input,
   .manual-addr-ta,
   .order-type-btn,
@@ -3183,6 +3181,65 @@ Requires Worker routes from:
     background: rgba(0,0,0,.64) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+
+  .qty-control {
+    align-items: stretch !important;
+    gap: 0 !important;
+    width: max-content;
+    border: 1px solid rgba(201,154,59,.28);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #14110e;
+  }
+
+  .qty-btn,
+  .qty-num {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px;
+    border-radius: 0 !important;
+    border: 0 !important;
+    line-height: 44px !important;
+    font-size: 20px !important;
+  }
+
+  .qty-btn {
+    background: #1b1712 !important;
+    color: #fff3cf !important;
+  }
+
+  .qty-minus {
+    border-right: 1px solid rgba(201,154,59,.28) !important;
+  }
+
+  .qty-plus {
+    background: var(--classic-gold-deep) !important;
+    border-left: 1px solid rgba(201,154,59,.28) !important;
+    color: #fff3cf !important;
+  }
+
+  .qty-num {
+    background: #100e0c !important;
+    color: var(--classic-cream) !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+  }
+
+  #close-sheet-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0 !important;
+    border: 1px solid rgba(201,154,59,.22);
+    border-radius: 12px;
+    background: rgba(244,234,216,.07) !important;
+    color: var(--classic-cream) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    touch-action: manipulation;
   }
 
   .pill-inner {
