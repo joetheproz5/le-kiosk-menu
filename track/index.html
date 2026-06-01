@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 <title>Track Order — Le Kiosk</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" integrity="sha384-gNYNsUmuZqDYiT3gbirWTV5K7rt71RoveS/yXAaU09d4ZUmeDVTD3XoqB6uJAIFR" crossorigin="anonymous">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--amber:#f59e0b;--amber-d:#b45309;--amber-l:#fef3c7;--green:#16a34a;--green-l:#dcfce7;--gray:#d1d5db;--gray-l:#f3f4f6;--ink:#1f2937;--muted:#6b7280;--white:#fff}
@@ -73,9 +74,9 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(180deg,#fef3c7 
 <div class="header"><div class="logo">Le Kiosk</div><div class="sub">Order Tracking</div></div>
 <div id="content"><div class="loading"><div class="spinner"></div>Loading your order...</div></div>
 <div id="map-area"></div>
-<div class="footer">Need help? <a href="tel:+96176840244">+961 76 840 244</a><br><a href="https://g.page/r/CVH0uR_N89RlEAg/review" target="_blank">Leave a Google Review</a></div>
+<div class="footer">Need help? <a href="tel:+96176840244">+961 76 840 244</a><br><a href="https://g.page/r/CVH0uR_N89RlEAg/review" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Leave a Google Review</a></div>
 </div>
-<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js" integrity="sha384-1qC0PnXk2fgMDybOtZF1ui4LM5Sxm7o0TbEkwfxTTVdlZvuNENNGCKUub7d644HP" crossorigin="anonymous"></script>
 <script>
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';

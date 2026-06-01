@@ -1047,30 +1047,44 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
       const rows = Array.isArray(body.data) ? body.data : [];
 
-      let previousBlocklist = [];
       try {
-        previousBlocklist = await supabaseFetch('/blocklist?select=*').catch(() => []);
-        await supabaseFetch('/blocklist?phone=not.is.null', { method: 'DELETE' });
-
-        const clean = rows.map(b => ({
-          phone: String(b.phone || '').replace(/\D/g, '').slice(-8),
-          reason: b.reason || '',
-          blocked_at: b.blockedAt || b.blocked_at || new Date().toISOString(),
-        })).filter(b => b.phone.length === 8);
-
-        if (clean.length) {
-          await supabaseFetch('/blocklist', {
-            method: 'POST',
-            body: JSON.stringify(clean),
+        const cleanByPhone = new Map();
+        rows.forEach(b => {
+          const phone = String(b.phone || '').replace(/\D/g, '').slice(-8);
+          if (phone.length !== 8) return;
+          cleanByPhone.set(phone, {
+            phone,
+            reason: b.reason || '',
+            blocked_at: b.blockedAt || b.blocked_at || new Date().toISOString(),
           });
+        });
+        const clean = Array.from(cleanByPhone.values());
+        const existing = await supabaseFetch('/blocklist?select=*').catch(() => []);
+        const existingByPhone = new Map((Array.isArray(existing) ? existing : []).map(row => [String(row.phone || ''), row]));
+
+        for (const row of clean) {
+          if (existingByPhone.has(row.phone)) {
+            await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(row.phone)}`, {
+              method: 'PATCH',
+              body: JSON.stringify(row),
+            });
+          } else {
+            await supabaseFetch('/blocklist', {
+              method: 'POST',
+              body: JSON.stringify(row),
+            });
+          }
+        }
+
+        for (const row of existingByPhone.values()) {
+          const phone = String(row.phone || '');
+          if (phone && !cleanByPhone.has(phone)) {
+            await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(phone)}`, { method: 'DELETE' });
+          }
         }
 
         return json({ ok: true, count: clean.length });
       } catch (e) {
-        await supabaseFetch('/blocklist?phone=not.is.null', { method: 'DELETE' }).catch(() => {});
-        if (Array.isArray(previousBlocklist) && previousBlocklist.length) {
-          await supabaseFetch('/blocklist', { method: 'POST', body: JSON.stringify(previousBlocklist) }).catch(() => {});
-        }
         return json({ error: e.message }, 502);
       }
     }
@@ -1088,10 +1102,11 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       }
     }
 
-    // ── PUT /supabase/customers — admin only ──
+    // ── PUT /supabase/customers — admin/POS ──
     if (request.method === 'PUT' && url.pathname === '/supabase/customers') {
-      const blocked = await guard(['admin']);
+      const blocked = await guard(['admin', 'pos']);
       if (blocked instanceof Response) return blocked;
+      const session = blocked;
 
       let body;
       try {
@@ -1102,42 +1117,58 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
       const rows = Array.isArray(body.data) ? body.data : [];
 
-      let previousCustomers = [];
       try {
-        previousCustomers = await supabaseFetch('/customers?select=*').catch(() => []);
-        await supabaseFetch('/customers?phone=not.is.null', { method: 'DELETE' });
-
-        const clean = rows.map(c => ({
-          phone: String(c.phone || '').replace(/\D/g, '').slice(-8),
-          name: c.name || '',
-          note: c.note || '',
-          first_seen: c.firstSeen || c.first_seen || new Date().toISOString(),
-          last_seen: c.lastSeen || c.last_seen || new Date().toISOString(),
-          total_orders: Number(c.totalOrders ?? c.total_orders ?? 0),
-          total_spent: Number(c.totalSpent ?? c.total_spent ?? 0),
-          order_ids: c.orderIds || c.order_ids || [],
-          item_freq: c.itemFreq || c.item_freq || {},
-          favorite_items: c.favoriteItems || c.favorite_items || [],
-          loyalty_stamps: Number(c.loyaltyStamps ?? c.loyalty_stamps ?? 0),
-          loyalty_reward_ready: !!(c.loyaltyRewardReady ?? c.loyalty_reward_ready),
-          loyalty_last_reward: c.loyaltyLastReward ?? c.loyalty_last_reward ?? null,
-          loyalty_reward_redeemed_at: c.loyaltyRewardRedeemedAt ?? c.loyalty_reward_redeemed_at ?? null,
-          loyalty_lifetime_redemptions: Number(c.loyaltyLifetimeRedemptions ?? c.loyalty_lifetime_redemptions ?? 0),
-        })).filter(c => c.phone.length === 8);
-
-        if (clean.length) {
-          await supabaseFetch('/customers', {
-            method: 'POST',
-            body: JSON.stringify(clean),
+        const cleanByPhone = new Map();
+        rows.forEach(c => {
+          const phone = String(c.phone || '').replace(/\D/g, '').slice(-8);
+          if (phone.length !== 8) return;
+          cleanByPhone.set(phone, {
+            phone,
+            name: c.name || '',
+            note: c.note || '',
+            first_seen: c.firstSeen || c.first_seen || new Date().toISOString(),
+            last_seen: c.lastSeen || c.last_seen || new Date().toISOString(),
+            total_orders: Number(c.totalOrders ?? c.total_orders ?? 0),
+            total_spent: Number(c.totalSpent ?? c.total_spent ?? 0),
+            order_ids: c.orderIds || c.order_ids || [],
+            item_freq: c.itemFreq || c.item_freq || {},
+            favorite_items: c.favoriteItems || c.favorite_items || [],
+            loyalty_stamps: Number(c.loyaltyStamps ?? c.loyalty_stamps ?? 0),
+            loyalty_reward_ready: !!(c.loyaltyRewardReady ?? c.loyalty_reward_ready),
+            loyalty_last_reward: c.loyaltyLastReward ?? c.loyalty_last_reward ?? null,
+            loyalty_reward_redeemed_at: c.loyaltyRewardRedeemedAt ?? c.loyalty_reward_redeemed_at ?? null,
+            loyalty_lifetime_redemptions: Number(c.loyaltyLifetimeRedemptions ?? c.loyalty_lifetime_redemptions ?? 0),
           });
+        });
+        const clean = Array.from(cleanByPhone.values());
+        const existing = await supabaseFetch('/customers?select=*').catch(() => []);
+        const existingByPhone = new Map((Array.isArray(existing) ? existing : []).map(row => [String(row.phone || ''), row]));
+
+        for (const row of clean) {
+          if (existingByPhone.has(row.phone)) {
+            await supabaseFetch(`/customers?phone=eq.${encodeURIComponent(row.phone)}`, {
+              method: 'PATCH',
+              body: JSON.stringify(row),
+            });
+          } else {
+            await supabaseFetch('/customers', {
+              method: 'POST',
+              body: JSON.stringify(row),
+            });
+          }
+        }
+
+        if (session.role === 'admin') {
+          for (const row of existingByPhone.values()) {
+            const phone = String(row.phone || '');
+            if (phone && !cleanByPhone.has(phone)) {
+              await supabaseFetch(`/customers?phone=eq.${encodeURIComponent(phone)}`, { method: 'DELETE' });
+            }
+          }
         }
 
         return json({ ok: true });
       } catch (e) {
-        await supabaseFetch('/customers?phone=not.is.null', { method: 'DELETE' }).catch(() => {});
-        if (Array.isArray(previousCustomers) && previousCustomers.length) {
-          await supabaseFetch('/customers', { method: 'POST', body: JSON.stringify(previousCustomers) }).catch(() => {});
-        }
         return json({ error: e.message }, 502);
       }
     }
@@ -1585,14 +1616,20 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
       const sections = Array.isArray(body.data) ? body.data : [];
 
-      let previousCategories = [];
-      let previousProducts = [];
       try {
-        previousCategories = await supabaseFetch('/categories?select=*').catch(() => []);
-        previousProducts = await supabaseFetch('/products?select=*').catch(() => []);
-        await supabaseFetch('/products?id=not.is.null', { method: 'DELETE' });
-        await supabaseFetch('/categories?id=not.is.null', { method: 'DELETE' });
-
+        const now = new Date().toISOString();
+        const existingCategories = await supabaseFetch('/categories?select=*').catch(() => []);
+        const existingProducts = await supabaseFetch('/products?select=*').catch(() => []);
+        const existingCategoriesByKey = new Map((Array.isArray(existingCategories) ? existingCategories : []).map(cat => [String(cat.key || ''), cat]));
+        const existingProductsBySlot = new Map();
+        (Array.isArray(existingProducts) ? existingProducts : []).forEach(product => {
+          const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
+          if (!existingProductsBySlot.has(slot)) existingProductsBySlot.set(slot, product);
+        });
+        const productFilter = (product) => {
+          if (product?.id != null) return `/products?id=eq.${encodeURIComponent(product.id)}`;
+          return `/products?category_key=eq.${encodeURIComponent(product.category_key || '')}&sort_order=eq.${encodeURIComponent(product.sort_order ?? 0)}`;
+        };
         const categories = sections.map((sec, index) => ({
           key: sec.key || `category-${index}`,
           title: sec.title || 'Untitled',
@@ -1601,14 +1638,22 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           sort_order: index,
           active: true,
           raw: sec,
-          updated_at: new Date().toISOString(),
+          updated_at: now,
         }));
 
-        if (categories.length) {
-          await supabaseFetch('/categories', {
-            method: 'POST',
-            body: JSON.stringify(categories),
-          });
+        const incomingCategoryKeys = new Set(categories.map(cat => cat.key));
+        for (const category of categories) {
+          if (existingCategoriesByKey.has(category.key)) {
+            await supabaseFetch(`/categories?key=eq.${encodeURIComponent(category.key)}`, {
+              method: 'PATCH',
+              body: JSON.stringify(category),
+            });
+          } else {
+            await supabaseFetch('/categories', {
+              method: 'POST',
+              body: JSON.stringify(category),
+            });
+          }
         }
 
         const products = [];
@@ -1629,16 +1674,47 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
               addons: item.addons || [],
               flavor_color: item.flavorColor || 'amber',
               raw: item,
-              updated_at: new Date().toISOString(),
+              updated_at: now,
             });
           });
         });
 
-        if (products.length) {
-          await supabaseFetch('/products', {
-            method: 'POST',
-            body: JSON.stringify(products),
-          });
+        const incomingProductSlots = new Set();
+        for (const product of products) {
+          const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
+          incomingProductSlots.add(slot);
+          const existing = existingProductsBySlot.get(slot);
+          if (existing) {
+            await supabaseFetch(productFilter(existing), {
+              method: 'PATCH',
+              body: JSON.stringify(product),
+            });
+          } else {
+            await supabaseFetch('/products', {
+              method: 'POST',
+              body: JSON.stringify(product),
+            });
+          }
+        }
+
+        for (const product of existingProductsBySlot.values()) {
+          const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
+          if (!incomingProductSlots.has(slot) && product.active !== false) {
+            await supabaseFetch(productFilter(product), {
+              method: 'PATCH',
+              body: JSON.stringify({ active: false, updated_at: now }),
+            });
+          }
+        }
+
+        for (const category of existingCategoriesByKey.values()) {
+          const key = String(category.key || '');
+          if (key && !incomingCategoryKeys.has(key) && category.active !== false) {
+            await supabaseFetch(`/categories?key=eq.${encodeURIComponent(key)}`, {
+              method: 'PATCH',
+              body: JSON.stringify({ active: false, updated_at: now }),
+            });
+          }
         }
 
         return json({
@@ -1647,14 +1723,6 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           products: products.length,
 	        });
 	      } catch (e) {
-	        await supabaseFetch('/products?id=not.is.null', { method: 'DELETE' }).catch(() => {});
-	        await supabaseFetch('/categories?id=not.is.null', { method: 'DELETE' }).catch(() => {});
-	        if (Array.isArray(previousCategories) && previousCategories.length) {
-	          await supabaseFetch('/categories', { method: 'POST', body: JSON.stringify(previousCategories) }).catch(() => {});
-	        }
-	        if (Array.isArray(previousProducts) && previousProducts.length) {
-	          await supabaseFetch('/products', { method: 'POST', body: JSON.stringify(previousProducts) }).catch(() => {});
-	        }
 	        return json({ error: e.message }, 502);
 	      }
 	    }

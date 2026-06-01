@@ -1934,7 +1934,13 @@ return nativeFetch(input,{...options,headers});
 const money=n=>'$'+(Number(n)||0).toFixed(2);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const uid=()=>Date.now()+Math.random();
-function imageUrl(src){if(!src)return '';return /^https?:|^data:/.test(src)?src:`${STORAGE_PUBLIC_BASE}/${src}`;}
+function imageUrl(src){
+src=String(src||'').trim();
+if(!src)return '';
+if(src.startsWith(STORAGE_PUBLIC_BASE+'/'))return src;
+if(/^menupictures\/[a-zA-Z0-9._/-]+\.(?:jpe?g|png|webp)$/i.test(src)&&!src.includes('..'))return `${STORAGE_PUBLIC_BASE}/${src.replace(/^\/+/,'')}`;
+return '';
+}
 function readJson(key,fallback){
 try{return JSON.parse(localStorage.getItem(key)||'')||fallback}catch(_){return fallback}
 }
@@ -2193,15 +2199,18 @@ return vals.length?Math.min(...vals):0;
 function saveAuthSession(){
 if(!authSession)return;
 authSession.localExpiresAt=Date.now()+SESSION_MS;
-localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+sessionStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+localStorage.removeItem(AUTH_STORAGE_KEY);
 }
 function clearAuthSession(){
 authSession=null;
+sessionStorage.removeItem(AUTH_STORAGE_KEY);
 localStorage.removeItem(AUTH_STORAGE_KEY);
 }
 function restoreAuthSession(){
 try{
-const saved=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||'null');
+localStorage.removeItem(AUTH_STORAGE_KEY);
+const saved=JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||'null');
 if(!saved?.token)return false;
 authSession=saved;
 if(!authExpiryMs()){clearAuthSession();return false}
@@ -2770,7 +2779,7 @@ money(o.total)}
 status!=='done'?`<button class="small-btn green" onclick="confirmStatus('${esc(o.id)}','done')">Done</button>`:''}
 ${
 status!=='cancelled'&&status!=='done'?`<button class="small-btn red" onclick="confirmStatus('${esc(o.id)}','cancelled')">Cancel</button>`:''}
-<button class="small-btn amber" onclick="loadOrder('${esc(o.id)}')">Load</button><button class="small-btn blue" onclick="window.open('${esc(trackUrl(o))}','_blank')">Track</button><button class="small-btn dark" onclick="printLoggedOrder('${esc(o.id)}','thermal')">Thermal</button><button class="small-btn blue" onclick="printLoggedOrder('${esc(o.id)}','card')">Card</button><button class="small-btn blue" onclick="sendWhatsAppLoggedOrder('${esc(o.id)}')">WA</button></div></div>`;
+<button class="small-btn amber" onclick="loadOrder('${esc(o.id)}')">Load</button><button class="small-btn blue" onclick="window.open('${esc(trackUrl(o))}','_blank','noopener,noreferrer')">Track</button><button class="small-btn dark" onclick="printLoggedOrder('${esc(o.id)}','thermal')">Thermal</button><button class="small-btn blue" onclick="printLoggedOrder('${esc(o.id)}','card')">Card</button><button class="small-btn blue" onclick="sendWhatsAppLoggedOrder('${esc(o.id)}')">WA</button></div></div>`;
 }
 function confirmStatus(id,status){openModal(status==='done'?'Mark order as done':'Cancel order',`Update ${
 id}
@@ -2902,7 +2911,7 @@ if(!o||!o.phone)return;
 const phone=normalizePhone(o.phone);
 if(phone==='00000000'||phone.length!==8){showToast('No valid phone for WhatsApp','error');return}
 const msg=`Hello ${o.name||'there'}, your order is confirmed. We are preparing it now. Thank you - Le Kiosk`;
-window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+window.open(`https://wa.me/961${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
 }
 async function confirmInbox(id){const o=inboxData.find(x=>x.id===id);if(!o)return;o.status='confirmed';inboxWritePending=true;
 var now=new Date().toISOString();o.tracking=o.tracking||{};o.tracking.received=o.tracking.received||now;delete o.tracking.confirmed;
@@ -3029,7 +3038,7 @@ msg+=`Total: ${
 money(o.total)}
 \n\nTrack: ${trackUrl(o)}
 \n`;
-window.open(`https://wa.me/${o.phone?`961${o.phone}`:WA_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank');
+window.open(`https://wa.me/${o.phone?`961${o.phone}`:WA_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
 }
 function openModal(title,copy,onOk){
 $('modal-title').textContent=title;

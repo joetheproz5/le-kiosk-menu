@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="referrer" content="no-referrer">
 <title>Driver — Le Kiosk</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Poppins:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" integrity="sha384-gNYNsUmuZqDYiT3gbirWTV5K7rt71RoveS/yXAaU09d4ZUmeDVTD3XoqB6uJAIFR" crossorigin="anonymous">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#070b12;--panel:#101722;--panel2:#151f2d;--line:rgba(255,255,255,.08);--text:#f8fafc;--muted:#8d9aab;--amber:#f59e0b;--green:#22c55e;--blue:#38bdf8;--red:#fb7185}
@@ -32,7 +33,7 @@ body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg
 <body>
 <div class="container" id="app"></div>
 <div class="toast" id="toast"></div>
-<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js" integrity="sha384-1qC0PnXk2fgMDybOtZF1ui4LM5Sxm7o0TbEkwfxTTVdlZvuNENNGCKUub7d644HP" crossorigin="anonymous"></script>
 <script>
 (function(){
 	var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
@@ -1286,7 +1287,7 @@ window.D={
   if(e){e.preventDefault();e.stopPropagation()}
   var p=pointFromGPS(orderData&&orderData.gps);
   if(!p){toast('Customer GPS missing');return}
-  window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat+','+p.lng)+'&travelmode=driving','_blank');
+  window.open('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat+','+p.lng)+'&travelmode=driving','_blank','noopener,noreferrer');
  },
  recenter:function(e){
   if(e){e.preventDefault();e.stopPropagation()}

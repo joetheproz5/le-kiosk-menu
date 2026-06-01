@@ -1242,7 +1242,8 @@ function clearAuthSession(){
 }
 function restoreAuthSession(){
   try{
-    const saved=JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||localStorage.getItem(AUTH_STORAGE_KEY)||'null');
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    const saved=JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||'null');
     if(!saved?.token)return false;
     authSession=saved;
     if(!authExpiryMs()){clearAuthSession();return false;}
@@ -1783,7 +1784,7 @@ async function shareGeneratedBasketballPoster(){
     if(e.name==='AbortError')return;
   }
   downloadGeneratedBasketballPoster();
-  window.open(`https://wa.me/${BASKETBALL_WA_NUMBER}?text=${encodeURIComponent(generatedBasketballPoster.caption+'\n\nAttach the downloaded poster image.')}`,'_blank');
+  window.open(`https://wa.me/${BASKETBALL_WA_NUMBER}?text=${encodeURIComponent(generatedBasketballPoster.caption+'\n\nAttach the downloaded poster image.')}`,'_blank','noopener,noreferrer');
   showToast('Poster downloaded and WhatsApp opened','success');
 }
 function openBasketballStoryOptions(m){
@@ -2655,7 +2656,7 @@ async function copyTableQrUrl(i){
 }
 function openTableQr(i){
   const t=configData.tables?.[i];if(!t)return;
-  window.open(tableQrPublicUrl(t),'_blank');
+  window.open(tableQrPublicUrl(t),'_blank','noopener,noreferrer');
 }
 async function downloadTableQr(i){
   const t=configData.tables?.[i];if(!t)return;
