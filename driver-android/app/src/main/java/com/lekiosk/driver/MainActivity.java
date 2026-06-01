@@ -51,12 +51,20 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return request != null && !isAllowedDriverUri(request.getUrl());
+                if (request == null) return true;
+                Uri uri = request.getUrl();
+                if (isAllowedDriverUri(uri)) return false;
+                openExternalUri(uri);
+                return true;
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return url == null || !isAllowedDriverUri(Uri.parse(url));
+                if (url == null) return true;
+                Uri uri = Uri.parse(url);
+                if (isAllowedDriverUri(uri)) return false;
+                openExternalUri(uri);
+                return true;
             }
         });
         webView.addJavascriptInterface(new DriverBridge(), "LekioskAndroid");
@@ -77,6 +85,40 @@ public class MainActivity extends Activity {
     private boolean isAllowedDriverUri(Uri uri) {
         if (uri == null) return false;
         return "https".equals(uri.getScheme()) && "lekiosk.store".equals(uri.getHost());
+    }
+
+    private void openExternalUri(Uri uri) {
+        if (uri == null) return;
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void openGoogleNavigation(double lat, double lng, String label) {
+        Uri uri = Uri.parse("google.navigation:q=" + lat + "," + lng + "&mode=d");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.setPackage("com.google.android.apps.maps");
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            String query = lat + "," + lng;
+            Uri fallback = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + Uri.encode(query) + "&travelmode=driving");
+            openExternalUri(fallback);
+        }
+    }
+
+    private void openWazeNavigation(double lat, double lng) {
+        Uri uri = Uri.parse("waze://?ll=" + lat + "," + lng + "&navigate=yes");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            Uri fallback = Uri.parse("https://waze.com/ul?ll=" + lat + "," + lng + "&navigate=yes");
+            openExternalUri(fallback);
+        }
     }
 
     private boolean requestLocationPermission() {
@@ -215,6 +257,26 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void openGoogleNavigation(final double lat, final double lng, final String label) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    MainActivity.this.openGoogleNavigation(lat, lng, label);
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void openWazeNavigation(final double lat, final double lng) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    MainActivity.this.openWazeNavigation(lat, lng);
+                }
+            });
+        }
+
+        @JavascriptInterface
         public void notifyNewOrder(final String title, final String body) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -265,7 +327,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void markOrderNotified(final String orderId) {
-            markOrderNotified(orderId);
+            MainActivity.this.markOrderNotified(orderId);
         }
     }
 
