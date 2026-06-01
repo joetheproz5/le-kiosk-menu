@@ -29,7 +29,7 @@
 
   <!-- ═══ MOBILE & INDEXING ═══ -->
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <meta name="theme-color" content="#YOUR_BRAND_COLOR">
+  <meta name="theme-color" content="#f59e0b">
   <meta name="geo.region" content="LB-BA">
   <meta name="geo.placename" content="Baabda, Lebanon">
   <meta name="geo.position" content="33.821091;35.564961">
@@ -391,6 +391,9 @@ const PILL_COLORS = {
     gray:   { bg:'#f3f4f6', border:'#e5e7eb', text:'#374151' },
     dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
 };
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function jsStr(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r/g,'').replace(/\n/g,'\\n');}
+function newOrderId(){return 'MENU-'+(window.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(16).slice(2));}
 
 // DELIVERY ZONES
 const CENTER_LAT = 33.821091538427524;
@@ -425,13 +428,16 @@ function normalizePhone(raw){
 }
 async function isPhoneBlocked(phone){
   try{
-    const res = await fetch(`${WORKER_URL}/supabase/blocklist`, { cache:'no-store' });
+    const res = await fetch(`${WORKER_URL}/supabase/blocklist/check`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({phone}),
+      cache:'no-store'
+    });
     if(!res.ok) return false;
 
     const j = await res.json();
-    const list = Array.isArray(j.data) ? j.data : [];
-
-    return list.some(b => String(b.phone || '') === String(phone || ''));
+    return !!j.blocked;
   }catch(_){
     return false;
   }
@@ -447,7 +453,8 @@ let bubbleOpen=false;
 function isOpen(){
     if(TESTING_MODE) return true;
     const now=new Date(),lbMin=(now.getUTCHours()*60+now.getUTCMinutes()+180)%1440;
-    return Math.floor(lbMin/60)>=18;
+    const h=Math.floor(lbMin/60);
+    return h>=18 || h<1;
 }
 
 // OPEN/CLOSED BADGE
@@ -464,9 +471,10 @@ function updateStatusBadge(){
 
 // INBOX TOAST
 let _toastTimer;
-function showInboxToast(msg, type='') {
+function showInboxToast(msg, type='', html=false) {
     const t = document.getElementById('inbox-toast');
-    t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
+    if(html) t.innerHTML = msg; else t.textContent = msg;
+    t.className = 'show' + (type ? ' '+type : '');
     clearTimeout(_toastTimer);
     _toastTimer = setTimeout(() => { t.className = ''; }, 4000);
 }
@@ -545,7 +553,7 @@ function getItemsSubtotal(){
     return Object.entries(cart).filter(([,v])=>v>0).reduce((sum,[key,qty])=>{
         const price=parseFloat(key.split('|')[2].replace('$',''))||0;
         const addons=(addonSel[key]||[]).reduce((a,s)=>a+s.price,0);
-        return sum+price*qty+addons;
+        return sum+(price+addons)*qty;
     },0);
 }
 function getDeliveryFee(){return selectedType==='delivery'&&detectedZone&&detectedZone.canDeliver?detectedZone.fee:0;}
@@ -836,16 +844,17 @@ async function sendOrder(){
 
     let subtotal=0;
     const orderItems=entries.map(([key,qty])=>{
-        const[,itemName,price]=key.split('|');
+        const[categoryKey,itemName,price]=key.split('|');
         const pn=parseFloat(price.replace('$',''))||0;
-        subtotal+=pn*qty;
-        const addonsForItem=(addonSel[key]||[]).map(a=>{subtotal+=a.price;return{label:a.label,price:a.price};});
-        return{name:itemName,price:pn,priceStr:price,qty,flavor:null,addons:addonsForItem};
+        const addonsForItem=(addonSel[key]||[]).map(a=>({label:a.label,price:a.price}));
+        const addonTotal=addonsForItem.reduce((sum,a)=>sum+Number(a.price||0),0);
+        subtotal+=(pn+addonTotal)*qty;
+        return{categoryKey,itemKey:key,name:itemName,price:pn,priceStr:price,qty,flavor:shishaSel[key]||null,addons:addonsForItem};
     });
     subtotal+=fee;
 
     const order={
-        id:'MENU-'+Date.now(),
+        id:newOrderId(),
         status:'pending',
         timestamp:new Date().toISOString(),
         source:'menu',
@@ -861,14 +870,23 @@ async function sendOrder(){
         total:subtotal
     };
 
+    let trackUrl = `https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
+    let trackingReady = false;
     if (WORKER_URL && !WORKER_URL.includes('YOUR-SUBDOMAIN')) {
         showInboxToast('📥 Sending to POS…');
         try {
             const result = await dispatchOrder(order);
-            const trackUrl = `https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
-            showInboxToast(`✅ Order received! <a href="${trackUrl}" target="_blank" style="color:#fff;text-decoration:underline">Track your order</a>`, 'ok');
+            if(result.id) order.id = result.id;
+            if(result.trackUrl) trackUrl = result.trackUrl;
+            trackingReady = true;
+            showInboxToast(`✅ Order received! <a href="${esc(trackUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:underline">Track your order</a>`, 'ok', true);
         } catch(e) {
             console.error('Worker dispatch failed:', e);
+            if(/disabled|open|blocked|invalid|unavailable|outside|required|phone/i.test(String(e.message||e))){
+                if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Send Order on WhatsApp';}
+                showInboxToast(e.message||'Could not send order','err');
+                return;
+            }
             showInboxToast('⚠️ POS sync failed — WhatsApp still sent', 'err');
         }
     }
@@ -886,14 +904,14 @@ async function sendOrder(){
     msg+='━━━━━━━━━━━━━━━━━━\n';
     orderItems.forEach(it=>{
         msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
-        (it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label} — $${a.price.toFixed(2)}\n`;});
+        (it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label}${it.qty>1?' x'+it.qty:''} — $${(a.price*it.qty).toFixed(2)}\n`;});
     });
     if(fee>0) msg+=`• 🛵 Delivery — $${fee.toFixed(2)}\n`;
     msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n`;
     if(changeForNum>subtotal) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}* (change back: $${(changeForNum-subtotal).toFixed(2)})\n`;
     else if(changeForNum>0) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}*\n`;
-    msg+=`\nPlease confirm my order 🙏
-🔗 Track: https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
+    msg+=`\nPlease confirm my order 🙏`;
+    if(trackingReady) msg+=`\n🔗 Track: ${trackUrl}`;
 
     window.open('https://wa.me/76840244?text='+encodeURIComponent(msg),'_blank');
     closeSheet();
@@ -940,7 +958,7 @@ document.addEventListener('click',function(e){
 function renderPills(item){
     if(!item.flavors||!item.flavors.length) return '';
     const pc=PILL_COLORS[item.flavorColor]||PILL_COLORS.amber;
-    return'<div class="flex flex-wrap gap-1 mt-2">'+item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${f}</span>`).join('')+'</div>';
+    return'<div class="flex flex-wrap gap-1 mt-2">'+item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(f)}</span>`).join('')+'</div>';
 }
 async function loadMenu(){
     try{
@@ -967,29 +985,31 @@ async function loadMenu(){
     }
 }
 function renderAddonSection(category){
-    let html=`<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2><div class="grid gap-3">`;
+    let html=`<section id="${esc(category.key)}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${esc(category.title)}</h2><div class="grid gap-3">`;
     (category.addonGroups||[]).forEach(group=>{
-        html+=`<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${group.emoji}</div><div class="flex-grow min-w-0"><div class="flex justify-between items-center gap-2"><span class="font-bold text-amber-950 text-sm">${group.label}</span><span class="font-bold text-amber-500 text-sm flex-shrink-0">${group.price}</span></div><p class="text-gray-400 text-xs mt-0.5">${group.note}</p><div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${o}</span>`).join('')}</div></div></div>`;
+        html+=`<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${esc(group.emoji)}</div><div class="flex-grow min-w-0"><div class="flex justify-between items-center gap-2"><span class="font-bold text-amber-950 text-sm">${esc(group.label)}</span><span class="font-bold text-amber-500 text-sm flex-shrink-0">${esc(group.price)}</span></div><p class="text-gray-400 text-xs mt-0.5">${esc(group.note)}</p><div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(o)}</span>`).join('')}</div></div></div>`;
     });
     return html+'</div></section>';
 }
 function initMenu(menuData){
-    document.getElementById('main-nav').innerHTML=menuData.map((c,i)=>`<a href="#${c.key}" class="nav-link${i===0?' active':''}" data-section="${c.key}">${c.title}</a>`).join('');
+    document.getElementById('main-nav').innerHTML=menuData.map((c,i)=>`<a href="#${esc(c.key)}" class="nav-link${i===0?' active':''}" data-section="${esc(c.key)}">${esc(c.title)}</a>`).join('');
     const container=document.getElementById('menu-container');
     container.innerHTML='';
     menuData.forEach(category=>{
         if(category.type==='addons'){container.innerHTML+=renderAddonSection(category);return;}
-        let html=`<section id="${category.key}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${category.title}</h2>`;
+        let html=`<section id="${esc(category.key)}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${esc(category.title)}</h2>`;
         if(category.items&&category.items.length){
             html+='<div class="grid gap-3.5">';
             category.items.filter(item => item.active !== false).forEach((item,idx)=>{
                 const itemKey=`${category.key}|${item.name}|${item.price}`;
                 const qtyId=`qty-${category.key}-${idx}`,cardId=`card-${qtyId}`;
-                html+=`<div class="item-card-wrap" id="${cardId}"><div class="${item.flavors&&item.flavors.length?'min-h-32':'h-32'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200"><div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:128px"><img src="${item.image ? `${STORAGE_PUBLIC_BASE}/${item.image}` : ''}" alt="${item.name}" class="absolute inset-0 w-full h-full object-cover object-center block"></div><div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0"><div class="flex justify-between items-start gap-2"><h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${item.name}</h3><span class="font-bold text-amber-600 text-sm flex-shrink-0">${item.price}</span></div><p class="text-gray-500 text-xs mt-1 line-clamp-3 leading-relaxed pr-1">${item.desc}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKey}',-1,'${qtyId}')">−</button><div class="qty-num" id="${qtyId}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKey}',1,'${qtyId}')">+</button></div></div></div></div>`;
+                const itemKeyArg=jsStr(itemKey), safeQty=esc(qtyId), safeCard=esc(cardId);
+                const img=item.image ? `${STORAGE_PUBLIC_BASE}/${String(item.image).replace(/^\/+/,'')}` : '';
+                html+=`<div class="item-card-wrap" id="${safeCard}"><div class="${item.flavors&&item.flavors.length?'min-h-32':'h-32'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200"><div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:128px"><img src="${esc(img)}" alt="${esc(item.name)}" class="absolute inset-0 w-full h-full object-cover object-center block"></div><div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0"><div class="flex justify-between items-start gap-2"><h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${esc(item.name)}</h3><span class="font-bold text-amber-600 text-sm flex-shrink-0">${esc(item.price)}</span></div><p class="text-gray-500 text-xs mt-1 line-clamp-3 leading-relaxed pr-1">${esc(item.desc)}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKeyArg}',-1,'${safeQty}')">-</button><div class="qty-num" id="${safeQty}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKeyArg}',1,'${safeQty}')">+</button></div></div></div></div>`;
             });
             html+='</div>';
         }
-        if(category.bottomBanner) html+=`<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${category.bottomBanner}</div>`;
+        if(category.bottomBanner) html+=`<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${esc(category.bottomBanner)}</div>`;
         container.innerHTML+=html+'</section>';
     });
 }

@@ -1040,6 +1040,18 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
               </div>
             </div>
             <div class="setting-card">
+              <div class="setting-title">Driver PIN</div>
+              <div class="setting-copy">Protects the driver delivery list and driver status/location updates.</div>
+              <div class="setting-stat" id="settings-driver-pin-state">No PIN set</div>
+              <div class="setting-actions" style="align-items:end">
+                <div style="flex:1;min-width:150px">
+                  <label class="field-label">New PIN</label>
+                  <input class="inp" id="driver-pin-input" type="password" inputmode="numeric" maxlength="8" placeholder="4-8 digits">
+                </div>
+                <button class="btn btn-dark" onclick="saveDriverPin()">Save PIN</button>
+              </div>
+            </div>
+            <div class="setting-card">
               <div class="setting-title">Loyalty System</div>
               <div class="setting-copy">Controls whether POS shows rewards, applies discounts, and awards stamps on completed orders.</div>
               <div class="switch-row">
@@ -1131,11 +1143,13 @@ function activeTheme(){return savedTheme()||systemTheme()}
 
 /* ── SIDEBAR STATE ── */
 let _sidebarCollapsed=false,_sidebarStoredKey='lk_admin_sidebar_collapsed';
+function isMobileAdmin(){return window.matchMedia&&window.matchMedia('(max-width: 980px)').matches}
 function loadSidebarState(){try{_sidebarCollapsed=localStorage.getItem(_sidebarStoredKey)==='1';}catch(_){_sidebarCollapsed=false};applySidebarState();}
-function applySidebarState(){const s=document.getElementById('sidebar');if(s)s.classList.toggle('collapsed',_sidebarCollapsed);const t=document.getElementById('sidebar-toggle');if(t)t.textContent=_sidebarCollapsed?'▶':'☰';}
+function applySidebarState(){const s=document.getElementById('sidebar'),mobile=isMobileAdmin();if(s)s.classList.toggle('collapsed',!mobile&&_sidebarCollapsed);const t=document.getElementById('sidebar-toggle');if(t)t.textContent=(!mobile&&_sidebarCollapsed)?'▶':'☰';}
 function toggleSidebar(){_sidebarCollapsed=!_sidebarCollapsed;localStorage.setItem(_sidebarStoredKey,_sidebarCollapsed?'1':'0');applySidebarState();}
 function closeMobileSidebar(){document.getElementById('sidebar')?.classList.remove('open');document.getElementById('sidebar-overlay')?.classList.remove('show');document.getElementById('sidebar-toggle')?.classList.remove('open');}
 loadSidebarState();
+window.addEventListener('resize',applySidebarState);
 document.getElementById('sidebar-toggle').addEventListener('click',function(e){
   e.stopPropagation();
   const s=document.getElementById('sidebar'),o=document.getElementById('sidebar-overlay');
@@ -1393,6 +1407,25 @@ async function setLoyaltyMode(enabled){
   showLoading(enabled?'Enabling loyalty...':'Disabling loyalty...');
   try{configData.loyaltyEnabled=enabled;await saveConfig();clearRewardsDirty();renderStatus();showToast(enabled?'Loyalty enabled':'Loyalty disabled','success');}
   catch(e){configData.loyaltyEnabled=!enabled;renderStatus();showToast('Failed: '+e.message,'error');}
+  hideLoading();
+}
+async function saveDriverPin(){
+  const input=document.getElementById('driver-pin-input');
+  const pin=String(input?.value||'').trim();
+  if(!/^\d{4,8}$/.test(pin)){showToast('Driver PIN must be 4-8 digits','error');return;}
+  showLoading('Saving driver PIN...');
+  try{
+    configData.driverPin=pin;
+    await saveConfig();
+    delete configData.driverPin;
+    configData.driverPinSet=true;
+    if(input)input.value='';
+    renderSettings();
+    showToast('Driver PIN saved','success');
+  }catch(e){
+    delete configData.driverPin;
+    showToast('Failed: '+e.message,'error');
+  }
   hideLoading();
 }
 function todayBeirutKey(){
@@ -3571,7 +3604,7 @@ function renderItemAddons(item,i){
     <div class="editor-section-head"><div class="editor-section-title">Order Add-ons</div>
       <div class="addon-dropdown-wrap">
         <button class="btn btn-soft btn-sm" onclick="toggleAddonDropdown(event,${i})">+ Add</button>
-        <div class="addon-dropdown" id="addon-dd-${i}">${available.map(g=>`<div class="addon-dropdown-item" onclick="pickAddonFromDropdown(${i},'${esc(g.label)}','${esc(g.price)}')"><span>${esc(g.emoji)} ${esc(g.label)}</span><span style="color:var(--muted);font-size:10px">${esc(g.price)}</span></div>`).join('')||'<div class="addon-dropdown-item" style="color:var(--muted)">No global add-ons available. Create one in Add-ons view.</div>'}</div>
+        <div class="addon-dropdown" id="addon-dd-${i}">${available.map(g=>`<div class="addon-dropdown-item" data-label="${esc(g.label)}" data-price="${esc(g.price)}" onclick="pickAddonFromDropdown(${i},this.dataset.label,this.dataset.price)"><span>${esc(g.emoji)} ${esc(g.label)}</span><span style="color:var(--muted);font-size:10px">${esc(g.price)}</span></div>`).join('')||'<div class="addon-dropdown-item" style="color:var(--muted)">No global add-ons available. Create one in Add-ons view.</div>'}</div>
       </div>
     </div>
     <div class="inline-list">${addons.map((a,ai)=>`<div class="inline-row">
@@ -3838,6 +3871,8 @@ function renderSettings(){
   if(rewardNote)rewardNote.textContent=configData.loyaltyEnabled?'Available in POS when a customer has a reward ready.':'Loyalty is off, so POS will hide reward redemption.';
   const tableCount=document.getElementById('settings-table-count');
   if(tableCount)tableCount.textContent=`${configData.tables.length} table${configData.tables.length===1?'':'s'} configured`;
+  const driverPinState=document.getElementById('settings-driver-pin-state');
+  if(driverPinState)driverPinState.textContent=configData.driverPinSet?'PIN is set':'No PIN set';
   const galleryCount=document.getElementById('settings-gallery-count');
   if(galleryCount)galleryCount.textContent=`${galleryAdminData.length} photo${galleryAdminData.length===1?'':'s'} loaded`;
   const menuCounts=document.getElementById('settings-menu-counts');
@@ -3931,7 +3966,8 @@ async function importMenu(input){
   }catch(e){showToast('Import failed: '+e.message,'error')}
   input.value='';hideLoading();
 }
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&').replace(/"/g,'"').replace(/</g,'<').replace(/>/g,'>');}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function jsStr(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r/g,'').replace(/\n/g,'\\n');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(type?' '+type:'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.className='';},3300);}
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading...';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
@@ -4001,7 +4037,6 @@ document.addEventListener('keydown',function(e){
   if(shortcuts[e.key]){e.preventDefault();switchView(shortcuts[e.key]);}
 });
 
-window.getNewHash=async function(pw){const buf=await window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(pw));const h=[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');console.log(h);return h;};
 </script>
 </body>
 </html>

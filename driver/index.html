@@ -17,8 +17,9 @@ body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg
 .top-copy{min-width:0;flex:1}.kicker{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.top h1{font-family:'Fredoka',sans-serif;font-size:25px;line-height:1;color:#fff}.top .badge{font-size:10px;font-weight:900;padding:7px 10px;border-radius:999px;background:rgba(34,197,94,.13);color:#86efac;border:1px solid rgba(34,197,94,.25);white-space:nowrap}
 .tab-bar{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:14px}.tab-bar button{height:42px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:13px;font-weight:900;cursor:pointer}.tab-bar button.active{background:#fff;color:#101722}.tab-count{font-size:10px;font-weight:900;margin-left:5px;opacity:.7}
 .order-card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.045));border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:11px;cursor:pointer;box-shadow:0 16px 38px rgba(0,0,0,.18)}.order-card:active{transform:translateY(1px)}.order-card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.order-card .name{font-size:17px;font-weight:950;color:#fff;line-height:1.15}.order-card .total{font-size:16px;font-weight:950;color:#fbbf24;white-space:nowrap}.order-card .meta{font-size:12px;font-weight:800;color:#aeb8c6;margin-top:7px;line-height:1.45}.order-card .items-preview{font-size:11px;color:#788596;margin-top:8px;line-height:1.45}
-.empty{text-align:center;padding:72px 20px;color:#7d8999}.empty .emoji{font-size:44px;margin-bottom:12px}.empty .msg{font-size:14px;font-weight:800}
-.back-btn{height:40px;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 13px;gap:5px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin:2px 0 12px}
+	.empty{text-align:center;padding:72px 20px;color:#7d8999}.empty .emoji{font-size:44px;margin-bottom:12px}.empty .msg{font-size:14px;font-weight:800}
+	.pin-card{min-height:78vh;display:flex;align-items:center;justify-content:center;padding:22px}.pin-box{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.28)}.pin-title{font-family:'Fredoka',sans-serif;font-size:28px;font-weight:800;color:#fff}.pin-copy{font-size:12px;font-weight:750;color:var(--muted);line-height:1.45;margin:5px 0 16px}.pin-input{width:100%;height:48px;border-radius:12px;border:1px solid var(--line);background:#070b12;color:#fff;font-size:20px;font-weight:900;text-align:center;letter-spacing:.2em;outline:none}.pin-input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16)}.pin-btn{width:100%;height:46px;border:0;border-radius:12px;background:var(--amber);color:#111827;font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.06em;margin-top:12px;cursor:pointer}.pin-error{display:none;margin-top:10px;color:#fecdd3;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.24);border-radius:10px;padding:9px 10px;font-size:12px;font-weight:800}.pin-error.show{display:block}
+	.back-btn{height:40px;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 13px;gap:5px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin:2px 0 12px}
 .gps-bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);margin-bottom:12px;cursor:pointer}.gps-bar.active{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.35)}.gps-dot{width:11px;height:11px;border-radius:50%;background:#64748b;box-shadow:0 0 0 6px rgba(100,116,139,.12)}.gps-bar.active .gps-dot{background:var(--green);animation:pulse2 1.4s infinite}.gps-text{font-size:12px;font-weight:900;color:#cbd5e1}.gps-coords{font-size:10px;font-weight:800;color:#7f8ea1;text-align:right}.gps-weak{border-color:rgba(251,113,133,.45)!important;background:rgba(251,113,133,.1)!important}.gps-weak .gps-text{color:#fecdd3!important}@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 9px rgba(34,197,94,0)}}
 .map-card{position:relative;background:#0a0f17;border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:12px;box-shadow:0 24px 60px rgba(0,0,0,.28)}.map-head{position:absolute;left:10px;right:10px;top:10px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}.map-title,.map-distance,.map-chip{height:32px;display:inline-flex;align-items:center;border-radius:999px;padding:0 11px;background:rgba(7,11,18,.78);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);font-size:11px;font-weight:950;color:#fff}.map-distance{color:#bbf7d0}.map-actions{display:flex;align-items:center;gap:7px}.nav-btn{height:32px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.92);color:#0f172a;font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;padding:0 10px;cursor:pointer;pointer-events:auto}.compass-btn{position:absolute;left:10px;top:52px;z-index:3;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.94);box-shadow:0 8px 24px rgba(0,0,0,.24);display:grid;place-items:center;cursor:pointer}.compass-btn svg{width:22px;height:22px}.compass-needle{transform-origin:12px 12px;transition:transform .16s ease}.compass-btn.north-up{background:rgba(7,11,18,.86)}
 #map{height:330px;width:100%;transition:height .25s ease}.map-card.delivering #map{height:min(68vh,620px);min-height:460px}.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{display:none}.driver-heading{width:36px;height:36px;border-radius:50%;background:#22c55e;border:3px solid #fff;box-shadow:0 0 0 8px rgba(34,197,94,.22),0 8px 24px rgba(0,0,0,.42);position:relative;will-change:transform}.driver-heading.signal-lost{animation:signalPulse 1.4s infinite}.driver-heading .tip{position:absolute;left:50%;top:-10px;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #22c55e;filter:drop-shadow(0 -1px 0 #fff)}.driver-heading .core{position:absolute;inset:9px;border-radius:50%;background:#dcfce7}@keyframes signalPulse{0%,100%{box-shadow:0 0 0 8px rgba(34,197,94,.18),0 8px 24px rgba(0,0,0,.42)}50%{box-shadow:0 0 0 20px rgba(34,197,94,0),0 8px 24px rgba(0,0,0,.42)}}
@@ -34,10 +35,12 @@ body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg
 <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
 <script>
 (function(){
-var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
-var RLAT=33.821091, RLNG=35.564961;
-var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
-var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
+	var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
+	var RLAT=33.821091, RLNG=35.564961;
+	var ACTIVE_DELIVERY_KEY='lk_driver_active_delivery_v1';
+	var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
+	var DRIVER_PIN_KEY='lk_driver_pin_v1';
+	var DRIVER_TOKEN_KEY='lk_driver_tokens_v1';
 var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=900;
 var GPS_MAX_ACCURACY=160, GPS_JUMP_SPEED=45, GPS_HARD_JUMP=220;
 var FOLLOW_MIN_MOVE=12, FOLLOW_MIN_TURN=20;
@@ -71,24 +74,37 @@ function setReconnecting(active){
   el.style.color=active?'#f59e0b':'';
  });
 }
-function isNetworkError(e){
- return !navigator.onLine||(e&&e.name==='AbortError')||/Failed to fetch|NetworkError|Load failed/i.test(String(e&&e.message||e||''));
-}
-function pendingActions(){
- try{return JSON.parse(localStorage.getItem(PENDING_ACTIONS_KEY)||'[]')||[]}catch(e){return[]}
-}
+	function isNetworkError(e){
+	 return !navigator.onLine||(e&&e.name==='AbortError')||/Failed to fetch|NetworkError|Load failed/i.test(String(e&&e.message||e||''));
+	}
+	function driverPin(){try{return localStorage.getItem(DRIVER_PIN_KEY)||''}catch(e){return''}}
+	function saveDriverPin(pin){try{localStorage.setItem(DRIVER_PIN_KEY,String(pin||''))}catch(e){}}
+	function clearDriverPin(){try{localStorage.removeItem(DRIVER_PIN_KEY)}catch(e){}}
+	function driverHeaders(extra){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;return h}
+	function tokenMap(){try{return JSON.parse(localStorage.getItem(DRIVER_TOKEN_KEY)||'{}')||{}}catch(e){return{}}}
+	function saveTokenMap(map){try{localStorage.setItem(DRIVER_TOKEN_KEY,JSON.stringify(map||{}))}catch(e){}}
+	function rememberDriverToken(id,token){if(!id||!token)return;var map=tokenMap();map[id]=token;saveTokenMap(map)}
+	function driverToken(id){return (orderData&&orderData.id===id&&orderData.driverToken)||tokenMap()[id]||''}
+	function authUrl(path,token){return path+(path.indexOf('?')>=0?'&':'?')+'token='+encodeURIComponent(token||'')}
+	function renderPinGate(message){
+	 document.getElementById('app').innerHTML='\x3Cdiv class="pin-card"\x3E\x3Cdiv class="pin-box"\x3E\x3Cdiv class="pin-title"\x3EDriver PIN\x3C/div\x3E\x3Cdiv class="pin-copy"\x3EEnter the driver PIN to view deliveries.\x3C/div\x3E\x3Cinput class="pin-input" id="driver-pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="one-time-code"\x3E\x3Cbutton class="pin-btn" onclick="D.savePin()"\x3EUnlock Driver\x3C/button\x3E\x3Cdiv class="pin-error'+(message?' show':'')+'" id="driver-pin-error"\x3E'+esc(message||'')+'\x3C/div\x3E\x3C/div\x3E\x3C/div\x3E';
+	 setTimeout(function(){var i=document.getElementById('driver-pin-input');if(i){i.focus();i.onkeydown=function(e){if(e.key==='Enter')D.savePin()}}},50);
+	}
+	function pendingActions(){
+	 try{return JSON.parse(localStorage.getItem(PENDING_ACTIONS_KEY)||'[]')||[]}catch(e){return[]}
+	}
 function savePendingActions(rows){
  try{localStorage.setItem(PENDING_ACTIONS_KEY,JSON.stringify(rows||[]))}catch(e){}
 }
-function enqueuePendingAction(orderId,step){
- if(!orderId||!step)return;
- var rows=pendingActions();
- rows.push({orderId:orderId,step:step,time:new Date().toISOString()});
- savePendingActions(rows);
-}
-function postDriverStatus(orderId,step){
- return fetchJSON(W+'/driver/'+encodeURIComponent(orderId)+'/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({step:step})},1);
-}
+	function enqueuePendingAction(orderId,step,token){
+	 if(!orderId||!step)return;
+	 var rows=pendingActions();
+	 rows.push({orderId:orderId,step:step,token:token||driverToken(orderId),time:new Date().toISOString()});
+	 savePendingActions(rows);
+	}
+	function postDriverStatus(orderId,step,token){
+	 return fetchJSON(W+'/driver/'+encodeURIComponent(orderId)+'/status',{method:'POST',headers:driverHeaders({'Content-Type':'application/json'}),body:JSON.stringify({step:step,token:token||driverToken(orderId)})},1);
+	}
 async function drainPendingActions(){
  var rows=pendingActions();
  if(!rows.length)return;
@@ -96,7 +112,7 @@ async function drainPendingActions(){
  for(var i=0;i<rows.length;i++){
   try{
    var item=rows[i];
-   var j=await postDriverStatus(item.orderId,item.step);
+	   var j=await postDriverStatus(item.orderId,item.step,item.token);
    if(!j.ok)throw new Error(j.error||'Failed');
   }catch(e){
    kept=rows.slice(i);
@@ -212,7 +228,7 @@ function connectDriverWS(orderId){
   if(driverWS&&driverWSOrderId===orderId&&driverWS.readyState!==WebSocket.CLOSED)return;
   if(driverWS&&driverWSOrderId!==orderId)closeDriverWS();
   driverWSOrderId=orderId;
-  var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId);
+	 var wsUrl='wss://lekiosk-order-inbox.lekiosklb.workers.dev/ws/'+encodeURIComponent(orderId)+'?role=driver&orderId='+encodeURIComponent(orderId)+'&token='+encodeURIComponent(driverToken(orderId));
   driverWS=new WebSocket(wsUrl);
  driverWS.addEventListener('open',function(){
   setReconnecting(false);
@@ -306,9 +322,10 @@ function readActiveDelivery(){
 function saveActiveDelivery(active){
  if(!orderData||!orderData.id)return;
  try{
-  localStorage.setItem(ACTIVE_DELIVERY_KEY,JSON.stringify({
-   orderId:orderData.id,
-   lat:driverLat,
+	  localStorage.setItem(ACTIVE_DELIVERY_KEY,JSON.stringify({
+	   orderId:orderData.id,
+	   driverToken:orderData.driverToken||driverToken(orderData.id),
+	   lat:driverLat,
    lng:driverLng,
    heading:driverHeading,
    gpsActive:active!==undefined?!!active:!!gpsActive,
@@ -804,7 +821,8 @@ function renderList(data){
   var status=isDeliveredOrder(o)?'Delivered':track.delivering?'Out for Delivery':'Ready';
   var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
   if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
-   return'\x3Cdiv class="order-card" data-order-id="'+esc(o.id)+'" onclick="D.openOrder(this)"\x3E'+
+	   if(o.driverToken)rememberDriverToken(o.id,o.driverToken);
+	   return'\x3Cdiv class="order-card" data-order-id="'+esc(o.id)+'" data-driver-token="'+esc(o.driverToken||driverToken(o.id))+'" onclick="D.openOrder(this)"\x3E'+
    '\x3Cdiv class="head"\x3E\x3Cspan class="name"\x3E'+esc(o.name||'Guest')+'\x3C/span\x3E\x3Cspan class="total"\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E'+
    '\x3Cdiv class="meta"\x3E'+status+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+(o.address?' · '+esc(o.address):'')+'\x3C/div\x3E'+
    '\x3Cdiv class="items-preview"\x3E'+esc(items)+'\x3C/div\x3E'+
@@ -1110,9 +1128,9 @@ function moveDriverFromPosition(pos){
 
 async function sendLocation(lat,lng){
  try{
-  await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/location',{
-   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:lat,lng:lng,heading:driverHeading,speed:driverSpeed,accuracy:gpsAccuracy})
-  });
+	   await fetch(W+'/driver/'+encodeURIComponent(orderData.id)+'/location',{
+	   method:'POST',headers:driverHeaders({'Content-Type':'application/json'}),body:JSON.stringify({lat:lat,lng:lng,heading:driverHeading,speed:driverSpeed,accuracy:gpsAccuracy,token:driverToken(orderData.id)})
+	  });
   lastSent=Date.now();
  }catch(e){}
 }
@@ -1233,11 +1251,20 @@ function sendNow(){
 }
 
 window.D={
- openOrder:function(el){
-  var id=el&&el.getAttribute('data-order-id');
-  if(id)location.href='?id='+encodeURIComponent(id);
- },
- switchTab:function(tab){listTab=tab;renderList(allOrders)},
+	 openOrder:function(el){
+	  var id=el&&el.getAttribute('data-order-id');
+	  var token=el&&el.getAttribute('data-driver-token');
+	  if(id)location.href='?id='+encodeURIComponent(id)+(token?'&token='+encodeURIComponent(token):'');
+	 },
+	 savePin:function(){
+	  var input=document.getElementById('driver-pin-input');
+	  var pin=input?input.value.trim():'';
+	  if(!/^\d{4,8}$/.test(pin)){renderPinGate('Enter a 4-8 digit PIN');return}
+	  saveDriverPin(pin);
+	  load();
+	 },
+	 logout:function(){clearDriverPin();renderPinGate('')},
+	 switchTab:function(tab){listTab=tab;renderList(allOrders)},
  reload:function(){load()},
  toggleHeadingMode:function(e){
   if(e){e.preventDefault();e.stopPropagation()}
@@ -1270,7 +1297,7 @@ window.D={
    if(btn){btn.textContent=step==='delivering'?'Starting...':'Saving...'}
    if(step==='delivering'){gpsForceLocked=true;if(!gpsActive)startGPS()}
    try{
-    var j=await postDriverStatus(orderData.id,step);
+	    var j=await postDriverStatus(orderData.id,step,driverToken(orderData.id));
     if(!j.ok)throw new Error(j.error||'Failed');
     orderData.tracking[step]=j.time||new Date().toISOString();
     toast(j.error||(step==='delivering'?'Picked up!':'Delivered!'),'ok');
@@ -1279,7 +1306,7 @@ window.D={
    else setTimeout(function(){load()},1200);
   }catch(e){
    if(isNetworkError(e)){
-   enqueuePendingAction(orderData.id,step);
+	   enqueuePendingAction(orderData.id,step,driverToken(orderData.id));
     orderData.tracking[step]=new Date().toISOString();
     toast('Saved offline — will sync automatically','ok');
     if(step==='delivering'){saveActiveDelivery(true);routeNeeded=true;connectDriverWS(orderData.id);sendNow();updateMapView(orderData.tracking||{},orderData.gps);renderDetail(orderData);setReconnecting(true);markingStep=null;return}
@@ -1294,18 +1321,22 @@ window.D={
 };
 
 async function load(){
- if(loadBusy)return;
- loadBusy=true;
- var params=new URLSearchParams(window.location.search);
- var id=params.get('id');
- try{
-  if(id){
-   startRefresh();
-   try{
-    var j=await fetchJSON(W+'/driver/'+encodeURIComponent(id),{},3);
-    if(!j.ok)throw new Error(j.error||'Invalid response');
-    orderData=j.data;
-    if(!isMenuOrder(orderData)){
+	 if(loadBusy)return;
+	 loadBusy=true;
+	 var params=new URLSearchParams(window.location.search);
+	 var id=params.get('id');
+	 try{
+	  if(!id&&!driverPin()){renderPinGate('');return}
+	  if(id){
+	   var token=params.get('token')||driverToken(id);
+	   if(!token&&!driverPin()){renderPinGate('');return}
+	   startRefresh();
+	   try{
+	    var j=await fetchJSON(authUrl(W+'/driver/'+encodeURIComponent(id),token),{headers:driverHeaders()},3);
+	    if(!j.ok)throw new Error(j.error||'Invalid response');
+	    orderData=j.data;
+	    if(orderData.driverToken)rememberDriverToken(orderData.id,orderData.driverToken);
+	    if(!isMenuOrder(orderData)){
      document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🧾\x3C/div\x3E\x3Cdiv class="msg"\x3EThis is a POS order and is not assigned to drivers.\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="location.href=\x27?\x27"\x3EBack to deliveries\x3C/button\x3E\x3C/div\x3E';
      return;
     }
@@ -1320,26 +1351,29 @@ async function load(){
      updateMapView(orderData.tracking||{},orderData.gps);
     }
    }catch(e){
+    if(/PIN|required|Forbidden/i.test(String(e&&e.message||e||''))){clearDriverPin();renderPinGate('Invalid driver PIN');return}
     setReconnecting(true);
     if(lastDetailLoaded)toast(friendlyError(e));
     else document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E🔍\x3C/div\x3E\x3Cdiv class="msg"\x3E'+esc(friendlyError(e))+'\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="D.reload()"\x3ERetry\x3C/button\x3E\x3C/div\x3E';
    }
-  }else{
-   var active=readActiveDelivery();
-   if(active&&active.orderId&&active.gpsActive){location.href='?id='+encodeURIComponent(active.orderId);return}
+	  }else{
+	   var active=readActiveDelivery();
+	   if(active&&active.orderId&&active.driverToken)rememberDriverToken(active.orderId,active.driverToken);
+	   if(active&&active.orderId&&active.gpsActive){location.href='?id='+encodeURIComponent(active.orderId)+(active.driverToken?'&token='+encodeURIComponent(active.driverToken):'');return}
    clearInterval(autoRefresh);
    startRefresh();
    lastTrackingJSON=null;
     cleanupMap();
    try{
-    var j2=await fetchJSON(W+'/driver',{},3);
-    allOrders=j2.data||[];
+	    var j2=await fetchJSON(W+'/driver',{headers:driverHeaders()},3);
+	    allOrders=j2.data||[];
     setReconnecting(false);
     drainPendingActions();
     lastListLoaded=true;
     renderList(allOrders);
-   }catch(e){
-    setReconnecting(true);
+	   }catch(e){
+	    if(/PIN|required|Forbidden/i.test(String(e&&e.message||e||''))){clearDriverPin();renderPinGate('Invalid driver PIN');return}
+	    setReconnecting(true);
     if(lastListLoaded)toast(friendlyError(e));
     else document.getElementById('app').innerHTML='\x3Cdiv class="empty"\x3E\x3Cdiv class="emoji"\x3E⚠️\x3C/div\x3E\x3Cdiv class="msg"\x3ECould not load deliveries. Check internet and retry.\x3C/div\x3E\x3Cbutton class="back-btn" style="margin:16px auto 0" onclick="D.reload()"\x3ERetry\x3C/button\x3E\x3C/div\x3E';
    }

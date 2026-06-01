@@ -1,6 +1,7 @@
 const GH_OWNER = 'joetheproz5';
 const GH_REPO  = 'le-kiosk-menu';
 const GH_API   = 'https://api.github.com';
+const RATE_BUCKETS = globalThis.__LK_RATE_BUCKETS || (globalThis.__LK_RATE_BUCKETS = new Map());
 
 const ALLOWED_ORIGINS = [
   'https://lekiosk.store',
@@ -9,6 +10,15 @@ const ALLOWED_ORIGINS = [
 ];
 
 const ALLOWED_FILES = ['orders.json','inbox.json','menu.json','blocklist.json','customers.json','config.json'];
+
+function safeCompare(a, b) {
+  a = String(a || '');
+  b = String(b || '');
+  if (!a || !b || a.length !== b.length) return false;
+  let out = 0;
+  for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return out === 0;
+}
 
 export class OrderRoom {
   constructor(state) {
@@ -61,7 +71,7 @@ export default {
     const corsHeaders = {
       'Access-Control-Allow-Origin': corsOk ? origin : ALLOWED_ORIGINS[0],
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Setup-Key',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Setup-Key, X-Driver-Pin, X-Driver-Token, X-Track-Token',
     };
 
     if (request.method === 'OPTIONS') {
@@ -74,6 +84,32 @@ export default {
     if (url.pathname.startsWith('/ws/')) {
       const orderId = url.pathname.split('/')[2];
       if (!orderId) return new Response('Missing order id', { status: 400, headers: corsHeaders });
+      const role = url.searchParams.get('role');
+      if (!['customer', 'driver'].includes(role)) {
+        return new Response('Invalid role', { status: 400, headers: corsHeaders });
+      }
+
+      const token = url.searchParams.get('token') || '';
+      const orderRes = await fetch(
+        `${env.SUPABASE_URL}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=payload&limit=1`,
+        {
+          headers: {
+            'apikey': env.SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+        }
+      );
+      const rows = orderRes.ok ? await orderRes.json().catch(() => []) : [];
+      const payload = Array.isArray(rows) && rows.length ? (rows[0].payload || {}) : null;
+      if (!payload) return new Response('Order not found', { status: 404, headers: corsHeaders });
+      const access = payload.access || {};
+      const expected = role === 'driver' ? access.driverToken : access.customerToken;
+      if (expected && !safeCompare(token, expected)) {
+        return new Response('Forbidden', { status: 403, headers: corsHeaders });
+      }
+      if (role === 'driver' && !expected) {
+        return new Response('Driver token required', { status: 403, headers: corsHeaders });
+      }
       const id = env.ORDER_ROOM.idFromName(orderId);
       const room = env.ORDER_ROOM.get(id);
       return room.fetch(request);
@@ -298,6 +334,266 @@ export default {
         || pointFromText(payload.note);
     }
 
+    function clientIp() {
+      return request.headers.get('CF-Connecting-IP')
+        || request.headers.get('X-Forwarded-For')
+        || 'unknown';
+    }
+
+    function rateLimit(name, limit, windowMs) {
+      const key = `${name}:${clientIp()}`;
+      const now = Date.now();
+      const bucket = RATE_BUCKETS.get(key) || { count: 0, reset: now + windowMs };
+      if (bucket.reset <= now) {
+        bucket.count = 0;
+        bucket.reset = now + windowMs;
+      }
+      bucket.count++;
+      RATE_BUCKETS.set(key, bucket);
+      if (bucket.count > limit) {
+        return json({ error: 'Too many requests. Try again soon.' }, 429);
+      }
+      if (RATE_BUCKETS.size > 1000) {
+        for (const [k, v] of RATE_BUCKETS) if (v.reset <= now) RATE_BUCKETS.delete(k);
+      }
+      return null;
+    }
+
+    async function siteConfigRaw() {
+      const rows = await supabaseFetch('/app_config?key=eq.site_settings&select=*').catch(() => []);
+      const row = Array.isArray(rows) && rows.length ? rows[0] : null;
+      return row && row.value && typeof row.value === 'object' ? row.value : {};
+    }
+
+    function publicConfig(value, isAdmin = false) {
+      const clean = { ...(value || {}) };
+      const pinSet = !!(clean.driverPinHash || env.DRIVER_PIN || env.DRIVER_PIN_HASH);
+      delete clean.driverPin;
+      delete clean.driverPinHash;
+      if (isAdmin) clean.driverPinSet = pinSet;
+      return clean;
+    }
+
+    function beirutHour() {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Beirut',
+        hour: '2-digit',
+        hour12: false,
+      }).formatToParts(new Date());
+      return Number(parts.find(p => p.type === 'hour')?.value || 0);
+    }
+
+    function storeIsOpen(cfg) {
+      if (cfg.testingMode) return true;
+      const h = beirutHour();
+      return h >= 18 || h < 1;
+    }
+
+    function normalizePhone(value) {
+      const d = String(value || '').replace(/\D/g, '');
+      if (d.length === 8) return d;
+      if (d.length === 11 && d.startsWith('961')) return d.slice(3);
+      return '';
+    }
+
+    function priceNumber(price) {
+      const n = Number(String(price || '').replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function money(price) {
+      return `$${Number(price || 0).toFixed(2).replace(/\.00$/, '')}`;
+    }
+
+    function cleanText(value, max = 160) {
+      return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+    }
+
+    const CENTER_LAT = 33.821091538427524;
+    const CENTER_LNG = 35.56496110422372;
+    const ZONE_A_RADIUS_KM = 0.60;
+    const ZONE_B_LAT_SEMI = 0.010;
+    const ZONE_B_LNG_SEMI = 0.022;
+    const ZONE_C_POLYGON = [
+      [33.870,35.535],[33.867,35.558],[33.862,35.590],
+      [33.848,35.608],[33.825,35.622],[33.808,35.610],
+      [33.792,35.590],[33.785,35.555],[33.787,35.520],
+      [33.797,35.502],[33.816,35.490],[33.835,35.492],
+      [33.843,35.542],[33.858,35.542],[33.864,35.538],
+    ];
+
+    function distKm(a, b, c, d) {
+      const R = 6371, dL = (c - a) * Math.PI / 180, dl = (d - b) * Math.PI / 180;
+      const x = Math.sin(dL / 2) ** 2 + Math.cos(a * Math.PI / 180) * Math.cos(c * Math.PI / 180) * Math.sin(dl / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    }
+
+    function inEllipse(la, ln, cL, cN, lS, nS) {
+      return ((la - cL) / lS) ** 2 + ((ln - cN) / nS) ** 2 <= 1;
+    }
+
+    function pointInPolygon(lat, lng, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const [xi, yi] = [poly[i][0], poly[i][1]], [xj, yj] = [poly[j][0], poly[j][1]];
+        if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) inside = !inside;
+      }
+      return inside;
+    }
+
+    function deliveryZoneForPoint(point) {
+      if (!point) return null;
+      const d = distKm(point.lat, point.lng, CENTER_LAT, CENTER_LNG);
+      if (d <= ZONE_A_RADIUS_KM) return { label: 'Zone A', fee: 0.5 };
+      if (inEllipse(point.lat, point.lng, CENTER_LAT, CENTER_LNG, ZONE_B_LAT_SEMI, ZONE_B_LNG_SEMI)) return { label: 'Zone B', fee: 1 };
+      if (pointInPolygon(point.lat, point.lng, ZONE_C_POLYGON)) return { label: 'Zone C', fee: 1.5 };
+      return { label: 'Outside delivery area', fee: 0, outside: true };
+    }
+
+    async function menuProducts() {
+      const products = await supabaseFetch('/products?select=*&active=eq.true&order=sort_order.asc');
+      return Array.isArray(products) ? products : [];
+    }
+
+    function findProduct(products, item) {
+      const categoryKey = String(item.categoryKey || item.catKey || item.category || '').trim();
+      const name = String(item.name || '').trim().toLowerCase();
+      if (categoryKey) {
+        return products.find(p => String(p.category_key || '') === categoryKey && String(p.name || '').trim().toLowerCase() === name);
+      }
+      return products.find(p => String(p.name || '').trim().toLowerCase() === name);
+    }
+
+    function cleanPublicOrder(order, products) {
+      const phone = normalizePhone(order.phone);
+      if (!phone) throw new Error('Invalid phone number');
+
+      const orderType = ['dinein', 'takeaway', 'delivery'].includes(order.orderType) ? order.orderType : '';
+      if (!orderType) throw new Error('Invalid order type');
+
+      const submitted = Array.isArray(order.items) ? order.items : [];
+      if (!submitted.length || submitted.length > 40) throw new Error('Invalid order items');
+
+      let total = 0;
+      const items = submitted.map(raw => {
+        const product = findProduct(products, raw);
+        if (!product) throw new Error(`Unavailable item: ${cleanText(raw.name, 80) || 'unknown'}`);
+        const qty = Math.max(1, Math.min(50, Number(raw.qty || 1) || 1));
+        const productAddons = Array.isArray(product.addons) ? product.addons : [];
+        const submittedAddons = Array.isArray(raw.addons) ? raw.addons : [];
+        const addons = submittedAddons.map(a => {
+          const label = String(a.label || a.name || '').trim();
+          const match = productAddons.find(pa => String(pa.label || pa.name || '').trim().toLowerCase() === label.toLowerCase());
+          if (!match) throw new Error(`Unavailable add-on: ${label}`);
+          return {
+            label: String(match.label || match.name || label),
+            price: priceNumber(match.price),
+          };
+        });
+
+        for (const required of productAddons.filter(a => a.required)) {
+          const label = String(required.label || required.name || '').trim().toLowerCase();
+          if (!addons.some(a => String(a.label || '').trim().toLowerCase() === label)) {
+            throw new Error(`Required add-on missing: ${required.label || required.name}`);
+          }
+        }
+
+        const flavors = Array.isArray(product.flavors) ? product.flavors.map(String) : [];
+        const flavor = raw.flavor && flavors.includes(String(raw.flavor)) ? String(raw.flavor) : null;
+        const price = priceNumber(product.price);
+        total += (price + addons.reduce((sum, a) => sum + priceNumber(a.price), 0)) * qty;
+        return {
+          categoryKey: product.category_key || raw.categoryKey || '',
+          name: product.name,
+          price,
+          priceStr: product.price || money(price),
+          qty,
+          flavor,
+          addons,
+        };
+      });
+
+      const gps = customerGPS(order);
+      let deliveryFee = 0;
+      let deliveryZone = null;
+      if (orderType === 'delivery') {
+        const zone = deliveryZoneForPoint(gps);
+        if (!zone || zone.outside) throw new Error('Delivery location is outside our delivery area');
+        deliveryFee = zone.fee;
+        deliveryZone = zone.label;
+        total += deliveryFee;
+      }
+
+      const access = {
+        customerToken: randomB64(24).replace(/[+/=]/g, ''),
+        driverToken: randomB64(24).replace(/[+/=]/g, ''),
+      };
+      const tableNumber = cleanText(order.tableNumber, 12).replace(/[^a-zA-Z0-9_-]/g, '');
+
+      return {
+        id: `MENU-${crypto.randomUUID()}`,
+        status: 'inbox',
+        timestamp: new Date().toISOString(),
+        source: tableNumber ? 'table-qr' : 'menu',
+        name: cleanText(order.name, 80) || 'Guest',
+        phone,
+        orderType,
+        deliveryZone,
+        deliveryFee,
+        gps: gps || null,
+        address: orderType === 'delivery' ? (cleanText(order.address || order.note, 240) || null) : null,
+        tableNumber: tableNumber || null,
+        tableLabel: tableNumber ? (cleanText(order.tableLabel, 40) || `Table ${tableNumber}`) : null,
+        note: cleanText(order.note, 240) || null,
+        changeFor: Math.max(0, Math.min(100, Number(order.changeFor || 0) || 0)) || null,
+        items,
+        total: Number(total.toFixed(2)),
+        access,
+      };
+    }
+
+    async function driverPinHash(cfg) {
+      if (cfg.driverPinHash) return String(cfg.driverPinHash);
+      if (env.DRIVER_PIN_HASH) return String(env.DRIVER_PIN_HASH);
+      if (env.DRIVER_PIN) return sha256Hex(String(env.DRIVER_PIN));
+      return '';
+    }
+
+    async function driverPinOk(pin, cfg) {
+      const hash = await driverPinHash(cfg);
+      if (!hash) return false;
+      return safeEqual(await sha256Hex(String(pin || '')), hash);
+    }
+
+    async function requireDriverPin(request, cfg) {
+      const pin = request.headers.get('X-Driver-Pin') || url.searchParams.get('pin') || '';
+      if (await driverPinOk(pin, cfg)) return true;
+      throw json({ error: 'Driver PIN required' }, 403);
+    }
+
+    function trackTokenFromRequest(request) {
+      return url.searchParams.get('token') || request.headers.get('X-Track-Token') || '';
+    }
+
+    function driverTokenFromRequest(request, body = null) {
+      return url.searchParams.get('token') || request.headers.get('X-Driver-Token') || (body && body.token) || '';
+    }
+
+    function requireTrackAccess(payload, request) {
+      const expected = payload?.access?.customerToken;
+      if (expected && !safeEqual(trackTokenFromRequest(request), expected)) {
+        throw json({ error: 'Invalid tracking link' }, 403);
+      }
+    }
+
+    async function requireDriverOrderAccess(payload, request, cfg, body = null) {
+      const expected = payload?.access?.driverToken;
+      const token = driverTokenFromRequest(request, body);
+      if (expected && safeEqual(token, expected)) return true;
+      if (await driverPinOk(request.headers.get('X-Driver-Pin') || url.searchParams.get('pin') || (body && body.pin), cfg)) return true;
+      throw json({ error: 'Driver PIN or token required' }, 403);
+    }
+
     // ── POST /auth/setup — create/reset staff accounts ──
     // ── POST /auth/setup — create/reset staff accounts ──
 if (request.method === 'POST' && url.pathname === '/auth/setup') {
@@ -350,6 +646,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
     // ── POST /auth/login ──
     if (request.method === 'POST' && url.pathname === '/auth/login') {
+      const limited = rateLimit('auth-login', 12, 5 * 60 * 1000);
+      if (limited) return limited;
+
       let body;
       try {
         body = await request.json();
@@ -499,8 +798,32 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       return saved.content.sha;
     }
 
-    // ── GET /supabase/blocklist — public because menu checks blocked phones ──
+    // ── POST /supabase/blocklist/check — public, returns only yes/no ──
+    if (request.method === 'POST' && url.pathname === '/supabase/blocklist/check') {
+      const limited = rateLimit('block-check', 80, 60 * 1000);
+      if (limited) return limited;
+
+      let body;
+      try {
+        body = await request.json();
+      } catch (_) {
+        return json({ error: 'Invalid JSON' }, 400);
+      }
+      const phone = normalizePhone(body.phone);
+      if (!phone) return json({ blocked: false });
+      try {
+        const rows = await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(phone)}&select=phone&limit=1`);
+        return json({ blocked: Array.isArray(rows) && rows.length > 0 });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── GET /supabase/blocklist — admin only ──
     if (request.method === 'GET' && url.pathname === '/supabase/blocklist') {
+      const blocked = await guard(['admin']);
+      if (blocked instanceof Response) return blocked;
+
       try {
         const data = await supabaseFetch('/blocklist?select=*&order=blocked_at.desc');
         return json({ data });
@@ -523,7 +846,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
       const rows = Array.isArray(body.data) ? body.data : [];
 
+      let previousBlocklist = [];
       try {
+        previousBlocklist = await supabaseFetch('/blocklist?select=*').catch(() => []);
         await supabaseFetch('/blocklist?phone=not.is.null', { method: 'DELETE' });
 
         const clean = rows.map(b => ({
@@ -541,6 +866,10 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
         return json({ ok: true, count: clean.length });
       } catch (e) {
+        await supabaseFetch('/blocklist?phone=not.is.null', { method: 'DELETE' }).catch(() => {});
+        if (Array.isArray(previousBlocklist) && previousBlocklist.length) {
+          await supabaseFetch('/blocklist', { method: 'POST', body: JSON.stringify(previousBlocklist) }).catch(() => {});
+        }
         return json({ error: e.message }, 502);
       }
     }
@@ -572,7 +901,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
       const rows = Array.isArray(body.data) ? body.data : [];
 
+      let previousCustomers = [];
       try {
+        previousCustomers = await supabaseFetch('/customers?select=*').catch(() => []);
         await supabaseFetch('/customers?phone=not.is.null', { method: 'DELETE' });
 
         const clean = rows.map(c => ({
@@ -602,6 +933,10 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
         return json({ ok: true });
       } catch (e) {
+        await supabaseFetch('/customers?phone=not.is.null', { method: 'DELETE' }).catch(() => {});
+        if (Array.isArray(previousCustomers) && previousCustomers.length) {
+          await supabaseFetch('/customers', { method: 'POST', body: JSON.stringify(previousCustomers) }).catch(() => {});
+        }
         return json({ error: e.message }, 502);
       }
     }
@@ -649,6 +984,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           if (!order.tracking) order.tracking = {};
           order.tracking = { ...existing.payload.tracking, ...order.tracking };
         }
+        if (existing && existing.payload && existing.payload.access && !order.access) {
+          order.access = existing.payload.access;
+        }
 
         const existingGPS = existing && existing.payload ? customerGPS(existing.payload) : null;
         const nextGPS = customerGPS(order);
@@ -682,6 +1020,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
     // ── POST /order — public website order intake ──
     if (request.method === 'POST' && url.pathname === '/order') {
+      const limited = rateLimit('public-order', 10, 5 * 60 * 1000);
+      if (limited) return limited;
+
       let order;
       try {
         order = await request.json();
@@ -689,13 +1030,28 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         return json({ error: 'Invalid JSON' }, 400);
       }
 
-      if (!order.id || !order.name || !order.items) {
+      if (!order.name || !order.items) {
         return json({ error: 'Missing fields' }, 400);
       }
 
       try {
-        order.status = order.status || 'inbox';
-        order.gps = customerGPS(order);
+        const cfg = await siteConfigRaw();
+        if (cfg.menuOrderingEnabled === false) {
+          return json({ error: 'Online ordering is currently disabled' }, 403);
+        }
+        if (!storeIsOpen(cfg)) {
+          return json({ error: 'Orders open from 6 PM to 12 AM' }, 403);
+        }
+
+        const phone = normalizePhone(order.phone);
+        const blockedRows = phone
+          ? await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(phone)}&select=phone&limit=1`)
+          : [];
+        if (Array.isArray(blockedRows) && blockedRows.length) {
+          return json({ error: 'This number is blocked. Please contact us directly.' }, 403);
+        }
+
+        const cleanOrder = cleanPublicOrder(order, await menuProducts());
 
         await supabaseFetch('/orders?on_conflict=id', {
           method: 'POST',
@@ -703,16 +1059,21 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
             'Prefer': 'resolution=merge-duplicates,return=representation',
           },
           body: JSON.stringify({
-            id: String(order.id),
+            id: String(cleanOrder.id),
             status: 'inbox',
-            payload: order,
+            payload: cleanOrder,
             updated_at: new Date().toISOString(),
           }),
         });
 
-        return json({ ok: true, id: order.id });
+        return json({
+          ok: true,
+          id: cleanOrder.id,
+          customerToken: cleanOrder.access.customerToken,
+          trackUrl: `https://lekiosk.store/track/?id=${encodeURIComponent(cleanOrder.id)}&token=${encodeURIComponent(cleanOrder.access.customerToken)}`,
+        });
       } catch (e) {
-        return json({ error: e.message }, 502);
+        return json({ error: e.message }, /Invalid|Unavailable|Required|outside|disabled|blocked|open/i.test(e.message || '') ? 400 : 502);
       }
     }
 
@@ -843,7 +1204,11 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
       const sections = Array.isArray(body.data) ? body.data : [];
 
+      let previousCategories = [];
+      let previousProducts = [];
       try {
+        previousCategories = await supabaseFetch('/categories?select=*').catch(() => []);
+        previousProducts = await supabaseFetch('/products?select=*').catch(() => []);
         await supabaseFetch('/products?id=not.is.null', { method: 'DELETE' });
         await supabaseFetch('/categories?id=not.is.null', { method: 'DELETE' });
 
@@ -899,18 +1264,32 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           ok: true,
           categories: categories.length,
           products: products.length,
-        });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
+	        });
+	      } catch (e) {
+	        await supabaseFetch('/products?id=not.is.null', { method: 'DELETE' }).catch(() => {});
+	        await supabaseFetch('/categories?id=not.is.null', { method: 'DELETE' }).catch(() => {});
+	        if (Array.isArray(previousCategories) && previousCategories.length) {
+	          await supabaseFetch('/categories', { method: 'POST', body: JSON.stringify(previousCategories) }).catch(() => {});
+	        }
+	        if (Array.isArray(previousProducts) && previousProducts.length) {
+	          await supabaseFetch('/products', { method: 'POST', body: JSON.stringify(previousProducts) }).catch(() => {});
+	        }
+	        return json({ error: e.message }, 502);
+	      }
+	    }
 
     // ── GET /supabase/config — public ──
     if (request.method === 'GET' && url.pathname === '/supabase/config') {
       try {
-        const rows = await supabaseFetch('/app_config?key=eq.site_settings&select=*');
-        const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        return json({ data: row ? (row.value || {}) : {} });
+        const cfg = await siteConfigRaw();
+        let isAdmin = false;
+        if (bearerToken(request)) {
+          try {
+            await requireAuth(request, ['admin']);
+            isAdmin = true;
+          } catch (_) {}
+        }
+        return json({ data: publicConfig(cfg, isAdmin) });
       } catch (e) {
         return json({ error: e.message }, 502);
       }
@@ -928,7 +1307,17 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         return json({ error: 'Invalid JSON' }, 400);
       }
 
-      const value = body && typeof body.data === 'object' && body.data ? body.data : {};
+      const existingConfig = await siteConfigRaw();
+      const value = body && typeof body.data === 'object' && body.data ? { ...existingConfig, ...body.data } : { ...existingConfig };
+      if (typeof value.driverPin === 'string' && value.driverPin.trim()) {
+        const pin = value.driverPin.trim();
+        if (!/^\d{4,8}$/.test(pin)) return json({ error: 'Driver PIN must be 4-8 digits' }, 400);
+        value.driverPinHash = await sha256Hex(pin);
+      }
+      if (value.clearDriverPin === true) delete value.driverPinHash;
+      delete value.driverPin;
+      delete value.clearDriverPin;
+      delete value.driverPinSet;
 
       try {
         const data = await supabaseFetch('/app_config?on_conflict=key', {
@@ -1016,6 +1405,9 @@ Le Kiosk AI Combo Builder route.
 
 // -- POST /api/combo -- public AI combo builder
 if (request.method === 'POST' && url.pathname === '/api/combo') {
+  const limited = rateLimit('ai-combo', 20, 10 * 60 * 1000);
+  if (limited) return limited;
+
   let body;
   try {
     body = await request.json();
@@ -1033,6 +1425,9 @@ if (request.method === 'POST' && url.pathname === '/api/combo') {
   }
 
   try {
+    const cfg = await siteConfigRaw();
+    if (cfg.aiComboEnabled === false) return json({ error: 'AI combo builder is disabled' }, 403);
+
     const categories = await supabaseFetch('/categories?select=*&active=eq.true&order=sort_order.asc');
     const products = await supabaseFetch('/products?select=*&active=eq.true&order=sort_order.asc');
 
@@ -1602,6 +1997,9 @@ if (request.method === 'GET' && url.pathname === '/gallery/approved') {
 
 // -- POST /gallery/submit -- public photo submission, max 3 per visitor per day
 if (request.method === 'POST' && url.pathname === '/gallery/submit') {
+  const limited = rateLimit('gallery-submit', 6, 60 * 60 * 1000);
+  if (limited) return limited;
+
   let body;
   try {
     body = await request.json();
@@ -1612,10 +2010,9 @@ if (request.method === 'POST' && url.pathname === '/gallery/submit') {
   const visitorId = galleryCleanText(body.visitorId, 80);
   if (!visitorId) return json({ error: 'Missing visitorId' }, 400);
 
-  const submitDate = galleryCleanText(body.submitDate, 10) || galleryTodayKey();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(submitDate)) {
-    return json({ error: 'Invalid submitDate' }, 400);
-  }
+  const cfg = await siteConfigRaw();
+  if (cfg.galleryEnabled === false) return json({ error: 'Guest gallery is disabled' }, 403);
+  const submitDate = galleryTodayKey();
 
   try {
     const existing = await supabaseFetch(
@@ -1737,6 +2134,12 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
         if (!row) return json({ error: 'Order not found' }, 404);
 
         const payload = row.payload || {};
+        try {
+          requireTrackAccess(payload, request);
+        } catch (e) {
+          if (e instanceof Response) return e;
+          throw e;
+        }
         const safe = {
           id: row.id,
           name: payload.name || 'Guest',
@@ -1803,7 +2206,14 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
     // ── GET /driver — driver's pending delivery list (no ID = list view) ──
     if (request.method === 'GET' && url.pathname === '/driver') {
       try {
-        const rows = await supabaseFetch('/orders?select=*&order=created_at.desc&limit=30');
+        const cfg = await siteConfigRaw();
+        try {
+          await requireDriverPin(request, cfg);
+        } catch (e) {
+          if (e instanceof Response) return e;
+          throw e;
+        }
+        const rows = await supabaseFetch('/orders?select=*&order=created_at.desc&limit=100');
         const all = (Array.isArray(rows) ? rows : [])
           .filter(row => {
             const p = row.payload || {};
@@ -1826,6 +2236,7 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
               total: p.total || 0,
               gps: customerGPS(p),
               tracking: p.tracking || {},
+              driverToken: p.access?.driverToken || '',
             };
           });
 
@@ -1835,7 +2246,7 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
       }
     }
 
-    // ── POST /driver/:id/status — driver updates delivering/delivered (no auth) ──
+    // ── POST /driver/:id/status — driver updates delivering/delivered ──
     if (request.method === 'POST' && url.pathname.startsWith('/driver/') && url.pathname.endsWith('/status')) {
       const id = url.pathname.split('/driver/')[1].split('/status')[0];
       if (!id) return json({ error: 'Missing order ID' }, 400);
@@ -1853,8 +2264,15 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
         const row = Array.isArray(rows) && rows.length ? rows[0] : null;
         if (!row) return json({ error: 'Order not found' }, 404);
 
-        const payload = row.payload || {};
-        const track = payload.tracking || {};
+	        const payload = row.payload || {};
+	        const cfg = await siteConfigRaw();
+	        try {
+	          await requireDriverOrderAccess(payload, request, cfg, body);
+	        } catch (e) {
+	          if (e instanceof Response) return e;
+	          throw e;
+	        }
+	        const track = payload.tracking || {};
 
         if (step === 'delivering' && track.delivering) {
           return json({ ok: true, step, time: track.delivering, alreadyDone: true });
@@ -1893,7 +2311,7 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
       }
     }
 
-    // ── GET /driver/:id — public order details for driver ──
+    // ── GET /driver/:id — driver order details ──
     if (request.method === 'GET' && url.pathname.startsWith('/driver/')) {
       const id = url.pathname.split('/driver/')[1];
       if (!id) return json({ error: 'Missing order ID' }, 400);
@@ -1903,8 +2321,15 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
         const row = Array.isArray(rows) && rows.length ? rows[0] : null;
         if (!row) return json({ error: 'Order not found' }, 404);
 
-        const payload = row.payload || {};
-        const safe = {
+	        const payload = row.payload || {};
+	        const cfg = await siteConfigRaw();
+	        try {
+	          await requireDriverOrderAccess(payload, request, cfg);
+	        } catch (e) {
+	          if (e instanceof Response) return e;
+	          throw e;
+	        }
+	        const safe = {
           id: row.id,
           name: payload.name || 'Guest',
           phone: payload.phone || '',
@@ -1916,10 +2341,11 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
             flavor: it.flavor || null,
             addons: (it.addons || []).map(a => ({ label: a.label, price: a.price }))
           })),
-          total: payload.total || 0,
-          gps: customerGPS(payload),
-          tracking: payload.tracking || {},
-        };
+	          total: payload.total || 0,
+	          gps: customerGPS(payload),
+	          tracking: payload.tracking || {},
+	          driverToken: payload.access?.driverToken || '',
+	        };
 
         return json({ ok: true, data: safe });
       } catch (e) {
@@ -1947,8 +2373,15 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
         const row = Array.isArray(rows) && rows.length ? rows[0] : null;
         if (!row) return json({ error: 'Order not found' }, 404);
 
-        const payload = row.payload || {};
-        if (!payload.tracking) payload.tracking = {};
+	        const payload = row.payload || {};
+	        const cfg = await siteConfigRaw();
+	        try {
+	          await requireDriverOrderAccess(payload, request, cfg, body);
+	        } catch (e) {
+	          if (e instanceof Response) return e;
+	          throw e;
+	        }
+	        if (!payload.tracking) payload.tracking = {};
         payload.tracking.driverLocation = {
           lat,
           lng,
