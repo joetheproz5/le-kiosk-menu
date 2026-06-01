@@ -117,9 +117,9 @@
         .hero-chip.light { background: rgba(255,255,255,.78); color: #713f12; border: 1px solid rgba(217,119,6,.18); }
         .hero-chip.green { background: #e6fffa; color: #0f766e; border: 1px solid rgba(20,184,166,.22); }
         #main-nav { border-radius: 20px; background: rgba(255,255,255,.72); border-color: rgba(245,158,11,.28); box-shadow: 0 14px 42px rgba(69,26,3,.16), inset 0 1px 0 rgba(255,255,255,.74); backdrop-filter: blur(22px) saturate(1.18); -webkit-backdrop-filter: blur(22px) saturate(1.18); }
-        .nav-link { position: relative; padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,0.6); color: #451a03; border: 1px solid rgba(120,53,15,0.12); font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s, color 0.2s, transform .2s, box-shadow .2s, border-color .2s; white-space: nowrap; text-decoration: none; display: inline-block; overflow: hidden; }
-        .nav-link::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: 4px; height: 2px; border-radius: 999px; background: #f59e0b; transform: scaleX(0); transform-origin: center; transition: transform .22s ease; box-shadow: 0 0 12px rgba(245,158,11,.72); }
-        .nav-link:hover { background: #fff7ed; transform: translateY(-1px) scale(1.03); border-color: rgba(245,158,11,.34); }
+        .nav-link { position: relative; flex: 0 0 auto; min-width: max-content; padding: 10px 15px; border-radius: 999px; background: rgba(255,255,255,0.6); color: #451a03; border: 1px solid rgba(120,53,15,0.12); font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; transition: background 0.2s, color 0.2s, transform .2s, box-shadow .2s, border-color .2s; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; overflow: visible; line-height: 1; }
+        .nav-link::after { content: ""; position: absolute; left: 16%; right: 16%; bottom: 5px; height: 2px; border-radius: 999px; background: #f59e0b; transform: scaleX(0); transform-origin: center; transition: transform .22s ease; box-shadow: 0 0 12px rgba(245,158,11,.72); }
+        .nav-link:hover { background: #fff7ed; transform: translateY(-1px) scale(1.02); border-color: rgba(245,158,11,.34); }
         .nav-link:hover::after { transform: scaleX(1); }
         .nav-link.active { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #451a03; border-color: rgba(180,83,9,.32); box-shadow: 0 10px 24px rgba(245,158,11,0.28), 0 15px 30px rgba(180,83,9,.12); }
         .nav-link.active::after { transform: scaleX(1); background: #451a03; opacity: .42; }
@@ -306,12 +306,6 @@
     <p class="text-sm font-bold text-amber-800 mt-2">Waffles, burgers, ice cream, shisha & more.</p>
     <p class="text-xs text-amber-900/70 italic font-semibold mt-1">"Serving Cravings, Sharing Smiles"</p>
     <div class="hero-divider" aria-hidden="true"></div>
-    <div class="mt-4 flex flex-wrap justify-center gap-2">
-        <span class="hero-chip dark">6 PM - 12 AM</span>
-        <span class="hero-chip green">Dine in</span>
-        <span class="hero-chip light">Takeaway</span>
-        <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="hero-chip light hover:bg-amber-100 transition">Location</a>
-    </div>
     </div>
   </div>
 </header>
