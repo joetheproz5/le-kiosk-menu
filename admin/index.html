@@ -971,7 +971,10 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
                   </div>
                 </div>
                 <input class="search-input" id="sales-search" type="text" placeholder="Search items..." oninput="renderSalesAnalytics()">
+                <button class="btn btn-soft" onclick="exportSalesCsv()">Export CSV</button>
               </div>
+              <div class="today-bar" id="sales-summary"></div>
+              <div class="chart-grid" id="sales-breakdowns"></div>
               <div id="sales-table"></div>
             </div>
           </div>
@@ -1127,7 +1130,7 @@ const DEFAULT_LOYALTY_REWARDS=[
 
 let menuData=[],hasUnsaved=false,activeTab=0,currentView='dashboard',dragSrcIdx=null,dragItemSrcIdx=null,basketballPruneTimer=null,basketballPruneDay='';
 let selectedItems=new Set();
-let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false,dashboardRefreshTimer=null;
+let sessionTimer=null,sessionExpiry=0,sessionTick=null,sessionListenersAttached=false,dashboardRefreshTimer=null,orderEventInterval=null,lastOrderEventAt='',knownAdminInboxIds=new Set(),adminEventsReady=false;
 let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=false,galleryAdminData=[],galleryFilter='pending';
 let dashboardOrdersData=[],menuVisitorData=[];
 let salesFilter='today';
@@ -1294,7 +1297,7 @@ function updateSessionBadge(){
 }
 function logout(){
   clearAuthSession();
-  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);clearInterval(dashboardRefreshTimer);
+  clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);clearInterval(dashboardRefreshTimer);clearInterval(orderEventInterval);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
@@ -1313,9 +1316,12 @@ async function initAdmin(){
     await fetchConfig();
     scheduleBasketballExpiryPrune();
     await Promise.all([fetchMenu(),fetchCustomersAdmin(false),fetchDashboardOrders(),fetchMenuVisitors()]);
+    await pollAdminOrderEvents(true).catch(()=>{});
     renderStatus();
   renderAll();
+  clearInterval(dashboardRefreshTimer);clearInterval(orderEventInterval);
   dashboardRefreshTimer=setInterval(refreshDashboard,60000);
+  orderEventInterval=setInterval(()=>pollAdminOrderEvents(false),3000);
 }catch(e){
     showToast('Load failed: '+e.message,'error');
     document.getElementById('editor-root').innerHTML=`<div class="empty-state">Could not load menu. <button class="btn btn-save btn-sm" onclick="initAdmin()">Retry</button></div>`;
@@ -2968,10 +2974,80 @@ function salesAnalyticsStats(){
   });
   return Array.from(map.values());
 }
+function salesPeriodRows(){
+  const today=dateKey(new Date());
+  const weekStart=new Date();
+  weekStart.setHours(0,0,0,0);
+  weekStart.setDate(weekStart.getDate()-6);
+  return dashboardOrdersData.filter(row=>{
+    if(!isActiveOrder(row))return false;
+    if(salesFilter==='total')return true;
+    const d=orderStatDate(row);
+    if(!d)return false;
+    if(salesFilter==='today')return dateKey(d)===today;
+    return d>=weekStart;
+  });
+}
+function orderTypeLabel(type){
+  const t=String(type||'unknown').toLowerCase();
+  if(t==='dinein')return 'Dine-in';
+  if(t==='takeaway')return 'Takeaway';
+  if(t==='delivery')return 'Delivery';
+  return t?`${t.slice(0,1).toUpperCase()}${t.slice(1)}`:'Unknown';
+}
+function renderSalesSummary(rows,stats){
+  const el=document.getElementById('sales-summary');
+  const breakdown=document.getElementById('sales-breakdowns');
+  if(!el||!breakdown)return;
+  const revenue=rows.reduce((sum,row)=>sum+orderTotalValue(row),0);
+  const avg=rows.length?revenue/rows.length:0;
+  const customers=new Set(rows.map(orderCustomerKey).filter(Boolean)).size;
+  const soldQty=stats.reduce((sum,s)=>{
+    if(salesFilter==='today')return sum+s.todayQty;
+    if(salesFilter==='week')return sum+s.weekQty;
+    return sum+s.totalQty;
+  },0);
+  el.innerHTML=`
+    <div class="today-card"><div><div class="today-label">Orders</div><div class="today-value">${rows.length}</div><div class="today-note">Active orders in selected period</div></div><div class="today-icon">O</div></div>
+    <div class="today-card"><div><div class="today-label">Revenue</div><div class="today-value">$${revenue.toFixed(2)}</div><div class="today-note">$${avg.toFixed(2)} average order</div></div><div class="today-icon">$</div></div>
+    <div class="today-card"><div><div class="today-label">Items Sold</div><div class="today-value">${soldQty}</div><div class="today-note">${customers} unique customers</div></div><div class="today-icon">I</div></div>`;
+
+  const byType=new Map(),byCat=new Map(),byHour=new Map();
+  rows.forEach(row=>{
+    const p=row.payload||{},total=orderTotalValue(row);
+    const type=orderTypeLabel(p.orderType||p.type||orderSource(row));
+    byType.set(type,(byType.get(type)||0)+total);
+    const d=orderStatDate(row);
+    if(d){
+      const h=d.getHours();
+      byHour.set(h,(byHour.get(h)||0)+1);
+    }
+    orderItemsForStats(row).forEach(item=>{
+      const name=soldItemName(item.name||item.itemName||'');
+      const match=stats.find(s=>soldItemName(s.name)===name);
+      const cat=match?.cat||'Unmatched';
+      const qty=Math.max(1,Number(item.qty??item.quantity??1)||1);
+      byCat.set(cat,(byCat.get(cat)||0)+qty);
+    });
+  });
+  const topType=[...byType.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topCat=[...byCat.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topHours=[...byHour.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([h,count])=>[`${String(h).padStart(2,'0')}:00`,count]);
+  const listCard=(title,sub,rows,kind)=>`<div class="chart-card">
+    <div class="chart-head"><div><div class="chart-title">${title}</div><div class="chart-sub">${sub}</div></div></div>
+    <div class="mini-list">${rows.length?rows.map(([label,value])=>`<div class="mini-row"><div><div class="mini-name">${esc(label)}</div><div class="mini-meta">${kind==='money'?'Revenue':'Count'}</div></div><span style="font-size:13px;font-weight:900;color:var(--brand-dark)">${kind==='money'?'$'+Number(value).toFixed(2):Number(value)}</span></div>`).join(''):'<div class="empty-state">No data yet.</div>'}</div>
+  </div>`;
+  breakdown.innerHTML=
+    listCard('Order Type Mix','Revenue by dine-in, takeaway, delivery, and online source',topType,'money')+
+    listCard('Top Categories','Quantity sold by menu category',topCat,'count')+
+    listCard('Busy Hours','Order volume by hour',topHours,'count');
+}
 function renderSalesAnalytics(){
   const el=document.getElementById('sales-table');
   if(!el)return;
   const stats=salesAnalyticsStats();
+  const periodRows=salesPeriodRows();
+  renderSalesSummary(periodRows,stats);
   const q=(document.getElementById('sales-search')?.value||'').toLowerCase();
   const filtered=stats.filter(s=>!q||s.name.toLowerCase().includes(q)||s.cat.toLowerCase().includes(q));
   let sortKey,revKey;
@@ -3004,6 +3080,22 @@ function renderSalesAnalytics(){
       <div class="sales-cat" style="text-align:center">${esc(s.cat)}</div>
     </div>`).join('')}
   `;
+}
+function exportSalesCsv(){
+  const stats=salesAnalyticsStats();
+  let sortKey,revKey;
+  if(salesFilter==='today'){sortKey='todayQty';revKey='todayRev';}
+  else if(salesFilter==='week'){sortKey='weekQty';revKey='weekRev';}
+  else{sortKey='totalQty';revKey='totalRev';}
+  const rows=[['Item','Category','Unit Price','Sold','Revenue']];
+  stats.forEach(s=>rows.push([s.name,s.cat,s.price,s[sortKey],s[revKey].toFixed(2)]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`le-kiosk-sales-${salesFilter}-${dateKey(new Date())}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 const DASHBOARD_DAYS=20;
 function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -3788,6 +3880,13 @@ async function openCustomersAdmin(){
   await fetchCustomersAdmin(true);
 }
 function normalizeCustomerPhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d;}
+function customerHistoryRows(phone){
+  const normalized=normalizeCustomerPhone(phone);
+  if(!normalized)return [];
+  return dashboardOrdersData
+    .filter(row=>normalizeCustomerPhone(row.payload?.phone||'')===normalized)
+    .sort((a,b)=>(orderStatDate(b)?.getTime()||0)-(orderStatDate(a)?.getTime()||0));
+}
 function renderCustomersAdmin(){
   const el=document.getElementById('customers-admin-list');if(!el)return;
   const q=(document.getElementById('cust-admin-search')?.value||'').toLowerCase();
@@ -3796,10 +3895,11 @@ function renderCustomersAdmin(){
   el.innerHTML=`<div class="edit-list">${rows.map(({c,i})=>`<div class="edit-row">
     <div class="edit-row-img">${esc((c.name||c.phone||'?').slice(0,1).toUpperCase())}</div>
     <div><div class="edit-row-title">${esc(c.name||'Unnamed customer')}</div><div class="edit-row-meta">+961 ${esc(c.phone||'')} · ${Number(c.totalOrders||0)} visits · $${Number(c.totalSpent||0).toFixed(2)} · ${Number(c.loyaltyStamps||0)} stamps</div></div>
-    <div class="edit-row-actions"><span class="edit-badge${c.loyaltyRewardReady?' on':''}">${c.loyaltyRewardReady?'Reward':'No Reward'}</span><button class="btn btn-soft btn-sm" onclick="openCustomerEditor(${i})">Edit</button></div>
+    <div class="edit-row-actions"><span class="edit-badge${c.loyaltyRewardReady?' on':''}">${c.loyaltyRewardReady?'Reward':'No Reward'}</span><button class="btn btn-soft btn-sm" onclick="openCustomerEditor(${i})">History</button></div>
   </div>`).join('')}</div>`;
 }
 function customerEditorHtml(c,i){
+  const history=customerHistoryRows(c.phone).slice(0,12);
   return `<div class="editor-form">
     <div class="customer-grid">
       <div class="field"><label class="field-label">Name</label><input class="field-input" value="${esc(c.name||'')}" oninput="editCustomerField(${i},'name',this.value)"></div>
@@ -3811,6 +3911,14 @@ function customerEditorHtml(c,i){
     </div>
     <div class="note-row"><label class="field-label">Note</label><textarea class="field-input" rows="2" oninput="editCustomerField(${i},'note',this.value)">${esc(c.note||'')}</textarea></div>
     <div class="customer-meta">First seen: ${c.firstSeen?new Date(c.firstSeen).toLocaleDateString():'-'} · Last seen: ${c.lastSeen?new Date(c.lastSeen).toLocaleDateString():'-'}${c.favoriteItems?.length?` · Usually: ${esc(c.favoriteItems.join(', '))}`:''} · Redemptions: ${Number(c.loyaltyLifetimeRedemptions||0)}</div>
+    <div class="setting-card" style="margin-top:12px">
+      <div class="setting-title">Order History</div>
+      <div class="setting-copy">${history.length?`${history.length} recent orders from this phone number.`:'No matching orders found yet.'}</div>
+      <div class="mini-list" style="margin-top:10px">${history.map(row=>{
+        const p=row.payload||{},dt=orderStatDate(row),items=orderItemsForStats(row).slice(0,3).map(it=>`${Number(it.qty||1)}x ${it.name||it.itemName||'Item'}`).join(', ');
+        return `<div class="mini-row"><div><div class="mini-name">${esc(row.id||p.id||'Order')}</div><div class="mini-meta">${dt?dt.toLocaleString('en-GB'):'-'} · ${esc(p.orderType||'order')} · ${esc(items||'No items')}</div></div><span style="font-size:13px;font-weight:900;color:var(--brand-dark)">$${orderTotalValue(row).toFixed(2)}</span></div>`;
+      }).join('')}</div>
+    </div>
     <div class="modal-actions"><button class="btn btn-danger btn-sm" onclick="deleteCustomerAdmin(${i})">Delete Customer</button></div>
   </div>`;
 }
@@ -4005,6 +4113,46 @@ function updateMobileTab(){
     b.classList.toggle('active',(v==='orders-tab'&&currentView==='dashboard')||v===currentView);
   });
 }
+
+function requestAdminNotifications(){
+  try{
+    if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+  }catch(_){}
+}
+function notifyAdminOrder(ev){
+  requestAdminNotifications();
+  try{
+    if(!('Notification' in window)||Notification.permission!=='granted')return;
+    const n=new Notification('New Le Kiosk order',{
+      body:`${ev.name||'Guest'} · ${ev.orderType||'order'} · $${Number(ev.total||0).toFixed(2)}`,
+      tag:`lk-admin-order-${ev.id||Date.now()}`,
+      renotify:true
+    });
+    n.onclick=()=>{window.focus();switchView('dashboard');};
+  }catch(_){}
+}
+async function pollAdminOrderEvents(force=false){
+  if(!authSession?.token)return;
+  try{
+    const qs=lastOrderEventAt&&!force?`?since=${encodeURIComponent(lastOrderEventAt)}&limit=80`:'?limit=30';
+    const res=await fetch(`${WORKER_URL}/supabase/order-events${qs}`,{cache:'no-store'});
+    if(!res.ok)throw new Error('Order events '+res.status);
+    const j=await res.json(),rows=Array.isArray(j.data)?j.data:[];
+    rows.forEach(ev=>{if(ev.updatedAt&&(!lastOrderEventAt||ev.updatedAt>lastOrderEventAt))lastOrderEventAt=ev.updatedAt;});
+    const fresh=rows.filter(ev=>String(ev.status||'').toLowerCase()==='inbox'&&!knownAdminInboxIds.has(String(ev.id)));
+    rows.filter(ev=>String(ev.status||'').toLowerCase()==='inbox').forEach(ev=>knownAdminInboxIds.add(String(ev.id)));
+    if(fresh.length&&adminEventsReady){
+      notifyAdminOrder(fresh[0]);
+      showToast(`${fresh.length} new incoming order${fresh.length===1?'':'s'}`,'success');
+      await fetchDashboardOrders();
+      renderDashboard();
+    }
+    adminEventsReady=true;
+  }catch(_){}
+}
+document.addEventListener('pointerdown',requestAdminNotifications,{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pollAdminOrderEvents(true);});
+window.addEventListener('online',()=>pollAdminOrderEvents(true));
 
 // ── KEYBOARD SHORTCUTS ──
 function openShortcutsModal(){

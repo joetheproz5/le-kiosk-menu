@@ -71,7 +71,7 @@ export default {
     const corsHeaders = {
       'Access-Control-Allow-Origin': corsOk ? origin : ALLOWED_ORIGINS[0],
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Setup-Key, X-Driver-Pin, X-Driver-Token, X-Track-Token',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Setup-Key, X-Backup-Key, X-Driver-Pin, X-Driver-Token, X-Track-Token',
     };
 
     if (request.method === 'OPTIONS') {
@@ -372,6 +372,20 @@ export default {
       delete clean.driverPinHash;
       if (isAdmin) clean.driverPinSet = pinSet;
       return clean;
+    }
+
+    function backupKeyOk(request) {
+      const key = request.headers.get('X-Backup-Key') || url.searchParams.get('key') || '';
+      return !!(env.BACKUP_KEY && safeCompare(key, env.BACKUP_KEY));
+    }
+
+    function backupDateKey() {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Beirut',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date());
     }
 
     function beirutHour() {
@@ -960,6 +974,61 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       }
     }
 
+    // ── GET /supabase/order-events — admin/POS lightweight order-change polling ──
+    if (request.method === 'GET' && url.pathname === '/supabase/order-events') {
+      const blocked = await guard(['admin', 'pos']);
+      if (blocked instanceof Response) return blocked;
+
+      const since = url.searchParams.get('since');
+      const limit = Math.max(1, Math.min(100, Number(url.searchParams.get('limit') || 40) || 40));
+
+      try {
+        let path = `/orders?select=id,status,updated_at,created_at,payload&order=updated_at.desc&limit=${limit}`;
+        if (since) path += `&updated_at=gt.${encodeURIComponent(since)}`;
+        const rows = await supabaseFetch(path);
+        const data = (Array.isArray(rows) ? rows : []).map(row => ({
+          id: row.id,
+          status: row.status,
+          updatedAt: row.updated_at || row.created_at || '',
+          createdAt: row.created_at || '',
+          name: row.payload?.name || '',
+          phone: row.payload?.phone || '',
+          orderType: row.payload?.orderType || '',
+          total: row.payload?.total || 0,
+          source: row.payload?.source || '',
+        }));
+        return json({ data, serverTime: new Date().toISOString() });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── GET /supabase/customer-history?phone= — admin/POS order history by customer ──
+    if (request.method === 'GET' && url.pathname === '/supabase/customer-history') {
+      const blocked = await guard(['admin', 'pos']);
+      if (blocked instanceof Response) return blocked;
+
+      const phone = normalizePhone(url.searchParams.get('phone'));
+      if (!phone) return json({ error: 'Invalid phone' }, 400);
+
+      try {
+        const rows = await supabaseFetch('/orders?select=*&order=created_at.desc&limit=500');
+        const data = (Array.isArray(rows) ? rows : [])
+          .filter(row => normalizePhone(row.payload?.phone) === phone)
+          .slice(0, 50)
+          .map(row => ({
+            id: row.id,
+            status: row.status,
+            createdAt: row.created_at || row.payload?.timestamp || '',
+            updatedAt: row.updated_at || '',
+            payload: row.payload || {},
+          }));
+        return json({ data });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
     // ── POST /supabase/order — admin/POS ──
     if (request.method === 'POST' && url.pathname === '/supabase/order') {
       const blocked = await guard(['admin', 'pos']);
@@ -1013,6 +1082,93 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         });
 
         return json({ ok: true, data });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── POST /supabase/backup — scheduled Supabase snapshot backup ──
+    if (request.method === 'POST' && url.pathname === '/supabase/backup') {
+      if (!backupKeyOk(request)) return json({ error: 'Forbidden' }, 403);
+
+      try {
+        const [
+          cfg,
+          categories,
+          products,
+          customers,
+          orders,
+          blocklist,
+          gallery,
+        ] = await Promise.all([
+          siteConfigRaw(),
+          supabaseFetch('/categories?select=*&order=sort_order.asc').catch(() => []),
+          supabaseFetch('/products?select=*&order=sort_order.asc').catch(() => []),
+          supabaseFetch('/customers?select=*&order=last_seen.desc.nullslast').catch(() => []),
+          supabaseFetch('/orders?select=*&order=created_at.desc&limit=1000').catch(() => []),
+          supabaseFetch('/blocklist?select=*&order=blocked_at.desc').catch(() => []),
+          supabaseFetch('/guest_gallery?select=*&order=created_at.desc&limit=1000').catch(() => []),
+        ]);
+
+        const snapshot = {
+          createdAt: new Date().toISOString(),
+          source: 'worker',
+          tables: {
+            app_config: { site_settings: cfg },
+            categories,
+            products,
+            customers,
+            orders,
+            blocklist,
+            guest_gallery: gallery,
+          },
+        };
+
+        const backupKey = backupDateKey();
+        const inserted = await supabaseFetch('/app_backups?on_conflict=backup_key', {
+          method: 'POST',
+          headers: {
+            'Prefer': 'resolution=merge-duplicates,return=representation',
+          },
+          body: JSON.stringify({
+            backup_key: backupKey,
+            snapshot,
+            created_at: snapshot.createdAt,
+          }),
+        });
+
+        await supabaseFetch('/app_backups?select=backup_key&order=backup_key.desc&offset=30')
+          .then(oldRows => Promise.all((oldRows || []).map(row =>
+            supabaseFetch(`/app_backups?backup_key=eq.${encodeURIComponent(row.backup_key)}`, { method: 'DELETE' })
+          )))
+          .catch(() => {});
+
+        return json({
+          ok: true,
+          backupKey,
+          rows: {
+            categories: categories.length,
+            products: products.length,
+            customers: customers.length,
+            orders: orders.length,
+            blocklist: blocklist.length,
+            gallery: gallery.length,
+          },
+          data: inserted,
+        });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── GET /supabase/backups — admin backup inventory ──
+    if (request.method === 'GET' && url.pathname === '/supabase/backups') {
+      const blocked = await guard(['admin']);
+      if (blocked instanceof Response) return blocked;
+
+      try {
+        const data = await supabaseFetch('/app_backups?select=backup_key,created_at&order=backup_key.desc&limit=30');
+        return json({ data });
       } catch (e) {
         return json({ error: e.message }, 502);
       }

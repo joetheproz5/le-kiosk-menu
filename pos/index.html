@@ -1904,7 +1904,7 @@ let splitPayments=[],splitEnabled=false;
 let currentCustomerProfile=null,selectedRewardType=null,loyaltyEnabled=true,loyaltyRewards=DEFAULT_REWARDS.map(r=>({
 ...r}
 ));
-let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,loadedSourceOrder=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
+let sessionTimer=null,sessionTick=null,sessionExpiry=0,inboxPollInterval=null,orderEventInterval=null,lastOrderEventAt='',lastInboxCount=0,inboxWritePending=false,loadedInboxOrderId=null,loadedSourceOrder=null,checkoutOpen=false,handledInboxIds=new Map(),knownInboxIds=new Set(),inboxIdsReady=false;
 let lastHydratedPhone='',lastAutoName='';
 let authSession=null;
 let audioCtx=null,alarmAudio=null,lastIncomingSoundAt=0,soundUnlocked=false;
@@ -2133,8 +2133,40 @@ setTimeout(()=>{playAlarmElement();playWebAudioAlarm();},180);
 setTimeout(playWebAudioAlarm,650);
 if(navigator.vibrate)navigator.vibrate([180,70,180]);
 }
+function requestStaffNotifications(){
+try{
+if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+}catch(_){}
+}
+function notifyIncomingOrder(order){
+requestStaffNotifications();
+try{
+if(!('Notification' in window)||Notification.permission!=='granted')return;
+const title='New Le Kiosk order';
+const body=`${order?.name||'Guest'} · ${formatType(order?.orderType||'order')} · ${money(order?.total||0)}`;
+const n=new Notification(title,{body,tag:`lk-order-${order?.id||Date.now()}`,renotify:true});
+n.onclick=()=>{window.focus();switchView('inbox');};
+}catch(_){}
+}
+async function pollOrderEvents(force=false){
+if(!authSession?.token)return;
+try{
+const qs=lastOrderEventAt&&!force?`?since=${encodeURIComponent(lastOrderEventAt)}&limit=80`:'?limit=20';
+const res=await fetch(`${WORKER_URL}/supabase/order-events${qs}`,{cache:'no-store'});
+if(!res.ok)throw new Error('events '+res.status);
+const j=await res.json(),rows=Array.isArray(j.data)?j.data:[];
+rows.forEach(ev=>{if(ev.updatedAt&&(!lastOrderEventAt||ev.updatedAt>lastOrderEventAt))lastOrderEventAt=ev.updatedAt;});
+const freshInbox=rows.filter(ev=>String(ev.status||'').toLowerCase()==='inbox'&&!knownInboxIds.has(String(ev.id)));
+if(freshInbox.length&&inboxIdsReady){
+playIncomingSound();
+notifyIncomingOrder(freshInbox[0]);
+showToast(`${freshInbox.length} new incoming order${freshInbox.length===1?'':'s'}`,'success');
+pollInbox(true);
+}
+}catch(_){}
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSidebar();closeCategories();}});
-document.addEventListener('pointerdown',primeAudio,{passive:true});
+document.addEventListener('pointerdown',()=>{primeAudio();requestStaffNotifications();},{passive:true});
 document.addEventListener('keydown',primeAudio,{passive:true});
 document.addEventListener('touchstart',primeAudio,{passive:true});
 async function sha256(str){
@@ -2225,7 +2257,7 @@ restoreAuthSession();
 function startSession(){sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000)}
 function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);const rem=Math.max(0,sessionExpiry-Date.now());updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},rem)}
 function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
-function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
+function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);clearInterval(orderEventInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
 function togglePassword(){
 const input=$('pw'),btn=$('show-pw-btn'),show=input.type==='password';
 input.type=show?'text':'password';
@@ -2236,12 +2268,16 @@ showLoading('Loading POS...');
 await Promise.all([loadMenu(),loadCustomers(),loadConfig()]).catch(e=>showToast(e.message,'error'));
 await loadOrders(false).catch(()=>{});
 await pollInbox(false).catch(()=>{});
+await pollOrderEvents(true).catch(()=>{});
 mergeQueuedOrders();
 renderAll();
 updateSyncPill();
 syncOfflineQueue(false);
 hideLoading();
+clearInterval(inboxPollInterval);
+clearInterval(orderEventInterval);
 inboxPollInterval=setInterval(()=>pollInbox(false),3000);
+orderEventInterval=setInterval(()=>pollOrderEvents(false),2500);
 }
 async function loadConfig(){
 try{
@@ -2542,6 +2578,11 @@ function toggleCart(){$('cart-panel').classList.toggle('open')}
 function showCartOnMobile(){if(matchMedia('(max-width:900px)').matches)$('cart-panel').classList.add('open')}
 function normalizePhone(raw){const d=String(raw||'').replace(/\D/g,'');if(d.length===8)return d;if(d.length===11&&d.startsWith('961'))return d.slice(3);return d||'00000000'}
 function findCustomer(phone){const normalized=normalizePhone(phone);return customersData.find(c=>normalizePhone(c.phone)===normalized)||null}
+function customerOrderHistory(phone){
+const normalized=normalizePhone(phone);
+if(normalized==='00000000'||normalized.length!==8)return[];
+return ordersData.filter(o=>normalizePhone(o.phone)===normalized).sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0));
+}
 let phoneTimer=null;
 function onPhoneInput(raw){
 clearTimeout(phoneTimer);currentCustomerProfile=null;selectedRewardType=null;$('profile-card').classList.remove('show');
@@ -2577,6 +2618,7 @@ esc(phone)}
 if(profile.name&&$('cust-name').value.trim()!==profile.name)$('cust-name').value=profile.name;
 const rewardReady=loyaltyEnabled&&profile.loyaltyRewardReady;
 const loyaltyMeta=loyaltyEnabled?` · loyalty ${profile.loyaltyStamps||0}/${LOYALTY_TARGET}${rewardReady?' · reward ready':''}`:'';
+const history=customerOrderHistory(phone).slice(0,3);
 card.innerHTML=`<div class="profile-title">Welcome back, ${
 esc(profile.name||'Customer')}
 </div>
@@ -2589,6 +2631,8 @@ loyaltyMeta}
 </div>
 ${
 profile.favoriteItems?.length?`<div class="profile-meta">Usually: ${esc(profile.favoriteItems.slice(0,2).join(', '))}</div>`:''}
+${
+history.length?`<div class="profile-meta">Recent: ${history.map(o=>`${new Date(o.timestamp||Date.now()).toLocaleDateString('en-GB')} ${money(o.total||0)}`).join(' · ')}</div>`:''}
 ${
 rewardReady?`<div class="reward-row">${loyaltyRewards.map(r=>`<button class="addon-chip${selectedRewardType===r.id?' selected':''}" onclick="selectReward('${esc(r.id)}')">${
 esc(r.label)}
@@ -3012,7 +3056,8 @@ $('loading-text').textContent=msg||'Loading...';
 $('loading').classList.add('show')}
 function hideLoading(){
 $('loading').classList.remove('show')}
-window.addEventListener('online',()=>{updateSyncPill();syncOfflineQueue(false)});
+window.addEventListener('online',()=>{updateSyncPill();syncOfflineQueue(false);pollOrderEvents(true);pollInbox(true)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){pollOrderEvents(true);pollInbox(true)}});
 window.addEventListener('offline',updateSyncPill);
 setInterval(()=>syncOfflineQueue(false),30000);
 </script>

@@ -1,0 +1,31 @@
+# Le Kiosk - Daily Supabase Backup
+#
+# GitHub Actions is only the scheduler. The actual backup is written to the
+# Supabase app_backups table by the Cloudflare Worker.
+#
+# Required GitHub repository secrets:
+# - LEKIOSK_WORKER_URL, for example https://lekiosk-order-inbox.lekiosklb.workers.dev
+# - LEKIOSK_BACKUP_KEY, same value as the Worker BACKUP_KEY secret
+
+name: Daily Supabase Backup
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Worker backup
+        env:
+          LEKIOSK_WORKER_URL: ${{ secrets.LEKIOSK_WORKER_URL }}
+          LEKIOSK_BACKUP_KEY: ${{ secrets.LEKIOSK_BACKUP_KEY }}
+        run: |
+          test -n "$LEKIOSK_WORKER_URL"
+          test -n "$LEKIOSK_BACKUP_KEY"
+          curl --fail --show-error --silent \
+            --request POST \
+            --header "X-Backup-Key: ${LEKIOSK_BACKUP_KEY}" \
+            "${LEKIOSK_WORKER_URL%/}/supabase/backup"
