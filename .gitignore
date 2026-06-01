@@ -1,8 +1,23 @@
 .DS_Store
 
+# Local assistant/tool settings
+.codex/
+.claude/
+
 # Android local build state
 driver-android/.gradle/
 driver-android/**/build/
 driver-android/local.properties
+
+# Generated bundles and reports
 graphify-out/
 repomix-output.xml
+
+# Runtime data lives in Supabase
+backups/
+orders.json
+customers.json
+inbox.json
+
+# Build artifacts / release binaries
+driver-app/*.apk
