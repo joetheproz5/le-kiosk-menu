@@ -82,8 +82,15 @@ function setReconnecting(active){
 	 return !navigator.onLine||(e&&e.name==='AbortError')||/Failed to fetch|NetworkError|Load failed/i.test(String(e&&e.message||e||''));
 	}
 		function driverPin(){return driverPinMemory||''}
-		function saveDriverPin(pin){driverPinMemory=String(pin||'')}
-		function clearDriverPin(){driverPinMemory='';driverTokensMemory={};try{localStorage.removeItem(DRIVER_PIN_KEY);localStorage.removeItem(DRIVER_TOKEN_KEY);sessionStorage.removeItem(DRIVER_SESSION_TOKEN_KEY)}catch(e){}}
+		function saveDriverPin(pin){driverPinMemory=String(pin||'');try{if(window.LekioskAndroid&&typeof window.LekioskAndroid.setDriverPin==='function')window.LekioskAndroid.setDriverPin(driverPinMemory)}catch(e){}}
+		function clearDriverPin(){driverPinMemory='';driverTokensMemory={};try{localStorage.removeItem(DRIVER_PIN_KEY);localStorage.removeItem(DRIVER_TOKEN_KEY);sessionStorage.removeItem(DRIVER_SESSION_TOKEN_KEY)}catch(e){}try{if(window.LekioskAndroid&&typeof window.LekioskAndroid.clearDriverPin==='function')window.LekioskAndroid.clearDriverPin()}catch(e){}}
+function syncKnownOrdersToAndroid(ids){
+ try{
+  if(window.LekioskAndroid&&typeof window.LekioskAndroid.syncKnownOrders==='function'){
+   window.LekioskAndroid.syncKnownOrders(Array.from(ids||[]).join(','));
+  }
+ }catch(e){}
+}
 		function driverHeaders(extra,token){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;if(token)h['X-Driver-Token']=token;return h}
 		function tokenMap(){try{return Object.assign({},JSON.parse(sessionStorage.getItem(DRIVER_SESSION_TOKEN_KEY)||'{}')||{},driverTokensMemory||{})}catch(e){return driverTokensMemory||{}}}
 		function saveTokenMap(map){driverTokensMemory=map||{};try{sessionStorage.setItem(DRIVER_SESSION_TOKEN_KEY,JSON.stringify(driverTokensMemory))}catch(e){}}
@@ -220,9 +227,10 @@ function playOrderAlert(order){
 }
 function checkNewOrders(rows){
  var ids=new Set((rows||[]).filter(function(o){return !isDeliveredOrder(o)}).map(function(o){return String(o.id||'')}).filter(Boolean));
- if(knownOrderIds===null){knownOrderIds=ids;return}
+ if(knownOrderIds===null){knownOrderIds=ids;syncKnownOrdersToAndroid(ids);return}
  var newOrder=(rows||[]).find(function(o){return !isDeliveredOrder(o)&&o.id&&!knownOrderIds.has(String(o.id))});
  knownOrderIds=ids;
+ syncKnownOrdersToAndroid(ids);
  if(newOrder)playOrderAlert(newOrder);
 }
 

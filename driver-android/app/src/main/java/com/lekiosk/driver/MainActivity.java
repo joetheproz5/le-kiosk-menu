@@ -27,6 +27,9 @@ public class MainActivity extends Activity {
     private static final int NOTIFICATION_REQUEST = 21;
     private static final String ORDER_CHANNEL_ID = "driver_orders";
     private static final String DRIVER_URL = "https://lekiosk.store/driver/";
+    static final String PREFS_NAME = "lekiosk_driver";
+    static final String PREF_DRIVER_PIN = "driver_pin";
+    static final String PREF_KNOWN_ORDER_IDS = "known_order_ids";
     private WebView webView;
 
     @Override
@@ -63,8 +66,9 @@ public class MainActivity extends Activity {
         });
 
         createNotificationChannel();
-        requestLocationPermission();
-        requestNotificationPermission();
+        if (!requestLocationPermission()) {
+            requestNotificationPermission();
+        }
         webView.loadUrl(DRIVER_URL);
     }
 
@@ -73,14 +77,16 @@ public class MainActivity extends Activity {
         return "https".equals(uri.getScheme()) && "lekiosk.store".equals(uri.getHost());
     }
 
-    private void requestLocationPermission() {
+    private boolean requestLocationPermission() {
         if (android.os.Build.VERSION.SDK_INT >= 23 &&
             checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             }, LOCATION_REQUEST);
+            return true;
         }
+        return false;
     }
 
     private void requestNotificationPermission() {
@@ -145,6 +151,14 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_REQUEST) {
+            requestNotificationPermission();
+        }
+    }
+
     private class DriverBridge {
         @JavascriptInterface
         public void requestNotifications() {
@@ -182,6 +196,32 @@ public class MainActivity extends Activity {
                     showOrderNotification(title, body);
                 }
             });
+        }
+
+        @JavascriptInterface
+        public void setDriverPin(final String pin) {
+            getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putString(PREF_DRIVER_PIN, pin == null ? "" : pin.trim())
+                .apply();
+        }
+
+        @JavascriptInterface
+        public void clearDriverPin() {
+            getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .remove(PREF_DRIVER_PIN)
+                .remove(PREF_KNOWN_ORDER_IDS)
+                .apply();
+            stopService(new Intent(MainActivity.this, DriverBackgroundService.class));
+        }
+
+        @JavascriptInterface
+        public void syncKnownOrders(final String orderIds) {
+            getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putString(PREF_KNOWN_ORDER_IDS, orderIds == null ? "" : orderIds)
+                .apply();
         }
     }
 
