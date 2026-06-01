@@ -1232,15 +1232,17 @@ function authExpiryMs(){
 function saveAuthSession(){
   if(!authSession)return;
   authSession.localExpiresAt=Date.now()+SESSION_MS;
-  localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+  sessionStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+  localStorage.removeItem(AUTH_STORAGE_KEY);
 }
 function clearAuthSession(){
   authSession=null;
+  sessionStorage.removeItem(AUTH_STORAGE_KEY);
   localStorage.removeItem(AUTH_STORAGE_KEY);
 }
 function restoreAuthSession(){
   try{
-    const saved=JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY)||'null');
+    const saved=JSON.parse(sessionStorage.getItem(AUTH_STORAGE_KEY)||localStorage.getItem(AUTH_STORAGE_KEY)||'null');
     if(!saved?.token)return false;
     authSession=saved;
     if(!authExpiryMs()){clearAuthSession();return false;}
@@ -3092,7 +3094,7 @@ function renderSalesAnalytics(){
     </div>
     ${filtered.map(s=>`
     <div class="sales-row">
-      ${s.img?`<img class="sales-img" src="${s.img}" alt="${esc(s.name)}">`:`<div class="sales-img"></div>`}
+      ${s.img?`<img class="sales-img" src="${esc(s.img)}" alt="${esc(s.name)}">`:`<div class="sales-img"></div>`}
       <div>
         <div class="sales-name">${esc(s.name)}</div>
         <div class="sales-cat">${esc(s.cat)}</div>
@@ -3443,7 +3445,7 @@ function renderItemsHub(){
     const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}`:'';
     return `<div class="mini-row">
       <input type="checkbox" class="bulk-chk" ${selectedItems.has(key)?'checked':''} onclick="toggleSelectItem('${si}','${ii}')">
-      ${img?`<img class="mini-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="mini-img"></div>`}
+      ${img?`<img class="mini-img" src="${esc(img)}" alt="${esc(item.name||'')}">`:`<div class="mini-img"></div>`}
       <div><div class="mini-name">${esc(item.name||'Untitled')}</div><div class="mini-meta">${esc(sec.title||'Category')} · ${esc(item.price||'$0')} · ${item.active===false?'Inactive':'Active'}</div></div>
       <button class="btn btn-soft btn-sm" onclick="openItem(${si},${ii})">Edit</button>
     </div>`;
@@ -3640,7 +3642,7 @@ function confirmDeleteItem(i){
 function renderItem(item,i){
   const img=item.image?`${STORAGE_PUBLIC_BASE}/${item.image}?v=${Date.now()}`:'';
   return `<div class="edit-row${item.active===false?' inactive':''}" id="item-${i}" draggable="true" ondragstart="dragItemStart(event,${i})" ondragover="dragItemOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropItem(event,${i})">
-    ${img?`<img class="edit-row-img" src="${img}" alt="${esc(item.name||'')}">`:`<div class="edit-row-img">I</div>`}
+    ${img?`<img class="edit-row-img" src="${esc(img)}" alt="${esc(item.name||'')}">`:`<div class="edit-row-img">I</div>`}
     <div>
       <div class="edit-row-title">${esc(item.name||'Untitled item')}</div>
       <div class="edit-row-meta">${esc(item.price||'$0')} · ${(item.addons||[]).length} add-ons · ${(item.flavors||[]).length} pills</div>
@@ -3668,7 +3670,7 @@ function itemEditorHtml(item,i){
     <div class="editor-grid">
       <div>
         <div class="img-drop-zone" onclick="triggerUpload(${i})">
-          ${img?`<img src="${img}" alt=""><div class="img-drop-overlay">Change</div>`:`<div class="img-drop-label">Upload<br>Image</div>`}
+          ${img?`<img src="${esc(img)}" alt=""><div class="img-drop-overlay">Change</div>`:`<div class="img-drop-label">Upload<br>Image</div>`}
           <div class="img-progress" id="prog-${i}"></div>
         </div>
         <input class="file-input" id="file-${i}" type="file" accept="image/*" onchange="handleImageUpload(${i},this)">

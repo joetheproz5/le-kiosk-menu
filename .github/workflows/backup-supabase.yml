@@ -35,6 +35,5 @@ jobs:
               "${LEKIOSK_WORKER_URL%/}/supabase/backup"
           )"
           echo "Worker returned HTTP ${HTTP_STATUS}"
-          cat "$RESPONSE_FILE"
           test "$HTTP_STATUS" -ge 200
           test "$HTTP_STATUS" -lt 300

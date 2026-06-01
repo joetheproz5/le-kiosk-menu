@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.view.WindowManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -42,12 +43,22 @@ public class MainActivity extends Activity {
         settings.setGeolocationEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return request != null && !isAllowedDriverUri(request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return url == null || !isAllowedDriverUri(Uri.parse(url));
+            }
+        });
         webView.addJavascriptInterface(new DriverBridge(), "LekioskAndroid");
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, true, false);
+                callback.invoke(origin, isAllowedDriverUri(Uri.parse(origin)), false);
             }
         });
 
@@ -55,6 +66,11 @@ public class MainActivity extends Activity {
         requestLocationPermission();
         requestNotificationPermission();
         webView.loadUrl(DRIVER_URL);
+    }
+
+    private boolean isAllowedDriverUri(Uri uri) {
+        if (uri == null) return false;
+        return "https".equals(uri.getScheme()) && "lekiosk.store".equals(uri.getHost());
     }
 
     private void requestLocationPermission() {

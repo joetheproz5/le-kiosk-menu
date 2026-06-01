@@ -72,6 +72,9 @@ export default {
       'Access-Control-Allow-Origin': corsOk ? origin : ALLOWED_ORIGINS[0],
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Setup-Key, X-Backup-Key, X-Driver-Pin, X-Driver-Token, X-Track-Token',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'camera=(), microphone=()',
     };
 
     if (request.method === 'OPTIONS') {
@@ -104,11 +107,8 @@ export default {
       if (!payload) return new Response('Order not found', { status: 404, headers: corsHeaders });
       const access = payload.access || {};
       const expected = role === 'driver' ? access.driverToken : access.customerToken;
-      if (expected && !safeCompare(token, expected)) {
+      if (!expected || !token || !safeCompare(token, expected)) {
         return new Response('Forbidden', { status: 403, headers: corsHeaders });
-      }
-      if (role === 'driver' && !expected) {
-        return new Response('Driver token required', { status: 403, headers: corsHeaders });
       }
       const id = env.ORDER_ROOM.idFromName(orderId);
       const room = env.ORDER_ROOM.get(id);
@@ -650,7 +650,8 @@ export default {
 
     function requireTrackAccess(payload, request) {
       const expected = payload?.access?.customerToken;
-      if (expected && !safeEqual(trackTokenFromRequest(request), expected)) {
+      const token = trackTokenFromRequest(request);
+      if (!expected || !token || !safeEqual(token, expected)) {
         throw json({ error: 'Invalid tracking link' }, 403);
       }
     }
@@ -663,11 +664,22 @@ export default {
       throw json({ error: 'Driver PIN or token required' }, 403);
     }
 
+    function ensureOrderAccess(order) {
+      if (!order || typeof order !== 'object') return order;
+      const access = order.access && typeof order.access === 'object' ? { ...order.access } : {};
+      if (!access.customerToken) access.customerToken = randomB64(24).replace(/[+/=]/g, '');
+      if (!access.driverToken) access.driverToken = randomB64(24).replace(/[+/=]/g, '');
+      order.access = access;
+      return order;
+    }
+
     // ── POST /auth/setup — create/reset staff accounts ──
     // ── POST /auth/setup — create/reset staff accounts ──
 if (request.method === 'POST' && url.pathname === '/auth/setup') {
+  const limited = rateLimit('auth-setup', 5, 15 * 60 * 1000);
+  if (limited) return limited;
   try {
-    if ((request.headers.get('X-Setup-Key') || '') !== env.AUTH_SETUP_KEY) {
+    if (!env.AUTH_SETUP_KEY || !safeCompare(request.headers.get('X-Setup-Key') || '', env.AUTH_SETUP_KEY)) {
       return json({ error: 'Forbidden' }, 403);
     }
 
@@ -1076,9 +1088,9 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       }
     }
 
-    // ── PUT /supabase/customers — admin/POS ──
+    // ── PUT /supabase/customers — admin only ──
     if (request.method === 'PUT' && url.pathname === '/supabase/customers') {
-      const blocked = await guard(['admin', 'pos']);
+      const blocked = await guard(['admin']);
       if (blocked instanceof Response) return blocked;
 
       let body;
@@ -1231,6 +1243,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         if (existing && existing.payload && existing.payload.access && !order.access) {
           order.access = existing.payload.access;
         }
+        ensureOrderAccess(order);
 
         const existingGPS = existing && existing.payload ? customerGPS(existing.payload) : null;
         const nextGPS = customerGPS(order);
@@ -1329,7 +1342,6 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
             blocklist: blocklist.length,
             gallery: gallery.length,
           },
-          data: inserted,
         });
       } catch (e) {
         return json({ error: e.message }, 502);
@@ -1506,13 +1518,16 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         return json({ error: 'Missing path, b64, or message' }, 400);
       }
 
-      if (!path.startsWith('menupictures/')) {
+      if (!/^menupictures\/[a-zA-Z0-9._/-]+\.(?:jpe?g|png|webp)$/i.test(path) || path.includes('..')) {
         return json({ error: 'Forbidden path' }, 403);
       }
 
       try {
         const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        await supabaseUploadImage(path, bytes, 'image/jpeg', env);
+        if (!bytes.length || bytes.length > 5 * 1024 * 1024) return json({ error: 'Image is too large. Max 5MB.' }, 400);
+        const lower = path.toLowerCase();
+        const contentType = lower.endsWith('.png') ? 'image/png' : lower.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
+        await supabaseUploadImage(path, bytes, contentType, env);
         return json({ ok: true, path });
       } catch (e) {
         return json({ error: e.message }, 502);
@@ -2334,13 +2349,19 @@ function galleryImageFromBody(body) {
     throw new Error('Only JPG, PNG, or WEBP images are allowed');
   }
 
-  if (!b64 || b64.length > 14_000_000) {
-    throw new Error('Image is too large. Max 10MB.');
+  if (!b64 || b64.length > 4_500_000) {
+    throw new Error('Image is too large. Max 3MB.');
   }
 
   const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  if (!bytes.length || bytes.length > 10 * 1024 * 1024) {
-    throw new Error('Image is too large. Max 10MB.');
+  if (!bytes.length || bytes.length > 3 * 1024 * 1024) {
+    throw new Error('Image is too large. Max 3MB.');
+  }
+  const isJpeg = mime === 'image/jpeg' && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[bytes.length - 2] === 0xff && bytes[bytes.length - 1] === 0xd9;
+  const isPng = mime === 'image/png' && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+  const isWebp = mime === 'image/webp' && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
+  if (!isJpeg && !isPng && !isWebp) {
+    throw new Error('Uploaded file does not match the declared image type');
   }
 
   const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
@@ -2363,7 +2384,7 @@ if (request.method === 'GET' && url.pathname === '/gallery/approved') {
 
 // -- POST /gallery/submit -- public photo submission, max 3 per visitor per day
 if (request.method === 'POST' && url.pathname === '/gallery/submit') {
-  const limited = rateLimit('gallery-submit', 6, 60 * 60 * 1000);
+  const limited = rateLimit('gallery-submit', 3, 60 * 60 * 1000);
   if (limited) return limited;
 
   let body;
@@ -2571,6 +2592,8 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
 
     // ── GET /driver — driver's pending delivery list (no ID = list view) ──
     if (request.method === 'GET' && url.pathname === '/driver') {
+      const limited = rateLimit('driver-pin', 20, 5 * 60 * 1000);
+      if (limited) return limited;
       try {
         const cfg = await siteConfigRaw();
         try {
@@ -2602,7 +2625,6 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
               total: p.total || 0,
               gps: customerGPS(p),
               tracking: p.tracking || {},
-              driverToken: p.access?.driverToken || '',
             };
           });
 
@@ -2614,6 +2636,8 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
 
     // ── POST /driver/:id/status — driver updates delivering/delivered ──
     if (request.method === 'POST' && url.pathname.startsWith('/driver/') && url.pathname.endsWith('/status')) {
+      const limited = rateLimit('driver-order', 80, 5 * 60 * 1000);
+      if (limited) return limited;
       const id = url.pathname.split('/driver/')[1].split('/status')[0];
       if (!id) return json({ error: 'Missing order ID' }, 400);
 
@@ -2679,6 +2703,8 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
 
     // ── GET /driver/:id — driver order details ──
     if (request.method === 'GET' && url.pathname.startsWith('/driver/')) {
+      const limited = rateLimit('driver-order', 80, 5 * 60 * 1000);
+      if (limited) return limited;
       const id = url.pathname.split('/driver/')[1];
       if (!id) return json({ error: 'Missing order ID' }, 400);
 
@@ -2721,6 +2747,8 @@ if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')
 
     // ── POST /driver/:id/location — driver shares GPS location ──
     if (request.method === 'POST' && url.pathname.startsWith('/driver/') && url.pathname.endsWith('/location')) {
+      const limited = rateLimit('driver-location', 400, 5 * 60 * 1000);
+      if (limited) return limited;
       const id = url.pathname.split('/driver/')[1].split('/location')[0];
       if (!id) return json({ error: 'Missing order ID' }, 400);
 

@@ -41,6 +41,7 @@ body::before{content:'';position:fixed;inset:0;background:linear-gradient(180deg
 	var DELIVERED_CACHE_KEY='lk_driver_delivered_orders_v1';
 	var DRIVER_PIN_KEY='lk_driver_pin_v1';
 	var DRIVER_TOKEN_KEY='lk_driver_tokens_v1';
+	var driverPinMemory='', driverTokensMemory={};
 var FOLLOW_AHEAD_METERS=90, LOCATION_SEND_MS=900;
 var GPS_MAX_ACCURACY=160, GPS_JUMP_SPEED=45, GPS_HARD_JUMP=220;
 var FOLLOW_MIN_MOVE=12, FOLLOW_MIN_TURN=20;
@@ -78,12 +79,12 @@ function setReconnecting(active){
 	function isNetworkError(e){
 	 return !navigator.onLine||(e&&e.name==='AbortError')||/Failed to fetch|NetworkError|Load failed/i.test(String(e&&e.message||e||''));
 	}
-	function driverPin(){try{return localStorage.getItem(DRIVER_PIN_KEY)||''}catch(e){return''}}
-	function saveDriverPin(pin){try{localStorage.setItem(DRIVER_PIN_KEY,String(pin||''))}catch(e){}}
-	function clearDriverPin(){try{localStorage.removeItem(DRIVER_PIN_KEY)}catch(e){}}
-	function driverHeaders(extra){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;return h}
-	function tokenMap(){try{return JSON.parse(localStorage.getItem(DRIVER_TOKEN_KEY)||'{}')||{}}catch(e){return{}}}
-	function saveTokenMap(map){try{localStorage.setItem(DRIVER_TOKEN_KEY,JSON.stringify(map||{}))}catch(e){}}
+		function driverPin(){return driverPinMemory||''}
+		function saveDriverPin(pin){driverPinMemory=String(pin||'')}
+		function clearDriverPin(){driverPinMemory='';driverTokensMemory={};try{localStorage.removeItem(DRIVER_PIN_KEY);localStorage.removeItem(DRIVER_TOKEN_KEY)}catch(e){}}
+		function driverHeaders(extra){var h=Object.assign({},extra||{});var pin=driverPin();if(pin)h['X-Driver-Pin']=pin;return h}
+		function tokenMap(){return driverTokensMemory||{}}
+		function saveTokenMap(map){driverTokensMemory=map||{}}
 	function rememberDriverToken(id,token){if(!id||!token)return;var map=tokenMap();map[id]=token;saveTokenMap(map)}
 	function driverToken(id){return (orderData&&orderData.id===id&&orderData.driverToken)||tokenMap()[id]||''}
 	function authUrl(path,token){return path+(path.indexOf('?')>=0?'&':'?')+'token='+encodeURIComponent(token||'')}
@@ -100,7 +101,7 @@ function savePendingActions(rows){
 	function enqueuePendingAction(orderId,step,token){
 	 if(!orderId||!step)return;
 	 var rows=pendingActions();
-	 rows.push({orderId:orderId,step:step,token:token||driverToken(orderId),time:new Date().toISOString()});
+	 rows.push({orderId:orderId,step:step,time:new Date().toISOString()});
 	 savePendingActions(rows);
 	}
 	function postDriverStatus(orderId,step,token){
@@ -323,9 +324,8 @@ function readActiveDelivery(){
 function saveActiveDelivery(active){
  if(!orderData||!orderData.id)return;
  try{
-	  localStorage.setItem(ACTIVE_DELIVERY_KEY,JSON.stringify({
-	   orderId:orderData.id,
-	   driverToken:orderData.driverToken||driverToken(orderData.id),
+		  localStorage.setItem(ACTIVE_DELIVERY_KEY,JSON.stringify({
+		   orderId:orderData.id,
 	   lat:driverLat,
    lng:driverLng,
    heading:driverHeading,
@@ -831,8 +831,8 @@ function renderList(data){
   var status=isDeliveredOrder(o)?'Delivered':track.delivering?'Out for Delivery':'Ready';
   var items=(o.items||[]).slice(0,3).map(function(it){return it.qty+'x '+it.name}).join(', ');
   if((o.items||[]).length>3)items+=' +'+(o.items.length-3)+' more';
-	   if(o.driverToken)rememberDriverToken(o.id,o.driverToken);
-	   return'\x3Cdiv class="order-card" data-order-id="'+esc(o.id)+'" data-driver-token="'+esc(o.driverToken||driverToken(o.id))+'" onclick="D.openOrder(this)"\x3E'+
+		   if(o.driverToken)rememberDriverToken(o.id,o.driverToken);
+		   return'\x3Cdiv class="order-card" data-order-id="'+esc(o.id)+'" data-driver-token="'+esc(o.driverToken||driverToken(o.id))+'" onclick="D.openOrder(this)"\x3E'+
    '\x3Cdiv class="head"\x3E\x3Cspan class="name"\x3E'+esc(o.name||'Guest')+'\x3C/span\x3E\x3Cspan class="total"\x3E'+money(o.total)+'\x3C/span\x3E\x3C/div\x3E'+
    '\x3Cdiv class="meta"\x3E'+status+(o.deliveryZone?' · Zone '+esc(o.deliveryZone):'')+(o.address?' · '+esc(o.address):'')+'\x3C/div\x3E'+
    '\x3Cdiv class="items-preview"\x3E'+esc(items)+'\x3C/div\x3E'+
@@ -1368,8 +1368,7 @@ async function load(){
    }
 	  }else{
 	   var active=readActiveDelivery();
-	   if(active&&active.orderId&&active.driverToken)rememberDriverToken(active.orderId,active.driverToken);
-	   if(active&&active.orderId&&active.gpsActive){location.href='?id='+encodeURIComponent(active.orderId)+(active.driverToken?'&token='+encodeURIComponent(active.driverToken):'');return}
+	   if(active&&active.orderId&&active.gpsActive&&driverPin()){location.href='?id='+encodeURIComponent(active.orderId);return}
    clearInterval(autoRefresh);
    startRefresh();
    lastTrackingJSON=null;
