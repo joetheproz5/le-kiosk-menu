@@ -100,13 +100,38 @@
   }
   </script>
     <style>
-        body { font-family: 'Poppins', sans-serif; color: #2d2a26; background-color: #fcf8ee; background-image: linear-gradient(#f7f1e1 1.5px, transparent 1.5px), linear-gradient(90deg, #f7f1e1 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        body { font-family: 'Poppins', sans-serif; color: #2d2a26; background-color: #fff8ea; background-image: linear-gradient(135deg, rgba(15,118,110,.08) 0 1px, transparent 1px), linear-gradient(#f5ead2 1.2px, transparent 1.2px), linear-gradient(90deg, #f5ead2 1.2px, transparent 1.2px); background-size: 42px 42px, 24px 24px, 24px 24px; }
         .brand-heading { font-family: 'Fredoka', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .nav-link { padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.8); color: #451a03; border: 1px solid rgba(251,191,36,0.3); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s, color 0.2s; white-space: nowrap; text-decoration: none; display: inline-block; }
-        .nav-link:hover { background: #fef3c7; }
-        .nav-link.active { background: #f59e0b; color: #fff; border-color: #f59e0b; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+        .hero-shell { position: relative; overflow: hidden; border: 1px solid rgba(120,53,15,.16); border-radius: 28px; background: linear-gradient(160deg, rgba(255,255,255,.94), rgba(255,247,237,.88) 48%, rgba(240,253,250,.78)); box-shadow: 0 20px 60px rgba(69,26,3,.16); }
+        .hero-shell::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(120deg, transparent 0 58%, rgba(15,118,110,.1) 58% 100%); pointer-events: none; }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-logo { box-shadow: 0 14px 34px rgba(69,26,3,.22); }
+        .hero-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 11px; font-size: 11px; font-weight: 900; line-height: 1; text-decoration: none; white-space: nowrap; }
+        .hero-chip.dark { background: #2a1604; color: #fef3c7; }
+        .hero-chip.light { background: rgba(255,255,255,.78); color: #713f12; border: 1px solid rgba(217,119,6,.18); }
+        .hero-chip.green { background: #e6fffa; color: #0f766e; border: 1px solid rgba(20,184,166,.22); }
+        #main-nav { border-radius: 18px; }
+        .nav-link { padding: 9px 15px; border-radius: 999px; background: rgba(255,255,255,0.74); color: #451a03; border: 1px solid rgba(120,53,15,0.12); font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; transition: background 0.2s, color 0.2s, transform .2s, box-shadow .2s; white-space: nowrap; text-decoration: none; display: inline-block; }
+        .nav-link:hover { background: #fff7ed; transform: translateY(-1px); }
+        .nav-link.active { background: #1c0f00; color: #fef3c7; border-color: #1c0f00; box-shadow: 0 8px 20px rgba(28,15,0,0.16); }
+        .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(120,53,15,.14); padding-bottom: 10px; margin-bottom: 14px; }
+        .section-kicker { font-size: 10px; line-height: 1; font-weight: 900; color: #0f766e; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px; }
+        .section-title { font-family: 'Fredoka', sans-serif; font-size: 24px; line-height: 1; font-weight: 800; color: #451a03; text-transform: uppercase; letter-spacing: 0; }
+        .section-count { flex-shrink: 0; background: #fff; border: 1px solid rgba(120,53,15,.12); color: #92400e; border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; box-shadow: 0 6px 18px rgba(69,26,3,.08); }
+        .menu-grid { display: grid; gap: 14px; }
+        .menu-card { min-height: 136px; background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-radius: 18px; box-shadow: 0 12px 30px rgba(69,26,3,.09); overflow: hidden; display: flex; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+        .menu-card:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(69,26,3,.15); border-color: rgba(217,119,6,.32); }
+        .menu-image { width: 118px; flex-shrink: 0; border-right: 1px solid rgba(120,53,15,.08); position: relative; overflow: hidden; background: #fef3c7; }
+        .menu-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transform: scale(1.01); }
+        .menu-info { padding: 13px; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; min-width: 0; background: linear-gradient(180deg, #fff, #fffaf0); }
+        .menu-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .menu-name { font-weight: 900; color: #3b1f05; font-size: 15px; line-height: 1.15; }
+        .menu-price { flex-shrink: 0; background: #0f766e; color: #f0fdfa; border-radius: 999px; padding: 5px 8px; font-size: 12px; line-height: 1; font-weight: 900; box-shadow: 0 6px 14px rgba(15,118,110,.18); }
+        .menu-desc { color: #6b5b4c; font-size: 12px; margin-top: 7px; line-height: 1.45; padding-right: 3px; }
+        .addon-card { background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-radius: 18px; box-shadow: 0 12px 30px rgba(69,26,3,.08); padding: 14px; display: flex; align-items: center; gap: 14px; }
+        .addon-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 25px; flex-shrink: 0; background: #f0fdfa; border: 1px solid rgba(15,118,110,.18); }
         body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section, body.order-mode #status-badge, body.order-mode #basketball-bubble { display: none !important; }
         body.order-mode #main-nav { top: 0; }
         body.order-mode #menu-container { min-height: 100vh; padding-top: 84px; padding-bottom: 130px; }
@@ -237,20 +262,27 @@
 
 <div id="inbox-toast"></div>
 
-<header class="text-center pt-8 pb-6 px-4 max-w-md mx-auto">
-    <div class="w-28 h-28 mx-auto bg-white border-4 border-amber-900 rounded-full shadow-md mb-4 overflow-hidden relative">
+<header class="pt-5 pb-5 px-4 max-w-md mx-auto">
+  <div class="hero-shell px-5 pt-5 pb-4 text-center">
+    <div class="hero-content">
+    <div class="hero-logo w-28 h-28 mx-auto bg-white border-4 border-amber-950 rounded-full mb-4 overflow-hidden relative">
         <img src="menupictures/logo.png" alt="Le Kiosk Logo" class="w-full h-full object-cover object-center">
     </div>
-    <h1 class="brand-heading text-4xl font-extrabold text-amber-900 tracking-wide uppercase drop-shadow-sm">Le Kiosk</h1>
-    <p class="text-xs font-semibold uppercase tracking-wider text-amber-700 mt-1">Waffle & Ice Cream Menu</p>
-    <p class="text-sm text-amber-800/80 italic font-medium mt-2">"Serving Cravings, Sharing Smiles"</p>
-    <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs font-semibold">
-        <span class="bg-amber-900 text-amber-100 px-3 py-1 rounded-full shadow-sm">🕒 6 PM - 12 AM</span>
-        <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1 rounded-full shadow-sm hover:bg-amber-200 transition">📍 Wadi Chahrour</a>
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-700">Wadi Chahrour</p>
+    <h1 class="brand-heading text-5xl font-extrabold text-amber-950 uppercase drop-shadow-sm leading-none mt-1">Le Kiosk</h1>
+    <p class="text-sm font-bold text-amber-800 mt-2">Waffles, burgers, ice cream, shisha & more.</p>
+    <p class="text-xs text-amber-900/70 italic font-semibold mt-1">"Serving Cravings, Sharing Smiles"</p>
+    <div class="mt-4 flex flex-wrap justify-center gap-2">
+        <span class="hero-chip dark">6 PM - 12 AM</span>
+        <span class="hero-chip green">Dine in</span>
+        <span class="hero-chip light">Takeaway</span>
+        <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="hero-chip light hover:bg-amber-100 transition">Location</a>
     </div>
+    </div>
+  </div>
 </header>
 
-<nav id="main-nav" class="sticky top-0 bg-amber-50/90 backdrop-blur-md border-y border-amber-200/60 shadow-sm z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-4 flex gap-2 max-w-md mx-auto"></nav>
+<nav id="main-nav" class="sticky top-2 bg-white/88 backdrop-blur-md border border-amber-900/10 shadow-lg z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-2.5 px-3 flex gap-2 max-w-md mx-auto"></nav>
 
 <main class="max-w-md mx-auto px-4 pt-6 space-y-10" id="menu-container">
     <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
@@ -960,6 +992,10 @@ function renderPills(item){
     const pc=PILL_COLORS[item.flavorColor]||PILL_COLORS.amber;
     return'<div class="flex flex-wrap gap-1 mt-2">'+item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(f)}</span>`).join('')+'</div>';
 }
+function renderSectionHead(category,count){
+    const label=count===1?'1 item':count+' items';
+    return `<div class="section-head"><div><div class="section-kicker">Fresh picks</div><h2 class="section-title">${esc(category.title)}</h2></div><span class="section-count">${label}</span></div>`;
+}
 async function loadMenu(){
     try{
         const res = await fetch(`${WORKER_URL}/supabase/menu`, { cache:'no-store' });
@@ -985,9 +1021,10 @@ async function loadMenu(){
     }
 }
 function renderAddonSection(category){
-    let html=`<section id="${esc(category.key)}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${esc(category.title)}</h2><div class="grid gap-3">`;
-    (category.addonGroups||[]).forEach(group=>{
-        html+=`<div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-4 flex items-center gap-4"><div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-amber-50 border border-amber-100">${esc(group.emoji)}</div><div class="flex-grow min-w-0"><div class="flex justify-between items-center gap-2"><span class="font-bold text-amber-950 text-sm">${esc(group.label)}</span><span class="font-bold text-amber-500 text-sm flex-shrink-0">${esc(group.price)}</span></div><p class="text-gray-400 text-xs mt-0.5">${esc(group.note)}</p><div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(o)}</span>`).join('')}</div></div></div>`;
+    const groups=category.addonGroups||[];
+    let html=`<section id="${esc(category.key)}" class="scroll-mt-24">${renderSectionHead(category,groups.length)}<div class="menu-grid">`;
+    groups.forEach(group=>{
+        html+=`<div class="addon-card"><div class="addon-icon">${esc(group.emoji)}</div><div class="flex-grow min-w-0"><div class="flex justify-between items-center gap-2"><span class="font-black text-amber-950 text-sm">${esc(group.label)}</span><span class="menu-price">${esc(group.price)}</span></div><p class="menu-desc mt-1">${esc(group.note)}</p><div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(o)}</span>`).join('')}</div></div></div>`;
     });
     return html+'</div></section>';
 }
@@ -997,15 +1034,16 @@ function initMenu(menuData){
     container.innerHTML='';
     menuData.forEach(category=>{
         if(category.type==='addons'){container.innerHTML+=renderAddonSection(category);return;}
-        let html=`<section id="${esc(category.key)}" class="scroll-mt-24"><h2 class="brand-heading text-xl font-bold border-b-4 border-amber-400 pb-1 mb-4 text-amber-950 uppercase tracking-wide">${esc(category.title)}</h2>`;
-        if(category.items&&category.items.length){
-            html+='<div class="grid gap-3.5">';
-            category.items.filter(item => item.active !== false).forEach((item,idx)=>{
+        const activeItems=(category.items||[]).filter(item => item.active !== false);
+        let html=`<section id="${esc(category.key)}" class="scroll-mt-24">${renderSectionHead(category,activeItems.length)}`;
+        if(activeItems.length){
+            html+='<div class="menu-grid">';
+            activeItems.forEach((item,idx)=>{
                 const itemKey=`${category.key}|${item.name}|${item.price}`;
                 const qtyId=`qty-${category.key}-${idx}`,cardId=`card-${qtyId}`;
                 const itemKeyArg=jsStr(itemKey), safeQty=esc(qtyId), safeCard=esc(cardId);
                 const img=item.image ? `${STORAGE_PUBLIC_BASE}/${String(item.image).replace(/^\/+/,'')}` : '';
-                html+=`<div class="item-card-wrap" id="${safeCard}"><div class="${item.flavors&&item.flavors.length?'min-h-32':'h-32'} bg-white rounded-2xl border border-amber-200/40 shadow-sm overflow-hidden flex hover:shadow-md transition duration-200"><div class="w-28 flex-shrink-0 border-r border-amber-100/50 relative overflow-hidden" style="min-height:128px"><img src="${esc(img)}" alt="${esc(item.name)}" class="absolute inset-0 w-full h-full object-cover object-center block"></div><div class="p-3 flex flex-col justify-center flex-grow bg-white min-w-0"><div class="flex justify-between items-start gap-2"><h3 class="font-bold text-amber-950 text-sm leading-tight line-clamp-1">${esc(item.name)}</h3><span class="font-bold text-amber-600 text-sm flex-shrink-0">${esc(item.price)}</span></div><p class="text-gray-500 text-xs mt-1 line-clamp-3 leading-relaxed pr-1">${esc(item.desc)}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKeyArg}',-1,'${safeQty}')">-</button><div class="qty-num" id="${safeQty}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKeyArg}',1,'${safeQty}')">+</button></div></div></div></div>`;
+                html+=`<div class="item-card-wrap" id="${safeCard}"><div class="menu-card"><div class="menu-image"><img src="${esc(img)}" alt="${esc(item.name)}"></div><div class="menu-info"><div class="menu-title-row"><h3 class="menu-name line-clamp-2">${esc(item.name)}</h3><span class="menu-price">${esc(item.price)}</span></div><p class="menu-desc line-clamp-3">${esc(item.desc)}</p>${renderPills(item)}<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKeyArg}',-1,'${safeQty}')">-</button><div class="qty-num" id="${safeQty}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKeyArg}',1,'${safeQty}')">+</button></div></div></div></div>`;
             });
             html+='</div>';
         }
