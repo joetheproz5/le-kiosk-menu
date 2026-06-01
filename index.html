@@ -29,11 +29,7 @@
 
   <!-- ═══ MOBILE & INDEXING ═══ -->
   <meta name="robots" content="index, follow, max-image-preview:large">
-<<<<<<< HEAD
   <meta name="theme-color" content="#0f0e0c">
-=======
-  <meta name="theme-color" content="#f59e0b">
->>>>>>> 13fc3c0b7d08020616d7f218a94c5a6cd1993f46
   <meta name="geo.region" content="LB-BA">
   <meta name="geo.placename" content="Baabda, Lebanon">
   <meta name="geo.position" content="33.821091;35.564961">
@@ -2914,892 +2910,232 @@ Requires Worker routes from:
   }
 })();
 </script>
-<<<<<<< HEAD
-<style id="restaurant-theme">
+<style id="classic-black-gold-fix">
   :root {
-    --plate-bg: #080909;
-    --stone-1: #101211;
-    --stone-2: #171a18;
-    --ink: #f8f1e4;
-    --muted: #c9bca7;
-    --soft: rgba(248, 241, 228, .72);
-    --line: rgba(255, 255, 255, .12);
-    --line-strong: rgba(255, 255, 255, .22);
-    --char: #f08a20;
-    --gold: #f7b733;
-    --green: #77b943;
-    --tomato: #e24b35;
-    --cream: #fff3d6;
+    --classic-black: #090807;
+    --classic-black-2: #11100e;
+    --classic-panel: #15120f;
+    --classic-panel-2: #1c1712;
+    --classic-gold: #c99a3b;
+    --classic-gold-bright: #f1c76a;
+    --classic-gold-deep: #8a5a18;
+    --classic-cream: #f4ead8;
+    --classic-muted: #b9aa94;
+    --classic-line: rgba(201, 154, 59, .32);
   }
 
   html {
-    background: var(--plate-bg);
+    background: var(--classic-black) !important;
   }
 
   body {
-    color: var(--ink);
+    color: var(--classic-cream) !important;
     background:
-      radial-gradient(circle at 50% -18%, rgba(255, 255, 255, .13), transparent 29rem),
-      radial-gradient(circle at 12% 8%, rgba(119, 185, 67, .14), transparent 15rem),
-      radial-gradient(circle at 86% 14%, rgba(240, 138, 32, .16), transparent 17rem),
-      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 18rem),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"),
-      linear-gradient(135deg, #070807 0%, #121412 42%, #070807 100%);
-    background-attachment: fixed;
+      linear-gradient(180deg, #12100d 0%, #090807 34%, #0d0b09 100%) !important;
+    background-attachment: scroll !important;
+    background-size: auto !important;
   }
 
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      linear-gradient(115deg, transparent 0 44%, rgba(255,255,255,.045) 46%, transparent 51%),
-      radial-gradient(ellipse at center, transparent 0 55%, rgba(0,0,0,.56) 100%);
-  }
-
-  header {
-    position: relative;
-    padding-top: 26px !important;
-  }
-
-  header::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 28px;
-    width: min(92vw, 27rem);
-    height: 14rem;
-    transform: translateX(-50%);
-    border-radius: 999px;
-    background:
-      radial-gradient(ellipse at center, rgba(255,255,255,.08), rgba(255,255,255,.025) 42%, transparent 69%),
-      linear-gradient(180deg, #111311, #050505);
-    border: 1px solid rgba(255,255,255,.08);
-    box-shadow:
-      inset 0 13px 28px rgba(255,255,255,.045),
-      inset 0 -18px 36px rgba(0,0,0,.62),
-      0 28px 75px rgba(0,0,0,.58);
-  }
-
-  .hero-shell {
-    min-height: 19rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .hero-content {
-    width: 100%;
-  }
-
-  .hero-logo {
-    background: #050505 !important;
-    border-color: rgba(255,255,255,.16) !important;
-    box-shadow:
-      0 0 0 8px rgba(0,0,0,.65),
-      0 0 0 9px rgba(255,255,255,.12),
-      0 26px 54px rgba(0,0,0,.62),
-      0 0 34px rgba(247,183,51,.28);
-  }
-
-  header h1 {
-    color: var(--ink) !important;
-    letter-spacing: 0 !important;
-    text-shadow:
-      0 2px 0 rgba(0,0,0,.92),
-      0 12px 35px rgba(0,0,0,.65),
-      0 0 22px rgba(247,183,51,.18) !important;
-  }
-
-  header p {
-    color: var(--soft) !important;
-    text-shadow: 0 2px 18px rgba(0,0,0,.7);
-  }
-
-  header p:last-of-type {
-    color: rgba(183, 240, 130, .86) !important;
-  }
-
-  .hero-chip {
-    background: rgba(7, 8, 7, .72) !important;
-    color: var(--cream) !important;
-    border: 1px solid rgba(255,255,255,.14) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 28px rgba(0,0,0,.34);
-  }
-
-  .hero-chip.light {
-    color: #d9f8a8 !important;
-    border-color: rgba(119,185,67,.3) !important;
-  }
-
-  #status-badge,
-  #table-qr-badge {
-    background: rgba(8, 9, 9, .86);
-    color: var(--ink);
-    border-color: rgba(255,255,255,.16);
-    box-shadow: 0 16px 34px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.07);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
-  #status-badge.open .dot {
-    background: var(--green);
-  }
-
-  #main-nav {
-    background: rgba(8, 9, 9, .78) !important;
-    border-color: rgba(255,255,255,.13) !important;
-    box-shadow: 0 18px 44px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
-  }
-
-  .nav-link {
-    background: rgba(255,255,255,.055);
-    color: rgba(248,241,228,.84);
-    border-color: rgba(255,255,255,.11);
-  }
-
-  .nav-link:hover {
-    background: rgba(247,183,51,.12);
-    color: var(--cream);
-    border-color: rgba(247,183,51,.32);
-  }
-
-  .nav-link::after {
-    background: var(--green);
-    box-shadow: 0 0 16px rgba(119,185,67,.72);
-  }
-
-  .nav-link.active {
-    background: linear-gradient(180deg, #ffc04e, #f08a20);
-    color: #120d07;
-    border-color: rgba(255, 211, 138, .55);
-    box-shadow: 0 10px 26px rgba(240,138,32,.32), 0 0 0 1px rgba(255,255,255,.1);
-  }
-
-  .section-head {
-    border-bottom-color: rgba(255,255,255,.12);
-  }
-
-  .section-kicker {
-    color: #9bd865;
-  }
-
-  .section-kicker::before {
-    content: "";
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-right: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 16px rgba(119,185,67,.74);
-    vertical-align: 1px;
-  }
-
-  .section-title {
-    color: var(--ink);
-    text-shadow: 0 5px 24px rgba(0,0,0,.7);
-  }
-
-  .section-title::after {
-    background: linear-gradient(90deg, var(--char), rgba(119,185,67,.65), transparent);
-    box-shadow: 0 6px 18px rgba(240,138,32,.32);
-  }
-
-  .section-count {
-    background: rgba(255,255,255,.06);
-    color: rgba(248,241,228,.82);
-    border-color: rgba(255,255,255,.12);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 32px rgba(0,0,0,.24);
-  }
-
-  .section-count.unavailable-section {
-    background: rgba(226,75,53,.18);
-    color: #ffd0c8;
-    border-color: rgba(226,75,53,.35);
-  }
-
-  .menu-grid {
-    gap: 16px;
-  }
-
-  .menu-card {
-    min-height: 148px;
-    background:
-      linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.035)),
-      linear-gradient(180deg, #151815, #0a0b0a);
-    border-color: rgba(255,255,255,.115);
-    border-radius: 18px;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.08),
-      0 20px 48px rgba(0,0,0,.42);
-  }
-
-  .menu-card:hover {
-    border-color: rgba(247,183,51,.36);
-    border-left-color: var(--char);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.1),
-      0 24px 60px rgba(0,0,0,.52),
-      0 0 28px rgba(240,138,32,.13);
-  }
-
-  .item-card-wrap.has-qty {
-    border-radius: 18px;
-    box-shadow: 0 0 0 2px rgba(119,185,67,.72), 0 0 26px rgba(119,185,67,.26);
-  }
-
-  .menu-image {
-    width: 132px;
-    border-right-color: rgba(255,255,255,.1);
-    border-radius: 18px 0 0 18px;
-    background: #070807;
-  }
-
+  body::before,
+  header::before,
   .menu-image::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(90deg, transparent 58%, rgba(0,0,0,.2)),
-      radial-gradient(circle at 34% 20%, rgba(255,255,255,.16), transparent 34%);
-    mix-blend-mode: screen;
-  }
-
-  .menu-image img {
-    filter: saturate(1.16) contrast(1.08);
-  }
-
-  .menu-info {
-    background: linear-gradient(135deg, rgba(23,26,24,.92), rgba(9,10,9,.96));
-    padding: 14px;
-  }
-
-  .menu-name,
-  .addon-title {
-    color: var(--ink);
-    font-size: 16px;
-    line-height: 1.15;
-    font-weight: 900;
-  }
-
-  .menu-price {
-    background: linear-gradient(180deg, #ffc75b, #f08a20);
-    color: #130d06;
-    border-color: rgba(255, 221, 156, .6);
-    box-shadow: 0 8px 20px rgba(240,138,32,.28), inset 0 1px 0 rgba(255,255,255,.36);
-  }
-
-  .menu-desc {
-    color: var(--muted);
-  }
-
-  .option-pill,
-  .menu-info .text-\[10px\] {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 999px;
-    padding: 3px 8px;
-    background: rgba(255,255,255,.07) !important;
-    color: rgba(248,241,228,.82) !important;
-    border: 1px solid rgba(255,255,255,.12) !important;
-    font-size: 10px;
-    font-weight: 700;
-  }
-
-  .addon-card {
-    background:
-      linear-gradient(145deg, rgba(255,255,255,.1), rgba(255,255,255,.036)),
-      #111311;
-    border-color: rgba(255,255,255,.12);
-    border-radius: 18px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 20px 48px rgba(0,0,0,.38);
-  }
-
-  .addon-icon {
-    background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.16), rgba(247,183,51,.12) 42%, rgba(0,0,0,.3));
-    border-color: rgba(247,183,51,.25);
-    color: var(--cream);
-  }
-
-  .bottom-banner {
-    margin-top: 14px;
-    border-radius: 16px;
-    padding: 13px 14px;
-    text-align: center;
-    color: #120d07;
-    background: linear-gradient(100deg, #77b943, #f7b733 48%, #f08a20);
-    font-size: 12px;
-    font-weight: 900;
-    box-shadow: 0 18px 38px rgba(0,0,0,.32), 0 0 24px rgba(247,183,51,.22);
-  }
-
-  .bottom-bar {
-    background: rgba(8,9,9,.88);
-    color: var(--ink);
-    border-color: rgba(255,255,255,.13);
-    border-top-color: rgba(247,183,51,.56);
-    box-shadow: 0 22px 56px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.08);
-  }
-
-  .bottom-tab {
-    color: rgba(248,241,228,.72);
-  }
-
-  .bottom-tab:hover {
-    background: rgba(255,255,255,.07);
-    color: var(--ink);
-  }
-
-  .bottom-tab.active,
-  body.order-mode #order-mode-btn,
-  body.contact-open #contact-toggle {
-    background: linear-gradient(180deg, #ffc75b, #f08a20);
-    color: #120d07;
-    box-shadow: 0 12px 28px rgba(240,138,32,.32);
-  }
-
-  .qty-minus,
-  .qty-plus,
-  .locate-main-btn,
-  #send-order-btn,
-  .guest-gallery-submit-main,
-  .guest-gallery-submit-btn {
-    background: linear-gradient(180deg, #ffc75b, #f08a20) !important;
-    color: #120d07 !important;
-  }
-
-  .qty-num {
-    background: rgba(255,255,255,.08);
-    color: var(--ink);
-    border-color: rgba(247,183,51,.42);
-  }
-
-  #checkout-pill .pill-inner {
-    background:
-      radial-gradient(circle at 16% 0, rgba(119,185,67,.22), transparent 34%),
-      linear-gradient(135deg, #050505, #171a18 52%, #251407);
-    border-color: rgba(247,183,51,.58);
-    box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 22px 52px rgba(0,0,0,.5), 0 0 30px rgba(247,183,51,.2);
-  }
-
-  .pill-count {
-    background: var(--green);
-    color: #081006;
-  }
-
-  #sheet-body,
-  .contact-window,
-  .google-reviews-card,
-  .guest-gallery-card,
-  .guest-gallery-sheet-body,
-  #review-section > div {
-    background:
-      linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.04)),
-      #111311 !important;
-    color: var(--ink) !important;
-    border: 1px solid rgba(255,255,255,.12) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 24px 62px rgba(0,0,0,.48) !important;
-  }
-
-  #checkout-sheet.open #sheet-backdrop,
-  .guest-gallery-sheet.open {
-    background: rgba(0,0,0,.72);
-  }
-
-  .sheet-header,
-  .sheet-item,
-  .addon-section {
-    border-color: rgba(255,255,255,.1);
-  }
-
-  .sheet-item-name,
-  .sheet-section-title,
-  .contact-title,
-  .google-reviews-title,
-  .guest-gallery-title,
-  #review-section h3,
-  #sheet-body .brand-heading {
-    color: var(--ink) !important;
-  }
-
-  .sheet-item-qty,
-  .sheet-item-price,
-  .addon-section-title,
-  .contact-sub,
-  .google-reviews-sub,
-  .google-reviews-count,
-  .google-review-time,
-  .guest-gallery-copy,
-  .guest-gallery-note,
-  #review-section p {
-    color: var(--muted) !important;
-  }
-
-  .sheet-input,
-  .manual-addr-ta,
-  .guest-gallery-input,
-  .location-detect-box,
-  .table-qr-sheet-note,
-  .total-row,
-  .google-review-item,
-  .guest-gallery-empty {
-    background: rgba(255,255,255,.07) !important;
-    color: var(--ink) !important;
-    border-color: rgba(255,255,255,.14) !important;
-  }
-
-  .sheet-input::placeholder,
-  .manual-addr-ta::placeholder,
-  .guest-gallery-input::placeholder {
-    color: rgba(248,241,228,.45);
-  }
-
-  .order-type-btn,
-  .addon-chip {
-    background: rgba(255,255,255,.07);
-    color: rgba(248,241,228,.8);
-    border-color: rgba(255,255,255,.14);
-  }
-
-  .order-type-btn.selected,
-  .addon-chip.selected {
-    background: linear-gradient(180deg, #ffc75b, #f08a20);
-    color: #120d07;
-    border-color: rgba(255,211,138,.58);
-  }
-
-  .contact-close,
-  #close-sheet-btn,
-  .guest-gallery-close {
-    color: var(--ink) !important;
-    background: rgba(255,255,255,.08) !important;
-  }
-
-  #review-divider div {
-    background: rgba(255,255,255,.12) !important;
-  }
-
-  #review-divider span {
-    color: rgba(248,241,228,.52) !important;
-  }
-
-  #inbox-toast {
-    background: rgba(8,9,9,.94);
-    color: var(--cream);
-    border: 1px solid rgba(255,255,255,.14);
-    box-shadow: 0 18px 40px rgba(0,0,0,.45);
-  }
-
-  @media (max-width: 420px) {
-    .menu-card {
-      min-height: 140px;
-    }
-
-    .menu-image {
-      width: 116px;
-    }
-
-    .menu-name,
-    .addon-title {
-      font-size: 15px;
-    }
-
-    header h1 {
-      font-size: 3.25rem !important;
-    }
-  }
-
-  /* Upscale dark restaurant theme */
-  :root {
-    --restaurant-bg: #0f0e0c;
-    --restaurant-bg-2: #1a1410;
-    --restaurant-card: rgba(30, 24, 18, .92);
-    --restaurant-card-soft: rgba(42, 32, 22, .84);
-    --restaurant-line: rgba(245, 158, 11, .22);
-    --restaurant-line-soft: rgba(245, 240, 232, .1);
-    --restaurant-heading: #f59e0b;
-    --restaurant-amber: #f59e0b;
-    --restaurant-amber-deep: #d97706;
-    --restaurant-price: #92400e;
-    --restaurant-text: #f5f0e8;
-    --restaurant-muted: #cdbfae;
-    --restaurant-faint: rgba(245, 240, 232, .64);
-    --restaurant-shadow: rgba(0, 0, 0, .42);
-    --restaurant-glow: rgba(245, 158, 11, .34);
-  }
-
-  html {
-    background: var(--restaurant-bg);
-  }
-
-  body {
-    color: var(--restaurant-text) !important;
-    background-color: var(--restaurant-bg) !important;
-    background-image:
-      radial-gradient(circle at 50% -10%, rgba(245, 158, 11, .14), transparent 22rem),
-      radial-gradient(circle at 85% 9%, rgba(217, 119, 6, .12), transparent 18rem),
-      radial-gradient(circle at 12% 18%, rgba(116, 66, 28, .2), transparent 17rem),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.085'/%3E%3C/svg%3E"),
-      linear-gradient(180deg, var(--restaurant-bg) 0%, var(--restaurant-bg-2) 42%, #0b0a09 100%) !important;
-    background-size: auto, auto, auto, 180px 180px, auto !important;
-    background-attachment: fixed !important;
-  }
-
-  body::before {
     display: none !important;
-  }
-
-  header::before {
-    display: none !important;
-  }
-
-  header {
-    padding-top: 1.25rem !important;
-  }
-
-  .hero-shell {
-    min-height: auto !important;
-    border-radius: 24px;
-    background:
-      radial-gradient(circle at 50% 0, rgba(245, 158, 11, .2), transparent 48%),
-      linear-gradient(180deg, rgba(31, 25, 19, .82), rgba(15, 14, 12, .18));
   }
 
   .hero-logo,
   .hero-logo::after,
   .item-card-wrap,
-  .addon-card {
-    will-change: transform, opacity;
-    animation-fill-mode: both;
+  .addon-card,
+  .basketball-card,
+  .guest-gallery-photo {
+    animation: none !important;
+    will-change: auto !important;
+  }
+
+  * {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hero-shell {
+    min-height: auto !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .hero-logo {
-    background: #120e0a !important;
-    border-color: rgba(245, 158, 11, .38) !important;
-    box-shadow:
-      0 0 0 7px rgba(245, 158, 11, .2),
-      0 0 42px rgba(245, 158, 11, .68),
-      0 20px 54px rgba(0, 0, 0, .62) !important;
-  }
-
-  .hero-logo::after {
-    background: linear-gradient(115deg, transparent 34%, rgba(255, 221, 166, .72) 48%, transparent 62%) !important;
+    background: #0b0a08 !important;
+    border-color: rgba(201, 154, 59, .58) !important;
+    box-shadow: 0 0 0 5px rgba(201, 154, 59, .14), 0 14px 32px rgba(0,0,0,.45) !important;
   }
 
   header h1 {
-    color: var(--restaurant-text) !important;
-    text-shadow:
-      0 3px 0 rgba(0, 0, 0, .92),
-      0 0 28px rgba(245, 158, 11, .34),
-      0 14px 34px rgba(0, 0, 0, .6) !important;
+    color: var(--classic-cream) !important;
+    text-shadow: 0 2px 0 #000, 0 0 18px rgba(201,154,59,.24) !important;
   }
 
-  header p {
-    color: var(--restaurant-muted) !important;
-    text-shadow: 0 2px 18px rgba(0, 0, 0, .62);
-  }
-
-  header p:last-of-type {
-    color: #f7d7a4 !important;
+  header p,
+  #review-section p,
+  .menu-desc,
+  .contact-sub,
+  .google-reviews-sub,
+  .guest-gallery-copy {
+    color: var(--classic-muted) !important;
   }
 
   .hero-chip,
   .hero-chip.dark,
   .hero-chip.light,
-  .hero-chip.green {
-    background: rgba(30, 24, 18, .88) !important;
-    color: #fef3c7 !important;
-    border: 1px solid rgba(245, 158, 11, .24) !important;
-    box-shadow: 0 0 22px rgba(245, 158, 11, .15), inset 0 1px 0 rgba(255,255,255,.08);
-  }
-
+  .hero-chip.green,
   #status-badge,
-  #table-qr-badge {
-    background: rgba(15, 14, 12, .9) !important;
-    color: #fef3c7 !important;
-    border-color: rgba(245, 158, 11, .32) !important;
-    box-shadow: 0 0 24px rgba(245, 158, 11, .18), 0 16px 34px rgba(0,0,0,.36) !important;
-    backdrop-filter: blur(16px) saturate(1.1) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.1) !important;
-  }
-
-  #status-badge.open .dot {
-    background: var(--restaurant-amber) !important;
+  #table-qr-badge,
+  #main-nav,
+  .bottom-bar,
+  .contact-window,
+  #sheet-body,
+  .google-reviews-card,
+  .guest-gallery-card,
+  .guest-gallery-sheet-body {
+    background: rgba(15, 13, 10, .96) !important;
+    border-color: var(--classic-line) !important;
+    color: var(--classic-cream) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,.34) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   #main-nav {
-    background: rgba(20, 17, 14, .84) !important;
-    border-color: rgba(245, 158, 11, .2) !important;
-    box-shadow: 0 0 30px rgba(245, 158, 11, .12), 0 18px 44px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.06) !important;
-    backdrop-filter: blur(16px) saturate(1.08) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
+    border-radius: 16px !important;
   }
 
   .nav-link {
-    background: rgba(245, 240, 232, .055) !important;
-    color: rgba(245, 240, 232, .8) !important;
-    border-color: rgba(245, 158, 11, .14) !important;
-    transition: transform .2s ease, opacity .2s ease !important;
-    will-change: transform, opacity;
+    background: transparent !important;
+    color: rgba(244,234,216,.78) !important;
+    border-color: rgba(201,154,59,.18) !important;
+    transition: transform .16s ease, opacity .16s ease !important;
   }
 
   .nav-link::after {
-    background: var(--restaurant-amber) !important;
-    box-shadow: 0 0 14px rgba(245, 158, 11, .8) !important;
-    transition: transform .22s ease, opacity .22s ease !important;
-    will-change: transform, opacity;
-  }
-
-  .nav-link:hover {
-    background: rgba(245, 158, 11, .1) !important;
-    color: #fef3c7 !important;
-    border-color: rgba(245, 158, 11, .28) !important;
+    background: var(--classic-gold-bright) !important;
+    box-shadow: none !important;
   }
 
   .nav-link.active {
-    background: rgba(146, 64, 14, .54) !important;
-    color: #fef3c7 !important;
-    border-color: rgba(245, 158, 11, .42) !important;
-    box-shadow: 0 0 24px rgba(245, 158, 11, .24), inset 0 1px 0 rgba(255,255,255,.08) !important;
-  }
-
-  .nav-link.active::after {
-    background: var(--restaurant-amber) !important;
-    opacity: 1 !important;
-  }
-
-  .section-head {
-    border-bottom-color: rgba(245, 158, 11, .18) !important;
+    background: rgba(201,154,59,.14) !important;
+    color: var(--classic-gold-bright) !important;
+    border-color: rgba(201,154,59,.42) !important;
+    box-shadow: none !important;
   }
 
   .section-kicker {
-    color: rgba(245, 240, 232, .62) !important;
+    color: rgba(244,234,216,.56) !important;
   }
 
   .section-kicker::before {
-    color: var(--restaurant-amber) !important;
-    text-shadow: 0 0 14px rgba(245, 158, 11, .78) !important;
+    color: var(--classic-gold) !important;
+    text-shadow: none !important;
   }
 
   .section-title {
-    color: var(--restaurant-heading) !important;
-    text-shadow:
-      0 2px 0 rgba(0, 0, 0, .92),
-      0 0 20px rgba(245, 158, 11, .42) !important;
+    color: var(--classic-gold-bright) !important;
+    text-shadow: 0 2px 0 #000 !important;
   }
 
   .section-title::after {
-    background: linear-gradient(90deg, var(--restaurant-amber), rgba(217, 119, 6, .52), transparent) !important;
-    box-shadow: 0 0 18px rgba(245, 158, 11, .38) !important;
+    background: linear-gradient(90deg, var(--classic-gold), transparent) !important;
+    box-shadow: none !important;
+  }
+
+  .section-head {
+    border-bottom-color: rgba(201,154,59,.2) !important;
   }
 
   .section-count {
-    background: rgba(30, 24, 18, .82) !important;
-    color: #fef3c7 !important;
-    border-color: rgba(245, 158, 11, .2) !important;
-    box-shadow: 0 0 18px rgba(245, 158, 11, .12), inset 0 1px 0 rgba(255,255,255,.06) !important;
+    background: #11100e !important;
+    color: var(--classic-gold-bright) !important;
+    border-color: rgba(201,154,59,.28) !important;
+    box-shadow: none !important;
   }
 
   .menu-card {
     position: relative;
-    min-height: 136px;
-    background: var(--restaurant-card) !important;
-    border: 1px solid var(--restaurant-line) !important;
-    border-left: 1px solid var(--restaurant-line) !important;
-    border-radius: 18px !important;
-    box-shadow: 0 0 24px rgba(245, 158, 11, .08), 0 18px 42px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06) !important;
-    transition: transform .18s ease, opacity .18s ease !important;
-    will-change: transform, opacity;
+    min-height: 136px !important;
+    background: linear-gradient(180deg, var(--classic-panel), #100e0c) !important;
+    border: 1px solid rgba(201,154,59,.24) !important;
+    border-left: 1px solid rgba(201,154,59,.24) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,.28) !important;
+    transition: transform .16s ease, opacity .16s ease !important;
+    will-change: auto !important;
   }
 
   .menu-card::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 3px;
-    background: linear-gradient(180deg, var(--restaurant-amber), var(--restaurant-amber-deep));
-    opacity: .46;
-    transform: scaleY(.38);
-    transform-origin: center;
-    transition: transform .18s ease, opacity .18s ease;
-    will-change: transform, opacity;
-    z-index: 2;
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 auto 0 0 !important;
+    width: 3px !important;
+    background: var(--classic-gold) !important;
+    opacity: .86 !important;
+    transform: none !important;
+    transition: opacity .16s ease !important;
   }
 
   .menu-card:hover {
-    transform: translateY(-2px);
-    border: 1px solid rgba(245, 158, 11, .34) !important;
-    border-left: 1px solid rgba(245, 158, 11, .34) !important;
-    box-shadow: 0 0 30px rgba(245, 158, 11, .18), 0 22px 52px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.08) !important;
-  }
-
-  .menu-card:hover::before {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-
-  .menu-card.unavailable:hover {
-    transform: none;
-    border: 1px solid var(--restaurant-line-soft) !important;
-    box-shadow: 0 18px 42px rgba(0,0,0,.35) !important;
+    transform: translateY(-1px) !important;
+    border-color: rgba(241,199,106,.42) !important;
+    box-shadow: 0 12px 26px rgba(0,0,0,.32) !important;
   }
 
   .menu-image {
-    background: #120e0a !important;
-    border-right-color: rgba(245, 158, 11, .14) !important;
+    background: #0a0908 !important;
+    border-right-color: rgba(201,154,59,.2) !important;
+    border-radius: 14px 0 0 14px !important;
   }
 
   .menu-image img {
-    filter: saturate(1.12) contrast(1.06);
+    filter: none !important;
   }
 
   .menu-info {
-    background: linear-gradient(135deg, rgba(30, 24, 18, .96), rgba(18, 14, 10, .96)) !important;
+    background: transparent !important;
   }
 
   .menu-name,
-  .addon-card .font-black {
-    color: var(--restaurant-text) !important;
-  }
-
-  .menu-desc {
-    color: var(--restaurant-muted) !important;
-  }
-
-  .menu-price {
-    background: var(--restaurant-price) !important;
-    color: #fef3c7 !important;
-    border-color: rgba(254, 243, 199, .24) !important;
-    box-shadow: 0 0 18px rgba(245, 158, 11, .28), inset 0 1px 0 rgba(255,255,255,.12) !important;
-  }
-
-  .item-card-wrap.has-qty {
-    border-radius: 18px !important;
-    box-shadow: 0 0 0 2px rgba(245, 158, 11, .7), 0 0 26px rgba(245, 158, 11, .24) !important;
-  }
-
-  .unavailable-btn,
-  .addon-card,
-  #review-section > div,
-  .google-reviews-card,
-  .guest-gallery-card {
-    background: var(--restaurant-card) !important;
-    color: var(--restaurant-text) !important;
-    border-color: rgba(245, 158, 11, .2) !important;
-    box-shadow: 0 0 24px rgba(245, 158, 11, .08), 0 18px 42px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.06) !important;
-  }
-
-  .addon-card {
-    transition: transform .18s ease, opacity .18s ease !important;
-  }
-
-  .addon-icon,
-  .menu-info .text-\[10px\],
-  .addon-card .bg-amber-50 {
-    background: rgba(146, 64, 14, .3) !important;
-    color: #fef3c7 !important;
-    border-color: rgba(245, 158, 11, .22) !important;
-  }
-
-  .bg-gradient-to-r.from-amber-500.to-orange-500 {
-    background: linear-gradient(90deg, #92400e, #d97706) !important;
-    color: #fef3c7 !important;
-    box-shadow: 0 0 24px rgba(245, 158, 11, .24) !important;
-  }
-
-  .bottom-contact-panel {
-    background: rgba(0, 0, 0, .58) !important;
-    backdrop-filter: blur(16px) saturate(1.08) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
-  }
-
-  .contact-window,
-  #sheet-body,
-  .guest-gallery-sheet-body {
-    background: var(--restaurant-card) !important;
-    color: var(--restaurant-text) !important;
-    border-color: rgba(245, 158, 11, .22) !important;
-    box-shadow: 0 0 32px rgba(245, 158, 11, .14), 0 24px 70px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.06) !important;
-    backdrop-filter: blur(16px) saturate(1.08) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
-  }
-
+  .addon-card .font-black,
   .contact-title,
   .sheet-section-title,
   .sheet-item-name,
   #sheet-body .brand-heading,
+  #review-section h3,
   .google-reviews-title,
-  .guest-gallery-title,
-  #review-section h3 {
-    color: var(--restaurant-text) !important;
+  .guest-gallery-title {
+    color: var(--classic-cream) !important;
   }
 
-  .contact-sub,
-  .sheet-item-qty,
-  .google-reviews-sub,
-  .google-reviews-count,
-  .google-review-time,
-  .guest-gallery-copy,
-  .guest-gallery-note,
-  #review-section p {
-    color: var(--restaurant-muted) !important;
-  }
-
-  .bottom-bar {
-    background: rgba(15, 14, 12, .94) !important;
-    color: var(--restaurant-text) !important;
-    border-color: rgba(245, 158, 11, .18) !important;
-    border-top-color: rgba(245, 158, 11, .78) !important;
-    box-shadow: 0 0 28px rgba(245, 158, 11, .18), 0 18px 50px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.06) !important;
-    backdrop-filter: blur(16px) saturate(1.08) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(1.08) !important;
-  }
-
-  .bottom-tab {
-    color: rgba(245, 240, 232, .72) !important;
-    transition: transform .15s ease, opacity .15s ease !important;
-    will-change: transform, opacity;
-  }
-
-  .bottom-tab:hover {
-    background: rgba(245, 158, 11, .08) !important;
-    color: #fef3c7 !important;
-  }
-
-  .bottom-tab.active,
-  body.order-mode #order-mode-btn,
-  body.contact-open #contact-toggle {
-    background: rgba(146, 64, 14, .72) !important;
-    color: #fef3c7 !important;
-    box-shadow: 0 0 0 1px rgba(245, 158, 11, .42), 0 0 26px rgba(245, 158, 11, .42) !important;
-  }
-
-  #checkout-pill {
-    transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s cubic-bezier(.4,0,.2,1) !important;
-    will-change: transform, opacity;
-  }
-
-  .pill-inner {
-    background: linear-gradient(135deg, rgba(30, 24, 18, .96), rgba(15, 14, 12, .96)) !important;
-    border-color: rgba(245, 158, 11, .58) !important;
-    box-shadow: 0 0 34px rgba(245, 158, 11, .28), 0 18px 46px rgba(0,0,0,.46) !important;
-    transition: transform .15s ease, opacity .15s ease !important;
-  }
-
+  .menu-price,
   .pill-count,
   .pill-cta,
   .qty-plus,
   .locate-main-btn,
   #send-order-btn {
-    background: var(--restaurant-price) !important;
-    color: #fef3c7 !important;
-    box-shadow: 0 0 18px rgba(245, 158, 11, .28) !important;
+    background: var(--classic-gold-deep) !important;
+    color: #fff3cf !important;
+    border-color: rgba(241,199,106,.24) !important;
+    box-shadow: none !important;
   }
 
+  .addon-card,
+  #review-section > div,
+  .guest-gallery-card,
+  .google-reviews-card {
+    background: var(--classic-panel) !important;
+    border-color: rgba(201,154,59,.22) !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,.26) !important;
+  }
+
+  .addon-icon,
+  .menu-info .text-\[10px\],
+  .addon-card .bg-amber-50,
   .qty-minus,
   .qty-num,
   .sheet-input,
@@ -3812,67 +3148,70 @@ Requires Worker routes from:
   .guest-gallery-input,
   .guest-gallery-empty,
   .table-qr-sheet-note {
-    background: var(--restaurant-card-soft) !important;
-    color: var(--restaurant-text) !important;
-    border-color: rgba(245, 158, 11, .22) !important;
+    background: var(--classic-panel-2) !important;
+    color: var(--classic-cream) !important;
+    border-color: rgba(201,154,59,.22) !important;
+    box-shadow: none !important;
   }
 
-  .sheet-input:focus,
-  .manual-addr-ta:focus,
   .order-type-btn.selected,
-  .addon-chip.selected {
-    border-color: rgba(245, 158, 11, .55) !important;
-    box-shadow: 0 0 18px rgba(245, 158, 11, .18) !important;
+  .addon-chip.selected,
+  .bottom-tab.active,
+  body.order-mode #order-mode-btn,
+  body.contact-open #contact-toggle {
+    background: rgba(201,154,59,.18) !important;
+    color: var(--classic-gold-bright) !important;
+    border-color: rgba(241,199,106,.45) !important;
+    box-shadow: none !important;
   }
 
-  .sheet-input::placeholder,
-  .manual-addr-ta::placeholder,
-  .guest-gallery-input::placeholder {
-    color: rgba(245, 240, 232, .45) !important;
+  .bottom-bar {
+    border-top: 2px solid var(--classic-gold) !important;
   }
 
-  .sheet-header,
-  .sheet-item,
-  .addon-section {
-    border-color: rgba(245, 158, 11, .14) !important;
+  .bottom-tab {
+    color: rgba(244,234,216,.68) !important;
+    transition: transform .14s ease, opacity .14s ease !important;
   }
 
-  .clear-cart-btn,
-  .contact-close,
-  #close-sheet-btn,
-  .guest-gallery-close {
-    background: rgba(245, 240, 232, .08) !important;
-    color: var(--restaurant-text) !important;
-    border-color: rgba(245, 158, 11, .18) !important;
+  .bottom-tab:hover {
+    background: rgba(201,154,59,.08) !important;
+    color: var(--classic-gold-bright) !important;
+  }
+
+  .bottom-contact-panel {
+    background: rgba(0,0,0,.64) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .pill-inner {
+    background: #0f0d0b !important;
+    border-color: rgba(201,154,59,.34) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,.36) !important;
+    transition: transform .14s ease, opacity .14s ease !important;
   }
 
   #sheet-backdrop {
-    background: rgba(0,0,0,.68) !important;
+    background: #000 !important;
     opacity: 0;
-    transition: opacity .35s ease !important;
-    will-change: opacity;
   }
 
   #checkout-sheet.open #sheet-backdrop {
-    opacity: 1;
+    opacity: .7;
   }
 
-  .guest-gallery-sheet.open {
-    background: rgba(0,0,0,.68) !important;
-    transition: opacity .35s ease !important;
-    will-change: opacity;
-  }
-
-  #contact-bubble,
-  #status-badge,
-  .guest-gallery-box,
-  .google-reviews-box,
-  #inbox-toast {
-    transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .28s cubic-bezier(.4,0,.2,1) !important;
-    will-change: transform, opacity;
+  .bg-gradient-to-r.from-amber-500.to-orange-500 {
+    background: #7c5017 !important;
+    color: #fff3cf !important;
+    box-shadow: none !important;
   }
 
   .transition,
+  .nav-link,
+  .menu-card,
+  .bottom-tab,
+  .pill-inner,
   .qty-btn,
   .addon-chip,
   .order-type-btn,
@@ -3880,54 +3219,17 @@ Requires Worker routes from:
   .manual-addr-ta,
   .locate-main-btn,
   #send-order-btn,
-  .contact-action,
-  .guest-gallery-submit-btn,
-  .guest-gallery-submit-main,
-  .google-review-item,
-  .guest-gallery-photo {
+  .contact-action {
     transition-property: transform, opacity !important;
-    transition-duration: .2s !important;
-    transition-timing-function: ease !important;
   }
 
-  #review-divider div {
-    background: rgba(245, 158, 11, .2) !important;
-  }
-
-  #review-divider span {
-    color: rgba(245, 240, 232, .54) !important;
-  }
-
-  @keyframes logoPulse {
-    0%, 100% {
-      transform: translateZ(0) scale(1);
-      box-shadow:
-        0 0 0 7px rgba(245, 158, 11, .22),
-        0 0 42px rgba(245, 158, 11, .68),
-        0 20px 54px rgba(0, 0, 0, .62);
-    }
-    50% {
-      transform: translateZ(0) scale(1.026);
-      box-shadow:
-        0 0 0 9px rgba(245, 158, 11, .28),
-        0 0 60px rgba(245, 158, 11, .82),
-        0 24px 60px rgba(0, 0, 0, .68);
-    }
-  }
-
-  @media (max-width: 480px) {
-    #main-nav,
-    .bottom-bar,
-    .contact-window,
-    .bottom-contact-panel,
-    #status-badge,
-    #table-qr-badge {
-      backdrop-filter: blur(14px) saturate(1.05) !important;
-      -webkit-backdrop-filter: blur(14px) saturate(1.05) !important;
-    }
-
+  @media (max-width: 420px) {
     .menu-image {
-      width: 118px !important;
+      width: 112px !important;
+    }
+
+    .menu-card {
+      border-radius: 13px !important;
     }
   }
 </style>
