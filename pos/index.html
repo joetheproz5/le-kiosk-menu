@@ -513,21 +513,6 @@ color:#166534}
 background:#fee2e2;
 color:#991b1b;
 box-shadow:0 0 0 3px rgba(239,68,68,.1)}
-.account-avatar-btn{
-width:38px;
-height:38px;
-border-radius:50%;
-border:1px solid var(--line);
-background:linear-gradient(135deg,#111827,#92400e);
-color:#fff7ed;
-font-size:13px;
-font-weight:900;
-display:inline-flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-box-shadow:0 8px 20px rgba(17,24,39,.14)}
-.account-avatar-btn:hover{transform:translateY(-1px)}
 .sync-pill{
 height:38px;
 border-radius:9px;
@@ -1744,7 +1729,6 @@ margin-left:auto}
 <button class="quick-btn hide-mobile" onclick="loadOrders(true)">Refresh</button>
 <button class="quick-btn primary" onclick="toggleCart()">Cart <span id="cart-count-mini">0</span>
 </button>
-<button class="account-avatar-btn" id="account-avatar-btn" onclick="openAccountProfile()" title="Account profile">P</button>
 </div>
 </header>
 <main class="main">
@@ -1932,13 +1916,6 @@ function applyTheme(){
 const theme=activeTheme();
 document.body.classList.toggle('theme-dark',theme==='dark');
 document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.textContent=theme==='dark'?'Dark':'Light'});
-}
-function updateAccountAvatar(){
-const el=$('account-avatar-btn');
-if(!el)return;
-const name=authSession?.username||authSession?.role||'P';
-el.textContent=String(name).trim().slice(0,1).toUpperCase()||'P';
-el.title=`${authSession?.username||'Account'} profile`;
 }
 function toggleTheme(){
 const next=activeTheme()==='dark'?'light':'dark';
@@ -2217,7 +2194,6 @@ function saveAuthSession(){
 if(!authSession)return;
 authSession.localExpiresAt=Date.now()+SESSION_MS;
 localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
-updateAccountAvatar();
 }
 function clearAuthSession(){
 authSession=null;
@@ -2231,7 +2207,6 @@ authSession=saved;
 if(!authExpiryMs()){clearAuthSession();return false}
 $('login-screen').style.display='none';
 $('app').classList.add('show');
-updateAccountAvatar();
 startSession();
 bootPOS();
 return true;
@@ -2281,7 +2256,7 @@ $('user').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
 restoreAuthSession();
 function startSession(){sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000)}
 function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);const rem=Math.max(0,sessionExpiry-Date.now());updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},rem)}
-function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`;updateAccountAvatar()}
+function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
 function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);clearInterval(orderEventInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
 function togglePassword(){
 const input=$('pw'),btn=$('show-pw-btn'),show=input.type==='password';
@@ -3079,53 +3054,6 @@ $('modal-ok').textContent='OK';
 $('modal-overlay').addEventListener('click',e=>{
 if(e.target===e.currentTarget)closeModal()}
 );
-async function fetchAccountInfo(){
-const [meRes,accountsRes]=await Promise.all([
-fetch(`${WORKER_URL}/auth/me`,{cache:'no-store'}),
-fetch(`${WORKER_URL}/auth/accounts`,{cache:'no-store'})
-]);
-const me=await meRes.json().catch(()=>({}));
-const accounts=await accountsRes.json().catch(()=>({data:[]}));
-if(!meRes.ok)throw new Error(me.error||'Account read failed');
-return{account:me.account||{},accounts:Array.isArray(accounts.data)?accounts.data:[]};
-}
-function accountProfileHtml(account,accounts){
-const isAdmin=(authSession?.role||account.role)==='admin';
-return `<div style="display:grid;gap:12px;text-align:left">
-<div class="panel-card" style="margin:0"><div class="panel-name">${esc(account.username||authSession?.username||'Account')}</div><div class="panel-meta">Role: ${esc(account.role||authSession?.role||'')}${account.last_login_at?` · Last login: ${new Date(account.last_login_at).toLocaleString('en-GB')}`:''}</div></div>
-<div class="panel-card" style="margin:0"><div class="panel-name">Change Password</div><div style="display:grid;gap:8px;margin-top:10px"><input class="input" id="acct-current-pw" type="password" placeholder="Current password"><input class="input" id="acct-new-pw" type="password" placeholder="New password"><button class="quick-btn primary" onclick="changeAccountPassword()">Change Password</button></div></div>
-<div class="panel-card" style="margin:0"><div class="panel-name">Create Staff Account</div><div class="panel-meta">${isAdmin?'Create admin or POS accounts.':'POS users can create POS accounts only.'}</div><div style="display:grid;gap:8px;margin-top:10px"><input class="input" id="acct-new-user" placeholder="Username"><input class="input" id="acct-new-user-pw" type="password" placeholder="Password"><select class="input" id="acct-new-role" ${isAdmin?'':'disabled'}><option value="pos">POS</option><option value="admin">Admin</option></select><button class="quick-btn primary" onclick="createStaffAccount()">Create Account</button></div></div>
-<div class="panel-card" style="margin:0"><div class="panel-name">Staff Accounts</div><div style="display:grid;gap:6px;margin-top:10px">${accounts.map(a=>`<div class="panel-meta">${esc(a.username)} · ${esc(a.role)} · ${a.active===false?'disabled':'active'}</div>`).join('')||'<div class="empty">No accounts found.</div>'}</div></div>
-</div>`;
-}
-async function openAccountProfile(){
-showLoading('Loading account...');
-try{
-const {account,accounts}=await fetchAccountInfo();
-openHtmlModal('Account Profile',accountProfileHtml(account,accounts),'Close');
-}catch(e){showToast(e.message,'error')}
-hideLoading();
-}
-async function changeAccountPassword(){
-const currentPassword=$('acct-current-pw')?.value||'',newPassword=$('acct-new-pw')?.value||'';
-if(!currentPassword||newPassword.length<8){showToast('Enter current password and 8+ char new password','error');return}
-try{
-const res=await fetch(`${WORKER_URL}/auth/password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})});
-const j=await res.json().catch(()=>({}));
-if(!res.ok)throw new Error(j.error||'Password change failed');
-showToast('Password changed. Log in again.','success');closeModal();logout();
-}catch(e){showToast(e.message,'error')}
-}
-async function createStaffAccount(){
-const username=($('acct-new-user')?.value||'').trim(),password=$('acct-new-user-pw')?.value||'',role=$('acct-new-role')?.value||'pos';
-if(!username||password.length<8){showToast('Username and 8+ char password required','error');return}
-try{
-const res=await fetch(`${WORKER_URL}/auth/accounts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,role})});
-const j=await res.json().catch(()=>({}));
-if(!res.ok)throw new Error(j.error||'Create account failed');
-showToast('Account created','success');await openAccountProfile();
-}catch(e){showToast(e.message,'error')}
-}
 function showToast(msg,type=''){
 const t=$('toast');
 t.textContent=msg;

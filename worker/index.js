@@ -784,7 +784,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
     // ── GET /auth/accounts ──
     if (request.method === 'GET' && url.pathname === '/auth/accounts') {
-      const blocked = await guard(['admin', 'pos']);
+      const blocked = await guard(['admin']);
       if (blocked instanceof Response) return blocked;
 
       try {
@@ -797,7 +797,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
 
     // ── POST /auth/accounts ──
     if (request.method === 'POST' && url.pathname === '/auth/accounts') {
-      const blocked = await guard(['admin', 'pos']);
+      const blocked = await guard(['admin']);
       if (blocked instanceof Response) return blocked;
       const session = blocked;
 
@@ -812,7 +812,6 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       const password = String(body.password || '');
       let role = String(body.role || '').trim().toLowerCase();
       if (!['admin', 'pos'].includes(role)) role = 'pos';
-      if (session.role !== 'admin') role = 'pos';
 
       if (!/^[a-z0-9._-]{3,32}$/.test(username) || password.length < 8) {
         return json({ error: 'Username must be 3-32 simple characters and password at least 8 chars' }, 400);
