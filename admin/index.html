@@ -350,6 +350,7 @@ body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .c
 .feature-title{font-size:14px;font-weight:900;color:var(--ink)}
 .feature-copy{font-size:12px;font-weight:600;color:var(--muted);line-height:1.45;flex:1}
 .hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+#categories-hub{display:block}
 .hub-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .hub-card:hover{border-color:var(--brand-line);box-shadow:0 8px 22px rgba(17,24,39,.06)}
 .hub-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -424,13 +425,14 @@ body.theme-dark .dash-card,body.theme-dark .dashboard-section,body.theme-dark .c
 .poster-share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .poster-share-note{font-size:12px;font-weight:700;color:var(--muted);line-height:1.45;margin-top:8px}
 .edit-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
-.edit-row{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.edit-row{display:grid;grid-template-columns:54px minmax(0,1fr) minmax(0,max-content);gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .edit-row:hover{border-color:var(--brand-line);box-shadow:0 6px 18px rgba(17,24,39,.05)}
 .edit-row.drag-over{border-color:var(--accent);background:#fffbeb}
 .edit-row-img{width:54px;height:54px;border-radius:8px;background:var(--soft);object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--brand)}
+.edit-row>div:nth-child(2){min-width:0}
 .edit-row-title{font-size:13px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .edit-row-meta{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px;line-height:1.35}
-.edit-row-actions{display:flex;align-items:center;gap:7px;justify-content:flex-end}
+.edit-row-actions{display:flex;align-items:center;gap:7px;justify-content:flex-end;flex-wrap:wrap;max-width:100%}
 .edit-row-delete-actions{grid-column:1/-1;display:flex;justify-content:flex-end;margin-top:2px}
 .edit-badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:var(--soft);color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase}
 .edit-badge.on{background:var(--green-soft);color:var(--green)}

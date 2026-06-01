@@ -1645,14 +1645,12 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         const existingProducts = await supabaseFetch('/products?select=*').catch(() => []);
         const existingCategoriesByKey = new Map((Array.isArray(existingCategories) ? existingCategories : []).map(cat => [String(cat.key || ''), cat]));
         const existingProductsBySlot = new Map();
+        const existingProductsList = Array.isArray(existingProducts) ? existingProducts : [];
         (Array.isArray(existingProducts) ? existingProducts : []).forEach(product => {
           const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
           if (!existingProductsBySlot.has(slot)) existingProductsBySlot.set(slot, product);
         });
-        const productFilter = (product) => {
-          if (product?.id != null) return `/products?id=eq.${encodeURIComponent(product.id)}`;
-          return `/products?category_key=eq.${encodeURIComponent(product.category_key || '')}&sort_order=eq.${encodeURIComponent(product.sort_order ?? 0)}`;
-        };
+        const idInFilter = (ids) => `in.(${ids.map(id => encodeURIComponent(String(id))).join(',')})`;
         const categories = sections.map((sec, index) => ({
           key: sec.key || `category-${index}`,
           title: sec.title || 'Untitled',
@@ -1703,31 +1701,56 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         });
 
         const incomingProductSlots = new Set();
+        const updateProducts = [];
+        const insertProducts = [];
+        const touchedProductIds = new Set();
         for (const product of products) {
           const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
           incomingProductSlots.add(slot);
           const existing = existingProductsBySlot.get(slot);
           if (existing) {
-            await supabaseFetch(productFilter(existing), {
-              method: 'PATCH',
-              body: JSON.stringify(product),
-            });
+            if (existing.id != null) {
+              touchedProductIds.add(String(existing.id));
+              updateProducts.push({ ...product, id: existing.id });
+            } else {
+              insertProducts.push(product);
+            }
           } else {
-            await supabaseFetch('/products', {
-              method: 'POST',
-              body: JSON.stringify(product),
-            });
+            insertProducts.push(product);
           }
         }
 
-        for (const product of existingProductsBySlot.values()) {
+        if (updateProducts.length) {
+          await supabaseFetch('/products?on_conflict=id', {
+            method: 'POST',
+            headers: {
+              'Prefer': 'resolution=merge-duplicates,return=representation',
+            },
+            body: JSON.stringify(updateProducts),
+          });
+        }
+
+        if (insertProducts.length) {
+          await supabaseFetch('/products', {
+            method: 'POST',
+            body: JSON.stringify(insertProducts),
+          });
+        }
+
+        const staleProductIds = [];
+        for (const product of existingProductsList) {
           const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
-          if (!incomingProductSlots.has(slot) && product.active !== false) {
-            await supabaseFetch(productFilter(product), {
-              method: 'PATCH',
-              body: JSON.stringify({ active: false, updated_at: now }),
-            });
+          const id = product.id != null ? String(product.id) : '';
+          if (id && product.active !== false && (!incomingProductSlots.has(slot) || (incomingProductSlots.has(slot) && !touchedProductIds.has(id)))) {
+            staleProductIds.push(id);
           }
+        }
+
+        if (staleProductIds.length) {
+          await supabaseFetch(`/products?id=${idInFilter(staleProductIds)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ active: false, updated_at: now }),
+          });
         }
 
         for (const category of existingCategoriesByKey.values()) {
