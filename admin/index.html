@@ -1066,6 +1066,16 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
             </div>
             <div class="settings-section-title">Tools</div>
             <div class="setting-card">
+              <div class="setting-title">Driver Android App</div>
+              <div class="setting-copy">Generate a temporary APK download link for a driver. The link expires after 15 minutes.</div>
+              <div class="setting-stat" id="driver-app-link-status">No active link generated on this device.</div>
+              <div class="setting-note" id="driver-app-link-output">Links are admin-only and should be sent directly to the driver.</div>
+              <div class="setting-actions">
+                <button class="btn btn-dark" onclick="generateDriverAppLink()">Generate Link</button>
+                <button class="btn btn-soft" id="driver-app-copy-btn" onclick="copyDriverAppLink()" disabled>Copy Link</button>
+              </div>
+            </div>
+            <div class="setting-card">
               <div class="setting-title">Appearance</div>
               <div class="setting-copy">Switch this device between light and dark theme. New devices follow their system theme by default.</div>
               <div class="setting-actions">
@@ -1141,6 +1151,7 @@ let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,l
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
+let driverAppDownloadLink='';
 let generatedBasketballPoster=null;
 function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
 function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
@@ -4042,6 +4053,40 @@ async function createStaffAccount(){
     showToast('Account created','success');
     await openAccountProfile();
   }catch(e){showToast(e.message,'error')}
+}
+
+async function generateDriverAppLink(){
+  showLoading('Generating app link...');
+  try{
+    const res=await fetch(`${WORKER_URL}/driver-app/link`,{method:'POST'});
+    const j=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(j.error||'Link generation failed');
+    driverAppDownloadLink=j.url||'';
+    const status=document.getElementById('driver-app-link-status');
+    const output=document.getElementById('driver-app-link-output');
+    const copy=document.getElementById('driver-app-copy-btn');
+    if(status)status.textContent=`Expires ${new Date(j.expiresAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
+    if(output)output.textContent=driverAppDownloadLink;
+    if(copy)copy.disabled=!driverAppDownloadLink;
+    if(navigator.clipboard&&driverAppDownloadLink){
+      await navigator.clipboard.writeText(driverAppDownloadLink).catch(()=>{});
+      showToast('Driver app link copied','success');
+    }else{
+      showToast('Driver app link generated','success');
+    }
+  }catch(e){
+    showToast(e.message,'error');
+  }
+  hideLoading();
+}
+async function copyDriverAppLink(){
+  if(!driverAppDownloadLink){showToast('Generate a link first','error');return}
+  try{
+    await navigator.clipboard.writeText(driverAppDownloadLink);
+    showToast('Link copied','success');
+  }catch(_){
+    showToast(driverAppDownloadLink);
+  }
 }
 
 function renderSettings(){

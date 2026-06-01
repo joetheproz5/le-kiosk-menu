@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.os.PowerManager;
 
@@ -54,6 +55,7 @@ public class DriverBackgroundService extends Service {
 
         notification
             .setSmallIcon(R.drawable.ic_driver_badge)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.lekiosk_logo))
             .setContentTitle("Le Kiosk Driver — Active")
             .setContentText("GPS tracking is running in the background")
             .setContentIntent(pendingIntent)

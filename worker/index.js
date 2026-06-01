@@ -388,6 +388,61 @@ export default {
       }).format(new Date());
     }
 
+    function b64url(bytes) {
+      let bin = '';
+      for (const b of bytes) bin += String.fromCharCode(b);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    async function hmacSign(text, secret) {
+      const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(secret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+      const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(text));
+      return b64url(new Uint8Array(sig));
+    }
+
+    async function driverAppToken(expiresAtMs) {
+      if (!env.APP_DOWNLOAD_SECRET) throw new Error('Missing APP_DOWNLOAD_SECRET Worker secret');
+      const exp = String(expiresAtMs);
+      return `${exp}.${await hmacSign(exp, env.APP_DOWNLOAD_SECRET)}`;
+    }
+
+    async function verifyDriverAppToken(token) {
+      if (!env.APP_DOWNLOAD_SECRET) return false;
+      const [exp, sig] = String(token || '').split('.');
+      const expMs = Number(exp);
+      if (!exp || !sig || !Number.isFinite(expMs) || expMs <= Date.now()) return false;
+      const expected = await hmacSign(exp, env.APP_DOWNLOAD_SECRET);
+      return safeEqual(sig, expected);
+    }
+
+    async function signedDriverApkUrl() {
+      const bucket = env.DRIVER_APK_BUCKET || 'driver-apps';
+      const path = env.DRIVER_APK_PATH || 'le-kiosk-driver.apk';
+      const res = await fetch(
+        `${env.SUPABASE_URL}/storage/v1/object/sign/${encodeURIComponent(bucket)}/${path.split('/').map(encodeURIComponent).join('/')}`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_SERVICE_ROLE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ expiresIn: 15 * 60 }),
+        }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.signedURL) {
+        throw new Error(data.message || data.error || `Driver APK signing failed ${res.status}`);
+      }
+      return `${env.SUPABASE_URL}/storage/v1${data.signedURL}`;
+    }
+
     function beirutHour() {
       const parts = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Beirut',
@@ -1291,6 +1346,41 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
         return json({ data });
       } catch (e) {
         return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── POST /driver-app/link — admin-only 15-minute APK download link ──
+    if (request.method === 'POST' && url.pathname === '/driver-app/link') {
+      const blocked = await guard(['admin']);
+      if (blocked instanceof Response) return blocked;
+
+      try {
+        const expiresAtMs = Date.now() + 15 * 60 * 1000;
+        const token = await driverAppToken(expiresAtMs);
+        const publicUrl = new URL(request.url);
+        publicUrl.pathname = '/driver-app/download';
+        publicUrl.search = `?token=${encodeURIComponent(token)}`;
+        return json({
+          ok: true,
+          url: publicUrl.toString(),
+          expiresAt: new Date(expiresAtMs).toISOString(),
+        });
+      } catch (e) {
+        return json({ error: e.message }, 500);
+      }
+    }
+
+    // ── GET /driver-app/download — temporary redirect to APK asset ──
+    if (request.method === 'GET' && url.pathname === '/driver-app/download') {
+      const token = url.searchParams.get('token') || '';
+      if (!(await verifyDriverAppToken(token))) {
+        return new Response('Download link expired or invalid', { status: 403, headers: corsHeaders });
+      }
+      try {
+        return Response.redirect(await signedDriverApkUrl(), 302);
+      } catch (e) {
+        if (env.DRIVER_APK_URL) return Response.redirect(env.DRIVER_APK_URL, 302);
+        return json({ error: e.message || 'Driver APK is not available' }, 502);
       }
     }
 

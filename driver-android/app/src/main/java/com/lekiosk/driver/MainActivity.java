@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -114,6 +115,7 @@ public class MainActivity extends Activity {
 
         builder
             .setSmallIcon(R.drawable.ic_driver_badge)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.lekiosk_logo))
             .setContentTitle(title == null || title.trim().isEmpty() ? "New delivery order" : title)
             .setContentText(body == null || body.trim().isEmpty() ? "Open the driver app to view it." : body)
             .setContentIntent(pendingIntent)
