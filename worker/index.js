@@ -1585,11 +1585,18 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       }
     }
 
-    // ── GET /supabase/menu — public ──
+    // ── GET /supabase/menu — public/admin ──
     if (request.method === 'GET' && url.pathname === '/supabase/menu') {
       try {
-        const categories = await supabaseFetch('/categories?select=*&active=eq.true&order=sort_order.asc');
-        const products = await supabaseFetch('/products?select=*&active=eq.true&order=sort_order.asc');
+        let isAdmin = false;
+        if (bearerToken(request)) {
+          try {
+            await requireAuth(request, ['admin']);
+            isAdmin = true;
+          } catch (_) {}
+        }
+        const categories = await supabaseFetch(isAdmin ? '/categories?select=*&order=sort_order.asc' : '/categories?select=*&active=eq.true&order=sort_order.asc');
+        const products = await supabaseFetch(isAdmin ? '/products?select=*&order=sort_order.asc' : '/products?select=*&active=eq.true&order=sort_order.asc');
 
         const menu = categories.map(cat => {
           const items = products
@@ -1612,6 +1619,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
             title: cat.title,
             type: cat.type === 'regular' ? undefined : cat.type,
             bottomBanner: cat.bottom_banner || undefined,
+            active: cat.active,
             items,
           };
         });
@@ -1656,7 +1664,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           type: sec.type || 'regular',
           bottom_banner: sec.bottomBanner || null,
           sort_order: index,
-          active: true,
+          active: sec.active !== false,
           raw: sec,
           updated_at: now,
         }));

@@ -192,6 +192,8 @@ body.theme-dark .edit-row.drag-over{background:#2c1d07}
 .cat-row{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:1px solid transparent;border-radius:8px;background:#fff;color:var(--ink);text-align:left;transition:background .12s,border-color .12s}
 .cat-row:hover{background:var(--panel-2);border-color:var(--line)}
 .cat-row.active{background:var(--brand-soft);border-color:var(--brand-line)}
+.cat-row.inactive{opacity:.62}
+.edit-row.inactive{opacity:.62}
 .cat-row.drag-over{border-color:var(--accent);background:#fff7ed}
 .cat-grip{color:var(--muted);font-size:13px;cursor:grab}
 .cat-main{flex:1;min-width:0}
@@ -231,6 +233,7 @@ textarea.field-input{resize:vertical;min-height:66px;line-height:1.45}
 .item-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px}
 .active-box{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px}
 .active-box input{width:16px;height:16px;accent-color:var(--accent)}
+.unavailable-check{white-space:nowrap}
 
 .pills-area,.addons-editor{border:1px solid var(--line);border-radius:8px;background:var(--panel-2);padding:10px}
 .pill-colors{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px}
@@ -3410,13 +3413,14 @@ function renderCategoriesHub(){
     const isAddon=sec.type==='addons';
     const count=isAddon?(sec.addonGroups||[]).length:(sec.items||[]).length;
     const banner=!isAddon&&sec.bottomBanner!==undefined?' · Banner on':'';
-    return `<div class="edit-row" draggable="true" ondragstart="dragCategoryStart(event,${i})" ondragover="dragCategoryOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropCategoryHub(event,${i})">
+    return `<div class="edit-row${sec.active===false?' inactive':''}" draggable="true" ondragstart="dragCategoryStart(event,${i})" ondragover="dragCategoryOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropCategoryHub(event,${i})">
       <div class="edit-row-img">::</div>
       <div>
         <div class="edit-row-title">${esc(sec.title||'Untitled')}</div>
-        <div class="edit-row-meta">${esc(sec.key||'no-key')} · ${isAddon?'Add-ons':'Menu Items'} · ${count} entries${banner}</div>
+        <div class="edit-row-meta">${esc(sec.key||'no-key')} · ${isAddon?'Add-ons':'Menu Items'} · ${count} entries${banner} · ${sec.active===false?'Unavailable':'Available'}</div>
       </div>
       <div class="edit-row-actions">
+        <label class="active-box unavailable-check" onclick="event.stopPropagation()"><input type="checkbox" ${sec.active===false?'checked':''} onchange="toggleSectionUnavailable(${i},this.checked)">Unavailable</label>
         <span class="edit-badge">${i+1}</span>
         <button class="btn btn-soft btn-sm" onclick="openCategory(${i})">Edit</button>
       </div>
@@ -3575,9 +3579,9 @@ function renderCategoryList(){
   if(!menuData.length){el.innerHTML='<div class="empty-state">No categories yet.</div>';return;}
   el.innerHTML=menuData.map((sec,i)=>{
     const count=sec.type==='addons'?(sec.addonGroups||[]).length:(sec.items||[]).length;
-    return `<button class="cat-row${i===activeTab?' active':''}" draggable="true" ondragstart="dragCategoryStart(event,${i})" ondragover="dragCategoryOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropCategory(event,${i})" onclick="setActiveCategory(${i})">
+    return `<button class="cat-row${i===activeTab?' active':''}${sec.active===false?' inactive':''}" draggable="true" ondragstart="dragCategoryStart(event,${i})" ondragover="dragCategoryOver(event,${i})" ondragleave="this.classList.remove('drag-over')" ondrop="dropCategory(event,${i})" onclick="setActiveCategory(${i})">
       <span class="cat-grip">::</span>
-      <span class="cat-main"><span class="cat-name">${esc(sec.title||'Untitled')}</span><span class="cat-meta">${sec.key||'no-key'} · ${sec.type==='addons'?'Add-ons':'Items'}</span></span>
+      <span class="cat-main"><span class="cat-name">${esc(sec.title||'Untitled')}</span><span class="cat-meta">${sec.key||'no-key'} · ${sec.type==='addons'?'Add-ons':'Items'}${sec.active===false?' · Unavailable':''}</span></span>
       <span class="cat-badge">${count}</span>
     </button>`;
   }).join('');
@@ -3609,6 +3613,7 @@ function renderEditor(){
     <div class="toggle-line">
       <span class="field-label" style="margin:0">Type</span>
       <span class="segment"><button class="${!isAddon?'active':''}" onclick="setSectionType('regular')">Items</button><button class="${isAddon?'active':''}" onclick="setSectionType('addons')">Add-ons</button></span>
+      <label class="active-box unavailable-check"><input type="checkbox" ${sec.active===false?'checked':''} onchange="setSectionUnavailable(this.checked)">Unavailable section</label>
       ${!isAddon?`<button class="chip-btn${hasBanner?' active':''}" onclick="toggleFeature('banner')">Bottom Banner</button>`:''}
     </div>
     ${isAddon?renderAddonGroups(sec):renderItems(sec)}
@@ -3616,6 +3621,21 @@ function renderEditor(){
   `;
 }
 function editCategory(field,value){const sec=getSec();if(!sec)return;sec[field]=value;markUnsaved();renderCategoryList();}
+function setSectionUnavailable(unavailable){
+  const sec=getSec();if(!sec)return;
+  sec.active=!unavailable;
+  markUnsaved();
+  renderCategoryList();
+  renderCategoriesHub();
+}
+function toggleSectionUnavailable(i,unavailable){
+  const sec=menuData[i];if(!sec)return;
+  sec.active=!unavailable;
+  markUnsaved();
+  renderCategoryList();
+  renderCategoriesHub();
+  if(i===activeTab)renderEditor();
+}
 function setSectionType(type){
   const sec=getSec();if(!sec)return;
   if(type==='addons'){sec.type='addons';if(!sec.addonGroups)sec.addonGroups=[];delete sec.items;delete sec.bottomBanner;}
@@ -3649,6 +3669,7 @@ function renderItem(item,i){
       <div class="edit-row-meta">${esc(item.price||'$0')} · ${(item.addons||[]).length} add-ons · ${(item.flavors||[]).length} pills</div>
     </div>
     <div class="edit-row-actions">
+      <label class="active-box unavailable-check" onclick="event.stopPropagation()"><input type="checkbox" ${item.active===false?'checked':''} onchange="toggleItemUnavailable(${i},this.checked)">Unavailable</label>
       <span class="edit-badge${item.active===false?'':' on'}">${item.active===false?'Hidden':'Active'}</span>
       <button class="btn btn-soft btn-sm" onclick="openItemEditor(${i})">Edit</button>
     </div>
@@ -3683,7 +3704,7 @@ function itemEditorHtml(item,i){
       </div>
     </div>
     <div class="field"><label class="field-label">Description</label><textarea class="field-input" oninput="editItem(${i},'desc',this.value)">${esc(item.desc||'')}</textarea></div>
-    <label class="active-box" style="justify-content:flex-start"><input type="checkbox" ${item.active===false?'':'checked'} onchange="editItem(${i},'active',this.checked)">Active on menu/POS</label>
+    <label class="active-box" style="justify-content:flex-start"><input type="checkbox" ${item.active===false?'checked':''} onchange="editItem(${i},'active',!this.checked)">Unavailable on menu/POS</label>
     <div class="editor-section">
         <label class="field-label">Pills / Options</label>
         <input class="field-input" value="${esc((item.flavors||[]).join(', '))}" placeholder="Double Apple, Lemon & Mint" oninput="editItemFlavors(${i},this.value)">
@@ -3752,6 +3773,13 @@ function pickAddonFromDropdown(i,label,price){
   if(modalBody)modalBody.innerHTML=itemEditorHtml(item,i);
 }
 function editItem(i,field,value){const sec=getSec();if(!sec||!sec.items[i])return;sec.items[i][field]=value;markUnsaved();if(field==='name')renderCategoryList();}
+function toggleItemUnavailable(i,unavailable){
+  const sec=getSec();if(!sec||!sec.items[i])return;
+  sec.items[i].active=!unavailable;
+  markUnsaved();
+  renderEditor();
+  renderItemsHub();
+}
 function editItemFlavors(i,value){const item=getSec().items[i];const arr=value.split(',').map(s=>s.trim()).filter(Boolean);if(arr.length)item.flavors=arr;else delete item.flavors;markUnsaved();}
 function setPillColor(i,color){const item=getSec().items[i];item.flavorColor=color;markUnsaved();openItemEditor(i);}
 function deletePill(i,fi){const item=getSec().items[i];if(!item.flavors)return;item.flavors.splice(fi,1);if(!item.flavors.length)delete item.flavors;markUnsaved();const modalBody=document.getElementById('modal-body');if(modalBody)modalBody.innerHTML=itemEditorHtml(item,i);}
