@@ -52,6 +52,7 @@ var listTab='pending';
 var allOrders=[];
 var markingStep=null;
 var firstMapDone=false, routeLastFetched=0, routeNeeded=true, lastRouteLat=null, lastRouteLng=null, currentRouteCoords=null, routeFetchSeq=0, routeDrawTimer=null, turnZoomActive=false, turnZoomTimer=null, lastTurnCheckAt=0, lastTurnAngle=0, arrivalTriggered=false, signalTimer=null, lastTrimLat=null, lastTrimLng=null;
+var ROUTE_REFRESH_MS=12000, ROUTE_REFRESH_METERS=18, ROUTE_OFFROUTE_METERS=35, ROUTE_SNAP_METERS=28, ROUTE_HEADING_METERS=32;
 var wakeLock=null, loadBusy=false, lastDetailLoaded=false, lastListLoaded=false, followTimer=null, lastFollowLat=null, lastFollowLng=null, lastFollowHeading=null, manualRecenterUntil=0, lastTrackingJSON=null;
 var knownOrderIds=null, alertAudioCtx=null, alertAudioUnlocked=false, lastOrderAlertAt=0;
 var driverWS=null, driverWSOrderId=null, wsReconnectTimer=null, wsPingTimer=null, lastETAMinutes=null;
@@ -354,8 +355,8 @@ function routeShouldRefresh(lat,lng){
  // Route refresh is intentionally slower unless the driver is off the route.
  if(routeNeeded)return true;
  if(lastRouteLat===null||lastRouteLng===null)return true;
- if(distanceToRouteMeters(lat,lng)>40)return true;
- return Date.now()-routeLastFetched>20000&&haversine(lat,lng,lastRouteLat,lastRouteLng)>25;
+ if(distanceToRouteMeters(lat,lng)>ROUTE_OFFROUTE_METERS)return true;
+ return Date.now()-routeLastFetched>ROUTE_REFRESH_MS&&haversine(lat,lng,lastRouteLat,lastRouteLng)>ROUTE_REFRESH_METERS;
 }
 function distanceToSegmentMeters(p,a,b){
  var x=p.lng,y=p.lat,x1=a[0],y1=a[1],x2=b[0],y2=b[1];
@@ -390,7 +391,7 @@ function snapToRoute(lat,lng){
   var d=haversine(lat,lng,p.lat,p.lng);
   if(d<bestDist){bestDist=d;bestPoint=p}
  }
- return bestDist<25?bestPoint:{lat:lat,lng:lng};
+ return bestDist<ROUTE_SNAP_METERS?bestPoint:{lat:lat,lng:lng};
 }
 function trimRouteToProgress(lat,lng){
  // Progress trimming only changes the displayed line; currentRouteCoords remains the full route.
@@ -416,7 +417,7 @@ function headingFromRoute(lat,lng){
   var d=haversine(lat,lng,p.lat,p.lng);
   if(d<bestDist){bestDist=d;bestIdx=i}
  }
- if(bestDist>20)return null;
+ if(bestDist>ROUTE_HEADING_METERS)return null;
  var a2=currentRouteCoords[bestIdx];
  var b2=currentRouteCoords[Math.min(bestIdx+2,currentRouteCoords.length-1)];
  return bearingBetween(a2[1],a2[0],b2[1],b2[0]);
@@ -707,8 +708,11 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   routeLastFetched=Date.now();
  }
  try{
-  var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=false';
-  var res=await fetch(url);
+  var url='https://router.project-osrm.org/route/v1/driving/'+dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=true&annotations=distance,duration';
+  var ctrl=new AbortController();
+  var routeTimeout=setTimeout(function(){ctrl.abort()},6500);
+  var res=await fetch(url,{cache:'no-store',signal:ctrl.signal});
+  clearTimeout(routeTimeout);
   if(seq!==routeFetchSeq)return;
   if(!res.ok){drawFallback();return}
   var j=await res.json();
@@ -742,10 +746,12 @@ function animateRouteDraw(){
   var progress=step/steps;
   var dash=progress*100;
   mapInst.setPaintProperty('route-line','line-dasharray',[dash,100-dash]);
+  if(mapInst.getLayer('route-casing'))mapInst.setPaintProperty('route-casing','line-dasharray',[dash,100-dash]);
   if(++step>steps){
    clearInterval(routeDrawTimer);
    routeDrawTimer=null;
    if(mapInst&&mapInst.getLayer('route-line'))mapInst.setPaintProperty('route-line','line-dasharray',[1,0]);
+   if(mapInst&&mapInst.getLayer('route-casing'))mapInst.setPaintProperty('route-casing','line-dasharray',[1,0]);
   }
  },30);
 }
@@ -756,7 +762,8 @@ function addNavigationLayers(){
  if(!mapInst.getSource('route'))mapInst.addSource('route',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
  if(!mapInst.getSource('storeLine'))mapInst.addSource('storeLine',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
  if(!mapInst.getLayer('store-line'))mapInst.addLayer({id:'store-line',type:'line',source:'storeLine',paint:{'line-color':'#b45309','line-width':2,'line-opacity':.45,'line-dasharray':[1.5,1.5]}});
- if(!mapInst.getLayer('route-line'))mapInst.addLayer({id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#22c55e','line-width':7,'line-opacity':.95}});
+ if(!mapInst.getLayer('route-casing'))mapInst.addLayer({id:'route-casing',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#fff','line-width':12,'line-opacity':.96}});
+ if(!mapInst.getLayer('route-line'))mapInst.addLayer({id:'route-line',type:'line',source:'route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#1a73e8','line-width':7,'line-opacity':.98}});
 }
 
 function enable3DBuildings(){
@@ -775,7 +782,7 @@ function enable3DBuildings(){
     'fill-extrusion-base':['coalesce',['get','min_height'],0],
     'fill-extrusion-opacity':.7
    }
-  },mapInst.getLayer('route-line')?'route-line':undefined);
+  },mapInst.getLayer('route-casing')?'route-casing':(mapInst.getLayer('route-line')?'route-line':undefined));
  }catch(e){}
 }
 
@@ -798,6 +805,9 @@ function setRouteGeometry(geometry,dashed){
  mapInst.getSource('route').setData({type:'FeatureCollection',features:[{type:'Feature',geometry:geometry,properties:{}}]});
  if(mapInst.getLayer('route-line')){
   mapInst.setPaintProperty('route-line','line-dasharray',dashed?[1.5,1.5]:[1,0]);
+ }
+ if(mapInst.getLayer('route-casing')){
+  mapInst.setPaintProperty('route-casing','line-dasharray',dashed?[1.5,1.5]:[1,0]);
  }
  routeLine=true;
 }
@@ -1045,7 +1055,7 @@ function updateMapView(track,gps){
   var routeLng=filteredDriverLng===null?driverLng:filteredDriverLng;
   checkArrival(routeLat,routeLng,c.lat,c.lng);
   if(track&&track.delivering&&!track.delivered){
-   if(distanceToRouteMeters(routeLat,routeLng)>40)routeNeeded=true;
+   if(distanceToRouteMeters(routeLat,routeLng)>ROUTE_OFFROUTE_METERS)routeNeeded=true;
    if(routeShouldRefresh(routeLat,routeLng)){
     routeNeeded=false;
     fetchRoute(routeLat,routeLng,c.lat,c.lng);
@@ -1078,7 +1088,7 @@ function moveDriver(lat,lng,heading){
   var c=custMarker.getLngLat();
   trimRouteToProgress(visual.lat,visual.lng);
   checkArrival(routeLat,routeLng,c.lat,c.lng);
-  if(distanceToRouteMeters(routeLat,routeLng)>40)routeNeeded=true;
+  if(distanceToRouteMeters(routeLat,routeLng)>ROUTE_OFFROUTE_METERS)routeNeeded=true;
   if(routeShouldRefresh(routeLat,routeLng)){
    routeNeeded=false;
    fetchRoute(routeLat,routeLng,c.lat,c.lng);
