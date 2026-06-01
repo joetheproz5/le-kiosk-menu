@@ -25,7 +25,16 @@ jobs:
         run: |
           test -n "$LEKIOSK_WORKER_URL"
           test -n "$LEKIOSK_BACKUP_KEY"
-          curl --fail --show-error --silent \
-            --request POST \
-            --header "X-Backup-Key: ${LEKIOSK_BACKUP_KEY}" \
-            "${LEKIOSK_WORKER_URL%/}/supabase/backup"
+          RESPONSE_FILE="$(mktemp)"
+          HTTP_STATUS="$(
+            curl --show-error --silent \
+              --output "$RESPONSE_FILE" \
+              --write-out "%{http_code}" \
+              --request POST \
+              --header "X-Backup-Key: ${LEKIOSK_BACKUP_KEY}" \
+              "${LEKIOSK_WORKER_URL%/}/supabase/backup"
+          )"
+          echo "Worker returned HTTP ${HTTP_STATUS}"
+          cat "$RESPONSE_FILE"
+          test "$HTTP_STATUS" -ge 200
+          test "$HTTP_STATUS" -lt 300
