@@ -29,7 +29,7 @@ jobs:
 
       - name: Build APK
         working-directory: driver-android
-        run: gradle :app:assembleDebug
+        run: gradle :app:assembleDebug --stacktrace --info
 
       - name: Prepare release asset
         run: cp driver-android/app/build/outputs/apk/debug/app-debug.apk le-kiosk-driver.apk
