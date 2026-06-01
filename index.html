@@ -3090,6 +3090,7 @@ Requires Worker routes from:
   }
 
   .menu-image {
+    width: 132px !important;
     background: #0a0908 !important;
     border-right-color: rgba(201,154,59,.2) !important;
     border-radius: 14px 0 0 14px !important;
@@ -3097,6 +3098,9 @@ Requires Worker routes from:
 
   .menu-image img {
     filter: none !important;
+    transform: none !important;
+    object-fit: cover !important;
+    object-position: center center !important;
   }
 
   .menu-info {
@@ -3284,7 +3288,7 @@ Requires Worker routes from:
 
   @media (max-width: 420px) {
     .menu-image {
-      width: 112px !important;
+      width: 128px !important;
     }
 
     .menu-card {
