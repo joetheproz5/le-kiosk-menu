@@ -1,2931 +1,2914 @@
-const GH_OWNER = 'joetheproz5';
-const GH_REPO  = 'le-kiosk-menu';
-const GH_API   = 'https://api.github.com';
-const RATE_BUCKETS = globalThis.__LK_RATE_BUCKETS || (globalThis.__LK_RATE_BUCKETS = new Map());
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-const ALLOWED_ORIGINS = [
-  'https://lekiosk.store',
-  'https://www.lekiosk.store',
-  'https://joetheproz5.github.io',
+  <!-- ═══ PRIMARY SEO ═══ -->
+  <title>Le Kiosk | Waffles, Crepes & Burgers in Wadi Chahrour, Baabda</title>
+  <meta name="description" content="Le Kiosk in Wadi Chahrour, Baabda — waffles, crepes, pancakes, ice cream, burgers, shisha & more. Open daily 6 PM–12 AM. Dine-in, takeaway & delivery.">
+  <meta name="keywords" content="Le Kiosk, lekiosk, Le Kiosk Baabda, waffles Baabda, crepes Wadi Chahrour, burgers Baabda, shisha Baabda, ice cream Lebanon, delivery Baabda">
+  <link rel="canonical" href="https://lekiosk.store/">
+
+  <!-- ═══ OPEN GRAPH (Facebook, WhatsApp previews) ═══ -->
+  <meta property="og:type" content="restaurant">
+  <meta property="og:title" content="Le Kiosk | Waffles, Crepes & Burgers in Baabda">
+  <meta property="og:description" content="Waffles, crepes, burgers, ice cream & shisha in Wadi Chahrour. Open nightly 6 PM–12 AM. Dine-in, takeaway & delivery.">
+  <meta property="og:image" content="https://lekiosk.store/menupictures/logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://lekiosk.store/">
+  <meta property="og:site_name" content="Le Kiosk">
+  <meta property="og:locale" content="en_US">
+
+  <!-- ═══ TWITTER / X CARD ═══ -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Le Kiosk | Waffles, Crepes & Burgers in Baabda">
+  <meta name="twitter:description" content="Waffles, crepes, burgers, ice cream & shisha in Wadi Chahrour. Open nightly 6 PM–12 AM.">
+  <meta name="twitter:image" content="https://lekiosk.store/menupictures/logo.png">
+
+  <!-- ═══ MOBILE & INDEXING ═══ -->
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#f59e0b">
+  <meta name="geo.region" content="LB-BA">
+  <meta name="geo.placename" content="Baabda, Lebanon">
+  <meta name="geo.position" content="33.821091;35.564961">
+  <meta name="ICBM" content="33.821091, 35.564961">
+
+  <!-- ═══ ICONS ═══ -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- ═══ FONTS ═══ -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- ═══ STRUCTURED DATA (Schema.org) ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Le Kiosk",
+    "alternateName": "lekiosk",
+    "url": "https://lekiosk.store/",
+    "image": [
+      "https://lekiosk.store/menupictures/logo.png"
+    ],
+    "telephone": "+96176840244",
+    "priceRange": "$",
+    "servesCuisine": ["Waffles", "Crepes", "Pancakes", "Ice Cream", "Burgers", "Shisha", "sandwiches"],
+    "hasMenu": "https://lekiosk.store/menu",
+    "description": "Le Kiosk serves waffles, crepes, pancakes, ice cream, burgers, fries, drinks and shisha in Wadi Chahrour, Baabda. Open nightly from 6 PM. Dine-in, takeaway and delivery available.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Wadi Chahrour",
+      "addressLocality": "Baabda",
+      "addressRegion": "Mount Lebanon",
+      "addressCountry": "LB"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 33.821091538427524,
+      "longitude": 35.56496110422372
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "18:00",
+        "closes": "23:59"
+      }
+    ],
+    "potentialAction": {
+      "@type": "OrderAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://lekiosk.store/order",
+        "inLanguage": "en",
+        "actionPlatform": [
+          "http://schema.org/DesktopWebPlatform",
+          "http://schema.org/MobileWebPlatform"
+        ]
+      },
+      "deliveryMethod": ["http://purl.org/goodrelations/v1#DeliveryModePickUp", "http://purl.org/goodrelations/v1#DeliveryModeDirect"]
+    },
+    "sameAs": [
+      "https://www.instagram.com/lekiosk__",
+      "https://maps.app.goo.gl/https://maps.app.goo.gl/qo3zJ3Whywvro84J9"
+    ]
+  }
+  </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; color: #2d2a26; background-color: #fff8ea; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.11'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(245,158,11,.07) 0 1px, transparent 1px), linear-gradient(#f5ead2 1.2px, transparent 1.2px), linear-gradient(90deg, #f5ead2 1.2px, transparent 1.2px); background-size: 140px 140px, 42px 42px, 24px 24px, 24px 24px; }
+        .brand-heading { font-family: 'Fredoka', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .hero-shell { position: relative; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-logo { position: relative; box-shadow: 0 0 0 7px rgba(245,158,11,.16), 0 0 34px rgba(245,158,11,.5), 0 18px 42px rgba(69,26,3,.28); animation: logoPulse 3.8s ease-in-out infinite; }
+        .hero-logo::after { content: ""; position: absolute; inset: -30%; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.68) 48%, transparent 58%); transform: translateX(-95%) rotate(8deg); animation: logoShimmer 4.6s ease-in-out infinite; pointer-events: none; }
+        .hero-divider { display: none; }
+        .hero-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 11px; font-size: 11px; font-weight: 900; line-height: 1; text-decoration: none; white-space: nowrap; }
+        .hero-chip.dark { background: #2a1604; color: #fef3c7; }
+        .hero-chip.light { background: rgba(255,255,255,.78); color: #713f12; border: 1px solid rgba(217,119,6,.18); }
+        .hero-chip.green { background: #fef3c7; color: #92400e; border: 1px solid rgba(217,119,6,.3); }
+        #main-nav { border-radius: 20px; background: rgba(255,255,255,.72); border-color: rgba(245,158,11,.28); box-shadow: 0 14px 42px rgba(69,26,3,.16), inset 0 1px 0 rgba(255,255,255,.74); backdrop-filter: blur(22px) saturate(1.18); -webkit-backdrop-filter: blur(22px) saturate(1.18); }
+        .nav-link { position: relative; flex: 0 0 auto; min-width: max-content; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.6); color: #451a03; border: 1px solid rgba(120,53,15,0.12); font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; transition: background 0.2s, color 0.2s, transform .2s, box-shadow .2s, border-color .2s; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; overflow: visible; line-height: 1; }
+        .nav-link::after { content: ""; position: absolute; left: 16%; right: 16%; bottom: 5px; height: 2px; border-radius: 999px; background: #f59e0b; transform: scaleX(0); transform-origin: center; transition: transform .22s ease; box-shadow: 0 0 12px rgba(245,158,11,.72); }
+        .nav-link:hover { background: #fff7ed; transform: translateY(-1px) scale(1.02); border-color: rgba(245,158,11,.34); }
+        .nav-link:hover::after { transform: scaleX(1); }
+        .nav-link.active { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #451a03; border-color: rgba(180,83,9,.32); box-shadow: 0 10px 24px rgba(245,158,11,0.28), 0 15px 30px rgba(180,83,9,.12); }
+        .nav-link.active::after { transform: scaleX(1); background: #451a03; opacity: .42; }
+        .section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(120,53,15,.14); padding-bottom: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+        .section-head > div { min-width: 0; }
+        .section-kicker { font-size: 10px; line-height: 1; font-weight: 900; color: #d97706; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 6px; }
+        .section-kicker::before { content: "✦"; color: #f59e0b; margin-right: 6px; text-shadow: 0 0 10px rgba(245,158,11,.45); }
+        .section-title { position: relative; display: inline-block; max-width: 100%; overflow-wrap: anywhere; font-family: 'Fredoka', sans-serif; font-size: 28px; line-height: 1; font-weight: 900; color: #451a03; text-transform: uppercase; letter-spacing: 0; text-shadow: 0 2px 0 rgba(254,243,199,.88); }
+        .section-title::after { content: ""; position: absolute; left: 1px; right: 18%; bottom: -8px; height: 4px; border-radius: 999px; background: linear-gradient(90deg, #f59e0b, rgba(245,158,11,.12)); box-shadow: 0 5px 13px rgba(245,158,11,.28); }
+        .section-count { flex-shrink: 0; background: #fff; border: 1px solid rgba(120,53,15,.12); color: #92400e; border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; box-shadow: 0 6px 18px rgba(69,26,3,.08); }
+        .section-count.unavailable-section { width: 100%; text-align: center; background: #451a03; color: #fef3c7; border-color: rgba(245,158,11,.5); padding: 10px 12px; }
+        .menu-grid { display: grid; gap: 14px; }
+        .item-card-wrap { animation: fadeSlideUp .44s ease both; }
+        .menu-grid > .item-card-wrap:nth-child(1), .menu-grid > .addon-card:nth-child(1) { animation-delay: .02s; }
+        .menu-grid > .item-card-wrap:nth-child(2), .menu-grid > .addon-card:nth-child(2) { animation-delay: .06s; }
+        .menu-grid > .item-card-wrap:nth-child(3), .menu-grid > .addon-card:nth-child(3) { animation-delay: .1s; }
+        .menu-grid > .item-card-wrap:nth-child(4), .menu-grid > .addon-card:nth-child(4) { animation-delay: .14s; }
+        .menu-grid > .item-card-wrap:nth-child(5), .menu-grid > .addon-card:nth-child(5) { animation-delay: .18s; }
+        .menu-grid > .item-card-wrap:nth-child(n+6), .menu-grid > .addon-card:nth-child(n+6) { animation-delay: .22s; }
+        .menu-card { min-height: 136px; background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-left: 0 solid transparent; border-radius: 20px; box-shadow: 0 12px 30px rgba(69,26,3,.09); overflow: hidden; display: flex; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, border-left-width .18s ease; }
+        .menu-card:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(69,26,3,.16); border-color: rgba(217,119,6,.34); border-left: 3px solid #f59e0b; }
+        .menu-card.unavailable { opacity: .58; filter: grayscale(.16); }
+        .menu-card.unavailable:hover { transform: none; box-shadow: 0 12px 30px rgba(69,26,3,.09); border-left: 0 solid transparent; }
+        .menu-image { width: 118px; flex-shrink: 0; border-right: 1px solid rgba(120,53,15,.08); border-radius: 20px 0 0 20px; position: relative; overflow: hidden; background: #fef3c7; }
+        .menu-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transform: scale(1.01); }
+        .menu-info { padding: 13px; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; min-width: 0; background: linear-gradient(180deg, #fff, #fffaf0); }
+        .menu-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .menu-name { font-weight: 900; color: #3b1f05; font-size: 16px; line-height: 1.15; }
+        .menu-price { flex-shrink: 0; background: #d97706; color: #fff8ea; border-radius: 999px; padding: 6px 10px; font-size: 12px; line-height: 1; font-weight: 900; box-shadow: 0 7px 17px rgba(217,119,6,.24), inset 0 1px 0 rgba(255,255,255,.22); border: 1px solid rgba(254,243,199,.48); }
+        .menu-desc { color: #6b5b4c; font-size: 12px; margin-top: 7px; line-height: 1.45; padding-right: 3px; }
+        .menu-card.unavailable .menu-info { justify-content: flex-start; gap: 6px; }
+        .unavailable-btn { width: 100%; margin-top: auto; border: 1px solid rgba(120,53,15,.18); background: #f3f4f6; color: #6b5b4c; border-radius: 999px; padding: 8px 12px; font-size: 10px; line-height: 1; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; cursor: not-allowed; text-align: center; }
+        .addon-card { background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-radius: 18px; box-shadow: 0 12px 30px rgba(69,26,3,.08); padding: 14px; display: flex; align-items: center; gap: 14px; animation: fadeSlideUp .44s ease both; }
+        .addon-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 25px; flex-shrink: 0; background: #fef3c7; border: 1px solid rgba(217,119,6,.24); }
+        body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section, body.order-mode #status-badge, body.order-mode #basketball-bubble { display: none !important; }
+        body.order-mode #main-nav { top: 0; }
+        body.order-mode #menu-container { min-height: 100vh; padding-top: 84px; padding-bottom: 130px; }
+        #contact-bubble { transition: opacity 0.25s, transform 0.28s cubic-bezier(.4,0,.2,1); transform: translateY(100%); opacity: 0; pointer-events: none; }
+        #contact-bubble.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+        .bottom-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; padding: 0 12px 12px; pointer-events: none; }
+        .bottom-dock-inner { max-width: 28rem; margin: 0 auto; pointer-events: auto; }
+        .bottom-contact-panel { position: fixed; inset: 0; z-index: 145; background: rgba(15,23,42,.34); backdrop-filter: blur(22px) saturate(1.25); -webkit-backdrop-filter: blur(22px) saturate(1.25); padding: 22px 16px 110px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+        .contact-window { width: min(100%, 28rem); margin: 0 auto; background: rgba(239,246,255,.78); backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2); border: 1px solid rgba(255,255,255,.62); border-radius: 22px; padding: 18px; box-shadow: 0 24px 70px rgba(30,64,175,.24); }
+        .contact-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .contact-title { font-family: 'Fredoka', sans-serif; font-size: 24px; font-weight: 800; color: #172554; line-height: 1; }
+        .contact-sub { font-size: 12px; font-weight: 700; color: #1d4ed8; margin-top: 4px; }
+        .contact-close { width: 38px; height: 38px; border: 0; border-radius: 12px; background: rgba(255,255,255,.75); color: #172554; font-size: 22px; font-weight: 900; cursor: pointer; }
+        .contact-actions { display: grid; gap: 10px; }
+        .contact-action { min-height: 58px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 900; text-decoration: none; }
+        .bottom-bar { min-height: 76px; background: rgba(255,255,255,.92); color: #451a03; border: 1px solid rgba(120,53,15,.16); border-top: 2px solid rgba(245,158,11,.78); border-radius: 21px; box-shadow: 0 18px 50px rgba(69,26,3,.2), inset 0 1px 0 rgba(255,255,255,.76); display: grid; grid-template-columns: repeat(3,1fr); align-items: center; gap: 7px; padding: 8px; backdrop-filter: blur(20px) saturate(1.15); -webkit-backdrop-filter: blur(20px) saturate(1.15); }
+        .bottom-tab { height: 58px; border: 0; border-radius: 16px; background: transparent; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease, box-shadow .15s ease; }
+        .bottom-tab:hover { background: rgba(245,158,11,.1); }
+        .bottom-tab:active { transform: translateY(1px); }
+        .bottom-tab .tab-icon { font-size: 19px; line-height: 1; }
+        .bottom-tab.active, body.order-mode #order-mode-btn, body.contact-open #contact-toggle { background: #1c0f00; color: #fef3c7; box-shadow: 0 0 0 1px rgba(245,158,11,.38), 0 0 22px rgba(245,158,11,.42), 0 10px 24px rgba(28,15,0,.2); }
+        #order-mode-btn.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.3); }
+        .qty-control { display: none; align-items: center; margin-top: 8px; }
+        .order-mode .qty-control { display: flex; }
+        .qty-btn { width: 28px; height: 28px; border-radius: 8px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+        .qty-minus { background: #fef3c7; color: #92400e; }
+        .qty-minus:hover { background: #fde68a; }
+        .qty-plus { background: #f59e0b; color: #fff; }
+        .qty-plus:hover { background: #d97706; }
+        .qty-num { width: 32px; text-align: center; font-size: 14px; font-weight: 700; color: #451a03; background: #fff; border-top: 1.5px solid #fde68a; border-bottom: 1.5px solid #fde68a; height: 28px; line-height: 28px; }
+        .item-card-wrap.has-qty { box-shadow: 0 0 0 2px #f59e0b; border-radius: 16px; }
+        #checkout-pill { position: fixed; top: 58px; left: 50%; width: min(calc(100% - 28px), 28rem); transform: translateX(-50%) translateY(-16px); opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(.4,0,.2,1); z-index: 80; }
+        #checkout-pill.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
+        body.contact-open #checkout-pill { transform: translateX(-50%) translateY(-16px); opacity: 0; pointer-events: none; }
+        body.sheet-open #checkout-pill { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-16px); }
+        .pill-inner { background: radial-gradient(circle at 18% 0, rgba(245,158,11,.28), transparent 34%), linear-gradient(135deg, #1c0f00, #2a1604 54%, #451a03); border: 1px solid rgba(245,158,11,.82); border-radius: 18px; padding: 11px 11px 11px 13px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; box-shadow: 0 0 0 1px rgba(254,243,199,.08), 0 0 28px rgba(245,158,11,.34), 0 16px 38px rgba(28,15,0,.3); cursor: pointer; transition: transform 0.15s, box-shadow .15s; }
+        .pill-inner:hover { transform: translateY(-1px); }
+        .pill-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .pill-label { display: block; color: #fbbf24; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; line-height: 1; margin-bottom: 4px; }
+        .pill-count { background: #f59e0b; color: #1c0f00; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 100px; }
+        .pill-total { color: #fff7ed; font-size: 16px; font-weight: 900; justify-self: start; }
+        .pill-cta { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #1c0f00; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; padding: 11px 14px; border-radius: 13px; white-space: nowrap; box-shadow: 0 8px 20px rgba(245,158,11,.28), inset 0 1px 0 rgba(255,255,255,.34); }
+        #checkout-sheet { position: fixed; inset: 0; z-index: 150; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
+        #checkout-sheet.open { pointer-events: all; }
+        #sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.35s ease; }
+        #checkout-sheet.open #sheet-backdrop { background: rgba(0,0,0,0.55); }
+        #sheet-body { position: relative; background: #fff; border-radius: 24px 24px 0 0; max-height: 75vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1); max-width: 28rem; margin: 0 auto; width: 100%; }
+        #checkout-sheet.open #sheet-body { transform: translateY(0); }
+        .sheet-handle { width: 46px; height: 5px; background: #d1d5db; border-radius: 100px; margin: 12px auto 0; flex-shrink: 0; cursor: grab; }
+        .sheet-handle,.sheet-header { touch-action: none; }
+        .sheet-header { padding: 16px 20px 12px; border-bottom: 1px solid #fef3c7; flex-shrink: 0; }
+        .sheet-scroll { touch-action: pan-y; }
+        .sheet-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .sheet-actions { display: flex; align-items: center; gap: 8px; }
+        .clear-cart-btn { border: 1px solid #fecaca; background: #fff1f2; color: #be123c; border-radius: 999px; padding: 7px 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+        .clear-cart-btn:hover { background: #ffe4e6; }
+        .sheet-scroll { overflow-y: auto; flex: 1; padding: 0 20px 24px; -webkit-overflow-scrolling: touch; }
+        .sheet-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #fef3c7; }
+        .sheet-item:last-child { border-bottom: none; }
+        .sheet-item-name { font-size: 13px; font-weight: 700; color: #451a03; }
+        .sheet-item-qty { font-size: 11px; color: #f59e0b; font-weight: 700; margin-top: 1px; }
+        .sheet-item-price { font-size: 13px; font-weight: 700; color: #d97706; flex-shrink: 0; margin-left: 12px; }
+        .addon-section { padding: 6px 0 10px; border-bottom: 1px solid #fef3c7; }
+        .addon-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #b45309; margin-bottom: 6px; }
+        .addon-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .addon-chip { padding: 5px 12px; border-radius: 100px; border: 1.5px solid #fde68a; background: #fffbeb; color: #92400e; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s; }
+        .addon-chip:hover { border-color: #f59e0b; background: #fef3c7; }
+        .addon-chip.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+        .sheet-divider { height: 1px; background: #fde68a; margin: 16px 0; }
+        .sheet-section-title { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 700; color: #451a03; margin-bottom: 10px; }
+        .sheet-input { width: 100%; padding: 11px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; color: #451a03; background: #fffbeb; outline: none; transition: border-color 0.2s; }
+        .sheet-input:focus { border-color: #f59e0b; }
+        .sheet-input.error { border-color: #ef4444; background: #fef2f2; }
+        .order-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+        .order-type-btn { padding: 10px 4px; border-radius: 12px; border: 2px solid #fde68a; background: #fffbeb; color: #92400e; font-family: 'Poppins', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; }
+        .order-type-btn:hover { background: #fef3c7; border-color: #fcd34d; }
+        .order-type-btn.selected { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+        .order-type-btn .type-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+        .delivery-sub { margin-top: 12px; display: none; }
+        .delivery-sub.show { display: block; }
+        .location-detect-box { border: 2px dashed #fde68a; border-radius: 14px; padding: 16px; text-align: center; background: #fffbeb; }
+        .location-detect-box.detected { border-style: solid; border-color: #f59e0b; background: #fef3c7; }
+        .location-detect-box.no-delivery { border-style: solid; border-color: #ef4444; background: #fef2f2; }
+        .locate-main-btn { background: #f59e0b; color: #1c0f00; border: none; border-radius: 10px; padding: 10px 20px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; margin-top: 8px; }
+        .locate-main-btn:hover { background: #d97706; }
+        .locate-main-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; margin-top: 10px; }
+        .zone-badge.zone-a { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .zone-badge.zone-b { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .zone-badge.zone-c { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
+        .zone-badge.no-del { background: #f3f4f6; color: #374151; border: 1.5px solid #e5e7eb; }
+        .manual-addr-ta { width: 100%; padding: 10px 14px; border: 2px solid #fde68a; border-radius: 12px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #451a03; background: #fffbeb; outline: none; resize: none; min-height: 64px; line-height: 1.5; transition: border-color 0.2s; }
+        .manual-addr-ta:focus { border-color: #f59e0b; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; background: #fef3c7; border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
+        .err-text { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
+        .err-text.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin .7s linear infinite; display: inline-block; }
+        #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #f59e0b; color: #451a03; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+        #send-order-btn:hover { background: #d97706; }
+        #send-order-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        #inbox-toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1c0f00; color: #fef3c7; padding: 10px 20px; border-radius: 100px; font-size: 12px; font-weight: 700; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        #inbox-toast.show { transform: translateX(-50%) translateY(0); }
+        #inbox-toast.ok  { background: #92400e; }
+        #inbox-toast.err { background: #dc2626; }
+
+        /* OPEN / CLOSED STATUS BADGE */
+        #status-badge { position: fixed; top: 12px; right: 12px; z-index: 60; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; background: #fef3c7; border: 1px solid #fde68a; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: opacity 0.25s ease, transform 0.25s ease; }
+        #status-badge.hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
+        #status-badge.open   { color: #92400e; }
+        #status-badge.closed { color: #991b1b; }
+        #status-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        #status-badge.open .dot   { background: #f59e0b; animation: statusPulse 2s infinite; }
+        #status-badge.closed .dot { background: #ef4444; }
+        @keyframes statusPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(245,158,11,.7); }
+            70%  { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+            100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+        }
+        @keyframes logoPulse {
+            0%, 100% { transform: translateZ(0) scale(1); box-shadow: 0 0 0 7px rgba(245,158,11,.16), 0 0 34px rgba(245,158,11,.5), 0 18px 42px rgba(69,26,3,.28); }
+            50% { transform: translateZ(0) scale(1.025); box-shadow: 0 0 0 9px rgba(245,158,11,.2), 0 0 46px rgba(245,158,11,.62), 0 20px 46px rgba(69,26,3,.3); }
+        }
+        @keyframes logoShimmer {
+            0%, 52% { transform: translateX(-95%) rotate(8deg); }
+            70%, 100% { transform: translateX(95%) rotate(8deg); }
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .hero-logo, .hero-logo::after, .item-card-wrap, .addon-card { animation: none; }
+            .nav-link, .menu-card, .bottom-tab, .pill-inner { transition: none; }
+        }
+    </style>
+</head>
+<body class="pb-32">
+
+<div id="status-badge" class="closed" aria-live="polite">
+    <span class="dot"></span>
+    <span id="status-text">…</span>
+</div>
+
+<div id="inbox-toast"></div>
+
+<header class="pt-5 pb-5 px-4 max-w-md mx-auto">
+  <div class="hero-shell px-5 pt-5 pb-4 text-center">
+    <div class="hero-content">
+    <div class="hero-logo w-28 h-28 mx-auto bg-white border-[6px] border-amber-950 rounded-full mb-4 overflow-hidden relative">
+        <img src="menupictures/logo.png" alt="Le Kiosk Logo" class="w-full h-full object-cover object-center">
+    </div>
+    <h1 class="brand-heading text-[3.65rem] font-extrabold text-amber-950 uppercase leading-none mt-1" style="text-shadow:0 3px 0 rgba(254,243,199,.95), 0 10px 26px rgba(69,26,3,.2);">Le Kiosk</h1>
+    <p class="text-sm font-bold text-amber-800 mt-2">Waffles, burgers, ice cream, shisha & more.</p>
+    <p class="text-xs text-amber-900/70 italic font-semibold mt-1">"Serving Cravings, Sharing Smiles"</p>
+    <div class="mt-5 flex flex-wrap justify-center gap-2">
+        <span class="hero-chip dark">6:00 - 12:00</span>
+        <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="hero-chip light hover:bg-amber-100 transition">Wady Chahrour</a>
+    </div>
+    <div class="hero-divider" aria-hidden="true"></div>
+    </div>
+  </div>
+</header>
+
+<nav id="main-nav" class="sticky top-2 bg-white/88 backdrop-blur-md border border-amber-900/10 shadow-lg z-50 overflow-x-auto whitespace-nowrap scrollbar-hide py-2.5 px-3 flex gap-2 max-w-md mx-auto"></nav>
+
+<main class="max-w-md mx-auto px-4 pt-6 space-y-14" id="menu-container">
+    <div class="text-center py-12 text-amber-400 text-sm">Loading menu…</div>
+</main>
+
+<div id="review-divider" class="max-w-md mx-auto px-4 mt-4 mb-2 flex items-center gap-3">
+    <div class="flex-1 h-px bg-amber-200"></div>
+    <span class="text-amber-400 text-[10px] font-bold uppercase tracking-widest px-2">✦ &nbsp; Le Kiosk &nbsp; ✦</span>
+    <div class="flex-1 h-px bg-amber-200"></div>
+</div>
+
+<section id="review-section" class="max-w-md mx-auto px-4 pb-6 mt-2">
+    <div class="bg-white rounded-2xl border border-amber-200/60 shadow-sm p-5 text-center">
+        <div class="text-3xl mb-2">⭐</div>
+        <h3 class="brand-heading text-lg font-bold text-amber-950 uppercase tracking-wide">Enjoyed your visit?</h3>
+        <p class="text-gray-400 text-xs mt-1 mb-4">Leave us a review — it means the world to us!</p>
+        <div class="flex gap-3">
+            <a href="https://g.page/r/CdZUOIeNZTlTEBM/review" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Google Review
+            </a>
+            <a href="https://wa.me/76840244?text=Hi%20Le%20Kiosk!%20I%20wanted%20to%20leave%20some%20feedback%20%F0%9F%8C%9F" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 rounded-xl transition shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                WhatsApp
+            </a>
+        </div>
+    </div>
+</section>
+
+<div id="checkout-pill">
+    <div class="pill-inner" id="checkout-pill-inner">
+        <div class="pill-main">
+            <span class="pill-count" id="pill-count">0 items</span>
+            <span>
+                <span class="pill-label">Your order</span>
+                <span class="pill-total" id="pill-total">$0.00</span>
+            </span>
+        </div>
+        <span class="pill-cta">Checkout →</span>
+    </div>
+</div>
+
+<div id="checkout-sheet">
+    <div id="sheet-backdrop"></div>
+    <div id="sheet-body">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <div class="sheet-title-row">
+                <span class="brand-heading text-xl font-bold text-amber-950">Your Order</span>
+                <div class="sheet-actions">
+                    <button id="clear-cart-btn" class="clear-cart-btn" type="button">Clear cart</button>
+                    <button id="close-sheet-btn" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">✕</button>
+                </div>
+            </div>
+        </div>
+        <div class="sheet-scroll" id="sheet-scroll"></div>
+    </div>
+</div>
+
+<div class="bottom-dock">
+    <div class="bottom-dock-inner">
+    <div id="contact-bubble" class="bottom-contact-panel">
+        <div class="contact-window">
+            <div class="contact-head">
+                <div>
+                    <div class="contact-title">Contact Le Kiosk</div>
+                    <div class="contact-sub">Call us, message us, or find us in Wadi Chahrour.</div>
+                </div>
+                <button id="contact-close" class="contact-close" type="button">×</button>
+            </div>
+            <div class="contact-actions">
+                <a href="tel:+96176840244" class="contact-action bg-amber-500 hover:bg-amber-400 text-white transition shadow-sm">📞 Call +961 76 840 244</a>
+                <a href="https://wa.me/76840244" target="_blank" rel="noopener noreferrer" class="contact-action bg-green-500 hover:bg-green-400 text-white transition shadow-sm">WhatsApp</a>
+                <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="contact-action bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-200 transition">📍 Open Location</a>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar" aria-label="Main actions">
+        <button id="menu-jump-btn" class="bottom-tab" type="button"><span class="tab-icon">☰</span><span>Menu</span></button>
+        <button id="order-mode-btn" class="bottom-tab" type="button"><span class="tab-icon">🛒</span><span>Order</span></button>
+        <button id="contact-toggle" class="bottom-tab" type="button"><span class="tab-icon">☎</span><span>Contact</span></button>
+    </div>
+    </div>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━
+let TESTING_MODE = false;
+let MENU_ORDERING_ENABLED = true;
+// load from config
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const WORKER_URL = 'https://lekiosk-order-inbox.lekiosklb.workers.dev';
+    function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getVisitorId(){
+  const key = 'lk_menu_visitor_id';
+  let id = localStorage.getItem(key);
+  if(!id){
+    id = crypto?.randomUUID?.() || ('v-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
+async function trackMenuVisit(){
+  const day = todayKey();
+  const seenKey = 'lk_menu_visit_' + day;
+  if(localStorage.getItem(seenKey) === '1') return;
+
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/menu-visit`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        visitorId: getVisitorId(),
+        visitDate: day,
+        path: location.pathname,
+        referrer: document.referrer || ''
+      })
+    });
+
+    if(res.ok) localStorage.setItem(seenKey, '1');
+  }catch(_){}
+}
+
+trackMenuVisit();
+const STORAGE_PUBLIC_BASE = 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
+const PILL_COLORS = {
+    amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
+    red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
+    green:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
+    blue:   { bg:'#dbeafe', border:'#bfdbfe', text:'#1e40af' },
+    purple: { bg:'#ede9fe', border:'#ddd6fe', text:'#5b21b6' },
+    pink:   { bg:'#fce7f3', border:'#fbcfe8', text:'#9d174d' },
+    gray:   { bg:'#f3f4f6', border:'#e5e7eb', text:'#374151' },
+    dark:   { bg:'#1f2937', border:'#374151', text:'#f9fafb' },
+};
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function jsStr(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r/g,'').replace(/\n/g,'\\n');}
+function newOrderId(){return 'MENU-'+(window.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(16).slice(2));}
+
+// DELIVERY ZONES
+const CENTER_LAT = 33.821091538427524;
+const CENTER_LNG = 35.56496110422372;
+const ZONE_A_RADIUS_KM = 0.60;
+const ZONE_B_LAT_SEMI = 0.010, ZONE_B_LNG_SEMI = 0.022;
+const ZONE_C_POLYGON = [
+    [33.870,35.535],[33.867,35.558],[33.862,35.590],
+    [33.848,35.608],[33.825,35.622],[33.808,35.610],
+    [33.792,35.590],[33.785,35.555],[33.787,35.520],
+    [33.797,35.502],[33.816,35.490],[33.835,35.492],
+    [33.843,35.542],[33.858,35.542],[33.864,35.538],
 ];
 
-const ALLOWED_FILES = ['orders.json','inbox.json','menu.json','blocklist.json','customers.json','config.json'];
-
-function wsAccessToken(request, url) {
-  const queryToken = url.searchParams.get('token') || '';
-  if (queryToken) return queryToken;
-  const protocols = String(request.headers.get('Sec-WebSocket-Protocol') || '')
-    .split(',')
-    .map(p => p.trim());
-  const tokenProtocol = protocols.find(p => p.startsWith('lk-token-'));
-  return tokenProtocol ? tokenProtocol.slice('lk-token-'.length) : '';
+function distKm(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function inEllipse(la,ln,cL,cN,lS,nS){return((la-cL)/lS)**2+((ln-cN)/nS)**2<=1;}
+function pointInPolygon(lat,lng,poly){let inside=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const[xi,yi]=[poly[i][0],poly[i][1]],[xj,yj]=[poly[j][0],poly[j][1]];if(((yi>lng)!==(yj>lng))&&(lat<(xj-xi)*(lng-yi)/(yj-yi)+xi))inside=!inside;}return inside;}
+function getDeliveryZone(lat,lng){
+    const d=distKm(lat,lng,CENTER_LAT,CENTER_LNG);
+    if(d<=ZONE_A_RADIUS_KM) return{zone:'zone-a',fee:.5,label:'Zone A',feeLabel:'$0.50',cls:'zone-a',emoji:'📍',canDeliver:true};
+    if(inEllipse(lat,lng,CENTER_LAT,CENTER_LNG,ZONE_B_LAT_SEMI,ZONE_B_LNG_SEMI)) return{zone:'zone-b',fee:1,label:'Zone B',feeLabel:'$1.00',cls:'zone-b',emoji:'🛵',canDeliver:true};
+    if(pointInPolygon(lat,lng,ZONE_C_POLYGON)) return{zone:'zone-c',fee:1.5,label:'Zone C',feeLabel:'$1.50',cls:'zone-c',emoji:'🗺️',canDeliver:true};
+    return{zone:'none',fee:0,label:'Outside delivery area',feeLabel:'$0.00',cls:'no-del',emoji:'🚫',canDeliver:false};
 }
 
-function wsSelectedProtocol(request) {
-  return String(request.headers.get('Sec-WebSocket-Protocol') || '')
-    .split(',')
-    .map(p => p.trim())
-    .find(p => p.startsWith('lk-token-')) || '';
+// PHONE HELPERS
+function normalizePhone(raw){
+    const d=(raw||'').replace(/\D/g,'');
+    if(d.length===8) return d;
+    if(d.length===11 && d.startsWith('961')) return d.slice(3);
+    return null;
 }
-
-function safeCompare(a, b) {
-  a = String(a || '');
-  b = String(b || '');
-  if (!a || !b || a.length !== b.length) return false;
-  let out = 0;
-  for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return out === 0;
-}
-
-export class OrderRoom {
-  constructor(state) {
-    this.state = state;
-    this.sessions = new Map();
-  }
-
-  async fetch(request) {
-    const url = new URL(request.url);
-    const role = url.searchParams.get('role');
-
-    if (request.headers.get('Upgrade') !== 'websocket') {
-      return new Response('Expected WebSocket', { status: 426 });
-    }
-
-    const pair = new WebSocketPair();
-    const client = pair[0];
-    const server = pair[1];
-    server.accept();
-
-    // Keep one live socket per role and close stale sockets for this order.
-    const old = this.sessions.get(role);
-    if (old) {
-      try { old.close(1000, 'replaced'); } catch (_) {}
-    }
-    this.sessions.set(role, server);
-
-    server.addEventListener('message', (evt) => {
-      // Driver messages are live map updates; forward them to the customer only.
-      if (role === 'driver') {
-        const customer = this.sessions.get('customer');
-        if (customer && customer.readyState === 1) customer.send(evt.data);
-      }
+async function isPhoneBlocked(phone){
+  try{
+    const res = await fetch(`${WORKER_URL}/supabase/blocklist/check`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({phone}),
+      cache:'no-store'
     });
+    if(!res.ok) return false;
 
-    const cleanup = () => {
-      if (this.sessions.get(role) === server) this.sessions.delete(role);
-    };
-    server.addEventListener('close', cleanup);
-    server.addEventListener('error', cleanup);
-
-    const selectedProtocol = wsSelectedProtocol(request);
-    const init = { status: 101, webSocket: client };
-    if (selectedProtocol) init.headers = { 'Sec-WebSocket-Protocol': selectedProtocol };
-    return new Response(null, init);
+    const j = await res.json();
+    return !!j.blocked;
+  }catch(_){
+    return false;
   }
 }
 
-export default {
-  async fetch(request, env) {
-    const origin = request.headers.get('Origin') || '';
-    const corsOk = ALLOWED_ORIGINS.includes(origin);
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': corsOk ? origin : ALLOWED_ORIGINS[0],
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Setup-Key, X-Backup-Key, X-Driver-Pin, X-Driver-Token, X-Track-Token',
-      'X-Content-Type-Options': 'nosniff',
-      'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Permissions-Policy': 'camera=(), microphone=()',
-    };
+// STATE
+let orderMode=false,cart={},addonSel={},shishaSel={},itemMeta={};
+let selectedType=null,detectedZone=null,userGPS=null,deliveryAddress='',changeFor='';
+let customerName='',customerPhone='';
+let _addonMap=[];
+let bubbleOpen=false;
+
+function isOpen(){
+    if(TESTING_MODE) return true;
+    const now=new Date(),lbMin=(now.getUTCHours()*60+now.getUTCMinutes()+180)%1440;
+    const h=Math.floor(lbMin/60);
+    return h>=18 || h<1;
+}
+
+// OPEN/CLOSED BADGE
+function updateStatusBadge(){
+    const badge=document.getElementById('status-badge');
+    const text=document.getElementById('status-text');
+    if(!badge||!text) return;
+    const open=isOpen();
+    badge.classList.toggle('open',open);
+    badge.classList.toggle('closed',!open);
+    text.textContent=open?'Open':'Closed';
+    badge.title=open?'We are open — 6 PM to 12 AM':'Currently closed — opens 6 PM';
+}
+
+// INBOX TOAST
+let _toastTimer;
+function showInboxToast(msg, type='', html=false) {
+    const t = document.getElementById('inbox-toast');
+    if(html) t.innerHTML = msg; else t.textContent = msg;
+    t.className = 'show' + (type ? ' '+type : '');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { t.className = ''; }, 4000);
+}
+
+async function dispatchOrder(order) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders });
-    }
-
-    const url = new URL(request.url);
-
-    // ── WebSocket /ws/:orderId — real-time driver map updates via Durable Object ──
-    if (url.pathname.startsWith('/ws/')) {
-      const orderId = url.pathname.split('/')[2];
-      if (!orderId) return new Response('Missing order id', { status: 400, headers: corsHeaders });
-      const role = url.searchParams.get('role');
-      if (!['customer', 'driver'].includes(role)) {
-        return new Response('Invalid role', { status: 400, headers: corsHeaders });
-      }
-
-      const token = wsAccessToken(request, url);
-      const orderRes = await fetch(
-        `${env.SUPABASE_URL}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=payload&limit=1`,
-        {
-          headers: {
-            'apikey': env.SUPABASE_SERVICE_ROLE_KEY,
-            'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-          },
-        }
-      );
-      const rows = orderRes.ok ? await orderRes.json().catch(() => []) : [];
-      const payload = Array.isArray(rows) && rows.length ? (rows[0].payload || {}) : null;
-      if (!payload) return new Response('Order not found', { status: 404, headers: corsHeaders });
-      const access = payload.access || {};
-      const expected = role === 'driver' ? access.driverToken : access.customerToken;
-      if (!expected || !token || !safeCompare(token, expected)) {
-        return new Response('Forbidden', { status: 403, headers: corsHeaders });
-      }
-      const id = env.ORDER_ROOM.idFromName(orderId);
-      const room = env.ORDER_ROOM.get(id);
-      return room.fetch(request);
-    }
-
-    const ghHeaders = {
-      'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-      'User-Agent': 'LeKiosk-Worker/1.0',
-    };
-
-    function json(data, status = 200) {
-      return new Response(JSON.stringify(data), {
-        status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    function b64decode(b64) {
-      const bin = atob(b64.replace(/\n/g, ''));
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return new TextDecoder().decode(bytes);
-    }
-
-    function b64encode(str) {
-      const bytes = new TextEncoder().encode(str);
-      let bin = '';
-      for (const b of bytes) bin += String.fromCharCode(b);
-      return btoa(bin);
-    }
-
-    async function supabaseFetch(path, options = {}) {
-      const res = await fetch(`${env.SUPABASE_URL}/rest/v1${path}`, {
-        ...options,
-        headers: {
-          'apikey': env.SUPABASE_SERVICE_ROLE_KEY,
-          'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation',
-          ...(options.headers || {}),
-        },
-      });
-
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : null;
-
-      if (!res.ok) {
-        throw new Error(data?.message || data?.error || `Supabase ${res.status}`);
-      }
-
-      return data;
-    }
-
-    async function supabaseUploadImage(path, bytes, contentType, env) {
-      const res = await fetch(
-        `${env.SUPABASE_URL}/storage/v1/object/menu-images/${path}`,
-        {
-          method: 'POST',
-          headers: {
-            'apikey': env.SUPABASE_SERVICE_ROLE_KEY,
-            'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': contentType,
-            'x-upsert': 'true',
-          },
-          body: bytes,
-        }
-      );
-
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : null;
-
-      if (!res.ok) {
-        throw new Error(data?.message || data?.error || `Storage ${res.status}`);
-      }
-
-      return data;
-    }
-
-    // ── Staff auth helpers ──
-    const PBKDF2_ITERATIONS = 100000;
-    const SESSION_HOURS = 6;
-
-    function bytesToB64(bytes) {
-      let bin = '';
-      for (const b of bytes) bin += String.fromCharCode(b);
-      return btoa(bin);
-    }
-
-    function b64ToBytes(b64) {
-      const bin = atob(b64);
-      return Uint8Array.from(bin, c => c.charCodeAt(0));
-    }
-
-    function randomB64(len = 32) {
-      const bytes = new Uint8Array(len);
-      crypto.getRandomValues(bytes);
-      return bytesToB64(bytes);
-    }
-
-    async function sha256Hex(text) {
-      const data = new TextEncoder().encode(text);
-      const digest = await crypto.subtle.digest('SHA-256', data);
-      return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    async function passwordHash(password, saltB64) {
-      const key = await crypto.subtle.importKey(
-        'raw',
-        new TextEncoder().encode(password),
-        'PBKDF2',
-        false,
-        ['deriveBits']
-      );
-
-      const bits = await crypto.subtle.deriveBits(
-        {
-          name: 'PBKDF2',
-          salt: b64ToBytes(saltB64),
-          iterations: PBKDF2_ITERATIONS,
-          hash: 'SHA-256',
-        },
-        key,
-        256
-      );
-
-      return bytesToB64(new Uint8Array(bits));
-    }
-
-    function safeEqual(a, b) {
-      if (!a || !b || a.length !== b.length) return false;
-      let out = 0;
-      for (let i = 0; i < a.length; i++) {
-        out |= a.charCodeAt(i) ^ b.charCodeAt(i);
-      }
-      return out === 0;
-    }
-
-    function bearerToken(request) {
-      const header = request.headers.get('Authorization') || '';
-      return header.startsWith('Bearer ') ? header.slice(7).trim() : '';
-    }
-
-    async function requireAuth(request, roles = []) {
-      const token = bearerToken(request);
-
-      if (!token) {
-        throw json({ error: 'Auth required' }, 401);
-      }
-
-      const tokenHash = await sha256Hex(token);
-
-      const rows = await supabaseFetch(
-        `/staff_sessions?token_hash=eq.${encodeURIComponent(tokenHash)}&select=*`
-      );
-
-      const session = Array.isArray(rows) && rows.length ? rows[0] : null;
-
-      if (!session || new Date(session.expires_at).getTime() <= Date.now()) {
-        throw json({ error: 'Session expired' }, 401);
-      }
-
-      if (roles.length && !roles.includes(session.role)) {
-        throw json({ error: 'Forbidden' }, 403);
-      }
-
-      return session;
-    }
-
-    async function guard(roles) {
-      try {
-        return await requireAuth(request, roles);
-      } catch (e) {
-        if (e instanceof Response) return e;
-        throw e;
-      }
-    }
-
-    function cleanPoint(point) {
-      if (!point) return null;
-
-      if (Array.isArray(point) && point.length >= 2) {
-        const lat = Number(point[0]);
-        const lng = Number(point[1]);
-        return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-      }
-
-      if (typeof point === 'object') {
-        const lat = Number(point.lat ?? point.latitude);
-        const lng = Number(point.lng ?? point.lon ?? point.long ?? point.longitude);
-        return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-      }
-
-      return null;
-    }
-
-    function pointFromText(text) {
-      const raw = String(text || '');
-      const match = raw.match(/(?:q=|@)?(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
-      if (!match) return null;
-      const lat = Number(match[1]);
-      const lng = Number(match[2]);
-      return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
-    }
-
-    function customerGPS(payload) {
-      if (!payload || typeof payload !== 'object') return null;
-
-      return cleanPoint(payload.gps)
-        || cleanPoint(payload.customerGps)
-        || cleanPoint(payload.customerGPS)
-        || cleanPoint(payload.customerLocation)
-        || cleanPoint(payload.deliveryLocation)
-        || cleanPoint(payload.location)
-        || cleanPoint(payload.coordinates)
-        || cleanPoint(payload.coords)
-        || cleanPoint(payload.tracking && payload.tracking.customerLocation)
-        || pointFromText(payload.mapUrl)
-        || pointFromText(payload.locationUrl)
-        || pointFromText(payload.address)
-        || pointFromText(payload.note);
-    }
-
-    function clientIp() {
-      return request.headers.get('CF-Connecting-IP')
-        || request.headers.get('X-Forwarded-For')
-        || 'unknown';
-    }
-
-    function rateLimit(name, limit, windowMs) {
-      const key = `${name}:${clientIp()}`;
-      const now = Date.now();
-      const bucket = RATE_BUCKETS.get(key) || { count: 0, reset: now + windowMs };
-      if (bucket.reset <= now) {
-        bucket.count = 0;
-        bucket.reset = now + windowMs;
-      }
-      bucket.count++;
-      RATE_BUCKETS.set(key, bucket);
-      if (bucket.count > limit) {
-        return json({ error: 'Too many requests. Try again soon.' }, 429);
-      }
-      if (RATE_BUCKETS.size > 1000) {
-        for (const [k, v] of RATE_BUCKETS) if (v.reset <= now) RATE_BUCKETS.delete(k);
-      }
-      return null;
-    }
-
-    async function siteConfigRaw() {
-      const rows = await supabaseFetch('/app_config?key=eq.site_settings&select=*').catch(() => []);
-      const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-      return row && row.value && typeof row.value === 'object' ? row.value : {};
-    }
-
-    function publicConfig(value, isAdmin = false) {
-      const clean = { ...(value || {}) };
-      const pinSet = !!(clean.driverPinHash || env.DRIVER_PIN || env.DRIVER_PIN_HASH);
-      delete clean.driverPin;
-      delete clean.driverPinHash;
-      if (isAdmin) clean.driverPinSet = pinSet;
-      return clean;
-    }
-
-    function backupKeyOk(request) {
-      const key = request.headers.get('X-Backup-Key') || '';
-      return !!(env.BACKUP_KEY && safeCompare(key, env.BACKUP_KEY));
-    }
-
-    function backupDateKey() {
-      return new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'Asia/Beirut',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      }).format(new Date());
-    }
-
-    function b64url(bytes) {
-      let bin = '';
-      for (const b of bytes) bin += String.fromCharCode(b);
-      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-    }
-
-    async function hmacSign(text, secret) {
-      const key = await crypto.subtle.importKey(
-        'raw',
-        new TextEncoder().encode(secret),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign']
-      );
-      const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(text));
-      return b64url(new Uint8Array(sig));
-    }
-
-    async function driverAppToken(expiresAtMs) {
-      if (!env.APP_DOWNLOAD_SECRET) throw new Error('Missing APP_DOWNLOAD_SECRET Worker secret');
-      const exp = String(expiresAtMs);
-      return `${exp}.${await hmacSign(exp, env.APP_DOWNLOAD_SECRET)}`;
-    }
-
-    async function verifyDriverAppToken(token) {
-      if (!env.APP_DOWNLOAD_SECRET) return false;
-      const [exp, sig] = String(token || '').split('.');
-      const expMs = Number(exp);
-      if (!exp || !sig || !Number.isFinite(expMs) || expMs <= Date.now()) return false;
-      const expected = await hmacSign(exp, env.APP_DOWNLOAD_SECRET);
-      return safeEqual(sig, expected);
-    }
-
-    async function signedDriverApkUrl() {
-      const bucket = env.DRIVER_APK_BUCKET || 'driver-apps';
-      const path = env.DRIVER_APK_PATH || 'le-kiosk-driver.apk';
-      const res = await fetch(
-        `${env.SUPABASE_URL}/storage/v1/object/sign/${encodeURIComponent(bucket)}/${path.split('/').map(encodeURIComponent).join('/')}`,
-        {
-          method: 'POST',
-          headers: {
-            'apikey': env.SUPABASE_SERVICE_ROLE_KEY,
-            'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ expiresIn: 15 * 60 }),
-        }
-      );
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.signedURL) {
-        throw new Error(data.message || data.error || `Driver APK signing failed ${res.status}`);
-      }
-      return `${env.SUPABASE_URL}/storage/v1${data.signedURL}`;
-    }
-
-    function beirutHour() {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Beirut',
-        hour: '2-digit',
-        hour12: false,
-      }).formatToParts(new Date());
-      return Number(parts.find(p => p.type === 'hour')?.value || 0);
-    }
-
-    function storeIsOpen(cfg) {
-      if (cfg.testingMode) return true;
-      const h = beirutHour();
-      return h >= 18 || h < 1;
-    }
-
-    function normalizePhone(value) {
-      const d = String(value || '').replace(/\D/g, '');
-      if (d.length === 8) return d;
-      if (d.length === 11 && d.startsWith('961')) return d.slice(3);
-      return '';
-    }
-
-    function priceNumber(price) {
-      const n = Number(String(price || '').replace(/[^0-9.-]/g, ''));
-      return Number.isFinite(n) ? n : 0;
-    }
-
-    function money(price) {
-      return `$${Number(price || 0).toFixed(2).replace(/\.00$/, '')}`;
-    }
-
-    function cleanText(value, max = 160) {
-      return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
-    }
-
-    const CENTER_LAT = 33.821091538427524;
-    const CENTER_LNG = 35.56496110422372;
-    const ZONE_A_RADIUS_KM = 0.60;
-    const ZONE_B_LAT_SEMI = 0.010;
-    const ZONE_B_LNG_SEMI = 0.022;
-    const ZONE_C_POLYGON = [
-      [33.870,35.535],[33.867,35.558],[33.862,35.590],
-      [33.848,35.608],[33.825,35.622],[33.808,35.610],
-      [33.792,35.590],[33.785,35.555],[33.787,35.520],
-      [33.797,35.502],[33.816,35.490],[33.835,35.492],
-      [33.843,35.542],[33.858,35.542],[33.864,35.538],
-    ];
-
-    function distKm(a, b, c, d) {
-      const R = 6371, dL = (c - a) * Math.PI / 180, dl = (d - b) * Math.PI / 180;
-      const x = Math.sin(dL / 2) ** 2 + Math.cos(a * Math.PI / 180) * Math.cos(c * Math.PI / 180) * Math.sin(dl / 2) ** 2;
-      return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-    }
-
-    function inEllipse(la, ln, cL, cN, lS, nS) {
-      return ((la - cL) / lS) ** 2 + ((ln - cN) / nS) ** 2 <= 1;
-    }
-
-    function pointInPolygon(lat, lng, poly) {
-      let inside = false;
-      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-        const [xi, yi] = [poly[i][0], poly[i][1]], [xj, yj] = [poly[j][0], poly[j][1]];
-        if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) inside = !inside;
-      }
-      return inside;
-    }
-
-    function deliveryZoneForPoint(point) {
-      if (!point) return null;
-      const d = distKm(point.lat, point.lng, CENTER_LAT, CENTER_LNG);
-      if (d <= ZONE_A_RADIUS_KM) return { label: 'Zone A', fee: 0.5 };
-      if (inEllipse(point.lat, point.lng, CENTER_LAT, CENTER_LNG, ZONE_B_LAT_SEMI, ZONE_B_LNG_SEMI)) return { label: 'Zone B', fee: 1 };
-      if (pointInPolygon(point.lat, point.lng, ZONE_C_POLYGON)) return { label: 'Zone C', fee: 1.5 };
-      return { label: 'Outside delivery area', fee: 0, outside: true };
-    }
-
-    async function menuProducts() {
-      const categories = await supabaseFetch('/categories?select=key&active=eq.true');
-      const activeCategoryKeys = new Set((Array.isArray(categories) ? categories : []).map(cat => String(cat.key || '')));
-      const products = await supabaseFetch('/products?select=*&active=eq.true&order=sort_order.asc');
-      return Array.isArray(products) ? products.filter(product => activeCategoryKeys.has(String(product.category_key || ''))) : [];
-    }
-
-    function findProduct(products, item) {
-      const categoryKey = String(item.categoryKey || item.catKey || item.category || '').trim();
-      const name = String(item.name || '').trim().toLowerCase();
-      if (categoryKey) {
-        return products.find(p => String(p.category_key || '') === categoryKey && String(p.name || '').trim().toLowerCase() === name);
-      }
-      return products.find(p => String(p.name || '').trim().toLowerCase() === name);
-    }
-
-    function cleanPublicOrder(order, products) {
-      const phone = normalizePhone(order.phone);
-      if (!phone) throw new Error('Invalid phone number');
-
-      const orderType = ['dinein', 'takeaway', 'delivery'].includes(order.orderType) ? order.orderType : '';
-      if (!orderType) throw new Error('Invalid order type');
-
-      const submitted = Array.isArray(order.items) ? order.items : [];
-      if (!submitted.length || submitted.length > 40) throw new Error('Invalid order items');
-
-      let total = 0;
-      const items = submitted.map(raw => {
-        const product = findProduct(products, raw);
-        if (!product) throw new Error(`Unavailable item: ${cleanText(raw.name, 80) || 'unknown'}`);
-        const qty = Math.max(1, Math.min(50, Number(raw.qty || 1) || 1));
-        const productAddons = Array.isArray(product.addons) ? product.addons : [];
-        const submittedAddons = Array.isArray(raw.addons) ? raw.addons : [];
-        const addons = submittedAddons.map(a => {
-          const label = String(a.label || a.name || '').trim();
-          const match = productAddons.find(pa => String(pa.label || pa.name || '').trim().toLowerCase() === label.toLowerCase());
-          if (!match) throw new Error(`Unavailable add-on: ${label}`);
-          return {
-            label: String(match.label || match.name || label),
-            price: priceNumber(match.price),
-          };
-        });
-
-        for (const required of productAddons.filter(a => a.required)) {
-          const label = String(required.label || required.name || '').trim().toLowerCase();
-          if (!addons.some(a => String(a.label || '').trim().toLowerCase() === label)) {
-            throw new Error(`Required add-on missing: ${required.label || required.name}`);
-          }
-        }
-
-        const flavors = Array.isArray(product.flavors) ? product.flavors.map(String) : [];
-        const flavor = raw.flavor && flavors.includes(String(raw.flavor)) ? String(raw.flavor) : null;
-        const price = priceNumber(product.price);
-        total += (price + addons.reduce((sum, a) => sum + priceNumber(a.price), 0)) * qty;
-        return {
-          categoryKey: product.category_key || raw.categoryKey || '',
-          name: product.name,
-          price,
-          priceStr: product.price || money(price),
-          qty,
-          flavor,
-          addons,
-        };
-      });
-
-      const gps = customerGPS(order);
-      let deliveryFee = 0;
-      let deliveryZone = null;
-      if (orderType === 'delivery') {
-        const zone = deliveryZoneForPoint(gps);
-        if (!zone || zone.outside) throw new Error('Delivery location is outside our delivery area');
-        deliveryFee = zone.fee;
-        deliveryZone = zone.label;
-        total += deliveryFee;
-      }
-
-      const access = {
-        customerToken: randomB64(24).replace(/[+/=]/g, ''),
-        driverToken: randomB64(24).replace(/[+/=]/g, ''),
-      };
-      const tableNumber = cleanText(order.tableNumber, 12).replace(/[^a-zA-Z0-9_-]/g, '');
-
-      return {
-        id: `MENU-${crypto.randomUUID()}`,
-        status: 'inbox',
-        timestamp: new Date().toISOString(),
-        source: tableNumber ? 'table-qr' : 'menu',
-        name: cleanText(order.name, 80) || 'Guest',
-        phone,
-        orderType,
-        deliveryZone,
-        deliveryFee,
-        gps: gps || null,
-        address: orderType === 'delivery' ? (cleanText(order.address || order.note, 240) || null) : null,
-        tableNumber: tableNumber || null,
-        tableLabel: tableNumber ? (cleanText(order.tableLabel, 40) || `Table ${tableNumber}`) : null,
-        note: cleanText(order.note, 240) || null,
-        changeFor: Math.max(0, Math.min(100, Number(order.changeFor || 0) || 0)) || null,
-        items,
-        total: Number(total.toFixed(2)),
-        access,
-      };
-    }
-
-    async function driverPinHash(cfg) {
-      if (cfg.driverPinHash) return String(cfg.driverPinHash);
-      if (env.DRIVER_PIN_HASH) return String(env.DRIVER_PIN_HASH);
-      if (env.DRIVER_PIN) return sha256Hex(String(env.DRIVER_PIN));
-      return '';
-    }
-
-    async function driverPinOk(pin, cfg) {
-      const hash = await driverPinHash(cfg);
-      if (!hash) return false;
-      return safeEqual(await sha256Hex(String(pin || '')), hash);
-    }
-
-    async function requireDriverPin(request, cfg) {
-      const pin = request.headers.get('X-Driver-Pin') || url.searchParams.get('pin') || '';
-      if (await driverPinOk(pin, cfg)) return true;
-      throw json({ error: 'Driver PIN required' }, 403);
-    }
-
-    function trackTokenFromRequest(request) {
-      return request.headers.get('X-Track-Token') || url.searchParams.get('token') || url.searchParams.get('t') || '';
-    }
-
-    function driverTokenFromRequest(request, body = null) {
-      return request.headers.get('X-Driver-Token') || (body && body.token) || url.searchParams.get('token') || '';
-    }
-
-    function requireTrackAccess(payload, request) {
-      const expected = payload?.access?.customerToken;
-      const token = trackTokenFromRequest(request);
-      if (!expected || !token || !safeEqual(token, expected)) {
-        throw json({ error: 'Invalid tracking link' }, 403);
-      }
-    }
-
-    async function requireDriverOrderAccess(payload, request, cfg, body = null) {
-      const expected = payload?.access?.driverToken;
-      const token = driverTokenFromRequest(request, body);
-      if (expected && safeEqual(token, expected)) return true;
-      if (await driverPinOk(request.headers.get('X-Driver-Pin') || url.searchParams.get('pin') || (body && body.pin), cfg)) return true;
-      throw json({ error: 'Driver PIN or token required' }, 403);
-    }
-
-    function ensureOrderAccess(order) {
-      if (!order || typeof order !== 'object') return order;
-      const access = order.access && typeof order.access === 'object' ? { ...order.access } : {};
-      if (!access.customerToken) access.customerToken = randomB64(24).replace(/[+/=]/g, '');
-      if (!access.driverToken) access.driverToken = randomB64(24).replace(/[+/=]/g, '');
-      order.access = access;
-      return order;
-    }
-
-    // ── POST /auth/setup — create/reset staff accounts ──
-    // ── POST /auth/setup — create/reset staff accounts ──
-if (request.method === 'POST' && url.pathname === '/auth/setup') {
-  const limited = rateLimit('auth-setup', 5, 15 * 60 * 1000);
-  if (limited) return limited;
-  try {
-    if (!env.AUTH_SETUP_KEY || !safeCompare(request.headers.get('X-Setup-Key') || '', env.AUTH_SETUP_KEY)) {
-      return json({ error: 'Forbidden' }, 403);
-    }
-
-    let body;
     try {
-      body = await request.json();
-    } catch (_) {
-      return json({ error: 'Invalid JSON' }, 400);
+        const res = await fetch(WORKER_URL + '/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(order),
+            signal: controller.signal
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Worker error ' + res.status);
+        }
+
+        return res.json();
+    } finally {
+        clearTimeout(timeout);
     }
-
-    const username = String(body.username || '').trim().toLowerCase();
-    const password = String(body.password || '');
-    const role = String(body.role || '').trim().toLowerCase();
-
-    if (!username || password.length < 8 || !['admin', 'pos'].includes(role)) {
-      return json({ error: 'Need username, role, and password with at least 8 chars' }, 400);
-    }
-
-    const salt = randomB64(16);
-    const hash = await passwordHash(password, salt);
-
-    const data = await supabaseFetch('/staff_accounts?on_conflict=username', {
-      method: 'POST',
-      headers: {
-        'Prefer': 'resolution=merge-duplicates,return=representation',
-      },
-      body: JSON.stringify({
-        username,
-        role,
-        password_salt: salt,
-        password_hash: hash,
-        active: true,
-        updated_at: new Date().toISOString(),
-      }),
-    });
-
-    return json({ ok: true, data });
-  } catch (e) {
-    return json({
-      error: e.message || String(e),
-      where: 'auth_setup'
-    }, 500);
-  }
 }
 
-    // ── POST /auth/login ──
-    if (request.method === 'POST' && url.pathname === '/auth/login') {
-      const limited = rateLimit('auth-login', 12, 5 * 60 * 1000);
-      if (limited) return limited;
+// ORDER MODE
+function renderOrderModeButton(){
+    const btn=document.getElementById('order-mode-btn');
+    const menuBtn=document.getElementById('menu-jump-btn');
+    if(!btn) return;
+    btn.classList.toggle('active',orderMode);
+    if(menuBtn) menuBtn.classList.toggle('active',!orderMode&&!bubbleOpen);
+    btn.innerHTML='<span class="tab-icon">🛒</span><span>Order</span>';
+}
 
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
+function openOrderPage(){
+    if(!MENU_ORDERING_ENABLED) return;
+    if(!isOpen()){alert('⏰ Orders open 6 PM – 12 AM only.');return;}
+    closeContactPanel();
+    orderMode=true;
+    document.body.classList.add('order-mode');
+    renderOrderModeButton();
+    updatePill();
+    document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
 
-      const username = String(body.username || '').trim().toLowerCase();
-      const password = String(body.password || '');
-      const requestedRole = String(body.role || '').trim().toLowerCase();
-
-      const rows = await supabaseFetch(
-        `/staff_accounts?username=eq.${encodeURIComponent(username)}&active=eq.true&select=*`
-      );
-
-      const account = Array.isArray(rows) && rows.length ? rows[0] : null;
-
-      if (!account || (requestedRole && account.role !== requestedRole)) {
-        return json({ error: 'Invalid login' }, 401);
-      }
-
-      const hash = await passwordHash(password, account.password_salt);
-
-      if (!safeEqual(hash, account.password_hash)) {
-        return json({ error: 'Invalid login' }, 401);
-      }
-
-      const token = randomB64(32);
-      const tokenHash = await sha256Hex(token);
-      const expiresAt = new Date(Date.now() + SESSION_HOURS * 60 * 60 * 1000).toISOString();
-
-      await supabaseFetch('/staff_sessions', {
-        method: 'POST',
-        body: JSON.stringify({
-          token_hash: tokenHash,
-          account_id: account.id,
-          role: account.role,
-          expires_at: expiresAt,
-        }),
-      });
-
-      await supabaseFetch(`/staff_accounts?id=eq.${account.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          last_login_at: new Date().toISOString(),
-        }),
-      });
-
-      return json({
-        ok: true,
-        token,
-        role: account.role,
-        username: account.username,
-        expiresAt,
-      });
+function openMenuPage(){
+    closeContactPanel();
+    if(orderMode){
+        orderMode=false;
+        document.body.classList.remove('order-mode');
+        closeSheet();
+        updatePill();
     }
+    renderOrderModeButton();
+    document.getElementById('menu-container')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
 
-    // ── GET /auth/me ──
-    if (request.method === 'GET' && url.pathname === '/auth/me') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-      const session = blocked;
+function toggleOrderMode(){
+    if(orderMode) openMenuPage();
+    else openOrderPage();
+}
+function changeQty(itemKey,delta,elId){
+    if(!orderMode) return;
+    cart[itemKey]=Math.max(0,(cart[itemKey]||0)+delta);
+    const el=document.getElementById(elId);
+    if(el) el.textContent=cart[itemKey];
+    const card=document.getElementById('card-'+elId);
+    if(card) card.classList.toggle('has-qty',cart[itemKey]>0);
+    updatePill();
+}
+function getTotalItems(){return Object.values(cart).reduce((a,b)=>a+b,0);}
+function getItemsSubtotal(){
+    return Object.entries(cart).filter(([,v])=>v>0).reduce((sum,[key,qty])=>{
+        const price=parseFloat(key.split('|')[2].replace('$',''))||0;
+        const addons=(addonSel[key]||[]).reduce((a,s)=>a+s.price,0);
+        return sum+(price+addons)*qty;
+    },0);
+}
+function getDeliveryFee(){return selectedType==='delivery'&&detectedZone&&detectedZone.canDeliver?detectedZone.fee:0;}
+function getGrandTotal(){return getItemsSubtotal()+getDeliveryFee();}
 
-      try {
-        const rows = await supabaseFetch(`/staff_accounts?id=eq.${encodeURIComponent(session.account_id)}&select=id,username,role,active,last_login_at,updated_at&limit=1`);
-        const account = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!account || account.active === false) return json({ error: 'Account disabled' }, 403);
-        return json({ account });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
+function updatePill(){
+    const count=getTotalItems();
+    if(count>0&&orderMode) closeContactPanel();
+    document.getElementById('checkout-pill').classList.toggle('show',count>0&&orderMode);
+    if(count>0){
+        document.getElementById('pill-count').textContent=count+' item'+(count!==1?'s':'');
+        document.getElementById('pill-total').textContent='$'+getItemsSubtotal().toFixed(2);
     }
+}
 
-    // ── POST /auth/password ──
-    if (request.method === 'POST' && url.pathname === '/auth/password') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-      const session = blocked;
+function clearCart(){
+    cart={};addonSel={};shishaSel={};
+    selectedType=null;detectedZone=null;userGPS=null;deliveryAddress='';changeFor='';
+    document.querySelectorAll('.qty-num').forEach(el=>el.textContent='0');
+    document.querySelectorAll('.item-card-wrap').forEach(el=>el.classList.remove('has-qty'));
+    closeSheet();
+    updatePill();
+    showInboxToast('Cart cleared.','ok');
+}
 
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
+// SHEET
+function openSheet(){
+    closeContactPanel();
+    renderSheet();
+    bindCheckoutSheetDrag();
+    clearTimeout(closeSheet.t);
+    var sheet=document.getElementById('checkout-sheet');
+    var body=document.getElementById('sheet-body');
+    if(body){body.style.transition='';body.style.transform='';}
+    sheet.classList.add('open');
+    document.body.classList.add('sheet-open');
+    document.body.style.overflow='hidden';
+}
+function closeSheet(){
+    var sheet=document.getElementById('checkout-sheet');
+    var body=document.getElementById('sheet-body');
+    clearTimeout(closeSheet.t);
+    if(body&&sheet.classList.contains('open')){
+        body.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';
+        body.style.transform='translateY(100%)';
+    }
+    document.body.style.overflow='';
+    closeSheet.t=setTimeout(function(){
+        sheet.classList.remove('open');
+        if(body){body.style.transition='';body.style.transform='';}
+        document.body.classList.remove('sheet-open');
+    },300);
+}
 
-      const currentPassword = String(body.currentPassword || '');
-      const newPassword = String(body.newPassword || '');
-      if (!currentPassword || newPassword.length < 8) {
-        return json({ error: 'Current password and a new password with at least 8 chars are required' }, 400);
-      }
+function renderSheet(){
+    _addonMap=[];
+    // Preserve user inputs across re-renders
+    const addrEl=document.getElementById('delivery-address-ta');
+    if(addrEl) deliveryAddress=addrEl.value;
+    const changeEl=document.getElementById('sheet-change');
+    if(changeEl) changeFor=changeEl.value;
+    const nameElPrev=document.getElementById('sheet-name');
+    if(nameElPrev) customerName=nameElPrev.value;
+    const phoneElPrev=document.getElementById('sheet-phone');
+    if(phoneElPrev) customerPhone=phoneElPrev.value;
 
-      try {
-        const rows = await supabaseFetch(`/staff_accounts?id=eq.${encodeURIComponent(session.account_id)}&active=eq.true&select=*`);
-        const account = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!account) return json({ error: 'Account not found' }, 404);
+    const entries=Object.entries(cart).filter(([,v])=>v>0);
+    if(!entries.length) return;
 
-        const currentHash = await passwordHash(currentPassword, account.password_salt);
-        if (!safeEqual(currentHash, account.password_hash)) {
-          return json({ error: 'Current password is wrong' }, 400);
+    let html='<div style="padding-top:12px">';
+    entries.forEach(([key,qty])=>{
+        const[,name,price]=key.split('|');
+        const pn=parseFloat(price.replace('$',''))||0;
+        html+=`<div class="sheet-item"><div><div class="sheet-item-name">${name}</div><div class="sheet-item-qty">x${qty} @ ${price}</div></div><div class="sheet-item-price">$${(pn*qty).toFixed(2)}</div></div>`;
+        const meta=itemMeta[key];
+        if(meta&&meta.addons&&meta.addons.length){
+            const selArr=addonSel[key]||[],ki=_addonMap.length;_addonMap.push({key,type:'addon'});
+            const hasReq=meta.addons.some(a=>a.required);
+            html+=`<div class="addon-section" id="addon-err-wrap-${ki}"><div class="addon-section-title">➕ Add extras${hasReq?' <span style="color:#ef4444;font-size:10px;font-weight:800">* required</span>':''}</div><div class="addon-chips">`;
+            meta.addons.forEach((addon,ai)=>{ const on=selArr.some(s=>s.label===addon.label); html+=`<button class="addon-chip${on?' selected':''}" data-type="addon" data-ki="${ki}" data-ai="${ai}">${addon.label}${addon.required?'*':''} <span style="opacity:.65">${addon.price}</span></button>`; });
+            html+=`</div><div class="err-text" id="err-addon-${ki}" style="margin-top:4px">⚠️ Please select the required add-ons (marked with *).</div></div>`;
         }
+    });
+    html+='</div>';
 
-        const salt = randomB64(16);
-        const hash = await passwordHash(newPassword, salt);
-        await supabaseFetch(`/staff_accounts?id=eq.${encodeURIComponent(session.account_id)}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            password_salt: salt,
-            password_hash: hash,
-            updated_at: new Date().toISOString(),
-          }),
-        });
-        await supabaseFetch(`/staff_sessions?account_id=eq.${encodeURIComponent(session.account_id)}`, { method: 'DELETE' }).catch(() => {});
-        return json({ ok: true });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
+    html+=`<div class="sheet-divider"></div>
+    <div class="sheet-section-title">👤 Your Details</div>
+    <div style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Phone Number *</label>
+        <input id="sheet-phone" type="tel" inputmode="tel" class="sheet-input" style="margin-top:6px" placeholder="03 123 456" value="${customerPhone}" autocomplete="tel">
+        <div class="err-text" id="err-phone">Please enter a valid Lebanese phone number (8 digits).</div>
+    </div>
+    <div style="margin-bottom:12px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Your Name *</label>
+        <input id="sheet-name" type="text" class="sheet-input" style="margin-top:6px" placeholder="e.g. Elie" value="${customerName}" autocomplete="name">
+        <div class="err-text" id="err-name">Please enter your name.</div>
+    </div>
+    <div style="margin-bottom:4px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Order Type *</label>
+        <div class="order-type-grid">
+            <button type="button" class="order-type-btn${selectedType==='dinein'?' selected':''}" data-select-type="dinein"><span class="type-icon">🪑</span>Dine In</button>
+            <button type="button" class="order-type-btn${selectedType==='takeaway'?' selected':''}" data-select-type="takeaway"><span class="type-icon">🥡</span>Takeaway</button>
+            <button type="button" class="order-type-btn${selectedType==='delivery'?' selected':''}" data-select-type="delivery"><span class="type-icon">🛵</span>Delivery</button>
+        </div>
+        <div class="err-text" id="err-type">Please select an order type.</div>
+    </div>
+    <div class="delivery-sub${selectedType==='delivery'?' show':''}" id="sheet-delivery-sub">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;display:block;margin-top:8px;margin-bottom:8px">Your Location</label>
+        ${renderLocationBox()}
+    </div>`;
+
+    const canProceed=selectedType!=='delivery'||(detectedZone&&detectedZone.canDeliver);
+    const fee=getDeliveryFee(),sub=getItemsSubtotal(),total=sub+fee;
+    const feeBreakdown=(selectedType==='delivery'&&detectedZone&&detectedZone.canDeliver)
+        ?`<div style="font-size:11px;color:#b45309;margin-top:2px">Items $${sub.toFixed(2)} + delivery ${detectedZone.feeLabel}</div>`:'';
+
+    if(canProceed){
+        const changeNum=parseFloat(changeFor)||0;
+        const changeBack=changeNum>total?'💵 Change: $'+(changeNum-total).toFixed(2):'';
+        const showChangeBox=selectedType==='takeaway'||selectedType==='delivery';
+        const changeBoxHtml=showChangeBox?`<div style="margin-top:12px"><label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">💵 Need Change? (optional)</label><div style="margin-top:6px;position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:700;color:#92400e">$</span><input id="sheet-change" type="number" min="0" max="100" step="1" class="sheet-input" style="padding-left:28px" placeholder="e.g. 50" value="${changeFor}" oninput="(function(el){const v=parseFloat(el.value)||0,tot=${total.toFixed(2)};const cb=document.getElementById('change-back-label');if(cb){cb.textContent=v>tot?'Change back: $'+(v-tot).toFixed(2):'';cb.style.display=v>tot?'block':'none';}})(this)"></div><div id="change-back-label" style="font-size:12px;font-weight:700;color:#92400e;margin-top:5px;display:${changeBack?'block':'none'}">${changeBack}</div></div>`:'';
+        html+=`<div class="total-row"><div><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>${feeBreakdown}</div><span style="font-size:18px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span></div>${changeBoxHtml}
+        <button id="send-order-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            Send Order on WhatsApp
+        </button>`;
     }
+    document.getElementById('sheet-scroll').innerHTML=html;
+}
 
-    // ── GET /auth/accounts ──
-    if (request.method === 'GET' && url.pathname === '/auth/accounts') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      try {
-        const rows = await supabaseFetch('/staff_accounts?select=id,username,role,active,last_login_at,updated_at&order=username.asc');
-        return json({ data: rows });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
+function renderLocationBox(){
+    if(!detectedZone){
+        return`<div class="location-detect-box"><div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px">📍 We need your location</div><div style="font-size:11px;color:#b45309">Tap below so we can calculate your exact delivery fee.</div><button class="locate-main-btn" id="locate-btn">📍 Detect My Location</button><div class="err-text" id="err-location" style="margin-top:8px">Please detect your location to continue.</div></div>`;
     }
-
-    // ── POST /auth/accounts ──
-    if (request.method === 'POST' && url.pathname === '/auth/accounts') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-      const session = blocked;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const username = String(body.username || '').trim().toLowerCase();
-      const password = String(body.password || '');
-      let role = String(body.role || '').trim().toLowerCase();
-      if (!['admin', 'pos'].includes(role)) role = 'pos';
-
-      if (!/^[a-z0-9._-]{3,32}$/.test(username) || password.length < 8) {
-        return json({ error: 'Username must be 3-32 simple characters and password at least 8 chars' }, 400);
-      }
-
-      try {
-        const existing = await supabaseFetch(`/staff_accounts?username=eq.${encodeURIComponent(username)}&select=id&limit=1`);
-        if (Array.isArray(existing) && existing.length) return json({ error: 'Username already exists' }, 409);
-
-        const salt = randomB64(16);
-        const hash = await passwordHash(password, salt);
-        const data = await supabaseFetch('/staff_accounts', {
-          method: 'POST',
-          body: JSON.stringify({
-            username,
-            role,
-            password_salt: salt,
-            password_hash: hash,
-            active: true,
-            updated_at: new Date().toISOString(),
-          }),
-        });
-        return json({ ok: true, data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
+    if(!detectedZone.canDeliver){
+        const mu=userGPS?`https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}`:'';
+        return`<div class="location-detect-box no-delivery">
+            <div style="font-size:13px;font-weight:700;color:#991b1b">🚫 Outside delivery area</div>
+            <div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>But you can still order — pick one:</div>
+            <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
+                <button type="button" class="locate-main-btn" style="background:#f59e0b;font-size:11px;margin-top:0" data-select-type="dinein">🪑 Dine In</button>
+                <button type="button" class="locate-main-btn" style="background:#d97706;color:#fff;font-size:11px;margin-top:0" data-select-type="takeaway">🥡 Takeaway</button>
+            </div>
+            ${mu?`<div style="margin-top:10px"><a href="${mu}" target="_blank" rel="noopener noreferrer" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}
+            <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button>
+        </div>`;
     }
-
-    // ── POST /auth/logout ──
-    if (request.method === 'POST' && url.pathname === '/auth/logout') {
-      const token = bearerToken(request);
-
-      if (token) {
-        const tokenHash = await sha256Hex(token);
-        await supabaseFetch(
-          `/staff_sessions?token_hash=eq.${encodeURIComponent(tokenHash)}`,
-          { method: 'DELETE' }
-        ).catch(() => {});
-      }
-
-      return json({ ok: true });
-    }
-
-    async function ghReadSha(file) {
-      const res = await fetch(
-        `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${file}`,
-        { headers: ghHeaders }
-      );
-
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error('GH SHA read ' + res.status);
-
-      const d = await res.json();
-      return d.sha || null;
-    }
-
-    async function ghRead(file) {
-      const res = await fetch(
-        `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${file}`,
-        { headers: ghHeaders }
-      );
-
-      if (res.status === 404) return { data: [], sha: null };
-      if (!res.ok) throw new Error('GH read ' + res.status);
-
-      const d = await res.json();
-      return { data: JSON.parse(b64decode(d.content)), sha: d.sha };
-    }
-
-    async function ghWrite(file, data, message) {
-      const sha = await ghReadSha(file);
-      const body = {
-        message,
-        content: b64encode(JSON.stringify(data, null, 2)),
-      };
-
-      if (sha) body.sha = sha;
-
-      const res = await fetch(
-        `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${file}`,
-        {
-          method: 'PUT',
-          headers: ghHeaders,
-          body: JSON.stringify(body),
-        }
-      );
-
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.message || res.status);
-      }
-
-      const saved = await res.json();
-      return saved.content.sha;
-    }
-
-    async function ghWriteRaw(file, b64content, message) {
-      const sha = await ghReadSha(file);
-      const body = { message, content: b64content };
-
-      if (sha) body.sha = sha;
-
-      const res = await fetch(
-        `${GH_API}/repos/${GH_OWNER}/${GH_REPO}/contents/${file}`,
-        {
-          method: 'PUT',
-          headers: ghHeaders,
-          body: JSON.stringify(body),
-        }
-      );
-
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.message || res.status);
-      }
-
-      const saved = await res.json();
-      return saved.content.sha;
-    }
-
-    // ── POST /supabase/blocklist/check — public, returns only yes/no ──
-    if (request.method === 'POST' && url.pathname === '/supabase/blocklist/check') {
-      const limited = rateLimit('block-check', 80, 60 * 1000);
-      if (limited) return limited;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-      const phone = normalizePhone(body.phone);
-      if (!phone) return json({ blocked: false });
-      try {
-        const rows = await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(phone)}&select=phone&limit=1`);
-        return json({ blocked: Array.isArray(rows) && rows.length > 0 });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/blocklist — admin only ──
-    if (request.method === 'GET' && url.pathname === '/supabase/blocklist') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      try {
-        const data = await supabaseFetch('/blocklist?select=*&order=blocked_at.desc');
-        return json({ data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── PUT /supabase/blocklist — admin only ──
-    if (request.method === 'PUT' && url.pathname === '/supabase/blocklist') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const rows = Array.isArray(body.data) ? body.data : [];
-
-      try {
-        const cleanByPhone = new Map();
-        rows.forEach(b => {
-          const phone = String(b.phone || '').replace(/\D/g, '').slice(-8);
-          if (phone.length !== 8) return;
-          cleanByPhone.set(phone, {
-            phone,
-            reason: b.reason || '',
-            blocked_at: b.blockedAt || b.blocked_at || new Date().toISOString(),
-          });
-        });
-        const clean = Array.from(cleanByPhone.values());
-        const existing = await supabaseFetch('/blocklist?select=*').catch(() => []);
-        const existingByPhone = new Map((Array.isArray(existing) ? existing : []).map(row => [String(row.phone || ''), row]));
-
-        for (const row of clean) {
-          if (existingByPhone.has(row.phone)) {
-            await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(row.phone)}`, {
-              method: 'PATCH',
-              body: JSON.stringify(row),
-            });
-          } else {
-            await supabaseFetch('/blocklist', {
-              method: 'POST',
-              body: JSON.stringify(row),
-            });
-          }
-        }
-
-        for (const row of existingByPhone.values()) {
-          const phone = String(row.phone || '');
-          if (phone && !cleanByPhone.has(phone)) {
-            await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(phone)}`, { method: 'DELETE' });
-          }
-        }
-
-        return json({ ok: true, count: clean.length });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/customers — admin/POS ──
-    if (request.method === 'GET' && url.pathname === '/supabase/customers') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-
-      try {
-        const data = await supabaseFetch('/customers?select=*&order=last_seen.desc.nullslast');
-        return json({ data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── PUT /supabase/customers — admin/POS ──
-    if (request.method === 'PUT' && url.pathname === '/supabase/customers') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-      const session = blocked;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const rows = Array.isArray(body.data) ? body.data : [];
-
-      try {
-        const cleanByPhone = new Map();
-        rows.forEach(c => {
-          const phone = String(c.phone || '').replace(/\D/g, '').slice(-8);
-          if (phone.length !== 8) return;
-          cleanByPhone.set(phone, {
-            phone,
-            name: c.name || '',
-            note: c.note || '',
-            first_seen: c.firstSeen || c.first_seen || new Date().toISOString(),
-            last_seen: c.lastSeen || c.last_seen || new Date().toISOString(),
-            total_orders: Number(c.totalOrders ?? c.total_orders ?? 0),
-            total_spent: Number(c.totalSpent ?? c.total_spent ?? 0),
-            order_ids: c.orderIds || c.order_ids || [],
-            item_freq: c.itemFreq || c.item_freq || {},
-            favorite_items: c.favoriteItems || c.favorite_items || [],
-            loyalty_stamps: Number(c.loyaltyStamps ?? c.loyalty_stamps ?? 0),
-            loyalty_reward_ready: !!(c.loyaltyRewardReady ?? c.loyalty_reward_ready),
-            loyalty_last_reward: c.loyaltyLastReward ?? c.loyalty_last_reward ?? null,
-            loyalty_reward_redeemed_at: c.loyaltyRewardRedeemedAt ?? c.loyalty_reward_redeemed_at ?? null,
-            loyalty_lifetime_redemptions: Number(c.loyaltyLifetimeRedemptions ?? c.loyalty_lifetime_redemptions ?? 0),
-          });
-        });
-        const clean = Array.from(cleanByPhone.values());
-        const existing = await supabaseFetch('/customers?select=*').catch(() => []);
-        const existingByPhone = new Map((Array.isArray(existing) ? existing : []).map(row => [String(row.phone || ''), row]));
-
-        for (const row of clean) {
-          if (existingByPhone.has(row.phone)) {
-            await supabaseFetch(`/customers?phone=eq.${encodeURIComponent(row.phone)}`, {
-              method: 'PATCH',
-              body: JSON.stringify(row),
-            });
-          } else {
-            await supabaseFetch('/customers', {
-              method: 'POST',
-              body: JSON.stringify(row),
-            });
-          }
-        }
-
-        if (session.role === 'admin') {
-          for (const row of existingByPhone.values()) {
-            const phone = String(row.phone || '');
-            if (phone && !cleanByPhone.has(phone)) {
-              await supabaseFetch(`/customers?phone=eq.${encodeURIComponent(phone)}`, { method: 'DELETE' });
-            }
-          }
-        }
-
-        return json({ ok: true });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/orders — admin/POS ──
-    if (request.method === 'GET' && url.pathname === '/supabase/orders') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-
-      const status = url.searchParams.get('status');
-
-      try {
-        const path = status
-          ? `/orders?select=*&status=eq.${encodeURIComponent(status)}&order=created_at.desc`
-          : '/orders?select=*&order=created_at.desc';
-
-        const data = await supabaseFetch(path);
-        return json({ data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/order-events — admin/POS lightweight order-change polling ──
-    if (request.method === 'GET' && url.pathname === '/supabase/order-events') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-
-      const since = url.searchParams.get('since');
-      const limit = Math.max(1, Math.min(100, Number(url.searchParams.get('limit') || 40) || 40));
-
-      try {
-        let path = `/orders?select=id,status,updated_at,created_at,payload&order=updated_at.desc&limit=${limit}`;
-        if (since) path += `&updated_at=gt.${encodeURIComponent(since)}`;
-        const rows = await supabaseFetch(path);
-        const data = (Array.isArray(rows) ? rows : []).map(row => ({
-          id: row.id,
-          status: row.status,
-          updatedAt: row.updated_at || row.created_at || '',
-          createdAt: row.created_at || '',
-          name: row.payload?.name || '',
-          phone: row.payload?.phone || '',
-          orderType: row.payload?.orderType || '',
-          total: row.payload?.total || 0,
-          source: row.payload?.source || '',
-        }));
-        return json({ data, serverTime: new Date().toISOString() });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/customer-history?phone= — admin/POS order history by customer ──
-    if (request.method === 'GET' && url.pathname === '/supabase/customer-history') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-
-      const phone = normalizePhone(url.searchParams.get('phone'));
-      if (!phone) return json({ error: 'Invalid phone' }, 400);
-
-      try {
-        const rows = await supabaseFetch('/orders?select=*&order=created_at.desc&limit=500');
-        const data = (Array.isArray(rows) ? rows : [])
-          .filter(row => normalizePhone(row.payload?.phone) === phone)
-          .slice(0, 50)
-          .map(row => ({
-            id: row.id,
-            status: row.status,
-            createdAt: row.created_at || row.payload?.timestamp || '',
-            updatedAt: row.updated_at || '',
-            payload: row.payload || {},
-          }));
-        return json({ data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── POST /supabase/order — admin/POS ──
-    if (request.method === 'POST' && url.pathname === '/supabase/order') {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-
-      let order;
-      try {
-        order = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      if (!order.id || !order.name || !order.items) {
-        return json({ error: 'Missing fields' }, 400);
-      }
-
-      try {
-        const existingRows = await supabaseFetch(`/orders?id=eq.${String(order.id)}&select=*&limit=1`);
-        const existing = Array.isArray(existingRows) && existingRows.length ? existingRows[0] : null;
-
-        if (existing && existing.payload && existing.payload.tracking) {
-          if (!order.tracking) order.tracking = {};
-          order.tracking = { ...existing.payload.tracking, ...order.tracking };
-        }
-        if (existing && existing.payload && existing.payload.access && !order.access) {
-          order.access = existing.payload.access;
-        }
-        ensureOrderAccess(order);
-
-        const existingGPS = existing && existing.payload ? customerGPS(existing.payload) : null;
-        const nextGPS = customerGPS(order);
-        if (!nextGPS && existingGPS) order.gps = existingGPS;
-        else if (nextGPS) order.gps = nextGPS;
-
-        if ((!order.address || !String(order.address).trim()) && existing?.payload?.address) {
-          order.address = existing.payload.address;
-        }
-
-        const row = {
-          id: String(order.id),
-          status: order.status || 'inbox',
-          payload: order,
-          updated_at: new Date().toISOString(),
-        };
-
-        const data = await supabaseFetch('/orders?on_conflict=id', {
-          method: 'POST',
-          headers: {
-            'Prefer': 'resolution=merge-duplicates,return=representation',
-          },
-          body: JSON.stringify(row),
-        });
-
-        return json({ ok: true, data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── POST /supabase/backup — scheduled Supabase snapshot backup ──
-    if (request.method === 'POST' && url.pathname === '/supabase/backup') {
-      if (!backupKeyOk(request)) return json({ error: 'Forbidden' }, 403);
-
-      try {
-        const [
-          cfg,
-          categories,
-          products,
-          customers,
-          orders,
-          blocklist,
-          gallery,
-        ] = await Promise.all([
-          siteConfigRaw(),
-          supabaseFetch('/categories?select=*&order=sort_order.asc').catch(() => []),
-          supabaseFetch('/products?select=*&order=sort_order.asc').catch(() => []),
-          supabaseFetch('/customers?select=*&order=last_seen.desc.nullslast').catch(() => []),
-          supabaseFetch('/orders?select=*&order=created_at.desc&limit=1000').catch(() => []),
-          supabaseFetch('/blocklist?select=*&order=blocked_at.desc').catch(() => []),
-          supabaseFetch('/guest_gallery?select=*&order=created_at.desc&limit=1000').catch(() => []),
-        ]);
-
-        const snapshot = {
-          createdAt: new Date().toISOString(),
-          source: 'worker',
-          tables: {
-            app_config: { site_settings: cfg },
-            categories,
-            products,
-            customers,
-            orders,
-            blocklist,
-            guest_gallery: gallery,
-          },
-        };
-
-        const backupKey = backupDateKey();
-        const inserted = await supabaseFetch('/app_backups?on_conflict=backup_key', {
-          method: 'POST',
-          headers: {
-            'Prefer': 'resolution=merge-duplicates,return=representation',
-          },
-          body: JSON.stringify({
-            backup_key: backupKey,
-            snapshot,
-            created_at: snapshot.createdAt,
-          }),
-        });
-
-        await supabaseFetch('/app_backups?select=backup_key&order=backup_key.desc&offset=30')
-          .then(oldRows => Promise.all((oldRows || []).map(row =>
-            supabaseFetch(`/app_backups?backup_key=eq.${encodeURIComponent(row.backup_key)}`, { method: 'DELETE' })
-          )))
-          .catch(() => {});
-
-        return json({
-          ok: true,
-          backupKey,
-          rows: {
-            categories: categories.length,
-            products: products.length,
-            customers: customers.length,
-            orders: orders.length,
-            blocklist: blocklist.length,
-            gallery: gallery.length,
-          },
-        });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/backups — admin backup inventory ──
-    if (request.method === 'GET' && url.pathname === '/supabase/backups') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      try {
-        const data = await supabaseFetch('/app_backups?select=backup_key,created_at&order=backup_key.desc&limit=30');
-        return json({ data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── POST /driver-app/link — admin-only 15-minute APK download link ──
-    if (request.method === 'POST' && url.pathname === '/driver-app/link') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      try {
-        const expiresAtMs = Date.now() + 15 * 60 * 1000;
-        const token = await driverAppToken(expiresAtMs);
-        const publicUrl = new URL(request.url);
-        publicUrl.pathname = '/driver-app/download';
-        publicUrl.search = `?token=${encodeURIComponent(token)}`;
-        return json({
-          ok: true,
-          url: publicUrl.toString(),
-          expiresAt: new Date(expiresAtMs).toISOString(),
-        });
-      } catch (e) {
-        return json({ error: e.message }, 500);
-      }
-    }
-
-    // ── GET /driver-app/download — temporary redirect to APK asset ──
-    if (request.method === 'GET' && url.pathname === '/driver-app/download') {
-      const token = url.searchParams.get('token') || '';
-      if (!(await verifyDriverAppToken(token))) {
-        return new Response('Download link expired or invalid', { status: 403, headers: corsHeaders });
-      }
-      try {
-        return Response.redirect(await signedDriverApkUrl(), 302);
-      } catch (e) {
-        if (env.DRIVER_APK_URL) return Response.redirect(env.DRIVER_APK_URL, 302);
-        return json({ error: e.message || 'Driver APK is not available' }, 502);
-      }
-    }
-
-    // ── POST /order — public website order intake ──
-    if (request.method === 'POST' && url.pathname === '/order') {
-      const limited = rateLimit('public-order', 10, 5 * 60 * 1000);
-      if (limited) return limited;
-
-      let order;
-      try {
-        order = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      if (!order.name || !order.items) {
-        return json({ error: 'Missing fields' }, 400);
-      }
-
-      try {
-        const cfg = await siteConfigRaw();
-        if (cfg.menuOrderingEnabled === false) {
-          return json({ error: 'Online ordering is currently disabled' }, 403);
-        }
-        if (!storeIsOpen(cfg)) {
-          return json({ error: 'Orders open from 6 PM to 12 AM' }, 403);
-        }
-
-        const phone = normalizePhone(order.phone);
-        const blockedRows = phone
-          ? await supabaseFetch(`/blocklist?phone=eq.${encodeURIComponent(phone)}&select=phone&limit=1`)
-          : [];
-        if (Array.isArray(blockedRows) && blockedRows.length) {
-          return json({ error: 'This number is blocked. Please contact us directly.' }, 403);
-        }
-
-        const cleanOrder = cleanPublicOrder(order, await menuProducts());
-
-        await supabaseFetch('/orders?on_conflict=id', {
-          method: 'POST',
-          headers: {
-            'Prefer': 'resolution=merge-duplicates,return=representation',
-          },
-          body: JSON.stringify({
-            id: String(cleanOrder.id),
-            status: 'inbox',
-            payload: cleanOrder,
-            updated_at: new Date().toISOString(),
-          }),
-        });
-
-        return json({
-          ok: true,
-          id: cleanOrder.id,
-          customerToken: cleanOrder.access.customerToken,
-          trackUrl: `https://lekiosk.store/track/?id=${encodeURIComponent(cleanOrder.id)}#t=${encodeURIComponent(cleanOrder.access.customerToken)}`,
-        });
-      } catch (e) {
-        return json({ error: e.message }, /Invalid|Unavailable|Required|outside|disabled|blocked|open/i.test(e.message || '') ? 400 : 502);
-      }
-    }
-
-    // ── GET /gh — admin only ──
-    if (request.method === 'GET' && url.pathname === '/gh') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      const file = url.searchParams.get('file');
-
-      if (!ALLOWED_FILES.includes(file)) {
-        return json({ error: 'Forbidden file: ' + file }, 403);
-      }
-
-      try {
-        const { data, sha } = await ghRead(file);
-        return json({ data, sha });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── PUT /gh — admin only ──
-    if (request.method === 'PUT' && url.pathname === '/gh') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      const file = url.searchParams.get('file');
-
-      if (!ALLOWED_FILES.includes(file)) {
-        return json({ error: 'Forbidden file: ' + file }, 403);
-      }
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      try {
-        const newSha = await ghWrite(file, body.data, body.message);
-        return json({ ok: true, sha: newSha });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── POST /image — admin only ──
-    if (request.method === 'POST' && url.pathname === '/image') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const { path, b64, message } = body;
-
-      if (!path || !b64 || !message) {
-        return json({ error: 'Missing path, b64, or message' }, 400);
-      }
-
-      if (!/^menupictures\/[a-zA-Z0-9._/-]+\.(?:jpe?g|png|webp)$/i.test(path) || path.includes('..')) {
-        return json({ error: 'Forbidden path' }, 403);
-      }
-
-      try {
-        const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-        if (!bytes.length || bytes.length > 5 * 1024 * 1024) return json({ error: 'Image is too large. Max 5MB.' }, 400);
-        const lower = path.toLowerCase();
-        const contentType = lower.endsWith('.png') ? 'image/png' : lower.endsWith('.webp') ? 'image/webp' : 'image/jpeg';
-        await supabaseUploadImage(path, bytes, contentType, env);
-        return json({ ok: true, path });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/menu — public/admin ──
-    if (request.method === 'GET' && url.pathname === '/supabase/menu') {
-      try {
-        const categories = await supabaseFetch('/categories?select=*&order=sort_order.asc');
-        const products = await supabaseFetch('/products?select=*&order=sort_order.asc');
-
-        const menu = categories.map(cat => {
-          const items = products
-            .filter(p => p.category_key === cat.key)
-            .map(p => ({
-              ...(p.raw || {}),
-              name: p.name,
-              desc: p.description,
-              price: p.price,
-              image: p.image,
-              active: p.active,
-              flavors: p.flavors || [],
-              addons: p.addons || [],
-              flavorColor: p.flavor_color || 'amber',
-            }));
-
-          return {
-            ...(cat.raw || {}),
-            key: cat.key,
-            title: cat.title,
-            type: cat.type === 'regular' ? undefined : cat.type,
-            bottomBanner: cat.bottom_banner || undefined,
-            active: cat.active,
-            items,
-          };
-        });
-
-        return json({ data: menu });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── PUT /supabase/menu — admin only ──
-    if (request.method === 'PUT' && url.pathname === '/supabase/menu') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const sections = Array.isArray(body.data) ? body.data : [];
-
-      try {
-        const now = new Date().toISOString();
-        const existingCategories = await supabaseFetch('/categories?select=*').catch(() => []);
-        const existingProducts = await supabaseFetch('/products?select=*').catch(() => []);
-        const existingCategoriesByKey = new Map((Array.isArray(existingCategories) ? existingCategories : []).map(cat => [String(cat.key || ''), cat]));
-        const existingProductsBySlot = new Map();
-        const existingProductsList = Array.isArray(existingProducts) ? existingProducts : [];
-        (Array.isArray(existingProducts) ? existingProducts : []).forEach(product => {
-          const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
-          if (!existingProductsBySlot.has(slot)) existingProductsBySlot.set(slot, product);
-        });
-        const idInFilter = (ids) => `in.(${ids.map(id => encodeURIComponent(String(id))).join(',')})`;
-        const categories = sections.map((sec, index) => ({
-          key: sec.key || `category-${index}`,
-          title: sec.title || 'Untitled',
-          type: sec.type || 'regular',
-          bottom_banner: sec.bottomBanner || null,
-          sort_order: index,
-          active: sec.active !== false,
-          raw: sec,
-          updated_at: now,
-        }));
-
-        const incomingCategoryKeys = new Set(categories.map(cat => cat.key));
-        for (const category of categories) {
-          if (existingCategoriesByKey.has(category.key)) {
-            await supabaseFetch(`/categories?key=eq.${encodeURIComponent(category.key)}`, {
-              method: 'PATCH',
-              body: JSON.stringify(category),
-            });
-          } else {
-            await supabaseFetch('/categories', {
-              method: 'POST',
-              body: JSON.stringify(category),
-            });
-          }
-        }
-
-        const products = [];
-
-        sections.forEach((sec, sectionIndex) => {
-          if (sec.type === 'addons') return;
-
-          (sec.items || []).forEach((item, itemIndex) => {
-            products.push({
-              category_key: sec.key || `category-${sectionIndex}`,
-              name: item.name || 'Untitled Item',
-              description: item.desc || item.description || '',
-              price: item.price || '$0',
-              image: item.image || '',
-              active: item.active !== false,
-              sort_order: itemIndex,
-              flavors: item.flavors || [],
-              addons: item.addons || [],
-              flavor_color: item.flavorColor || 'amber',
-              raw: item,
-              updated_at: now,
-            });
-          });
-        });
-
-        const incomingProductSlots = new Set();
-        const updateProducts = [];
-        const insertProducts = [];
-        const touchedProductIds = new Set();
-        for (const product of products) {
-          const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
-          incomingProductSlots.add(slot);
-          const existing = existingProductsBySlot.get(slot);
-          if (existing) {
-            if (existing.id != null) {
-              touchedProductIds.add(String(existing.id));
-              updateProducts.push({ ...product, id: existing.id });
-            } else {
-              insertProducts.push(product);
-            }
-          } else {
-            insertProducts.push(product);
-          }
-        }
-
-        if (updateProducts.length) {
-          await supabaseFetch('/products?on_conflict=id', {
-            method: 'POST',
-            headers: {
-              'Prefer': 'resolution=merge-duplicates,return=representation',
-            },
-            body: JSON.stringify(updateProducts),
-          });
-        }
-
-        if (insertProducts.length) {
-          await supabaseFetch('/products', {
-            method: 'POST',
-            body: JSON.stringify(insertProducts),
-          });
-        }
-
-        const staleProductIds = [];
-        for (const product of existingProductsList) {
-          const slot = `${product.category_key || ''}\n${Number(product.sort_order ?? 0)}`;
-          const id = product.id != null ? String(product.id) : '';
-          if (id && product.active !== false && (!incomingProductSlots.has(slot) || (incomingProductSlots.has(slot) && !touchedProductIds.has(id)))) {
-            staleProductIds.push(id);
-          }
-        }
-
-        if (staleProductIds.length) {
-          await supabaseFetch(`/products?id=${idInFilter(staleProductIds)}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ active: false, updated_at: now }),
-          });
-        }
-
-        for (const category of existingCategoriesByKey.values()) {
-          const key = String(category.key || '');
-          if (key && !incomingCategoryKeys.has(key) && category.active !== false) {
-            await supabaseFetch(`/categories?key=eq.${encodeURIComponent(key)}`, {
-              method: 'PATCH',
-              body: JSON.stringify({ active: false, updated_at: now }),
-            });
-          }
-        }
-
-        return json({
-          ok: true,
-          categories: categories.length,
-          products: products.length,
-	        });
-	      } catch (e) {
-	        return json({ error: e.message }, 502);
-	      }
-	    }
-
-    // ── GET /supabase/config — public ──
-    if (request.method === 'GET' && url.pathname === '/supabase/config') {
-      try {
-        const cfg = await siteConfigRaw();
-        let isAdmin = false;
-        if (bearerToken(request)) {
-          try {
-            await requireAuth(request, ['admin']);
-            isAdmin = true;
-          } catch (_) {}
-        }
-        return json({ data: publicConfig(cfg, isAdmin) });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── PUT /supabase/config — admin only ──
-    if (request.method === 'PUT' && url.pathname === '/supabase/config') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const existingConfig = await siteConfigRaw();
-      const value = body && typeof body.data === 'object' && body.data ? { ...existingConfig, ...body.data } : { ...existingConfig };
-      if (typeof value.driverPin === 'string' && value.driverPin.trim()) {
-        const pin = value.driverPin.trim();
-        if (!/^\d{4,8}$/.test(pin)) return json({ error: 'Driver PIN must be 4-8 digits' }, 400);
-        value.driverPinHash = await sha256Hex(pin);
-      }
-      if (value.clearDriverPin === true) delete value.driverPinHash;
-      delete value.driverPin;
-      delete value.clearDriverPin;
-      delete value.driverPinSet;
-
-      try {
-        const data = await supabaseFetch('/app_config?on_conflict=key', {
-          method: 'POST',
-          headers: {
-            'Prefer': 'resolution=merge-duplicates,return=representation',
-          },
-          body: JSON.stringify({
-            key: 'site_settings',
-            value,
-            updated_at: new Date().toISOString(),
-          }),
-        });
-
-        return json({ ok: true, data });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── POST /supabase/menu-visit — public ──
-    if (request.method === 'POST' && url.pathname === '/supabase/menu-visit') {
-      const limited = rateLimit('menu-visit', 60, 60 * 1000);
-      if (limited) return limited;
-
-      let body;
-      try {
-        body = await request.json();
-      } catch (_) {
-        return json({ error: 'Invalid JSON' }, 400);
-      }
-
-      const visitorId = String(body.visitorId || '').trim();
-      const visitDate = String(body.visitDate || '').slice(0, 10);
-
-      if (!visitorId || !/^\d{4}-\d{2}-\d{2}$/.test(visitDate)) {
-        return json({ error: 'Missing visitorId or visitDate' }, 400);
-      }
-
-      try {
-        await supabaseFetch('/menu_visits?on_conflict=visitor_id,visit_date', {
-          method: 'POST',
-          headers: {
-            'Prefer': 'resolution=merge-duplicates,return=representation',
-          },
-          body: JSON.stringify({
-            visitor_id: visitorId,
-            visit_date: visitDate,
-            path: String(body.path || '').slice(0, 250),
-            referrer: String(body.referrer || '').slice(0, 500),
-          }),
-        });
-
-        return json({ ok: true });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-
-    // ── GET /supabase/menu-visits — admin only ──
-    if (request.method === 'GET' && url.pathname === '/supabase/menu-visits') {
-      const blocked = await guard(['admin']);
-      if (blocked instanceof Response) return blocked;
-
-      try {
-        const data = await supabaseFetch('/menu_visits?select=visit_date,visitor_id&order=visit_date.desc');
-
-        const byDay = {};
-        data.forEach(row => {
-          const day = row.visit_date;
-          if (!day) return;
-          byDay[day] = (byDay[day] || 0) + 1;
-        });
-
-        const rows = Object.entries(byDay).map(([visit_date, visits]) => ({
-          visit_date,
-          visits,
-        }));
-
-        return json({ data: rows });
-      } catch (e) {
-        return json({ error: e.message }, 502);
-      }
-    }
-/*
-Le Kiosk AI Combo Builder route.
-*/
-
-// -- POST /api/combo -- public AI combo builder
-if (request.method === 'POST' && url.pathname === '/api/combo') {
-  const limited = rateLimit('ai-combo', 20, 10 * 60 * 1000);
-  if (limited) return limited;
-
-  let body;
-  try {
-    body = await request.json();
-  } catch (_) {
-    return json({ error: 'Invalid JSON' }, 400);
-  }
-
-  const craving = String(body.craving || '').trim();
-  if (!craving) {
-    return json({ error: 'Missing craving' }, 400);
-  }
-
-  if (!env.GEMINI_API_KEY) {
-    return json({ error: 'Missing GEMINI_API_KEY Worker secret' }, 500);
-  }
-
-  try {
-    const cfg = await siteConfigRaw();
-    if (cfg.aiComboEnabled === false) return json({ error: 'AI combo builder is disabled' }, 403);
-
-    const categories = await supabaseFetch('/categories?select=*&active=eq.true&order=sort_order.asc');
-    const products = await supabaseFetch('/products?select=*&active=eq.true&order=sort_order.asc');
-
-    const categoryTitles = Object.fromEntries(
-      (Array.isArray(categories) ? categories : []).map(cat => [cat.key, cat.title])
+    const mu=userGPS?`https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}`:'';
+    return`<div class="location-detect-box detected"><div style="font-size:13px;font-weight:700;color:#78350f">✅ Location detected</div><div class="zone-badge ${detectedZone.cls}" style="margin-top:8px">${detectedZone.emoji} ${detectedZone.label} — <strong>Delivery: ${detectedZone.feeLabel}</strong></div>${mu?`<div style="margin-top:8px"><a href="${mu}" target="_blank" rel="noopener noreferrer" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}<button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Change location</button><div style="margin-top:10px;text-align:left"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">Add address details (optional)</label><textarea id="delivery-address-ta" class="manual-addr-ta" style="margin-top:6px" placeholder="Building name, floor, landmarks...">${deliveryAddress}</textarea></div></div>`;
+}
+
+function detectLocation(){
+    if(!navigator.geolocation){alert('Geolocation not supported.');return;}
+    const btn=document.getElementById('locate-btn');
+    if(btn){btn.disabled=true;btn.innerHTML='<span class="spin">⏳</span> Getting location…';}
+    navigator.geolocation.getCurrentPosition(
+        (pos)=>{
+            userGPS={lat:pos.coords.latitude,lng:pos.coords.longitude};
+            detectedZone=getDeliveryZone(userGPS.lat,userGPS.lng);
+            const ta=document.getElementById('delivery-address-ta');
+            if(ta) deliveryAddress=ta.value;
+            renderSheet();
+        },
+        (err)=>{
+            if(btn){btn.disabled=false;btn.innerHTML='📍 Detect My Location';}
+            let msg='Could not get location. Please try again.';
+            if(err.code===1) msg='Location access denied. Please allow location and try again.';
+            if(err.code===3) msg='Location timed out. Please try again.';
+            const e=document.getElementById('err-location');
+            if(e){e.textContent=msg;e.classList.add('show');}
+        },
+        {timeout:12000,enableHighAccuracy:true}
     );
+}
+function resetLocation(){
+    const ta=document.getElementById('delivery-address-ta');
+    if(ta) deliveryAddress=ta.value;
+    userGPS=null;detectedZone=null;renderSheet();
+}
 
-    const menuItems = (Array.isArray(products) ? products : [])
-      .map(p => ({
-        name: p.name,
-        category: categoryTitles[p.category_key] || p.category_key || '',
-        description: p.description || '',
-        price: p.price || '$0',
-      }))
-      .filter(item => item.name);
+    function syncMenuOrderingUI(){
+  const btn = document.getElementById('order-mode-btn');
+  if(btn) btn.style.display = MENU_ORDERING_ENABLED ? '' : 'none';
+  renderOrderModeButton();
 
-    function priceNumber(price) {
-      const n = Number(String(price || '').replace(/[^0-9.-]/g, ''));
-      return Number.isFinite(n) ? n : 0;
+  if(!MENU_ORDERING_ENABLED){
+    orderMode = false;
+    cart = {};
+    addonSel = {};
+    shishaSel = {};
+    document.body.classList.remove('order-mode');
+    updatePill();
+    closeSheet();
+  }
+}
+// SEND ORDER
+async function sendOrder(){
+    const nameEl=document.getElementById('sheet-name');
+    const phoneEl=document.getElementById('sheet-phone');
+    const name=nameEl?nameEl.value.trim():'';
+    const rawPhone=phoneEl?phoneEl.value.trim():'';
+    const phone=normalizePhone(rawPhone);
+    let valid=true;
+
+    // Name (mandatory)
+    const nameErr=document.getElementById('err-name');
+    if(!name){
+        if(nameErr) nameErr.classList.add('show');
+        if(nameEl) nameEl.classList.add('error');
+        valid=false;
+    } else {
+        if(nameErr) nameErr.classList.remove('show');
+        if(nameEl) nameEl.classList.remove('error');
     }
 
-    function normalizeName(name) {
-      return String(name || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, ' ')
-        .trim();
+    // Phone (mandatory)
+    const phoneErr=document.getElementById('err-phone');
+    if(!phone){
+        if(phoneErr) phoneErr.classList.add('show');
+        if(phoneEl) phoneEl.classList.add('error');
+        valid=false;
+    } else {
+        if(phoneErr) phoneErr.classList.remove('show');
+        if(phoneEl) phoneEl.classList.remove('error');
     }
 
-    function menuItemByName(name) {
-      const exact = normalizeName(name);
-      return menuItems.find(item => normalizeName(item.name) === exact)
-        || menuItems.find(item => exact && normalizeName(item.name).includes(exact))
-        || menuItems.find(item => exact && exact.includes(normalizeName(item.name)));
+    // Required add-ons
+    const addonErrors=[];
+    Object.entries(cart).filter(([,v])=>v>0).forEach(([key])=>{
+        const meta=itemMeta[key];
+        const selArr=addonSel[key]||[];
+        if(meta&&meta.addons&&meta.addons.length){
+            meta.addons.forEach(a=>{
+                if(a.required&&!selArr.some(s=>s.label===a.label)){
+                    valid=false;
+                    if(!addonErrors.includes(key))addonErrors.push(key);
+                }
+            });
+        }
+    });
+    if(addonErrors.length){
+        _addonMap.forEach((entry,ki)=>{
+            if(entry.type==='addon'&&addonErrors.includes(entry.key)){
+                const errEl=document.getElementById('err-addon-'+ki);
+                if(errEl) errEl.classList.add('show');
+                const wrap=document.getElementById('addon-err-wrap-'+ki);
+                if(wrap) setTimeout(()=>wrap.scrollIntoView({behavior:'smooth',block:'center'}),50);
+            }
+        });
     }
 
-    function cravingTerms() {
-      const raw = normalizeName(craving).split(/\s+/).filter(word => word.length > 2);
-      const aliases = {
-        // English sweet / dessert
-        nutela: ['nutella', 'chocolate', 'sweet', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'milkshake'],
-        nutla: ['nutella', 'chocolate', 'sweet', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
-        nutella: ['chocolate', 'sweet', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'milkshake'],
-        choco: ['chocolate', 'nutella', 'brownie', 'oreo', 'sweet'],
-        chocolate: ['nutella', 'brownie', 'oreo', 'sweet', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
-        chocolat: ['chocolate', 'nutella', 'brownie', 'oreo', 'sweet'],
-        kinder: ['kinder', 'chocolate', 'sweet', 'waffle', 'crepe', 'pancake'],
-        oreo: ['oreo', 'chocolate', 'sweet', 'milkshake', 'ice', 'cream'],
-        lotus: ['lotus', 'biscoff', 'sweet', 'waffle', 'crepe', 'pancake'],
-        caramel: ['caramel', 'sweet', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
-        sugar: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
-        sukar: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
-        sokar: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
-        sweet: ['waffle', 'pancake', 'crepe', 'ice', 'cream', 'nutella', 'oreo', 'chocolate', 'dessert'],
-        dessert: ['sweet', 'waffle', 'pancake', 'crepe', 'ice', 'cream', 'nutella', 'oreo', 'chocolate'],
-        sweets: ['sweet', 'waffle', 'pancake', 'crepe', 'ice', 'cream', 'nutella', 'oreo', 'chocolate'],
-        helou: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        helo: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        heloow: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        '7elo': ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        '7elou': ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        hlou: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        helwe: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        helweh: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        helu: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        halew: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream', 'nutella', 'chocolate'],
-        zahra: ['dessert', 'sweet', 'waffle', 'crepe', 'pancake'],
-        sahra: ['dessert', 'sweet', 'waffle', 'crepe', 'pancake', 'shisha'],
-        atyab: ['sweet', 'dessert', 'waffle', 'crepe', 'pancake', 'ice', 'cream'],
+    if(!selectedType){
+        const e=document.getElementById('err-type');if(e)e.classList.add('show');valid=false;
+    } else {
+        const e=document.getElementById('err-type');if(e)e.classList.remove('show');
+    }
+    if(selectedType==='delivery'){
+        if(detectedZone&&!detectedZone.canDeliver){ valid=false; }
+        else if(!detectedZone){
+            const e=document.getElementById('err-location');
+            if(e){e.textContent='Please detect your location to continue.';e.classList.add('show');}
+            valid=false;
+        }
+    }
+    if(!valid) return;
 
-        // Cold / drinks / fruity
-        cold: ['ice', 'cream', 'milkshake', 'smoothie', 'juice', 'lemon', 'mint', 'fruit'],
-        cool: ['ice', 'cream', 'milkshake', 'smoothie', 'juice', 'cold'],
-        fresh: ['juice', 'smoothie', 'lemon', 'mint', 'cold', 'fruit'],
-        ice: ['ice', 'cream', 'cold', 'milkshake'],
-        iced: ['ice', 'cream', 'cold', 'milkshake'],
-        frozen: ['ice', 'cream', 'cold', 'smoothie', 'milkshake'],
-        drink: ['juice', 'smoothie', 'milkshake', 'cold', 'lemon', 'mint'],
-        drinks: ['juice', 'smoothie', 'milkshake', 'cold', 'lemon', 'mint'],
-        juice: ['juice', 'fruit', 'lemon', 'mint', 'orange', 'strawberry', 'mango'],
-        smoothie: ['smoothie', 'fruit', 'cold', 'strawberry', 'banana', 'mango'],
-        milkshake: ['milkshake', 'ice', 'cream', 'chocolate', 'oreo', 'cold'],
-        refreshing: ['juice', 'smoothie', 'lemon', 'mint', 'cold', 'fruit'],
-        fruity: ['fruit', 'strawberry', 'banana', 'mango', 'berry', 'juice', 'smoothie'],
-        fruit: ['fruit', 'strawberry', 'banana', 'mango', 'berry', 'juice', 'smoothie'],
-        strawberry: ['strawberry', 'fruit', 'smoothie', 'juice', 'ice', 'cream'],
-        banana: ['banana', 'fruit', 'smoothie', 'juice', 'ice', 'cream'],
-        mango: ['mango', 'fruit', 'smoothie', 'juice'],
-        lemon: ['lemon', 'mint', 'juice', 'cold', 'refreshing'],
-        mint: ['mint', 'lemon', 'juice', 'cold', 'refreshing', 'shisha'],
-        bared: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        bered: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        barid: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        barad: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        sa2e3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        sa23a: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        msa2a3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        msa23: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        msaa2a3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        msha2a3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        msake3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        mse2a3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        saqe3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        se2a3: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        sa2a: ['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice'],
-        talej: ['ice', 'cream', 'cold', 'milkshake'],
-        tlej: ['ice', 'cream', 'cold', 'milkshake'],
-        mos2e3: ['cold', 'juice', 'smoothie', 'lemon', 'mint'],
-        asir: ['juice', 'fruit', 'lemon', 'mint', 'orange', 'strawberry', 'mango'],
-        '3asir': ['juice', 'fruit', 'lemon', 'mint', 'orange', 'strawberry', 'mango'],
-        cocktail: ['juice', 'fruit', 'smoothie', 'strawberry', 'banana', 'mango'],
-        koktel: ['juice', 'fruit', 'smoothie', 'strawberry', 'banana', 'mango'],
-        orange: ['orange', 'juice', 'fruit'],
-        avocado: ['avocado', 'juice', 'smoothie', 'fruit'],
+    const sendBtn=document.getElementById('send-order-btn');
+    if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='⏳ Checking…';}
 
-        // Salty / savory / meal
-        salty: ['fries', 'cheese', 'burger', 'sandwich', 'sauce', 'loaded'],
-        salt: ['fries', 'cheese', 'burger', 'sandwich', 'sauce', 'loaded'],
-        savory: ['fries', 'cheese', 'burger', 'sandwich', 'sauce', 'loaded'],
-        snack: ['fries', 'cheese', 'burger', 'sandwich', 'sauce', 'loaded', 'box'],
-        snacks: ['fries', 'cheese', 'burger', 'sandwich', 'sauce', 'loaded', 'box'],
-        fries: ['fries', 'loaded', 'cheese', 'sauce'],
-        fry: ['fries', 'loaded', 'cheese', 'sauce'],
-        batata: ['fries', 'loaded', 'cheese', 'sauce'],
-        batataw: ['fries', 'loaded', 'cheese', 'sauce'],
-        batata2: ['fries', 'loaded', 'cheese', 'sauce'],
-        cheese: ['cheese', 'fries', 'burger', 'sandwich'],
-        jebne: ['cheese', 'fries', 'burger', 'sandwich'],
-        jebneh: ['cheese', 'fries', 'burger', 'sandwich'],
-        labne: ['labne', 'labneh', 'sandwich', 'cheese', 'savory'],
-        labneh: ['labne', 'labneh', 'sandwich', 'cheese', 'savory'],
-        labni: ['labne', 'labneh', 'sandwich', 'cheese', 'savory'],
-        zaatar: ['zaatar', 'labne', 'sandwich', 'savory'],
-        manoushe: ['zaatar', 'labne', 'cheese', 'savory'],
-        manouche: ['zaatar', 'labne', 'cheese', 'savory'],
-        maleh: ['salty', 'fries', 'cheese', 'burger', 'sandwich', 'loaded'],
-        meleh: ['salty', 'fries', 'cheese', 'burger', 'sandwich', 'loaded'],
-        mleh: ['salty', 'fries', 'cheese', 'burger', 'sandwich', 'loaded'],
-        male7: ['salty', 'fries', 'cheese', 'burger', 'sandwich', 'loaded'],
-        mele7: ['salty', 'fries', 'cheese', 'burger', 'sandwich', 'loaded'],
-        akel: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        akle: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        akleh: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        spicy: ['spicy', 'buffalo', 'sauce', 'burger', 'fries'],
-        har: ['spicy', 'buffalo', 'sauce', 'burger', 'fries'],
-        '7ar': ['spicy', 'buffalo', 'sauce', 'burger', 'fries'],
-        harr: ['spicy', 'buffalo', 'sauce', 'burger', 'fries'],
-        spicyy: ['spicy', 'buffalo', 'sauce', 'burger', 'fries'],
-        hungry: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        honger: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        hunger: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        jo3an: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        jوعان: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        je3an: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        jou3an: ['burger', 'sandwich', 'fries', 'loaded', 'box'],
-        ktir: ['loaded', 'box', 'burger', 'sandwich', 'fries'],
-        burger: ['burger', 'fries', 'cheese', 'sauce'],
-        sandwich: ['sandwich', 'fries', 'cheese', 'sauce'],
-        sandwish: ['sandwich', 'fries', 'cheese', 'sauce'],
-        tawouk: ['sandwich', 'fries', 'garlic', 'sauce'],
-        taouk: ['sandwich', 'fries', 'garlic', 'sauce'],
-        chicken: ['chicken', 'sandwich', 'burger', 'fries'],
-        djej: ['chicken', 'sandwich', 'burger', 'fries'],
-        djeij: ['chicken', 'sandwich', 'burger', 'fries'],
-        crispy: ['crispy', 'sandwich', 'burger', 'fries'],
-        loaded: ['loaded', 'fries', 'cheese', 'sauce'],
-        shawarma: ['sandwich', 'chicken', 'fries', 'garlic', 'sauce'],
-        garlic: ['garlic', 'sauce', 'sandwich', 'fries'],
-        toum: ['garlic', 'sauce', 'sandwich', 'fries'],
-        sauce: ['sauce', 'fries', 'burger', 'sandwich'],
-        bbq: ['bbq', 'sauce', 'burger', 'fries'],
-        buffalo: ['buffalo', 'spicy', 'sauce', 'fries'],
-
-        // Shisha
-        shisha: ['shisha', 'double', 'apple', 'mint', 'lemon', 'flavor'],
-        arguile: ['shisha', 'double', 'apple', 'mint', 'lemon', 'flavor'],
-        argile: ['shisha', 'double', 'apple', 'mint', 'lemon', 'flavor'],
-        arghile: ['shisha', 'double', 'apple', 'mint', 'lemon', 'flavor'],
-        nargile: ['shisha', 'double', 'apple', 'mint', 'lemon', 'flavor'],
-        nafas: ['shisha', 'double', 'apple', 'mint', 'lemon', 'flavor'],
-        teffehten: ['double', 'apple', 'shisha'],
-        tifehten: ['double', 'apple', 'shisha'],
-        na3na3: ['mint', 'lemon', 'shisha'],
-        nana: ['mint', 'lemon', 'shisha'],
-
-        // Mood words
-        light: ['juice', 'smoothie', 'fruit', 'salad', 'ice', 'cream'],
-        khafif: ['juice', 'smoothie', 'fruit', 'ice', 'cream'],
-        khfif: ['juice', 'smoothie', 'fruit', 'ice', 'cream'],
-        quick: ['fries', 'sandwich', 'burger', 'juice', 'milkshake'],
-        cheap: ['fries', 'juice', 'ice', 'cream'],
-        rkhees: ['fries', 'juice', 'ice', 'cream'],
-        rkhes: ['fries', 'juice', 'ice', 'cream'],
-        kids: ['pancake', 'waffle', 'ice', 'cream', 'fries', 'juice'],
-        child: ['pancake', 'waffle', 'ice', 'cream', 'fries', 'juice'],
-        kidsmeal: ['pancake', 'waffle', 'ice', 'cream', 'fries', 'juice'],
-      };
-      const terms = new Set(raw);
-      raw.forEach(word => (aliases[word] || []).forEach(alias => terms.add(alias)));
-      return [...terms];
+    // Block list check
+    if(await isPhoneBlocked(phone)){
+        if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Send Order on WhatsApp';}
+        showInboxToast('🚫 This number is blocked. Please contact us directly.','err');
+        return;
     }
 
-    function itemRelevance(item) {
-      const hay = normalizeName(`${item.name} ${item.category} ${item.description}`);
-      let score = cravingTerms().reduce((total, term) => {
-        if (hay.includes(term)) total += 4;
-        if (normalizeName(item.name).includes(term)) total += 3;
-        if (normalizeName(item.category).includes(term)) total += 2;
-        return total;
-      }, 0);
-      if (isBadMatchForCraving(item)) score -= 20;
-      return score;
+    if(sendBtn){sendBtn.textContent='⏳ Sending…';}
+
+    const entries=Object.entries(cart).filter(([,v])=>v>0);
+    const timeStr=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+    const typeNames={dinein:'🪑 Dine In',takeaway:'🥡 Takeaway',delivery:'🛵 Delivery'};
+    const ta=document.getElementById('delivery-address-ta');
+    const addr=ta?ta.value.trim():deliveryAddress;
+    const changeEl=document.getElementById('sheet-change');
+    const changeForVal=changeEl?changeEl.value.trim():'';
+    const changeForNum=Math.min(100, parseFloat(changeForVal)||0);
+    const fee=getDeliveryFee();
+
+    let subtotal=0;
+    const orderItems=entries.map(([key,qty])=>{
+        const[categoryKey,itemName,price]=key.split('|');
+        const pn=parseFloat(price.replace('$',''))||0;
+        const addonsForItem=(addonSel[key]||[]).map(a=>({label:a.label,price:a.price}));
+        const addonTotal=addonsForItem.reduce((sum,a)=>sum+Number(a.price||0),0);
+        subtotal+=(pn+addonTotal)*qty;
+        return{categoryKey,itemKey:key,name:itemName,price:pn,priceStr:price,qty,flavor:shishaSel[key]||null,addons:addonsForItem};
+    });
+    subtotal+=fee;
+
+    const order={
+        id:newOrderId(),
+        status:'pending',
+        timestamp:new Date().toISOString(),
+        source:'menu',
+        name: name,
+        phone,
+        orderType:selectedType,
+        deliveryZone:(selectedType==='delivery'&&detectedZone)?detectedZone.label:null,
+        deliveryFee:fee,
+        gps:userGPS||null,
+        address:addr||null,
+        changeFor:changeForNum||null,
+        items:orderItems,
+        total:subtotal
+    };
+
+    let trackUrl = `https://lekiosk.store/track/?id=${encodeURIComponent(order.id)}`;
+    let trackingReady = false;
+    if (WORKER_URL && !WORKER_URL.includes('YOUR-SUBDOMAIN')) {
+        showInboxToast('📥 Sending to POS…');
+        try {
+            const result = await dispatchOrder(order);
+            if(result.id) order.id = result.id;
+            if(result.trackUrl) trackUrl = result.trackUrl;
+            trackingReady = true;
+            showInboxToast(`✅ Order received! <a href="${esc(trackUrl)}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:underline">Track your order</a>`, 'ok', true);
+        } catch(e) {
+            console.error('Worker dispatch failed:', e);
+            if(/disabled|open|blocked|invalid|unavailable|outside|required|phone/i.test(String(e.message||e))){
+                if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Send Order on WhatsApp';}
+                showInboxToast(e.message||'Could not send order','err');
+                return;
+            }
+            showInboxToast('⚠️ POS sync failed — WhatsApp still sent', 'err');
+        }
     }
 
-    function hasAnyTerm(list) {
-      const terms = cravingTerms();
-      return list.some(term => terms.includes(term));
+    let msg='🛒 *New Order — Le Kiosk*\n━━━━━━━━━━━━━━━━━━\n';
+    msg+=`👤 *Name:* ${name}\n`;
+    msg+=`📞 *Phone:* +961 ${phone}\n`;
+    msg+=`📦 *Type:* ${typeNames[selectedType]}\n`;
+    msg+=`🕐 *Time:* ${timeStr}\n`;
+    if(selectedType==='delivery'){
+        if(detectedZone&&detectedZone.canDeliver) msg+=`📍 *Zone:* ${detectedZone.label} — Fee: ${detectedZone.feeLabel}\n`;
+        if(userGPS) msg+=`🗺️ *Customer Location:* https://maps.google.com/?q=${userGPS.lat},${userGPS.lng}\n`;
+        if(addr) msg+=`🏠 *Address details:* ${addr}\n`;
     }
+    msg+='━━━━━━━━━━━━━━━━━━\n';
+    orderItems.forEach(it=>{
+        msg+=`• ${it.name} x${it.qty} — $${(it.price*it.qty).toFixed(2)}\n`;
+        (it.addons||[]).forEach(a=>{msg+=`  ↳ + ${a.label}${it.qty>1?' x'+it.qty:''} — $${(a.price*it.qty).toFixed(2)}\n`;});
+    });
+    if(fee>0) msg+=`• 🛵 Delivery — $${fee.toFixed(2)}\n`;
+    msg+=`━━━━━━━━━━━━━━━━━━\n💰 *Total: $${subtotal.toFixed(2)}*\n`;
+    if(changeForNum>subtotal) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}* (change back: $${(changeForNum-subtotal).toFixed(2)})\n`;
+    else if(changeForNum>0) msg+=`💵 *Change needed for: $${changeForNum.toFixed(2)}*\n`;
+    msg+=`\nPlease confirm my order 🙏`;
+    if(trackingReady) msg+=`\n🔗 Track: ${trackUrl}`;
 
-    function isBadMatchForCraving(item) {
-      const hay = normalizeName(`${item.name} ${item.category} ${item.description}`);
-      const sweetIntent = hasAnyTerm(['sweet', 'dessert', 'nutella', 'chocolate', 'oreo', 'lotus', 'kinder', 'waffle', 'crepe', 'pancake']);
-      const coldIntent = hasAnyTerm(['cold', 'ice', 'cream', 'milkshake', 'smoothie', 'juice', 'fruit']);
-      if (sweetIntent) {
-        return ['fries', 'burger', 'sandwich', 'labne', 'labneh', 'zaatar', 'cheese', 'tawouk', 'taouk', 'chicken', 'crispy', 'garlic', 'sauce']
-          .some(term => hay.includes(term));
+    window.open('https://wa.me/76840244?text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');
+    closeSheet();
+}
+
+// DELEGATED CLICKS
+document.addEventListener('click',function(e){
+    if(e.target.closest('#menu-jump-btn')){openMenuPage();return;}
+    if(e.target.closest('#order-mode-btn')){openOrderPage();return;}
+    if(e.target.closest('#checkout-pill-inner')){openSheet();return;}
+    if(e.target.closest('#contact-close')){closeContactPanel();return;}
+    if(e.target.closest('#clear-cart-btn')){clearCart();return;}
+    if(e.target.closest('#close-sheet-btn')||e.target===document.getElementById('sheet-backdrop')){closeSheet();return;}
+    if(e.target.closest('#send-order-btn')){sendOrder();return;}
+    if(e.target.closest('#locate-btn')){detectLocation();return;}
+    if(e.target.closest('#reset-loc-btn')){resetLocation();return;}
+    const typeBtn=e.target.closest('[data-select-type]');
+    if(typeBtn){selectedType=typeBtn.dataset.selectType;renderSheet();return;}
+    const chip=e.target.closest('[data-type]');
+    if(!chip) return;
+    const type=chip.dataset.type,ki=parseInt(chip.dataset.ki),entry=_addonMap[ki];
+    if(!entry) return;
+    const{key}=entry;
+    const scrollTop=document.getElementById('sheet-scroll').scrollTop;
+    if(type==='shisha'){
+        const fi=parseInt(chip.dataset.fi),meta=itemMeta[key];
+        if(!meta||!meta.flavors) return;
+        const flv=meta.flavors[fi];
+        shishaSel[key]=shishaSel[key]===flv?null:flv;
+    } else if(type==='addon'){
+        const ai=parseInt(chip.dataset.ai),meta=itemMeta[key];
+        if(!meta||!meta.addons) return;
+        const addon=meta.addons[ai];
+        const pn=parseFloat((addon.price||'0').replace('$',''))||0;
+        if(!addonSel[key]) addonSel[key]=[];
+        const idx=addonSel[key].findIndex(s=>s.label===addon.label);
+        if(idx>-1) addonSel[key].splice(idx,1); else addonSel[key].push({label:addon.label,price:pn});
+    }
+    renderSheet();
+    document.getElementById('sheet-scroll').scrollTop=scrollTop;
+});
+
+// MENU RENDER
+function renderPills(item){
+    if(!item.flavors||!item.flavors.length) return '';
+    const pc=PILL_COLORS[item.flavorColor]||PILL_COLORS.amber;
+    return'<div class="flex flex-wrap gap-1 mt-2">'+item.flavors.map(f=>`<span style="background:${pc.bg};border:1px solid ${pc.border};color:${pc.text}" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(f)}</span>`).join('')+'</div>';
+}
+function renderSectionHead(category,count){
+    const label=count===1?'1 item':count+' items';
+    const unavailable=category.active===false;
+    return `<div class="section-head"><div><div class="section-kicker">Fresh picks</div><h2 class="section-title">${esc(category.title)}</h2></div><span class="section-count${unavailable?' unavailable-section':''}">${unavailable?'Unavailable section':label}</span></div>`;
+}
+async function loadMenu(){
+    try{
+        const res = await fetch(`${WORKER_URL}/supabase/menu`, { cache:'no-store' });
+        if(!res.ok) throw new Error('Supabase menu failed');
+
+        const j = await res.json();
+        const data = Array.isArray(j.data) ? j.data : [];
+
+        if(!data.length) throw new Error('Empty Supabase menu');
+        return data;
+    }catch(e){
+        console.warn('Using menu.json fallback:', e);
+
+        try{
+            const res = await fetch('menu.json?v=' + Date.now());
+            if(!res.ok) throw new Error();
+            return await res.json();
+        }catch(_){
+            document.getElementById('menu-container').innerHTML =
+              '<div class="text-center py-12 text-red-400 text-sm">Could not load menu. Please refresh.</div>';
+            return null;
+        }
+    }
+}
+function renderAddonSection(category){
+    const groups=category.addonGroups||[];
+    let html=`<section id="${esc(category.key)}" class="scroll-mt-24">${renderSectionHead(category,groups.length)}<div class="menu-grid">`;
+    groups.forEach(group=>{
+        html+=`<div class="addon-card"><div class="addon-icon">${esc(group.emoji)}</div><div class="flex-grow min-w-0"><div class="flex justify-between items-center gap-2"><span class="font-black text-amber-950 text-sm">${esc(group.label)}</span><span class="menu-price">${esc(group.price)}</span></div><p class="menu-desc mt-1">${esc(group.note)}</p><div class="flex flex-wrap gap-1 mt-2">${(group.options||[]).map(o=>`<span class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-lg">${esc(o)}</span>`).join('')}</div></div></div>`;
+    });
+    return html+'</div></section>';
+}
+function initMenu(menuData){
+    document.getElementById('main-nav').innerHTML=menuData.map((c,i)=>`<a href="#${esc(c.key)}" class="nav-link${i===0?' active':''}" data-section="${esc(c.key)}">${esc(c.title)}</a>`).join('');
+    const container=document.getElementById('menu-container');
+    container.innerHTML='';
+    menuData.forEach(category=>{
+        if(category.type==='addons'){container.innerHTML+=renderAddonSection(category);return;}
+        const items=category.items||[];
+        let html=`<section id="${esc(category.key)}" class="scroll-mt-24">${renderSectionHead(category,items.length)}`;
+        if(items.length){
+            html+='<div class="menu-grid">';
+            items.forEach((item,idx)=>{
+                const unavailable=category.active===false||item.active===false;
+                const itemKey=`${category.key}|${item.name}|${item.price}`;
+                const qtyId=`qty-${category.key}-${idx}`,cardId=`card-${qtyId}`;
+                const itemKeyArg=jsStr(itemKey), safeQty=esc(qtyId), safeCard=esc(cardId);
+                const img=item.image ? `${STORAGE_PUBLIC_BASE}/${String(item.image).replace(/^\/+/,'')}` : '';
+                html+=`<div class="item-card-wrap" id="${safeCard}"><div class="menu-card${unavailable?' unavailable':''}"><div class="menu-image"><img src="${esc(img)}" alt="${esc(item.name)}"></div><div class="menu-info"><div class="menu-title-row"><h3 class="menu-name line-clamp-2">${esc(item.name)}</h3><span class="menu-price">${esc(item.price)}</span></div><p class="menu-desc line-clamp-3">${esc(item.desc)}</p>${renderPills(item)}${unavailable?'<button class="unavailable-btn" type="button" disabled>Unavailable</button>':`<div class="qty-control"><button class="qty-btn qty-minus" onclick="changeQty('${itemKeyArg}',-1,'${safeQty}')">-</button><div class="qty-num" id="${safeQty}">0</div><button class="qty-btn qty-plus" onclick="changeQty('${itemKeyArg}',1,'${safeQty}')">+</button></div>`}</div></div></div>`;
+            });
+            html+='</div>';
+        }
+        if(category.bottomBanner) html+=`<div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs p-3 rounded-xl mt-3 text-center shadow-sm">${esc(category.bottomBanner)}</div>`;
+        container.innerHTML+=html+'</section>';
+    });
+}
+function initScrollSpy(menuData){
+    const navLinks=document.querySelectorAll('.nav-link');
+    function setActive(id){navLinks.forEach(link=>{if(link.dataset.section===id){link.classList.add('active');link.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}else link.classList.remove('active');});}
+    const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:'-30% 0px -65% 0px',threshold:0});
+    menuData.forEach(c=>{const el=document.getElementById(c.key);if(el)observer.observe(el);});
+}
+
+function bindCheckoutSheetDrag(){
+    const sheet=document.getElementById('checkout-sheet');
+    const body=document.getElementById('sheet-body');
+    if(!sheet||!body||body.dataset.dragBound)return;
+    body.dataset.dragBound='1';
+    let startY=0,currentY=0,dragging=false;
+    function canDragFrom(target){
+        if(target.closest&&target.closest('.sheet-handle,.sheet-header'))return true;
+        const scroll=target.closest&&target.closest('#sheet-scroll');
+        return !scroll||scroll.scrollTop<=0;
+    }
+    body.addEventListener('pointerdown',function(e){
+        if(!sheet.classList.contains('open')||!canDragFrom(e.target))return;
+        dragging=true;startY=e.clientY;currentY=0;
+        body.style.transition='none';
+        body.setPointerCapture&&body.setPointerCapture(e.pointerId);
+    });
+    body.addEventListener('pointermove',function(e){
+        if(!dragging)return;
+        currentY=Math.max(0,e.clientY-startY);
+        if(currentY>0){
+            e.preventDefault();
+            body.style.transform='translateY('+currentY+'px)';
+        }
+    });
+    function endDrag(){
+        if(!dragging)return;
+        dragging=false;
+        body.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';
+        if(currentY>90)closeSheet();
+        else body.style.transform='';
+    }
+    body.addEventListener('pointerup',endDrag);
+    body.addEventListener('pointercancel',endDrag);
+}
+
+// Contact bubble
+const bubble = document.getElementById('contact-bubble');
+const ctoggle = document.getElementById('contact-toggle');
+function closeContactPanel(){
+    bubbleOpen=false;
+    if(bubble) bubble.classList.remove('open');
+    document.body.classList.remove('contact-open');
+    renderOrderModeButton();
+}
+function toggleContactPanel(){
+    bubbleOpen=true;
+    if(orderMode){
+        orderMode=false;
+        document.body.classList.remove('order-mode');
+        closeSheet();
+        updatePill();
+    }
+    if(bubble) bubble.classList.toggle('open',bubbleOpen);
+    document.body.classList.toggle('contact-open',bubbleOpen);
+    renderOrderModeButton();
+}
+ctoggle.addEventListener('click', toggleContactPanel);
+document.addEventListener('click', e => { if(bubbleOpen && !bubble.contains(e.target) && e.target !== ctoggle && !ctoggle.contains(e.target)) closeContactPanel(); });
+
+// Scroll spy for status badge
+(function(){
+    const badge = document.getElementById('status-badge');
+    if(!badge) return;
+    function onScroll(){ badge.classList.toggle('hidden', document.body.classList.contains('order-mode') || window.scrollY > 60); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+
+// Boot — fetch config first, then render everything
+// Boot — fetch config first, then render everything
+fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' })
+  .then(r => r.ok ? r.json() : null)
+  .then(j => {
+    if(j && j.data) {
+      if(j.data.testingMode !== undefined) {
+        TESTING_MODE = !!j.data.testingMode;
       }
-      if (coldIntent && !sweetIntent) {
-        return ['fries', 'burger', 'sandwich', 'labne', 'labneh', 'zaatar', 'tawouk', 'taouk', 'chicken', 'crispy']
-          .some(term => hay.includes(term));
+      if(j.data.menuOrderingEnabled !== undefined) {
+        MENU_ORDERING_ENABLED = !!j.data.menuOrderingEnabled;
       }
+    }
+  })
+  .catch(() => {})
+  .finally(() => {
+    syncMenuOrderingUI();
+
+    updateStatusBadge();
+    setInterval(updateStatusBadge, 60000);
+
+    loadMenu().then(data => {
+      if(!data) return;
+
+      initMenu(data);
+      initScrollSpy(data);
+
+      itemMeta = {};
+      data.forEach(cat => {
+        if(cat.type === 'addons') return;
+        if(cat.active===false) return;
+        (cat.items || []).filter(item => item.active !== false).forEach(item => {
+          itemMeta[`${cat.key}|${item.name}|${item.price}`] = item;
+        });
+      });
+
+      syncMenuOrderingUI();
+    });
+  });
+</script>
+ <!-- Le Kiosk Basketball Popup
+Paste this near the end of the public menu page, after WORKER_URL is defined.
+It reads config.basketballEnabled and config.basketballMatches from /supabase/config.
+-->
+
+<style>
+  #basketball-bubble {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 61;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: #1c0f00;
+    color: #fef3c7;
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 16px rgba(0,0,0,.22);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  #basketball-bubble.show { display: flex; }
+  #basketball-bubble.hidden {
+    opacity: 0;
+    transform: translateY(-12px);
+    pointer-events: none;
+  }
+
+  #basketball-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 180;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(28, 15, 0, 0);
+    backdrop-filter: blur(3px);
+  }
+  #basketball-popup.open {
+    display: flex;
+    background: rgba(28, 15, 0, .54);
+    animation: basketballBackdropIn .24s ease forwards;
+  }
+  #basketball-popup.closing {
+    display: flex;
+    pointer-events: none;
+    animation: basketballBackdropOut .28s ease forwards;
+  }
+
+  .basketball-card {
+    width: min(430px, 92vw);
+    max-height: 88vh;
+    overflow: hidden;
+    border-radius: 26px;
+    border: 1px solid rgba(17,24,39,.1);
+    background:
+      radial-gradient(circle at 14px 14px, rgba(120,53,15,.16) 0 5px, transparent 5.5px) 0 0 / 28px 28px,
+      linear-gradient(180deg, rgba(255,251,235,.98), rgba(254,243,199,.96));
+    box-shadow: 0 24px 70px rgba(0,0,0,.36);
+    position: relative;
+    transform-origin: top left;
+    will-change: transform, opacity;
+  }
+  #basketball-popup.opening .basketball-card {
+    animation: basketballBubbleOpen .34s cubic-bezier(.2, .8, .2, 1) both;
+  }
+  #basketball-popup.closing .basketball-card {
+    animation: basketballBubbleClose .28s cubic-bezier(.4, 0, .2, 1) forwards;
+  }
+  .basketball-card::before {
+    content: "";
+    position: absolute;
+    inset: 76px 24px 82px;
+    border: 15px solid rgba(245,158,11,.11);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .basketball-top {
+    color: #111827;
+    padding: 18px 46px 6px;
+    position: relative;
+    text-align: center;
+  }
+  .basketball-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: .02em;
+    color: #451a03;
+    text-shadow: 0 2px 0 rgba(255,255,255,.8);
+  }
+  .basketball-sub {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #b45309;
+    margin-top: 6px;
+  }
+  .basketball-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,.88);
+    color: #111827;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(15,23,42,.12);
+  }
+  .basketball-list {
+    position: relative;
+    max-height: 78vh;
+    overflow-y: auto;
+    padding: 6px 14px 14px;
+  }
+  .basketball-match {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(245,158,11,.34);
+    background: rgba(255,255,255,.88);
+    border-radius: 18px;
+    padding: 94px 12px 10px;
+    margin-bottom: 9px;
+    box-shadow: 0 10px 25px rgba(69,26,3,.13);
+  }
+  .basketball-match::before {
+    content: "NEXT MATCH\A NEXT MATCH";
+    white-space: pre;
+    position: absolute;
+    left: 50%;
+    top: 7px;
+    transform: translateX(-50%);
+    width: 112%;
+    text-align: center;
+    font-family: Impact, 'Arial Black', sans-serif;
+    font-size: clamp(31px, 10vw, 46px);
+    line-height: .8;
+    letter-spacing: 0;
+    color: rgba(180,83,9,.92);
+    pointer-events: none;
+  }
+  .basketball-match::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 48px;
+    width: 72px;
+    height: 72px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #451a03 0 64%, transparent 65%),
+      linear-gradient(135deg, #f59e0b, #92400e);
+    box-shadow: 0 8px 20px rgba(69,26,3,.28);
+    pointer-events: none;
+  }
+  .basketball-match.featured {
+    border-color: rgba(245,158,11,.52);
+    box-shadow: 0 14px 34px rgba(69,26,3,.16), 0 0 0 3px rgba(245,158,11,.13);
+  }
+  .basketball-match-inner {
+    position: relative;
+    z-index: 1;
+  }
+  .basketball-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: max-content;
+    margin: 7px auto 0;
+    border-radius: 999px;
+    padding: 5px 10px;
+    background: #78350f;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    box-shadow: 0 7px 16px rgba(120,53,15,.24);
+  }
+  .basketball-time.live {
+    background: #d97706;
+    box-shadow: 0 7px 16px rgba(217,119,6,.24);
+  }
+  .basketball-time.ended {
+    background: #9ca3af;
+    color: #fff;
+    box-shadow: none;
+  }
+  .basketball-mark {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 52px;
+    transform: translateX(-50%);
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #451a03;
+    border: 4px solid #f59e0b;
+    box-shadow: 0 9px 22px rgba(69,26,3,.26);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .basketball-mark img {
+    width: 78%;
+    height: 78%;
+    object-fit: contain;
+  }
+  .basketball-mark span {
+    display: none;
+    font-family: 'Fredoka', sans-serif;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+  }
+  .basketball-scoreboard {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 36px minmax(0,1fr);
+    align-items: center;
+    gap: 8px;
+    margin-top: 0;
+    background: rgba(255,255,255,.94);
+    border: 1px solid rgba(251,191,36,.42);
+    border-radius: 16px;
+    padding: 8px 8px;
+    box-shadow: 0 7px 18px rgba(69,26,3,.1);
+  }
+  .basketball-team {
+    min-width: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .basketball-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    border: 2px solid #fde68a;
+    background: #fffaf0;
+    object-fit: contain;
+    padding: 5px;
+    margin: 0 auto;
+    box-shadow: 0 4px 10px rgba(69,26,3,.1);
+  }
+  .basketball-logo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #92400e;
+    font-size: 18px;
+    font-weight: 900;
+  }
+  .basketball-team-name {
+    font-family: Impact, 'Arial Black', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: #451a03;
+    line-height: 1;
+    overflow-wrap: anywhere;
+    text-transform: uppercase;
+    max-width: 100%;
+  }
+  .basketball-vs {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #f59e0b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 8px 16px rgba(245,158,11,.3);
+  }
+  .basketball-meta {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 900;
+    color: #92400e;
+    margin-top: 5px;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+  .basketball-note {
+    color: #451a03;
+    font-family: Impact, 'Arial Black', sans-serif;
+    font-size: 14px;
+    letter-spacing: .02em;
+  }
+  .basketball-reserve {
+    margin-top: 8px;
+    width: 100%;
+    border: 0;
+    border-radius: 999px;
+    background: #78350f;
+    color: #fff;
+    padding: 9px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(120,53,15,.22);
+  }
+  .basketball-reserve:hover { background: #451a03; }
+  .basketball-reserve:disabled,
+  .basketball-reserve.disabled {
+    background: #d1d5db;
+    color: #6b7280;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .basketball-reserve:disabled:hover,
+  .basketball-reserve.disabled:hover { background: #d1d5db; }
+  .basketball-empty {
+    padding: 22px 14px;
+    text-align: center;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  @media (max-width: 390px) {
+    .basketball-scoreboard {
+      grid-template-columns: minmax(0,1fr) 38px minmax(0,1fr);
+      gap: 6px;
+      padding: 9px 7px;
+    }
+    .basketball-logo { width: 40px; height: 40px; }
+    .basketball-team-name { font-size: 13px; }
+    .basketball-vs { width: 36px; height: 36px; font-size: 12px; }
+  }
+  @keyframes basketballBackdropIn {
+    from {
+      background: rgba(28, 15, 0, 0);
+      backdrop-filter: blur(0);
+    }
+    to {
+      background: rgba(28, 15, 0, .54);
+      backdrop-filter: blur(3px);
+    }
+  }
+  @keyframes basketballBackdropOut {
+    to {
+      background: rgba(28, 15, 0, 0);
+      backdrop-filter: blur(0);
+    }
+  }
+  @keyframes basketballBubbleOpen {
+    0% {
+      opacity: 0;
+      transform: translate(calc(-50vw + 33px), calc(-50vh + 33px)) scale(.08);
+      border-radius: 999px;
+    }
+    65% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1.015);
+      border-radius: 28px;
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+      border-radius: 26px;
+    }
+  }
+  @keyframes basketballBubbleClose {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+      border-radius: 26px;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(-50vw + 33px), calc(-50vh + 33px)) scale(.08);
+      border-radius: 999px;
+    }
+  }
+</style>
+
+<button id="basketball-bubble" type="button" aria-label="Today's basketball games">🏀</button>
+
+<div id="basketball-popup" aria-hidden="true">
+  <div class="basketball-card" role="dialog" aria-modal="true" aria-labelledby="basketball-title">
+    <div class="basketball-top">
+      <button class="basketball-close" type="button" id="basketball-close-btn" aria-label="Close">×</button>
+      <div class="basketball-title" id="basketball-title">Le Kiosk</div>
+      <div class="basketball-sub" id="basketball-date-label">Lebanese Basketball at Le Kiosk</div>
+    </div>
+    <div class="basketball-list" id="basketball-match-list"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const WA_NUMBER = '96176840244';
+  const BASKETBALL_STORAGE_PUBLIC_BASE = typeof STORAGE_PUBLIC_BASE !== 'undefined'
+    ? STORAGE_PUBLIC_BASE
+    : 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
+  const TEAM_LOGOS = {
+    riyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+    alriyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+    sportingalriyadi: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Al%20Riyadi%20Basketball%20logo.png?width=160',
+    sagesse: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Sagesse_SC_New_Logo.png/250px-Sagesse_SC_New_Logo.png',
+    hekmeh: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Sagesse_SC_New_Logo.png/250px-Sagesse_SC_New_Logo.png',
+    alhekmeh: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Sagesse_SC_New_Logo.png/250px-Sagesse_SC_New_Logo.png',
+    beirut: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
+    beirutclub: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Beirut%20Club%20logo.png?width=160',
+    homenetmen: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Hmemlogo2019.png/250px-Hmemlogo2019.png',
+    hmentmen: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Hmemlogo2019.png/250px-Hmemlogo2019.png',
+    champville: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+    maristes: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+    csmaristes: 'https://upload.wikimedia.org/wikipedia/en/a/a5/Champvillelogo.jpg',
+    antranik: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Antranik%20logo.png?width=160',
+    hoops: 'https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Hoops_Club.png/250px-Hoops_Club.png',
+    hoopsclub: 'https://upload.wikimedia.org/wikipedia/fr/thumb/6/67/Hoops_Club.png/250px-Hoops_Club.png',
+    antonine: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
+    antonin: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
+    clubantonin: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
+    clubantoninsportif: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Antonin%20Sportif.png?width=160',
+    nsa: 'https://s3.amazonaws.com/media.riyadi.com/uploads/2023/09/24162922/NSA-Club-128x128.png',
+    nadimsouaidacademy: 'https://s3.amazonaws.com/media.riyadi.com/uploads/2023/09/24162922/NSA-Club-128x128.png',
+    central: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    clubcentral: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    clubcentraljounieh: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    almarkazia: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    markazia: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    almarkaziyyah: 'https://fr.wikipedia.org/wiki/Special:Redirect/file/Club%20Central%20Jounieh.png?width=160',
+    tadamonzouk: 'https://en.wikipedia.org/wiki/Special:Redirect/file/Tadamoun%20Zouk%20logo.png?width=160',
+    tadamonhrajel: 'https://img.sofascore.com/api/v1/team/1072061/image',
+    clubtadamonhrajel: 'https://img.sofascore.com/api/v1/team/1072061/image',
+    hrajel: 'https://img.sofascore.com/api/v1/team/1072061/image',
+    chabebbatroun: 'https://img.sofascore.com/api/v1/team/1136559/image',
+    chababbatroun: 'https://img.sofascore.com/api/v1/team/1136559/image',
+    cjsbatroun: 'https://img.sofascore.com/api/v1/team/1136559/image',
+    clubjeunessesportifbatroun: 'https://img.sofascore.com/api/v1/team/1136559/image',
+    batroun: 'https://img.sofascore.com/api/v1/team/1136559/image',
+    federation: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160',
+    flb: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Federation%20Libanaise%20de%20Basketball%20logo.png?width=160'
+  };
+  let todaysMatches = [];
+  let closeTimer = null;
+  const BASKETBALL_POPUP_SEEN_KEY = 'lk_basketball_popup_seen_day';
+
+  function beirutDateKey(d = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Beirut',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(d);
+    const get = t => parts.find(p => p.type === t)?.value || '';
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
+  }
+
+  function hasSeenBasketballPopupToday(day) {
+    try {
+      return localStorage.getItem(BASKETBALL_POPUP_SEEN_KEY) === day;
+    } catch (_) {
       return false;
     }
-
-    function cleanCombo(combo) {
-      const names = Array.isArray(combo?.items) ? combo.items : [];
-      const picked = [];
-      names.forEach(name => {
-        const item = menuItemByName(name);
-        if (item && !picked.some(p => normalizeName(p.name) === normalizeName(item.name))) {
-          picked.push(item);
-        }
-      });
-
-      const finalItems = picked.slice(0, 3);
-      if (finalItems.length < 2) return null;
-
-      const relevantItems = finalItems.filter(item => itemRelevance(item) > 0);
-      if (relevantItems.length < Math.min(2, finalItems.length)) return null;
-
-      const totalPrice = finalItems.reduce((sum, item) => sum + priceNumber(item.price), 0);
-      return {
-        comboName: String(combo.comboName || 'Le Kiosk Combo').trim() || 'Le Kiosk Combo',
-        items: finalItems.map(item => item.name),
-        description: String(combo.description || 'Picked from the Le Kiosk menu for your craving.').trim(),
-        totalPrice: Number(totalPrice.toFixed(2)),
-      };
-    }
-
-    function fallbackCombo() {
-      const scored = menuItems.map(item => {
-        let score = itemRelevance(item);
-        const hay = normalizeName(`${item.name} ${item.category} ${item.description}`);
-        if (cravingTerms().some(term => ['nutela', 'nutella', 'chocolate', 'sweet', 'cold'].includes(term))) {
-          if (hay.includes('fries') || hay.includes('burger') || hay.includes('sandwich')) score -= 8;
-        }
-        if (hay.includes('combo')) score += 1;
-        return { item, score };
-      });
-
-      const picks = scored
-        .sort((a, b) => b.score - a.score)
-        .filter(row => row.score > 0)
-        .slice(0, 3)
-        .map(row => row.item);
-
-      const finalItems = (picks.length ? picks : menuItems.slice(0, 3)).slice(0, 3);
-      const totalPrice = finalItems.reduce((sum, item) => sum + priceNumber(item.price), 0);
-
-      return {
-        comboName: 'Le Kiosk Craving Combo',
-        items: finalItems.map(item => item.name),
-        description: 'A quick pick from the menu that matches your craving.',
-        totalPrice: Number(totalPrice.toFixed(2)),
-      };
-    }
-
-    const prompt = `You are the Le Kiosk snack combo assistant.
-
-User craving: "${craving}"
-
-Available menu items, with exact names and prices:
-${JSON.stringify(menuItems)}
-
-Pick 2-3 items that best match the craving.
-
-Strict rules:
-- Use ONLY exact item names from the menu above.
-- Do not invent items.
-- Prefer obvious flavor matches from name, category, and description.
-- For sweet cravings, prefer waffles, pancakes, crepes, ice cream, chocolate, Nutella, Oreo, fruit, milkshakes, and desserts.
-- For salty/hungry cravings, prefer burgers, sandwiches, fries, loaded fries, sauces, and savory items.
-- For cold/refreshing cravings, prefer ice cream, drinks, smoothies, juices, fruit, lemon, mint.
-- Make the combo feel like something a real Le Kiosk customer would order together.
-- totalPrice must be the sum of the selected menu item prices.
-
-Reply with ONLY a valid JSON object. Do not write markdown. Do not write "here is". Do not add explanation.
-
-JSON shape:
-{
-  "comboName": "...",
-  "items": ["...", "..."],
-  "description": "one fun line",
-  "totalPrice": 0.00
-}`;
-
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: prompt }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 300,
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: 'OBJECT',
-              properties: {
-                comboName: { type: 'STRING' },
-                items: {
-                  type: 'ARRAY',
-                  items: { type: 'STRING' },
-                },
-                description: { type: 'STRING' },
-                totalPrice: { type: 'NUMBER' },
-              },
-              required: ['comboName', 'items', 'description', 'totalPrice'],
-            },
-          },
-        }),
-      }
-    );
-
-    const geminiText = await geminiRes.text();
-    const geminiData = geminiText ? JSON.parse(geminiText) : {};
-
-    if (!geminiRes.ok) {
-      return json({
-        ok: true,
-        combo: fallbackCombo(),
-        fallback: true,
-        aiUnavailable: true,
-      });
-    }
-
-    const rawText = geminiData?.candidates?.[0]?.content?.parts
-      ?.map(part => part.text || '')
-      .join('')
-      .trim() || '';
-
-    let cleaned = rawText
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/```$/i, '')
-      .trim();
-
-    if (!cleaned.startsWith('{')) {
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace >= 0 && lastBrace > firstBrace) {
-        cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-      }
-    }
-
-    let combo;
-    if (!cleaned) {
-      combo = fallbackCombo();
-    } else {
-      try {
-        combo = JSON.parse(cleaned);
-      } catch (_) {
-        try {
-          const repaired = cleaned
-            .replace(/([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)/g, '$1"$2"$3')
-            .replace(/,\s*([}\]])/g, '$1');
-          combo = JSON.parse(repaired);
-        } catch (__) {
-          combo = fallbackCombo();
-        }
-      }
-    }
-
-    combo = cleanCombo(combo);
-
-    if (!combo || !Array.isArray(combo.items) || !combo.items.length) {
-      combo = fallbackCombo();
-    }
-
-    return json({ ok: true, combo });
-  } catch (e) {
-    return json({ error: e.message || String(e) }, 502);
   }
-}
-/*
-Le Kiosk Google Reviews route.
 
-Paste inside the Worker fetch handler before the final:
-  return json({ error: 'Not found' }, 404);
+  function markBasketballPopupSeen(day) {
+    try {
+      localStorage.setItem(BASKETBALL_POPUP_SEEN_KEY, day);
+    } catch (_) {}
+  }
 
-Required Worker secrets/settings:
+  function reserveMessage(m) {
+    const custom = String(m.waMessage || '')
+      .replace(/\s*People:\s*_+\s*$/i, '')
+      .replace(/\s*[-_]{2,}\s*$/, '')
+      .trim();
+    return custom || `Hi Le Kiosk, I want to reserve a table for ${m.home} vs ${m.away} on ${m.date} at ${m.time}.`;
+  }
+
+  function openReserve(m) {
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(reserveMessage(m))}`, '_blank', 'noopener,noreferrer');
+  }
+
+  function timeToMinutes(value) {
+    const m = String(value || '').trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    if (!m) return 9999;
+    let hour = Number(m[1]) || 0;
+    const minute = Number(m[2] || 0) || 0;
+    const meridiem = String(m[3] || '').toUpperCase();
+    if (meridiem === 'PM' && hour < 12) hour += 12;
+    if (meridiem === 'AM' && hour === 12) hour = 0;
+    return hour * 60 + minute;
+  }
+
+  function beirutMinutesNow() {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Beirut',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).formatToParts(new Date());
+    const get = t => Number(parts.find(p => p.type === t)?.value || 0);
+    return get('hour') * 60 + get('minute');
+  }
+
+  function matchStatus(matches, index) {
+    const match = matches[index] || {};
+    const now = beirutMinutesNow();
+    const start = timeToMinutes(match.time);
+    const nextStart = matches[index + 1] ? timeToMinutes(matches[index + 1].time) : null;
+    if (now < start) return { label: `Start at ${match.time || ''}`, cls: '' };
+    if (nextStart !== null && now >= nextStart) return { label: 'Ended', cls: 'ended' };
+    if (nextStart === null && now >= start + 150) return { label: 'Ended', cls: 'ended' };
+    return { label: 'Live now', cls: 'live' };
+  }
+
+  function teamInitial(name) {
+    return String(name || '?').trim().slice(0, 1).toUpperCase() || '?';
+  }
+
+  function teamLogoKey(name) {
+    return String(name || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '');
+  }
+
+  function teamLogoAliases(name) {
+    const key = teamLogoKey(name);
+    if (!key) return [];
+    const aliases = [key];
+    Object.keys(TEAM_LOGOS).forEach(alias => {
+      if ((key.includes(alias) || alias.includes(key)) && !aliases.includes(alias)) aliases.push(alias);
+    });
+    return aliases;
+  }
+
+  function teamLogo(name) {
+    const hit = teamLogoAliases(name).find(alias => TEAM_LOGOS[alias]);
+    return hit ? TEAM_LOGOS[hit] : '';
+  }
+
+  function logoSourceUrls(src) {
+    const value = String(src || '').trim();
+    if (!value) return [];
+    if (/^data:/.test(value) || /^https?:\/\//.test(value)) return [value];
+    const clean = value.replace(/^\/+/, '');
+    return [`${BASKETBALL_STORAGE_PUBLIC_BASE}/${clean}`, new URL(clean, location.href).href];
+  }
+
+  function teamStoredLogoUrls(name) {
+    const urls = [];
+    teamLogoAliases(name).forEach(alias => {
+      ['png', 'jpg', 'jpeg', 'webp'].forEach(ext => {
+        urls.push(`${BASKETBALL_STORAGE_PUBLIC_BASE}/menupictures/teams/${alias}.${ext}`);
+        urls.push(`${BASKETBALL_STORAGE_PUBLIC_BASE}/teams/${alias}.${ext}`);
+      });
+    });
+    return urls;
+  }
+
+  function logoCandidates(src, name) {
+    const urls = [
+      ...logoSourceUrls(src),
+      ...teamStoredLogoUrls(name),
+      teamLogo(name)
+    ].filter(Boolean);
+    return urls.filter((url, i) => urls.indexOf(url) === i);
+  }
+
+  function advanceLogo(img) {
+    let urls = [];
+    try { urls = JSON.parse(decodeURIComponent(img.dataset.logos || '[]')); } catch (_) {}
+    const next = (Number(img.dataset.logoIndex || 0) || 0) + 1;
+    if (urls[next]) {
+      img.dataset.logoIndex = String(next);
+      img.src = urls[next];
+      return;
+    }
+    const fallback = document.createElement('div');
+    fallback.className = 'basketball-logo basketball-logo-fallback';
+    fallback.textContent = img.dataset.initial || '?';
+    img.replaceWith(fallback);
+  }
+  window.lkBasketballAdvanceLogo = advanceLogo;
+
+  function logoHtml(src, name) {
+    const urls = logoCandidates(src, name);
+    const initial = teamInitial(name);
+    if (urls.length) {
+      return `<img class="basketball-logo" src="${esc(urls[0])}" data-logos="${encodeURIComponent(JSON.stringify(urls))}" data-logo-index="0" data-initial="${esc(initial)}" alt="${esc(name)} logo" onerror="window.lkBasketballAdvanceLogo(this)">`;
+    }
+    return `<div class="basketball-logo basketball-logo-fallback">${esc(initial)}</div>`;
+  }
+
+  function renderMatches() {
+    const list = document.getElementById('basketball-match-list');
+    if (!list) return;
+
+    if (!todaysMatches.length) {
+      list.innerHTML = '<div class="basketball-empty">No Lebanese basketball games today.</div>';
+      return;
+    }
+
+    list.innerHTML = todaysMatches.map((m, i) => {
+      const status = matchStatus(todaysMatches, i);
+      return `
+      <div class="basketball-match${m.featured ? ' featured' : ''}${status.cls === 'live' ? ' featured' : ''}">
+        <div class="basketball-mark">
+          <img src="${esc(BASKETBALL_STORAGE_PUBLIC_BASE)}/menupictures/logo.png" alt="Le Kiosk" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <span>LK</span>
+        </div>
+        <div class="basketball-match-inner">
+          <div class="basketball-scoreboard">
+            <div class="basketball-team">
+              ${logoHtml(m.homeLogo, m.home)}
+              <div class="basketball-team-name">${esc(m.home)}</div>
+            </div>
+            <div class="basketball-vs">VS</div>
+            <div class="basketball-team">
+              ${logoHtml(m.awayLogo, m.away)}
+              <div class="basketball-team-name">${esc(m.away)}</div>
+            </div>
+          </div>
+          <span class="basketball-time ${esc(status.cls)}">${esc(status.label)}</span>
+          <div class="basketball-meta">${esc(m.league || 'Lebanon FLB')}${m.venue ? ' · ' + esc(m.venue) : ''}</div>
+          ${m.note ? `<div class="basketball-meta basketball-note">${esc(m.note)}</div>` : ''}
+          ${m.reserveEnabled !== false ? `<button class="basketball-reserve${status.cls ? ' disabled' : ''}" type="button" data-match="${i}" ${status.cls ? 'disabled aria-disabled="true"' : ''}>${status.cls ? 'Reservations Closed' : 'Reserve Table'}</button>` : ''}
+        </div>
+      </div>
+    `;
+    }).join('');
+
+    list.querySelectorAll('[data-match]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        openReserve(todaysMatches[Number(btn.dataset.match)]);
+      });
+    });
+  }
+
+  function openPopup() {
+    const popup = document.getElementById('basketball-popup');
+    const bubble = document.getElementById('basketball-bubble');
+    if (!popup) return;
+    clearTimeout(closeTimer);
+    renderMatches();
+    popup.classList.remove('closing');
+    popup.classList.add('open', 'opening');
+    popup.setAttribute('aria-hidden', 'false');
+    if (bubble) bubble.classList.remove('show');
+    closeTimer = setTimeout(() => {
+      popup.classList.remove('opening');
+    }, 360);
+  }
+
+  function closePopup(animated = true) {
+    const popup = document.getElementById('basketball-popup');
+    const bubble = document.getElementById('basketball-bubble');
+    if (!popup || !popup.classList.contains('open')) return;
+    clearTimeout(closeTimer);
+    if (bubble && todaysMatches.length) {
+      bubble.classList.add('show');
+      bubble.classList.remove('hidden');
+    }
+    if (animated) {
+      popup.classList.add('closing');
+      closeTimer = setTimeout(() => {
+        popup.classList.remove('open', 'closing');
+        popup.setAttribute('aria-hidden', 'true');
+      }, 290);
+      return;
+    }
+    if (popup) {
+      popup.classList.remove('open', 'closing');
+      popup.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  async function loadBasketballMatches() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      const res = await fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const j = await res.json();
+      const cfg = j.data || {};
+      if (cfg.basketballEnabled === false) return;
+
+      const today = beirutDateKey();
+      todaysMatches = (Array.isArray(cfg.basketballMatches) ? cfg.basketballMatches : [])
+        .filter(m => m && m.active !== false && m.date === today)
+        .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+
+      const bubble = document.getElementById('basketball-bubble');
+      const dateLabel = document.getElementById('basketball-date-label');
+      if (dateLabel) dateLabel.textContent = `Lebanese Basketball / ${today}`;
+
+      if (todaysMatches.length) {
+        if (bubble) bubble.classList.add('show');
+        if (!hasSeenBasketballPopupToday(today)) {
+          markBasketballPopupSeen(today);
+          setTimeout(openPopup, 650);
+        }
+      }
+    } catch (_) {}
+  }
+
+  document.getElementById('basketball-bubble')?.addEventListener('click', openPopup);
+  document.getElementById('basketball-close-btn')?.addEventListener('click', closePopup);
+  document.getElementById('basketball-popup')?.addEventListener('click', e => {
+    if (e.target.id === 'basketball-popup') closePopup();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closePopup();
+  });
+
+  window.addEventListener('scroll', () => {
+    const bubble = document.getElementById('basketball-bubble');
+    if (bubble) bubble.classList.toggle('hidden', window.scrollY > 60);
+  }, { passive: true });
+
+  loadBasketballMatches();
+})();
+</script>
+    <!-- Le Kiosk Table QR Ordering
+Paste this near the end of the public menu page, after the main menu/order script.
+QR links should use: https://lekiosk.store/?table=1
+Also supports ?t=1 and ?tbl=1.
+-->
+
+<style>
+  #table-qr-badge {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 190;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #fde68a;
+    border-radius: 999px;
+    background: #451a03;
+    color: #fff7ed;
+    box-shadow: 0 4px 16px rgba(69,26,3,.22);
+    padding: 8px 11px;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  #table-qr-badge.show {
+    display: inline-flex;
+  }
+  #table-qr-badge.hidden {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .table-qr-sheet-note {
+    border: 1.5px solid #fde68a;
+    border-radius: 13px;
+    background: #fffbeb;
+    color: #451a03;
+    padding: 10px 12px;
+    margin: 12px 0 4px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  body.table-qr-mode #basketball-bubble,
+  body.table-qr-mode #basketball-popup {
+    display: none !important;
+    pointer-events: none !important;
+  }
+  body.table-qr-mode .order-type-grid {
+    grid-template-columns: 1fr !important;
+  }
+  body.table-qr-mode .order-type-btn:not([data-select-type="dinein"]) {
+    display: none !important;
+  }
+  body.table-qr-mode .delivery-sub {
+    display: none !important;
+  }
+</style>
+
+<div id="table-qr-badge" aria-live="polite">Table <span id="table-qr-number"></span></div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const rawTable = params.get('table') || params.get('t') || params.get('tbl') || '';
+  const tableNumber = String(rawTable).trim().replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 12);
+  if (!tableNumber) return;
+
+  window.LE_KIOSK_TABLE_NUMBER = tableNumber;
+  window.LE_KIOSK_TABLE_MODE = true;
+
+  function showTableBadge() {
+    document.body.classList.add('table-qr-mode');
+    const badge = document.getElementById('table-qr-badge');
+    const number = document.getElementById('table-qr-number');
+    if (!badge || !number) return;
+    number.textContent = tableNumber;
+    badge.classList.add('show');
+  }
+
+  function hideBasketballForTable() {
+    document.body.classList.add('table-qr-mode');
+    const bubble = document.getElementById('basketball-bubble');
+    const popup = document.getElementById('basketball-popup');
+    if (bubble) bubble.classList.remove('show');
+    if (popup) {
+      popup.classList.remove('open', 'opening', 'closing');
+      popup.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function lockDineIn() {
+    try {
+      selectedType = 'dinein';
+      document.querySelectorAll('[data-select-type]').forEach(btn => {
+        const isDine = btn.dataset.selectType === 'dinein';
+        btn.classList.toggle('selected', isDine);
+        if (!isDine) {
+          btn.style.display = 'none';
+          btn.style.pointerEvents = 'none';
+        } else {
+          btn.style.display = '';
+          btn.style.pointerEvents = '';
+        }
+      });
+      document.getElementById('sheet-delivery-sub')?.classList.remove('show');
+    } catch (_) {}
+  }
+
+  function injectTableNote() {
+    const scroll = document.getElementById('sheet-scroll');
+    if (!scroll || document.getElementById('table-qr-sheet-note')) return;
+    const detailsTitle = [...scroll.querySelectorAll('.sheet-section-title')]
+      .find(el => /your details/i.test(el.textContent || ''));
+    if (!detailsTitle) return;
+    const note = document.createElement('div');
+    note.className = 'table-qr-sheet-note';
+    note.id = 'table-qr-sheet-note';
+    note.textContent = `Table ${tableNumber} order`;
+    detailsTitle.before(note);
+  }
+
+  function patchRenderSheet() {
+    if (window.__lkTableRenderPatched || typeof renderSheet !== 'function') return;
+    const originalRenderSheet = renderSheet;
+    renderSheet = function() {
+      lockDineIn();
+      originalRenderSheet();
+      lockDineIn();
+      injectTableNote();
+    };
+    window.__lkTableRenderPatched = true;
+  }
+
+  function patchDispatchOrder() {
+    if (window.__lkTableDispatchPatched || typeof dispatchOrder !== 'function') return;
+    const originalDispatchOrder = dispatchOrder;
+    dispatchOrder = function(order) {
+      order.tableNumber = tableNumber;
+      order.tableLabel = `Table ${tableNumber}`;
+      order.orderType = 'dinein';
+      order.source = 'table-qr';
+      order.note = [order.note, `Table ${tableNumber}`].filter(Boolean).join(' · ');
+      return originalDispatchOrder(order);
+    };
+    window.__lkTableDispatchPatched = true;
+  }
+
+  function patchWhatsappMessage() {
+    if (window.__lkTableWaPatched) return;
+    const originalOpen = window.open.bind(window);
+    window.open = function(url, target, features) {
+      try {
+        const value = String(url || '');
+        if (value.includes('wa.me/') && value.includes('text=')) {
+          const u = new URL(value);
+          const current = u.searchParams.get('text') || '';
+          if (!current.includes(`Table ${tableNumber}`)) {
+            u.searchParams.set('text', `${current}\n🪑 *Table:* ${tableNumber}`);
+          }
+          return originalOpen(u.toString(), target, features || 'noopener,noreferrer');
+        }
+      } catch (_) {}
+      return originalOpen(url, target, features || 'noopener,noreferrer');
+    };
+    window.__lkTableWaPatched = true;
+  }
+
+  function bootTableQr() {
+    hideBasketballForTable();
+    showTableBadge();
+    lockDineIn();
+    patchRenderSheet();
+    patchDispatchOrder();
+    patchWhatsappMessage();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootTableQr);
+  } else {
+    bootTableQr();
+  }
+
+  window.addEventListener('load', bootTableQr);
+  setInterval(hideBasketballForTable, 1000);
+  document.addEventListener('click', e => {
+    if (e.target.closest('#checkout-pill-inner') || e.target.closest('#order-mode-btn')) {
+      setTimeout(bootTableQr, 0);
+    }
+  });
+  window.addEventListener('scroll', () => {
+    const badge = document.getElementById('table-qr-badge');
+    if (badge) badge.classList.remove('hidden');
+  }, { passive: true });
+})();
+</script>
+<!-- Le Kiosk Google Reviews
+Paste this near the end of the public menu page, after WORKER_URL is defined.
+It inserts itself just above the existing "Leave us a review" section.
+
+Requires Worker route:
+  GET /api/google-reviews
+
+Worker secrets/settings:
   GOOGLE_PLACES_API_KEY
   GOOGLE_PLACE_ID
-*/
+-->
 
-// -- GET /api/google-reviews -- public Google reviews for menu page
-if (request.method === 'GET' && url.pathname === '/api/google-reviews') {
-  if (!env.GOOGLE_PLACES_API_KEY) {
-    return json({ error: 'Missing GOOGLE_PLACES_API_KEY Worker secret' }, 500);
+<style>
+  .google-reviews-box {
+    max-width: 28rem;
+    margin: 18px auto 0;
+    padding: 0 16px;
+    display: none;
+  }
+  .google-reviews-box.show {
+    display: block;
+  }
+  .google-reviews-card {
+    background: #fff;
+    border: 1px solid rgba(251,191,36,.6);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(69,26,3,.07);
+  }
+  .google-reviews-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .google-reviews-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 19px;
+    line-height: 1;
+    font-weight: 800;
+    color: #451a03;
+  }
+  .google-reviews-sub {
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 5px;
+  }
+  .google-reviews-score {
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .google-reviews-rating {
+    color: #451a03;
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .google-reviews-stars {
+    color: #f59e0b;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+  .google-reviews-count {
+    color: #b45309;
+    font-size: 10px;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+  .google-review-list {
+    position: relative;
+    min-height: 122px;
+    overflow: hidden;
+  }
+  .google-review-item {
+    position: absolute;
+    inset: 0;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    background: #fffbeb;
+    padding: 11px;
+    opacity: 0;
+    transform: translateX(16px);
+    transition: opacity .35s ease, transform .35s ease;
+    pointer-events: none;
+  }
+  .google-review-item.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+  .google-review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .google-review-author {
+    color: #451a03;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  .google-review-time {
+    color: #b45309;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .google-review-stars {
+    color: #f59e0b;
+    font-size: 10px;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+  }
+  .google-review-text {
+    color: #78350f;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+(function(){
+  const sectionId = 'google-reviews-section';
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
   }
 
-  if (!env.GOOGLE_PLACE_ID) {
-    return json({ error: 'Missing GOOGLE_PLACE_ID Worker secret' }, 500);
+  function stars(rating) {
+    const n = Math.max(0, Math.min(5, Math.round(Number(rating || 0))));
+    return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
   }
 
-  const cache = caches.default;
-  const cacheKey = new Request(url.origin + '/api/google-reviews-cache-v2');
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
+  function findReviewSection() {
+    const googleReviewLink = [...document.querySelectorAll('a[href*="google"]')]
+      .find(a => /review/i.test(a.textContent || '') || /review/i.test(a.href || ''));
+    return googleReviewLink?.closest('section') || null;
+  }
 
-  try {
-    const googleUrl = new URL('https://maps.googleapis.com/maps/api/place/details/json');
-    googleUrl.searchParams.set('place_id', env.GOOGLE_PLACE_ID);
-    googleUrl.searchParams.set('fields', 'name,rating,user_ratings_total,reviews,url');
-    googleUrl.searchParams.set('reviews_sort', 'newest');
-    googleUrl.searchParams.set('key', env.GOOGLE_PLACES_API_KEY);
+  function ensureSection() {
+    let box = document.getElementById(sectionId);
+    if (box) return box;
 
-    const res = await fetch(googleUrl.toString());
-    const data = await res.json().catch(() => ({}));
+    box = document.createElement('section');
+    box.className = 'google-reviews-box';
+    box.id = sectionId;
 
-    if (!res.ok || data.status !== 'OK') {
-      return json({ error: data.error_message || data.status || `Google ${res.status}` }, 502);
+    const reviewSection = findReviewSection();
+    if (reviewSection?.parentNode) {
+      reviewSection.parentNode.insertBefore(box, reviewSection);
+    } else {
+      document.getElementById('menu-container')?.after(box);
+    }
+    return box;
+  }
+
+  function render(data) {
+    const box = ensureSection();
+    const reviews = Array.isArray(data?.reviews) ? data.reviews.filter(r => r && r.text) : [];
+    if (!box || !reviews.length) return;
+
+    const rating = Number(data.rating || 0);
+    const count = Number(data.userRatingsTotal || 0);
+    const visibleReviews = reviews.slice(0, 10);
+
+    box.innerHTML = `
+      <div class="google-reviews-card">
+        <div class="google-reviews-head">
+          <div>
+            <div class="google-reviews-title">Loved by Guests</div>
+            <div class="google-reviews-sub">Recent Google reviews from Le Kiosk visitors.</div>
+          </div>
+          <div class="google-reviews-score">
+            <div class="google-reviews-rating">${rating ? rating.toFixed(1) : '5.0'}</div>
+            <div class="google-reviews-stars">${esc(stars(rating || 5))}</div>
+            ${count ? `<div class="google-reviews-count">${count} reviews</div>` : ''}
+          </div>
+        </div>
+        <div class="google-review-list">
+          ${visibleReviews.map((review, index) => `
+            <article class="google-review-item${index === 0 ? ' active' : ''}" data-google-review="${index}">
+              <div class="google-review-top">
+                <div class="google-review-author">${esc(review.authorName || 'Google reviewer')}</div>
+                <div class="google-review-time">${esc(review.relativeTime || '')}</div>
+              </div>
+              <div class="google-review-stars">${esc(stars(review.rating || 5))}</div>
+              <div class="google-review-text">${esc(review.text)}</div>
+            </article>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    box.classList.add('show');
+    startReviewSlider(box, visibleReviews.length);
+  }
+
+  function startReviewSlider(box, count) {
+    if (!box || count <= 1) return;
+    let active = 0;
+    let timer = null;
+
+    function setActive(next) {
+      active = (next + count) % count;
+      box.querySelectorAll('[data-google-review]').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.googleReview) === active);
+      });
     }
 
-    const place = data.result || {};
-    const payload = {
-      ok: true,
-      data: {
-        name: place.name || 'Le Kiosk',
-        rating: Number(place.rating || 0),
-        userRatingsTotal: Number(place.user_ratings_total || 0),
-        url: place.url || '',
-        reviews: (Array.isArray(place.reviews) ? place.reviews : [])
-          .filter(r => r && r.text)
-          .slice(0, 10)
-          .map(r => ({
-            authorName: r.author_name || 'Google reviewer',
-            rating: Number(r.rating || 0),
-            text: String(r.text || '').trim().slice(0, 500),
-            relativeTime: r.relative_time_description || '',
-            time: r.time || null,
-            profilePhotoUrl: r.profile_photo_url || '',
-          })),
-      },
-    };
-
-    const response = json(payload);
-    response.headers.set('Cache-Control', 'public, max-age=86400');
-    await cache.put(cacheKey, response.clone());
-    return response;
-  } catch (e) {
-    return json({ error: e.message || String(e) }, 502);
-  }
-}
-/*
-Le Kiosk Guest Gallery routes.
-
-Paste inside the Worker fetch handler before the final:
-  return json({ error: 'Not found' }, 404);
-
-Requires Supabase table:
-  guest_gallery
-
-Uses existing Supabase storage bucket:
-  menu-images
-*/
-
-function galleryCleanText(value, max = 120) {
-  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
-}
-
-function galleryTodayKey() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function galleryPublicRow(row) {
-  return {
-    id: row.id,
-    image: row.image_path,
-    caption: row.caption || '',
-    customerName: row.customer_name || '',
-    createdAt: row.created_at || '',
-  };
-}
-
-function galleryAdminRow(row) {
-  return {
-    id: row.id,
-    status: row.status,
-    image: row.image_path,
-    caption: row.caption || '',
-    customerName: row.customer_name || '',
-    visitorId: row.visitor_id || '',
-    submitDate: row.submit_date || '',
-    hidden: !!row.hidden,
-    createdAt: row.created_at || '',
-    reviewedAt: row.reviewed_at || null,
-  };
-}
-
-function galleryImageFromBody(body) {
-  const raw = String(body.imageBase64 || body.b64 || '').trim();
-  const contentType = String(body.contentType || '').toLowerCase();
-  const dataUrl = raw.match(/^data:(image\/(?:jpeg|jpg|png|webp));base64,(.+)$/i);
-  const mime = dataUrl ? dataUrl[1].toLowerCase().replace('image/jpg', 'image/jpeg') : contentType;
-  const b64 = dataUrl ? dataUrl[2] : raw;
-
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
-    throw new Error('Only JPG, PNG, or WEBP images are allowed');
+    timer = setInterval(() => setActive(active + 1), 4200);
   }
 
-  if (!b64 || b64.length > 4_500_000) {
-    throw new Error('Image is too large. Max 3MB.');
+  async function loadGoogleReviews() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      const res = await fetch(`${WORKER_URL}/api/google-reviews`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      render(data.data || data);
+    } catch (_) {}
   }
 
-  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  if (!bytes.length || bytes.length > 3 * 1024 * 1024) {
-    throw new Error('Image is too large. Max 3MB.');
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGoogleReviews);
+  } else {
+    loadGoogleReviews();
   }
-  const isJpeg = mime === 'image/jpeg' && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[bytes.length - 2] === 0xff && bytes[bytes.length - 1] === 0xd9;
-  const isPng = mime === 'image/png' && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
-  const isWebp = mime === 'image/webp' && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50;
-  if (!isJpeg && !isPng && !isWebp) {
-    throw new Error('Uploaded file does not match the declared image type');
+})();
+</script>
+<!-- Le Kiosk Guest Gallery
+Paste this near the end of the public menu page, after WORKER_URL is defined.
+Recommended placement: before the Google reviews snippet, or before the "Leave us a review" section.
+
+Requires Worker routes from:
+  worker-guest-gallery-route-snippet.js
+-->
+
+<style>
+  .guest-gallery-box {
+    max-width: 28rem;
+    margin: 18px auto 0;
+    padding: 0 16px;
+    display: none;
+  }
+  .guest-gallery-box.show {
+    display: block;
+  }
+  .guest-gallery-card {
+    background: #fff;
+    border: 1px solid rgba(251,191,36,.6);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(69,26,3,.07);
+  }
+  .guest-gallery-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .guest-gallery-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 19px;
+    line-height: 1;
+    font-weight: 800;
+    color: #451a03;
+  }
+  .guest-gallery-copy {
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 5px;
+  }
+  .guest-gallery-submit-btn {
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 999px;
+    background: #d97706;
+    color: #fff;
+    padding: 8px 11px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    cursor: pointer;
+  }
+  .guest-gallery-submit-btn.hidden {
+    display: none;
+  }
+  .guest-gallery-strip {
+    position: relative;
+    min-height: 310px;
+    overflow: hidden;
+  }
+  .guest-gallery-photo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: .88;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    opacity: 0;
+    transition: opacity .6s ease;
+    pointer-events: none;
+  }
+  .guest-gallery-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+  .guest-gallery-photo.active {
+    opacity: 1;
+    pointer-events: auto;
   }
 
-  const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
-  return { bytes, mime, ext };
-}
-
-// -- GET /gallery/approved -- public approved guest gallery photos
-if (request.method === 'GET' && url.pathname === '/gallery/approved') {
-  try {
-    const cfgRows = await supabaseFetch('/app_config?key=eq.site_settings&select=*').catch(() => []);
-    const cfg = Array.isArray(cfgRows) && cfgRows.length ? (cfgRows[0].value || {}) : {};
-    if (cfg.galleryEnabled === false) return json({ ok: true, data: [] });
-
-    const rows = await supabaseFetch('/guest_gallery?status=eq.approved&hidden=eq.false&select=*&order=created_at.desc&limit=18');
-    return json({ ok: true, data: (Array.isArray(rows) ? rows : []).map(galleryPublicRow) });
-  } catch (e) {
-    return json({ error: e.message || String(e) }, 502);
+  .guest-gallery-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 18px 8px 8px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.25;
+    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.62));
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    pointer-events: none;
   }
-}
+  .guest-gallery-empty {
+    min-height: 122px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #fde68a;
+    border-radius: 14px;
+    background: #fffbeb;
+    color: #92400e;
+    padding: 14px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.45;
+    text-align: center;
+  }
+  #guest-gallery-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(0,0,0,.52);
+    padding: 0 12px;
+  }
+  #guest-gallery-sheet.open {
+    display: flex;
+  }
+  .guest-gallery-sheet-body {
+    width: min(28rem, 100%);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 22px 22px 0 0;
+    padding: 16px;
+  }
+  .guest-gallery-sheet-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .guest-gallery-close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 10px;
+    background: #fef3c7;
+    color: #451a03;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .guest-gallery-field {
+    margin-bottom: 10px;
+  }
+  .guest-gallery-label {
+    display: block;
+    color: #b45309;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 5px;
+  }
+  .guest-gallery-input {
+    width: 100%;
+    border: 2px solid #fde68a;
+    border-radius: 12px;
+    background: #fffbeb;
+    color: #451a03;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 12px;
+    outline: none;
+  }
+  .guest-gallery-input:focus {
+    border-color: #f59e0b;
+  }
+  .guest-gallery-file {
+    padding: 10px;
+  }
+  .guest-gallery-note {
+    color: #92400e;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.45;
+    margin-top: 8px;
+  }
+  .guest-gallery-submit-main {
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    background: #d97706;
+    color: #fff;
+    padding: 13px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    cursor: pointer;
+    margin-top: 5px;
+  }
+  .guest-gallery-submit-main:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+  .guest-gallery-error {
+    display: none;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .guest-gallery-error.show {
+    display: block;
+  }
+  .guest-gallery-ok {
+    display: none;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 8px;
+  }
+  .guest-gallery-ok.show {
+    display: block;
+  }
+</style>
 
-// -- POST /gallery/submit -- public photo submission, max 3 per visitor per day
-if (request.method === 'POST' && url.pathname === '/gallery/submit') {
-  const limited = rateLimit('gallery-submit', 3, 60 * 60 * 1000);
-  if (limited) return limited;
+<section class="guest-gallery-box" id="guest-gallery">
+  <div class="guest-gallery-card">
+    <div class="guest-gallery-head">
+      <div>
+        <div class="guest-gallery-title">Guest Gallery</div>
+        <div class="guest-gallery-copy">Real Le Kiosk cravings, shared by customers.</div>
+      </div>
+      <button class="guest-gallery-submit-btn" type="button" id="guest-gallery-open">Submit Photo</button>
+    </div>
+    <div class="guest-gallery-strip" id="guest-gallery-strip"></div>
+  </div>
+</section>
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (_) {
-    return json({ error: 'Invalid JSON' }, 400);
+<div id="guest-gallery-sheet" aria-hidden="true">
+  <div class="guest-gallery-sheet-body">
+    <div class="guest-gallery-sheet-top">
+      <div>
+        <div class="guest-gallery-title">Share Your Photo</div>
+        <div class="guest-gallery-copy">We review photos before they appear.</div>
+      </div>
+      <button class="guest-gallery-close" type="button" id="guest-gallery-close" aria-label="Close">x</button>
+    </div>
+    <div class="guest-gallery-field">
+      <label class="guest-gallery-label" for="guest-gallery-file">Photo *</label>
+      <input class="guest-gallery-input guest-gallery-file" id="guest-gallery-file" type="file" accept="image/jpeg,image/png,image/webp">
+    </div>
+    <div class="guest-gallery-field">
+      <label class="guest-gallery-label" for="guest-gallery-name">Name (optional)</label>
+      <input class="guest-gallery-input" id="guest-gallery-name" type="text" maxlength="50" placeholder="e.g. Joe">
+    </div>
+    <div class="guest-gallery-field">
+      <label class="guest-gallery-label" for="guest-gallery-caption">Caption (optional)</label>
+      <input class="guest-gallery-input" id="guest-gallery-caption" type="text" maxlength="120" placeholder="Best waffle night">
+    </div>
+    <button class="guest-gallery-submit-main" type="button" id="guest-gallery-submit">Submit For Review</button>
+    <div class="guest-gallery-note">Limit: 3 uploads per visitor per day. JPG, PNG, or WEBP up to 10MB.</div>
+    <div class="guest-gallery-error" id="guest-gallery-error"></div>
+    <div class="guest-gallery-ok" id="guest-gallery-ok">Photo submitted. It will appear after admin approval.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_BASE = typeof STORAGE_PUBLIC_BASE !== 'undefined'
+    ? STORAGE_PUBLIC_BASE
+    : 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/object/public/menu-images';
+  const section = document.getElementById('guest-gallery');
+  const strip = document.getElementById('guest-gallery-strip');
+  const sheet = document.getElementById('guest-gallery-sheet');
+  const fileInput = document.getElementById('guest-gallery-file');
+  const nameInput = document.getElementById('guest-gallery-name');
+  const captionInput = document.getElementById('guest-gallery-caption');
+  const submitBtn = document.getElementById('guest-gallery-submit');
+  const errorBox = document.getElementById('guest-gallery-error');
+  const okBox = document.getElementById('guest-gallery-ok');
+  const params = new URLSearchParams(location.search);
+  const tableNumber = String(params.get('table') || params.get('t') || params.get('tbl') || '').trim();
+  const canSubmitPhoto = !!tableNumber;
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[m]));
   }
 
-  const visitorId = galleryCleanText(body.visitorId, 80);
-  if (!visitorId) return json({ error: 'Missing visitorId' }, 400);
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
 
-  const cfg = await siteConfigRaw();
-  if (cfg.galleryEnabled === false) return json({ error: 'Guest gallery is disabled' }, 403);
-  const submitDate = galleryTodayKey();
-
-  try {
-    const existing = await supabaseFetch(
-      `/guest_gallery?visitor_id=eq.${encodeURIComponent(visitorId)}&submit_date=eq.${encodeURIComponent(submitDate)}&select=id`
-    );
-
-    if (Array.isArray(existing) && existing.length >= 3) {
-      return json({ error: 'Daily photo limit reached. Try again tomorrow.' }, 429);
+  function visitorId() {
+    const key = 'lk_menu_visitor_id';
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = crypto?.randomUUID?.() || ('v-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+      localStorage.setItem(key, id);
     }
+    return id;
+  }
 
-    const image = galleryImageFromBody(body);
-    const safeId = visitorId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 24) || 'guest';
-    const fileName = `${Date.now()}-${crypto.randomUUID()}.${image.ext}`;
-    const path = `menupictures/guest-gallery/${submitDate}/${safeId}-${fileName}`;
+  function localUploadCount() {
+    const key = 'lk_guest_gallery_uploads_' + todayKey();
+    return Number(localStorage.getItem(key) || 0) || 0;
+  }
 
-    await supabaseUploadImage(path, image.bytes, image.mime, env);
+  function bumpLocalUploadCount() {
+    const key = 'lk_guest_gallery_uploads_' + todayKey();
+    localStorage.setItem(key, String(localUploadCount() + 1));
+  }
 
-    const row = {
-      status: 'pending',
-      image_path: path,
-      caption: galleryCleanText(body.caption, 120),
-      customer_name: galleryCleanText(body.customerName || body.name, 50),
-      visitor_id: visitorId,
-      submit_date: submitDate,
-      hidden: false,
-    };
+  function showError(message) {
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.classList.add('show');
+    okBox?.classList.remove('show');
+  }
 
-    const data = await supabaseFetch('/guest_gallery', {
-      method: 'POST',
-      body: JSON.stringify(row),
+  function clearMessages() {
+    errorBox?.classList.remove('show');
+    okBox?.classList.remove('show');
+  }
+
+  function openSheet() {
+    if (!canSubmitPhoto) return;
+    clearMessages();
+    if (localUploadCount() >= 3) {
+      showError('Daily upload limit reached. Try again tomorrow.');
+    }
+    sheet?.classList.add('open');
+    sheet?.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeSheet() {
+    sheet?.classList.remove('open');
+    sheet?.setAttribute('aria-hidden', 'true');
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Could not read image'));
+      reader.readAsDataURL(file);
     });
-
-    return json({ ok: true, data: Array.isArray(data) ? galleryAdminRow(data[0]) : null });
-  } catch (e) {
-    const status = /too large|allowed|limit/i.test(e.message || '') ? 400 : 502;
-    return json({ error: e.message || String(e) }, status);
-  }
-}
-
-// -- GET /supabase/gallery -- admin only
-if (request.method === 'GET' && url.pathname === '/supabase/gallery') {
-  const blocked = await guard(['admin']);
-  if (blocked instanceof Response) return blocked;
-
-  const status = url.searchParams.get('status');
-  const statusFilter = status && ['pending', 'approved', 'rejected'].includes(status)
-    ? `status=eq.${encodeURIComponent(status)}&`
-    : '';
-
-  try {
-    const rows = await supabaseFetch(`/guest_gallery?${statusFilter}select=*&order=created_at.desc&limit=80`);
-    return json({ ok: true, data: (Array.isArray(rows) ? rows : []).map(galleryAdminRow) });
-  } catch (e) {
-    return json({ error: e.message || String(e) }, 502);
-  }
-}
-
-// -- PATCH /supabase/gallery/:id -- admin approve/hide/reject/edit
-if (request.method === 'PATCH' && url.pathname.startsWith('/supabase/gallery/')) {
-  const blocked = await guard(['admin']);
-  if (blocked instanceof Response) return blocked;
-
-  const id = url.pathname.split('/').pop();
-  if (!id) return json({ error: 'Missing id' }, 400);
-
-  let body;
-  try {
-    body = await request.json();
-  } catch (_) {
-    return json({ error: 'Invalid JSON' }, 400);
   }
 
-  const patch = {};
-  if (['pending', 'approved', 'rejected'].includes(body.status)) {
-    patch.status = body.status;
-    patch.reviewed_at = new Date().toISOString();
+  function insertBeforeReviews() {
+    const reviewSection = [...document.querySelectorAll('section')]
+      .find(sec => /leave us a review|google review/i.test(sec.textContent || ''));
+    if (section && reviewSection?.parentNode && section.nextElementSibling !== reviewSection) {
+      reviewSection.parentNode.insertBefore(section, reviewSection);
+    }
   }
-  if (typeof body.hidden === 'boolean') patch.hidden = body.hidden;
-  if (body.caption !== undefined) patch.caption = galleryCleanText(body.caption, 120);
-  if (body.customerName !== undefined) patch.customer_name = galleryCleanText(body.customerName, 50);
 
-  if (!Object.keys(patch).length) return json({ error: 'Nothing to update' }, 400);
+  function renderGallery(items) {
+    if (!strip || !section) return;
+    const photos = Array.isArray(items) ? items : [];
+    if (!photos.length) {
+      strip.innerHTML = '<div class="guest-gallery-empty">No guest photos yet. Be the first to submit one.</div>';
+      insertBeforeReviews();
+      section.classList.add('show');
+      return;
+    }
 
-  try {
-    const data = await supabaseFetch(`/guest_gallery?id=eq.${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(patch),
+    const visiblePhotos = photos.slice(0, 10);
+    let activePhoto = 0;
+    let html = '';
+    visiblePhotos.forEach((item, i) => {
+      const src = /^https?:\/\//.test(item.image || '') ? item.image : `${STORAGE_BASE}/${item.image || ''}`;
+      const label = item.caption || (item.customerName ? `Shared by ${item.customerName}` : '');
+      html += `<article class="guest-gallery-photo${i === 0 ? ' active' : ''}" data-gallery-idx="${i}">
+        <img src="${esc(src)}" alt="${esc(label || 'Le Kiosk guest photo')}" loading="${i === 0 ? 'eager' : 'lazy'}">
+        ${label ? `<div class="guest-gallery-caption">${esc(label)}</div>` : ''}
+      </article>`;
     });
-    return json({ ok: true, data: Array.isArray(data) ? galleryAdminRow(data[0]) : null });
-  } catch (e) {
-    return json({ error: e.message || String(e) }, 502);
+    strip.innerHTML = html;
+    const slides = strip.querySelectorAll('.guest-gallery-photo');
+
+    function showPhoto(index) {
+      const prev = activePhoto;
+      activePhoto = (index + slides.length) % slides.length;
+      if (slides[prev]) slides[prev].classList.remove('active');
+      if (slides[activePhoto]) slides[activePhoto].classList.add('active');
+      const next = (activePhoto + 1) % slides.length;
+      if (slides[next]) {
+        const img = slides[next].querySelector('img');
+        if (img && img.loading === 'lazy') img.loading = 'eager';
+      }
+    }
+
+    insertBeforeReviews();
+    section.classList.add('show');
+    if (window.__lkGuestGalleryTimer) clearInterval(window.__lkGuestGalleryTimer);
+    if (slides.length > 1) {
+      window.__lkGuestGalleryTimer = setInterval(() => showPhoto(activePhoto + 1), 3700);
+    }
   }
-}
 
-// -- DELETE /supabase/gallery/:id -- admin delete
-if (request.method === 'DELETE' && url.pathname.startsWith('/supabase/gallery/')) {
-  const blocked = await guard(['admin']);
-  if (blocked instanceof Response) return blocked;
-
-  const id = url.pathname.split('/').pop();
-  if (!id) return json({ error: 'Missing id' }, 400);
-
-  try {
-    await supabaseFetch(`/guest_gallery?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
-    return json({ ok: true });
-  } catch (e) {
-    return json({ error: e.message || String(e) }, 502);
+  async function galleryEnabled() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return true;
+      const res = await fetch(`${WORKER_URL}/supabase/config`, { cache: 'no-store' });
+      if (!res.ok) return true;
+      const j = await res.json();
+      return j?.data?.galleryEnabled !== false;
+    } catch (_) {
+      return true;
+    }
   }
-}
 
-    // ── GET /track/:id — public order tracking page ──
-    if (request.method === 'GET' && url.pathname.startsWith('/track/')) {
-      const id = url.pathname.split('/track/')[1];
-      if (!id) return json({ error: 'Missing order ID' }, 400);
-
-      try {
-        const rows = await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
-        const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!row) return json({ error: 'Order not found' }, 404);
-
-        const payload = row.payload || {};
-        try {
-          requireTrackAccess(payload, request);
-        } catch (e) {
-          if (e instanceof Response) return e;
-          throw e;
-        }
-        const safe = {
-          id: row.id,
-          name: payload.name || 'Guest',
-          orderType: payload.orderType || 'pos',
-          items: (payload.items || []).map(it => ({
-            name: it.name, price: it.price, qty: it.qty,
-            flavor: it.flavor || null,
-            addons: (it.addons || []).map(a => ({ label: a.label, price: a.price }))
-          })),
-          total: payload.total || 0,
-          gps: customerGPS(payload),
-          tracking: payload.tracking || {},
-        };
-
-        return json({ ok: true, data: safe });
-      } catch (e) {
-        return json({ error: e.message || String(e) }, 502);
+  async function loadGallery() {
+    try {
+      if (typeof WORKER_URL === 'undefined') return;
+      if (!(await galleryEnabled())) {
+        section?.classList.remove('show');
+        return;
       }
+      renderGallery([]);
+      const res = await fetch(`${WORKER_URL}/gallery/approved`, { cache: 'no-store' });
+      if (!res.ok) return;
+      const j = await res.json();
+      renderGallery(j.data || []);
+    } catch (_) {}
+  }
+
+  async function submitPhoto() {
+    try {
+      clearMessages();
+      if (!canSubmitPhoto) {
+        showError('Photo uploads are only available from a table QR code.');
+        return;
+      }
+      if (localUploadCount() >= 3) {
+        showError('Daily upload limit reached. Try again tomorrow.');
+        return;
+      }
+
+      const file = fileInput?.files?.[0];
+      if (!file) {
+        showError('Choose a photo first.');
+        return;
+      }
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        showError('Only JPG, PNG, or WEBP images are allowed.');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        showError('Image is too large. Max 10MB.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+      const imageBase64 = await fileToBase64(file);
+      const res = await fetch(`${WORKER_URL}/gallery/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          visitorId: visitorId(),
+          submitDate: todayKey(),
+          customerName: nameInput?.value || '',
+          caption: captionInput?.value || '',
+          contentType: file.type,
+          imageBase64,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not submit photo');
+
+      bumpLocalUploadCount();
+      if (fileInput) fileInput.value = '';
+      if (captionInput) captionInput.value = '';
+      okBox?.classList.add('show');
+    } catch (e) {
+      showError(e.message || 'Could not submit photo.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit For Review';
     }
+  }
 
-    // ── POST /track/:id — admin/POS, update tracking step ──
-    if (request.method === 'POST' && url.pathname.startsWith('/track/')) {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
+  document.getElementById('guest-gallery-open')?.addEventListener('click', openSheet);
+  document.getElementById('guest-gallery-close')?.addEventListener('click', closeSheet);
+  sheet?.addEventListener('click', e => {
+    if (e.target === sheet) closeSheet();
+  });
+  submitBtn?.addEventListener('click', submitPhoto);
+  if (!canSubmitPhoto) {
+    document.getElementById('guest-gallery-open')?.classList.add('hidden');
+  }
 
-      const id = url.pathname.split('/track/')[1];
-      if (!id) return json({ error: 'Missing order ID' }, 400);
-
-      let body;
-      try { body = await request.json(); } catch (_) { return json({ error: 'Invalid JSON' }, 400); }
-
-      const step = String(body.step || '').trim();
-      const STEPS_ORDER = ['received','confirmed','preparing','delivering','delivered'];
-      if (!STEPS_ORDER.includes(step)) {
-        return json({ error: 'Invalid step.' }, 400);
-      }
-
-      try {
-        const rows = await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
-        const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!row) return json({ error: 'Order not found' }, 404);
-
-        const payload = row.payload || {};
-        if (!payload.tracking) payload.tracking = {};
-        const now = new Date().toISOString();
-        payload.tracking[step] = now;
-        for (let i = 0; i < STEPS_ORDER.indexOf(step); i++) {
-          const earlier = STEPS_ORDER[i];
-          if (!payload.tracking[earlier]) payload.tracking[earlier] = now;
-        }
-
-        await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}`, {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=representation' },
-          body: JSON.stringify({ payload, updated_at: new Date().toISOString() }),
-        });
-
-        return json({ ok: true, step, time: payload.tracking[step] });
-      } catch (e) {
-        return json({ error: e.message || String(e) }, 502);
-      }
-    }
-
-    // ── GET /driver — driver's pending delivery list (no ID = list view) ──
-    if (request.method === 'GET' && url.pathname === '/driver') {
-      const limited = rateLimit('driver-pin', 20, 5 * 60 * 1000);
-      if (limited) return limited;
-      try {
-        const cfg = await siteConfigRaw();
-        try {
-          await requireDriverPin(request, cfg);
-        } catch (e) {
-          if (e instanceof Response) return e;
-          throw e;
-        }
-        const rows = await supabaseFetch('/orders?select=*&order=created_at.desc&limit=100');
-        const all = (Array.isArray(rows) ? rows : [])
-          .filter(row => {
-            const p = row.payload || {};
-            const track = p.tracking || {};
-            return p.orderType === 'delivery' && (track.preparing || track.delivered);
-          })
-          .map(row => {
-            const p = row.payload || {};
-            return {
-              id: row.id,
-              name: p.name || 'Guest',
-              phone: p.phone || '',
-              address: p.address || '',
-              deliveryZone: p.deliveryZone || null,
-              items: (p.items || []).map(it => ({
-                name: it.name, price: it.price, qty: it.qty,
-                flavor: it.flavor || null,
-                addons: (it.addons || []).map(a => ({ label: a.label, price: a.price }))
-              })),
-              total: p.total || 0,
-              gps: customerGPS(p),
-              tracking: p.tracking || {},
-            };
-          });
-
-        return json({ ok: true, data: all });
-      } catch (e) {
-        return json({ error: e.message || String(e) }, 502);
-      }
-    }
-
-    // ── POST /driver/:id/status — driver updates delivering/delivered ──
-    if (request.method === 'POST' && url.pathname.startsWith('/driver/') && url.pathname.endsWith('/status')) {
-      const limited = rateLimit('driver-order', 80, 5 * 60 * 1000);
-      if (limited) return limited;
-      const id = url.pathname.split('/driver/')[1].split('/status')[0];
-      if (!id) return json({ error: 'Missing order ID' }, 400);
-
-      let body;
-      try { body = await request.json(); } catch (_) { return json({ error: 'Invalid JSON' }, 400); }
-
-      const step = String(body.step || '').trim();
-      if (!['delivering','delivered'].includes(step)) {
-        return json({ error: 'Invalid step. Use delivering or delivered.' }, 400);
-      }
-
-      try {
-        const rows = await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
-        const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!row) return json({ error: 'Order not found' }, 404);
-
-	        const payload = row.payload || {};
-	        const cfg = await siteConfigRaw();
-	        try {
-	          await requireDriverOrderAccess(payload, request, cfg, body);
-	        } catch (e) {
-	          if (e instanceof Response) return e;
-	          throw e;
-	        }
-	        const track = payload.tracking || {};
-
-        if (step === 'delivering' && track.delivering) {
-          return json({ ok: true, step, time: track.delivering, alreadyDone: true });
-        }
-        if (!track.preparing && step === 'delivering') {
-          return json({ error: 'Order is not ready yet. Wait for kitchen to finish.' }, 400);
-        }
-        if (step === 'delivered' && track.delivered) {
-          return json({ ok: true, step, time: track.delivered, alreadyDone: true });
-        }
-
-        if (!payload.tracking) payload.tracking = {};
-        const now = new Date().toISOString();
-        payload.tracking[step] = now;
-        if (step === 'delivering' && !payload.tracking.received) payload.tracking.received = now;
-        if (step === 'delivering' && !payload.tracking.confirmed) payload.tracking.confirmed = now;
-        if (step === 'delivered' && !payload.tracking.received) payload.tracking.received = now;
-        if (step === 'delivered' && !payload.tracking.confirmed) payload.tracking.confirmed = now;
-        if (step === 'delivered' && !payload.tracking.preparing) payload.tracking.preparing = now;
-        if (step === 'delivered' && !payload.tracking.delivering) payload.tracking.delivering = now;
-        if (step === 'delivered') payload.status = 'done';
-
-        await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}`, {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=representation' },
-          body: JSON.stringify({
-            status: step === 'delivered' ? 'done' : row.status,
-            payload,
-            updated_at: new Date().toISOString(),
-          }),
-        });
-
-        return json({ ok: true, step, time: payload.tracking[step] });
-      } catch (e) {
-        return json({ error: e.message || String(e) }, 502);
-      }
-    }
-
-    // ── GET /driver/:id — driver order details ──
-    if (request.method === 'GET' && url.pathname.startsWith('/driver/')) {
-      const limited = rateLimit('driver-order', 80, 5 * 60 * 1000);
-      if (limited) return limited;
-      const id = url.pathname.split('/driver/')[1];
-      if (!id) return json({ error: 'Missing order ID' }, 400);
-
-      try {
-        const rows = await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
-        const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!row) return json({ error: 'Order not found' }, 404);
-
-	        const payload = row.payload || {};
-	        const cfg = await siteConfigRaw();
-	        try {
-	          await requireDriverOrderAccess(payload, request, cfg);
-	        } catch (e) {
-	          if (e instanceof Response) return e;
-	          throw e;
-	        }
-	        const safe = {
-          id: row.id,
-          name: payload.name || 'Guest',
-          phone: payload.phone || '',
-          address: payload.address || '',
-          orderType: payload.orderType || 'delivery',
-          deliveryZone: payload.deliveryZone || null,
-          items: (payload.items || []).map(it => ({
-            name: it.name, price: it.price, qty: it.qty,
-            flavor: it.flavor || null,
-            addons: (it.addons || []).map(a => ({ label: a.label, price: a.price }))
-          })),
-	          total: payload.total || 0,
-	          gps: customerGPS(payload),
-	          tracking: payload.tracking || {},
-	          driverToken: payload.access?.driverToken || '',
-	        };
-
-        return json({ ok: true, data: safe });
-      } catch (e) {
-        return json({ error: e.message || String(e) }, 502);
-      }
-    }
-
-    // ── POST /driver/:id/location — driver shares GPS location ──
-    if (request.method === 'POST' && url.pathname.startsWith('/driver/') && url.pathname.endsWith('/location')) {
-      const limited = rateLimit('driver-location', 400, 5 * 60 * 1000);
-      if (limited) return limited;
-      const id = url.pathname.split('/driver/')[1].split('/location')[0];
-      if (!id) return json({ error: 'Missing order ID' }, 400);
-
-      let body;
-      try { body = await request.json(); } catch (_) { return json({ error: 'Invalid JSON' }, 400); }
-
-      const lat = parseFloat(body.lat);
-      const lng = parseFloat(body.lng);
-      if (isNaN(lat) || isNaN(lng)) return json({ error: 'Invalid lat/lng' }, 400);
-      const heading = Number(body.heading);
-      const speed = Number(body.speed);
-      const accuracy = Number(body.accuracy);
-
-      try {
-        const rows = await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
-        const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-        if (!row) return json({ error: 'Order not found' }, 404);
-
-	        const payload = row.payload || {};
-	        const cfg = await siteConfigRaw();
-	        try {
-	          await requireDriverOrderAccess(payload, request, cfg, body);
-	        } catch (e) {
-	          if (e instanceof Response) return e;
-	          throw e;
-	        }
-	        if (!payload.tracking) payload.tracking = {};
-        payload.tracking.driverLocation = {
-          lat,
-          lng,
-          heading: Number.isFinite(heading) ? heading : payload.tracking.driverLocation?.heading ?? null,
-          speed: Number.isFinite(speed) ? speed : payload.tracking.driverLocation?.speed ?? null,
-          accuracy: Number.isFinite(accuracy) ? accuracy : payload.tracking.driverLocation?.accuracy ?? null,
-          updatedAt: new Date().toISOString(),
-        };
-
-        await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}`, {
-          method: 'PATCH',
-          headers: { 'Prefer': 'return=representation' },
-          body: JSON.stringify({ payload, updated_at: new Date().toISOString() }),
-        });
-
-        return json({ ok: true });
-      } catch (e) {
-        return json({ error: e.message || String(e) }, 502);
-      }
-    }
-
-    // ── DELETE /orders/:id — admin only, delete test orders ──
-    if (request.method === 'DELETE' && url.pathname.startsWith('/orders/')) {
-      const blocked = await guard(['admin', 'pos']);
-      if (blocked instanceof Response) return blocked;
-      const id = url.pathname.split('/orders/')[1];
-      if (!id) return json({ error: 'Missing ID' }, 400);
-      try {
-        await supabaseFetch(`/orders?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
-        return json({ ok: true });
-      } catch (e) { return json({ error: e.message }, 502); }
-    }
-
-    return json({ error: 'Not found' }, 404);
-  },
-};
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadGallery);
+  } else {
+    loadGallery();
+  }
+})();
+</script>
+</body>
+</html>
