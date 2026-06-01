@@ -49,11 +49,11 @@ public class DriverBackgroundService extends Service {
             this, 0, launchIntent, pendingFlags
         );
 
-        Notification notification = android.os.Build.VERSION.SDK_INT >= 26
+        Notification.Builder builder = android.os.Build.VERSION.SDK_INT >= 26
             ? new Notification.Builder(this, BG_CHANNEL_ID)
             : new Notification.Builder(this);
 
-        notification
+        builder
             .setSmallIcon(R.drawable.ic_driver_badge)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.lekiosk_logo))
             .setContentTitle("Le Kiosk Driver — Active")
@@ -62,7 +62,7 @@ public class DriverBackgroundService extends Service {
             .setPriority(Notification.PRIORITY_LOW)
             .setOngoing(true);
 
-        startForeground(NOTIFICATION_ID, notification.build());
+        startForeground(NOTIFICATION_ID, builder.build());
         return START_STICKY;
     }
 
