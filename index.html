@@ -101,12 +101,11 @@
   </script>
     <style>
         html { scroll-behavior: smooth; }
-        body { font-family: 'Poppins', sans-serif; color: #2d2a26; background-color: #fff8ea; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.11'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(15,118,110,.08) 0 1px, transparent 1px), linear-gradient(#f5ead2 1.2px, transparent 1.2px), linear-gradient(90deg, #f5ead2 1.2px, transparent 1.2px); background-size: 140px 140px, 42px 42px, 24px 24px, 24px 24px; }
+        body { font-family: 'Poppins', sans-serif; color: #2d2a26; background-color: #fff8ea; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.11'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(245,158,11,.07) 0 1px, transparent 1px), linear-gradient(#f5ead2 1.2px, transparent 1.2px), linear-gradient(90deg, #f5ead2 1.2px, transparent 1.2px); background-size: 140px 140px, 42px 42px, 24px 24px, 24px 24px; }
         .brand-heading { font-family: 'Fredoka', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .hero-shell { position: relative; overflow: hidden; border: 1px solid rgba(120,53,15,.22); border-radius: 28px; background: radial-gradient(circle at 18% 8%, rgba(245,158,11,.28), transparent 32%), radial-gradient(circle at 88% 20%, rgba(15,118,110,.18), transparent 34%), linear-gradient(155deg, rgba(255,255,255,.97), rgba(254,243,199,.92) 44%, rgba(240,253,250,.86)); box-shadow: 0 24px 70px rgba(69,26,3,.22), inset 0 1px 0 rgba(255,255,255,.78); }
-        .hero-shell::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(120deg, transparent 0 54%, rgba(15,118,110,.1) 54% 100%), radial-gradient(circle at 50% 0, rgba(255,255,255,.65), transparent 48%); pointer-events: none; }
+        .hero-shell { position: relative; overflow: hidden; border: 1px solid rgba(120,53,15,.22); border-radius: 28px; background: linear-gradient(160deg, #fffbeb, #fef3c7, #fff8ea); box-shadow: 0 24px 70px rgba(69,26,3,.22), inset 0 1px 0 rgba(255,255,255,.78); }
         .hero-shell::after { content: ""; position: absolute; inset: auto 18px 14px; height: 1px; background: linear-gradient(90deg, transparent, rgba(245,158,11,.58), transparent); pointer-events: none; }
         .hero-content { position: relative; z-index: 1; }
         .hero-logo { position: relative; box-shadow: 0 0 0 7px rgba(245,158,11,.16), 0 0 34px rgba(245,158,11,.5), 0 18px 42px rgba(69,26,3,.28); animation: logoPulse 3.8s ease-in-out infinite; }
@@ -115,16 +114,16 @@
         .hero-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 11px; font-size: 11px; font-weight: 900; line-height: 1; text-decoration: none; white-space: nowrap; }
         .hero-chip.dark { background: #2a1604; color: #fef3c7; }
         .hero-chip.light { background: rgba(255,255,255,.78); color: #713f12; border: 1px solid rgba(217,119,6,.18); }
-        .hero-chip.green { background: #e6fffa; color: #0f766e; border: 1px solid rgba(20,184,166,.22); }
+        .hero-chip.green { background: #fef3c7; color: #92400e; border: 1px solid rgba(217,119,6,.3); }
         #main-nav { border-radius: 20px; background: rgba(255,255,255,.72); border-color: rgba(245,158,11,.28); box-shadow: 0 14px 42px rgba(69,26,3,.16), inset 0 1px 0 rgba(255,255,255,.74); backdrop-filter: blur(22px) saturate(1.18); -webkit-backdrop-filter: blur(22px) saturate(1.18); }
-        .nav-link { position: relative; flex: 0 0 auto; min-width: max-content; padding: 10px 15px; border-radius: 999px; background: rgba(255,255,255,0.6); color: #451a03; border: 1px solid rgba(120,53,15,0.12); font-weight: 900; font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; transition: background 0.2s, color 0.2s, transform .2s, box-shadow .2s, border-color .2s; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; overflow: visible; line-height: 1; }
+        .nav-link { position: relative; flex: 0 0 auto; min-width: max-content; padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,0.6); color: #451a03; border: 1px solid rgba(120,53,15,0.12); font-weight: 900; font-size: 9px; text-transform: uppercase; letter-spacing: 0.02em; transition: background 0.2s, color 0.2s, transform .2s, box-shadow .2s, border-color .2s; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; overflow: visible; line-height: 1; }
         .nav-link::after { content: ""; position: absolute; left: 16%; right: 16%; bottom: 5px; height: 2px; border-radius: 999px; background: #f59e0b; transform: scaleX(0); transform-origin: center; transition: transform .22s ease; box-shadow: 0 0 12px rgba(245,158,11,.72); }
         .nav-link:hover { background: #fff7ed; transform: translateY(-1px) scale(1.02); border-color: rgba(245,158,11,.34); }
         .nav-link:hover::after { transform: scaleX(1); }
         .nav-link.active { background: linear-gradient(180deg, #fbbf24, #f59e0b); color: #451a03; border-color: rgba(180,83,9,.32); box-shadow: 0 10px 24px rgba(245,158,11,0.28), 0 15px 30px rgba(180,83,9,.12); }
         .nav-link.active::after { transform: scaleX(1); background: #451a03; opacity: .42; }
         .section-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(120,53,15,.14); padding-bottom: 10px; margin-bottom: 14px; }
-        .section-kicker { font-size: 10px; line-height: 1; font-weight: 900; color: #0f766e; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 6px; }
+        .section-kicker { font-size: 10px; line-height: 1; font-weight: 900; color: #d97706; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 6px; }
         .section-kicker::before { content: "✦"; color: #f59e0b; margin-right: 6px; text-shadow: 0 0 10px rgba(245,158,11,.45); }
         .section-title { position: relative; display: inline-block; font-family: 'Fredoka', sans-serif; font-size: 28px; line-height: 1; font-weight: 900; color: #451a03; text-transform: uppercase; letter-spacing: 0; text-shadow: 0 2px 0 rgba(254,243,199,.88); }
         .section-title::after { content: ""; position: absolute; left: 1px; right: 18%; bottom: -8px; height: 4px; border-radius: 999px; background: linear-gradient(90deg, #f59e0b, rgba(245,158,11,.12)); box-shadow: 0 5px 13px rgba(245,158,11,.28); }
@@ -144,10 +143,10 @@
         .menu-info { padding: 13px; display: flex; flex-direction: column; justify-content: center; flex-grow: 1; min-width: 0; background: linear-gradient(180deg, #fff, #fffaf0); }
         .menu-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         .menu-name { font-weight: 900; color: #3b1f05; font-size: 16px; line-height: 1.15; }
-        .menu-price { flex-shrink: 0; background: linear-gradient(135deg, #0f766e, #115e59 56%, #134e4a); color: #f0fdfa; border-radius: 999px; padding: 6px 10px; font-size: 12px; line-height: 1; font-weight: 900; box-shadow: 0 7px 17px rgba(15,118,110,.24), inset 0 1px 0 rgba(255,255,255,.22); border: 1px solid rgba(240,253,250,.34); }
+        .menu-price { flex-shrink: 0; background: #d97706; color: #fff8ea; border-radius: 999px; padding: 6px 10px; font-size: 12px; line-height: 1; font-weight: 900; box-shadow: 0 7px 17px rgba(217,119,6,.24), inset 0 1px 0 rgba(255,255,255,.22); border: 1px solid rgba(254,243,199,.48); }
         .menu-desc { color: #6b5b4c; font-size: 12px; margin-top: 7px; line-height: 1.45; padding-right: 3px; }
         .addon-card { background: rgba(255,255,255,.96); border: 1px solid rgba(120,53,15,.13); border-radius: 18px; box-shadow: 0 12px 30px rgba(69,26,3,.08); padding: 14px; display: flex; align-items: center; gap: 14px; animation: fadeSlideUp .44s ease both; }
-        .addon-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 25px; flex-shrink: 0; background: #f0fdfa; border: 1px solid rgba(15,118,110,.18); }
+        .addon-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 25px; flex-shrink: 0; background: #fef3c7; border: 1px solid rgba(217,119,6,.24); }
         body.order-mode header, body.order-mode #review-divider, body.order-mode #review-section, body.order-mode #status-badge, body.order-mode #basketball-bubble { display: none !important; }
         body.order-mode #main-nav { top: 0; }
         body.order-mode #menu-container { min-height: 100vh; padding-top: 84px; padding-bottom: 130px; }
@@ -235,7 +234,7 @@
         .locate-main-btn:hover { background: #d97706; }
         .locate-main-btn:disabled { opacity: .5; cursor: not-allowed; }
         .zone-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 800; margin-top: 10px; }
-        .zone-badge.zone-a { background: #dcfce7; color: #166534; border: 1.5px solid #bbf7d0; }
+        .zone-badge.zone-a { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
         .zone-badge.zone-b { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
         .zone-badge.zone-c { background: #fee2e2; color: #991b1b; border: 1.5px solid #fecaca; }
         .zone-badge.no-del { background: #f3f4f6; color: #374151; border: 1.5px solid #e5e7eb; }
@@ -246,26 +245,26 @@
         .err-text.show { display: block; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin .7s linear infinite; display: inline-block; }
-        #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #22c55e; color: #fff; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-        #send-order-btn:hover { background: #16a34a; }
+        #send-order-btn { margin-top: 14px; margin-bottom: 8px; width: 100%; background: #f59e0b; color: #451a03; border: none; border-radius: 14px; padding: 15px; font-family: Poppins, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+        #send-order-btn:hover { background: #d97706; }
         #send-order-btn:disabled { background: #9ca3af; cursor: not-allowed; }
         #inbox-toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #1c0f00; color: #fef3c7; padding: 10px 20px; border-radius: 100px; font-size: 12px; font-weight: 700; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         #inbox-toast.show { transform: translateX(-50%) translateY(0); }
-        #inbox-toast.ok  { background: #166534; }
+        #inbox-toast.ok  { background: #92400e; }
         #inbox-toast.err { background: #dc2626; }
 
         /* OPEN / CLOSED STATUS BADGE */
         #status-badge { position: fixed; top: 12px; right: 12px; z-index: 60; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; background: #fef3c7; border: 1px solid #fde68a; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: opacity 0.25s ease, transform 0.25s ease; }
         #status-badge.hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
-        #status-badge.open   { color: #166534; }
+        #status-badge.open   { color: #92400e; }
         #status-badge.closed { color: #991b1b; }
         #status-badge .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-        #status-badge.open .dot   { background: #22c55e; animation: statusPulse 2s infinite; }
+        #status-badge.open .dot   { background: #f59e0b; animation: statusPulse 2s infinite; }
         #status-badge.closed .dot { background: #ef4444; }
         @keyframes statusPulse {
-            0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.7); }
-            70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
-            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+            0%   { box-shadow: 0 0 0 0 rgba(245,158,11,.7); }
+            70%  { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+            100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
         }
         @keyframes logoPulse {
             0%, 100% { transform: translateZ(0) scale(1); box-shadow: 0 0 0 7px rgba(245,158,11,.16), 0 0 34px rgba(245,158,11,.5), 0 18px 42px rgba(69,26,3,.28); }
@@ -301,10 +300,16 @@
     <div class="hero-logo w-28 h-28 mx-auto bg-white border-[6px] border-amber-950 rounded-full mb-4 overflow-hidden relative">
         <img src="menupictures/logo.png" alt="Le Kiosk Logo" class="w-full h-full object-cover object-center">
     </div>
-    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-700">Wadi Chahrour</p>
+    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700">Wadi Chahrour</p>
     <h1 class="brand-heading text-[3.65rem] font-extrabold text-amber-950 uppercase leading-none mt-1" style="text-shadow:0 3px 0 rgba(254,243,199,.95), 0 10px 26px rgba(69,26,3,.2);">Le Kiosk</h1>
     <p class="text-sm font-bold text-amber-800 mt-2">Waffles, burgers, ice cream, shisha & more.</p>
     <p class="text-xs text-amber-900/70 italic font-semibold mt-1">"Serving Cravings, Sharing Smiles"</p>
+    <div class="mt-4 flex flex-wrap justify-center gap-2">
+        <span class="hero-chip dark">6 PM – 12 AM</span>
+        <span class="hero-chip green">Dine in</span>
+        <span class="hero-chip light">Takeaway</span>
+        <a href="https://maps.app.goo.gl/Jdi41vBaiKb4MGnW9" target="_blank" rel="noopener noreferrer" class="hero-chip light hover:bg-amber-100 transition">Location</a>
+    </div>
     <div class="hero-divider" aria-hidden="true"></div>
     </div>
   </div>
@@ -444,7 +449,7 @@ const STORAGE_PUBLIC_BASE = 'https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1
 const PILL_COLORS = {
     amber:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
     red:    { bg:'#fee2e2', border:'#fecaca', text:'#991b1b' },
-    green:  { bg:'#dcfce7', border:'#bbf7d0', text:'#166534' },
+    green:  { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
     blue:   { bg:'#dbeafe', border:'#bfdbfe', text:'#1e40af' },
     purple: { bg:'#ede9fe', border:'#ddd6fe', text:'#5b21b6' },
     pink:   { bg:'#fce7f3', border:'#fbcfe8', text:'#9d174d' },
@@ -734,7 +739,7 @@ function renderSheet(){
         const changeNum=parseFloat(changeFor)||0;
         const changeBack=changeNum>total?'💵 Change: $'+(changeNum-total).toFixed(2):'';
         const showChangeBox=selectedType==='takeaway'||selectedType==='delivery';
-        const changeBoxHtml=showChangeBox?`<div style="margin-top:12px"><label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">💵 Need Change? (optional)</label><div style="margin-top:6px;position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:700;color:#92400e">$</span><input id="sheet-change" type="number" min="0" max="100" step="1" class="sheet-input" style="padding-left:28px" placeholder="e.g. 50" value="${changeFor}" oninput="(function(el){const v=parseFloat(el.value)||0,tot=${total.toFixed(2)};const cb=document.getElementById('change-back-label');if(cb){cb.textContent=v>tot?'Change back: $'+(v-tot).toFixed(2):'';cb.style.display=v>tot?'block':'none';}})(this)"></div><div id="change-back-label" style="font-size:12px;font-weight:700;color:#166534;margin-top:5px;display:${changeBack?'block':'none'}">${changeBack}</div></div>`:'';
+        const changeBoxHtml=showChangeBox?`<div style="margin-top:12px"><label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309">💵 Need Change? (optional)</label><div style="margin-top:6px;position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:700;color:#92400e">$</span><input id="sheet-change" type="number" min="0" max="100" step="1" class="sheet-input" style="padding-left:28px" placeholder="e.g. 50" value="${changeFor}" oninput="(function(el){const v=parseFloat(el.value)||0,tot=${total.toFixed(2)};const cb=document.getElementById('change-back-label');if(cb){cb.textContent=v>tot?'Change back: $'+(v-tot).toFixed(2):'';cb.style.display=v>tot?'block':'none';}})(this)"></div><div id="change-back-label" style="font-size:12px;font-weight:700;color:#92400e;margin-top:5px;display:${changeBack?'block':'none'}">${changeBack}</div></div>`:'';
         html+=`<div class="total-row"><div><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#92400e">Total</div>${feeBreakdown}</div><span style="font-size:18px;font-weight:800;color:#d97706">$${total.toFixed(2)}</span></div>${changeBoxHtml}
         <button id="send-order-btn">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
@@ -755,7 +760,7 @@ function renderLocationBox(){
             <div style="font-size:12px;color:#b91c1c;margin-top:6px;line-height:1.5">Sorry, we don't deliver to your location yet.<br>But you can still order — pick one:</div>
             <div style="display:flex;gap:8px;margin-top:10px;justify-content:center">
                 <button type="button" class="locate-main-btn" style="background:#f59e0b;font-size:11px;margin-top:0" data-select-type="dinein">🪑 Dine In</button>
-                <button type="button" class="locate-main-btn" style="background:#22c55e;color:#fff;font-size:11px;margin-top:0" data-select-type="takeaway">🥡 Takeaway</button>
+                <button type="button" class="locate-main-btn" style="background:#d97706;color:#fff;font-size:11px;margin-top:0" data-select-type="takeaway">🥡 Takeaway</button>
             </div>
             ${mu?`<div style="margin-top:10px"><a href="${mu}" target="_blank" style="font-size:10px;color:#b45309;font-weight:700;text-decoration:underline">View on Maps ↗</a></div>`:''}
             <button class="locate-main-btn" style="margin-top:10px;background:#78350f;font-size:10px" id="reset-loc-btn">↺ Try a different location</button>
@@ -1388,8 +1393,8 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     box-shadow: 0 7px 16px rgba(120,53,15,.24);
   }
   .basketball-time.live {
-    background: #16a34a;
-    box-shadow: 0 7px 16px rgba(22,163,74,.24);
+    background: #d97706;
+    box-shadow: 0 7px 16px rgba(217,119,6,.24);
   }
   .basketball-time.ended {
     background: #9ca3af;
@@ -2429,7 +2434,7 @@ Requires Worker routes from:
     flex-shrink: 0;
     border: 0;
     border-radius: 999px;
-    background: #16a34a;
+    background: #d97706;
     color: #fff;
     padding: 8px 11px;
     font-size: 10px;
@@ -2581,7 +2586,7 @@ Requires Worker routes from:
     width: 100%;
     border: 0;
     border-radius: 14px;
-    background: #16a34a;
+    background: #d97706;
     color: #fff;
     padding: 13px;
     font-family: 'Poppins', sans-serif;
@@ -2608,9 +2613,9 @@ Requires Worker routes from:
   }
   .guest-gallery-ok {
     display: none;
-    color: #166534;
-    background: #dcfce7;
-    border: 1px solid #bbf7d0;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
     border-radius: 12px;
     padding: 10px 12px;
     font-size: 11px;
