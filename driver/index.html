@@ -894,10 +894,10 @@ function renderDetail(o){
 
  detailInner+='\x3Cdiv class="actions"\x3E'+
   (track.delivering?'\x3Cbutton class="action-btn done" disabled\x3EPicked Up\x3C/button\x3E':'\x3Cbutton class="action-btn delivering" id="btn-delivering" onclick="D.mark(\x27delivering\x27)" '+(canDeliver?'':'disabled')+'\x3EDelivering\x3C/button\x3E')+
-  (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" '+(canDelivered?'':'disabled')+'\x3EDelivered\x3C/button\x3E')+
+  (track.delivered?'\x3Cbutton class="action-btn done" disabled\x3ECompleted\x3C/button\x3E':(canDelivered?'':'\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)" disabled\x3EDelivered\x3C/button\x3E'))+
   '\x3C/div\x3E\x3C/div\x3E';
  html+='\x3C/div\x3E\x3Cdiv class="detail-side" id="detail-info"\x3E'+detailInner+'\x3C/div\x3E\x3C/div\x3E';
- if(canDelivered&&!track.delivered)html+='\x3Cdiv class="sticky-delivered"\x3E\x3Cdiv class="sticky-delivered-inner"\x3E\x3Cbutton class="action-btn delivered" onclick="D.mark(\x27delivered\x27)"\x3EDelivered\x3C/button\x3E\x3C/div\x3E\x3C/div\x3E';
+ if(canDelivered&&!track.delivered)html+='\x3Cdiv class="sticky-delivered"\x3E\x3Cdiv class="sticky-delivered-inner"\x3E\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)"\x3EDelivered\x3C/button\x3E\x3C/div\x3E\x3C/div\x3E';
  html+='\x3Cdiv class="last-updated"\x3EAuto-refreshing…\x3C/div\x3E';
 
  if(!firstMapDone){
@@ -924,7 +924,7 @@ function syncStickyDelivered(show){
  if(!show)return;
  var wrap=document.createElement('div');
  wrap.className='sticky-delivered';
- wrap.innerHTML='\x3Cdiv class="sticky-delivered-inner"\x3E\x3Cbutton class="action-btn delivered" onclick="D.mark(\x27delivered\x27)"\x3EDelivered\x3C/button\x3E\x3C/div\x3E';
+ wrap.innerHTML='\x3Cdiv class="sticky-delivered-inner"\x3E\x3Cbutton class="action-btn delivered" id="btn-delivered" onclick="D.mark(\x27delivered\x27)"\x3EDelivered\x3C/button\x3E\x3C/div\x3E';
  document.body.appendChild(wrap);
 }
 
