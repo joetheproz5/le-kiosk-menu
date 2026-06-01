@@ -1727,6 +1727,7 @@ margin-left:auto}
 <button class="sync-pill" id="sync-pill" onclick="syncOfflineQueue(true)" title="Offline sync status">Synced</button>
 <button class="quick-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
 <button class="quick-btn hide-mobile" onclick="loadOrders(true)">Refresh</button>
+<button class="quick-btn" onclick="openAccountProfile()">Account</button>
 <button class="quick-btn primary" onclick="toggleCart()">Cart <span id="cart-count-mini">0</span>
 </button>
 </div>
@@ -3040,11 +3041,67 @@ onOk&&onOk()}
 ;
 $('modal-overlay').classList.add('show');
 }
+function openHtmlModal(title,html,okText='Close'){
+$('modal-title').textContent=title;
+$('modal-copy').innerHTML=html;
+$('modal-ok').textContent=okText;
+$('modal-ok').onclick=closeModal;
+$('modal-overlay').classList.add('show');
+}
 function closeModal(){
-$('modal-overlay').classList.remove('show')}
+$('modal-overlay').classList.remove('show');
+$('modal-ok').textContent='OK';
+}
 $('modal-overlay').addEventListener('click',e=>{
 if(e.target===e.currentTarget)closeModal()}
 );
+async function fetchAccountInfo(){
+const [meRes,accountsRes]=await Promise.all([
+fetch(`${WORKER_URL}/auth/me`,{cache:'no-store'}),
+fetch(`${WORKER_URL}/auth/accounts`,{cache:'no-store'})
+]);
+const me=await meRes.json().catch(()=>({}));
+const accounts=await accountsRes.json().catch(()=>({data:[]}));
+if(!meRes.ok)throw new Error(me.error||'Account read failed');
+return{account:me.account||{},accounts:Array.isArray(accounts.data)?accounts.data:[]};
+}
+function accountProfileHtml(account,accounts){
+const isAdmin=(authSession?.role||account.role)==='admin';
+return `<div style="display:grid;gap:12px;text-align:left">
+<div class="panel-card" style="margin:0"><div class="panel-name">${esc(account.username||authSession?.username||'Account')}</div><div class="panel-meta">Role: ${esc(account.role||authSession?.role||'')}${account.last_login_at?` · Last login: ${new Date(account.last_login_at).toLocaleString('en-GB')}`:''}</div></div>
+<div class="panel-card" style="margin:0"><div class="panel-name">Change Password</div><div style="display:grid;gap:8px;margin-top:10px"><input class="input" id="acct-current-pw" type="password" placeholder="Current password"><input class="input" id="acct-new-pw" type="password" placeholder="New password"><button class="quick-btn primary" onclick="changeAccountPassword()">Change Password</button></div></div>
+<div class="panel-card" style="margin:0"><div class="panel-name">Create Staff Account</div><div class="panel-meta">${isAdmin?'Create admin or POS accounts.':'POS users can create POS accounts only.'}</div><div style="display:grid;gap:8px;margin-top:10px"><input class="input" id="acct-new-user" placeholder="Username"><input class="input" id="acct-new-user-pw" type="password" placeholder="Password"><select class="input" id="acct-new-role" ${isAdmin?'':'disabled'}><option value="pos">POS</option><option value="admin">Admin</option></select><button class="quick-btn primary" onclick="createStaffAccount()">Create Account</button></div></div>
+<div class="panel-card" style="margin:0"><div class="panel-name">Staff Accounts</div><div style="display:grid;gap:6px;margin-top:10px">${accounts.map(a=>`<div class="panel-meta">${esc(a.username)} · ${esc(a.role)} · ${a.active===false?'disabled':'active'}</div>`).join('')||'<div class="empty">No accounts found.</div>'}</div></div>
+</div>`;
+}
+async function openAccountProfile(){
+showLoading('Loading account...');
+try{
+const {account,accounts}=await fetchAccountInfo();
+openHtmlModal('Account Profile',accountProfileHtml(account,accounts),'Close');
+}catch(e){showToast(e.message,'error')}
+hideLoading();
+}
+async function changeAccountPassword(){
+const currentPassword=$('acct-current-pw')?.value||'',newPassword=$('acct-new-pw')?.value||'';
+if(!currentPassword||newPassword.length<8){showToast('Enter current password and 8+ char new password','error');return}
+try{
+const res=await fetch(`${WORKER_URL}/auth/password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})});
+const j=await res.json().catch(()=>({}));
+if(!res.ok)throw new Error(j.error||'Password change failed');
+showToast('Password changed. Log in again.','success');closeModal();logout();
+}catch(e){showToast(e.message,'error')}
+}
+async function createStaffAccount(){
+const username=($('acct-new-user')?.value||'').trim(),password=$('acct-new-user-pw')?.value||'',role=$('acct-new-role')?.value||'pos';
+if(!username||password.length<8){showToast('Username and 8+ char password required','error');return}
+try{
+const res=await fetch(`${WORKER_URL}/auth/accounts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,role})});
+const j=await res.json().catch(()=>({}));
+if(!res.ok)throw new Error(j.error||'Create account failed');
+showToast('Account created','success');await openAccountProfile();
+}catch(e){showToast(e.message,'error')}
+}
 function showToast(msg,type=''){
 const t=$('toast');
 t.textContent=msg;

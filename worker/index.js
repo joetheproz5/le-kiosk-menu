@@ -720,6 +720,127 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
       });
     }
 
+    // ── GET /auth/me ──
+    if (request.method === 'GET' && url.pathname === '/auth/me') {
+      const blocked = await guard(['admin', 'pos']);
+      if (blocked instanceof Response) return blocked;
+      const session = blocked;
+
+      try {
+        const rows = await supabaseFetch(`/staff_accounts?id=eq.${encodeURIComponent(session.account_id)}&select=id,username,role,active,last_login_at,updated_at&limit=1`);
+        const account = Array.isArray(rows) && rows.length ? rows[0] : null;
+        if (!account || account.active === false) return json({ error: 'Account disabled' }, 403);
+        return json({ account });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── POST /auth/password ──
+    if (request.method === 'POST' && url.pathname === '/auth/password') {
+      const blocked = await guard(['admin', 'pos']);
+      if (blocked instanceof Response) return blocked;
+      const session = blocked;
+
+      let body;
+      try {
+        body = await request.json();
+      } catch (_) {
+        return json({ error: 'Invalid JSON' }, 400);
+      }
+
+      const currentPassword = String(body.currentPassword || '');
+      const newPassword = String(body.newPassword || '');
+      if (!currentPassword || newPassword.length < 8) {
+        return json({ error: 'Current password and a new password with at least 8 chars are required' }, 400);
+      }
+
+      try {
+        const rows = await supabaseFetch(`/staff_accounts?id=eq.${encodeURIComponent(session.account_id)}&active=eq.true&select=*`);
+        const account = Array.isArray(rows) && rows.length ? rows[0] : null;
+        if (!account) return json({ error: 'Account not found' }, 404);
+
+        const currentHash = await passwordHash(currentPassword, account.password_salt);
+        if (!safeEqual(currentHash, account.password_hash)) {
+          return json({ error: 'Current password is wrong' }, 400);
+        }
+
+        const salt = randomB64(16);
+        const hash = await passwordHash(newPassword, salt);
+        await supabaseFetch(`/staff_accounts?id=eq.${encodeURIComponent(session.account_id)}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            password_salt: salt,
+            password_hash: hash,
+            updated_at: new Date().toISOString(),
+          }),
+        });
+        await supabaseFetch(`/staff_sessions?account_id=eq.${encodeURIComponent(session.account_id)}`, { method: 'DELETE' }).catch(() => {});
+        return json({ ok: true });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── GET /auth/accounts ──
+    if (request.method === 'GET' && url.pathname === '/auth/accounts') {
+      const blocked = await guard(['admin', 'pos']);
+      if (blocked instanceof Response) return blocked;
+
+      try {
+        const rows = await supabaseFetch('/staff_accounts?select=id,username,role,active,last_login_at,updated_at&order=username.asc');
+        return json({ data: rows });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
+    // ── POST /auth/accounts ──
+    if (request.method === 'POST' && url.pathname === '/auth/accounts') {
+      const blocked = await guard(['admin', 'pos']);
+      if (blocked instanceof Response) return blocked;
+      const session = blocked;
+
+      let body;
+      try {
+        body = await request.json();
+      } catch (_) {
+        return json({ error: 'Invalid JSON' }, 400);
+      }
+
+      const username = String(body.username || '').trim().toLowerCase();
+      const password = String(body.password || '');
+      let role = String(body.role || '').trim().toLowerCase();
+      if (!['admin', 'pos'].includes(role)) role = 'pos';
+      if (session.role !== 'admin') role = 'pos';
+
+      if (!/^[a-z0-9._-]{3,32}$/.test(username) || password.length < 8) {
+        return json({ error: 'Username must be 3-32 simple characters and password at least 8 chars' }, 400);
+      }
+
+      try {
+        const existing = await supabaseFetch(`/staff_accounts?username=eq.${encodeURIComponent(username)}&select=id&limit=1`);
+        if (Array.isArray(existing) && existing.length) return json({ error: 'Username already exists' }, 409);
+
+        const salt = randomB64(16);
+        const hash = await passwordHash(password, salt);
+        const data = await supabaseFetch('/staff_accounts', {
+          method: 'POST',
+          body: JSON.stringify({
+            username,
+            role,
+            password_salt: salt,
+            password_hash: hash,
+            active: true,
+            updated_at: new Date().toISOString(),
+          }),
+        });
+        return json({ ok: true, data });
+      } catch (e) {
+        return json({ error: e.message }, 502);
+      }
+    }
+
     // ── POST /auth/logout ──
     if (request.method === 'POST' && url.pathname === '/auth/logout') {
       const token = bearerToken(request);

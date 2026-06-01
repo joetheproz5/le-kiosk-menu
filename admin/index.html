@@ -673,7 +673,7 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
           <button class="btn btn-soft" onclick="document.getElementById('import-file').click()">Import</button>
           <input type="file" id="import-file" accept=".json" style="display:none" onchange="importMenu(this)">
           <button class="btn btn-soft" onclick="togglePreview()">Preview</button>
-          <button class="btn btn-add" onclick="addCategory()">Add Category</button>
+          <button class="btn btn-soft" onclick="openAccountProfile()">Account</button>
           <button class="btn btn-save" id="save-btn" onclick="saveMenu()">Save Menu</button>
         </div>
       </header>
@@ -3956,6 +3956,81 @@ async function saveCustomersAdmin(){
     customersAdminData=clean;customersAdminDirty=false;showToast('Customers saved','success');renderCustomersAdmin();renderLoyaltyHub();renderDashboard();
   }catch(e){showToast('Save failed: '+e.message,'error');}
   hideLoading();
+}
+
+async function fetchAccountInfo(){
+  const [meRes,accountsRes]=await Promise.all([
+    fetch(`${WORKER_URL}/auth/me`,{cache:'no-store'}),
+    fetch(`${WORKER_URL}/auth/accounts`,{cache:'no-store'})
+  ]);
+  const me=await meRes.json().catch(()=>({}));
+  const accounts=await accountsRes.json().catch(()=>({data:[]}));
+  if(!meRes.ok)throw new Error(me.error||'Account read failed');
+  return {account:me.account||{},accounts:Array.isArray(accounts.data)?accounts.data:[]};
+}
+function accountProfileHtml(account,accounts){
+  const isAdmin=(authSession?.role||account.role)==='admin';
+  return `<div class="editor-form">
+    <div class="setting-card">
+      <div class="setting-title">${esc(account.username||authSession?.username||'Account')}</div>
+      <div class="setting-copy">Role: <strong>${esc(account.role||authSession?.role||'')}</strong>${account.last_login_at?` · Last login: ${new Date(account.last_login_at).toLocaleString('en-GB')}`:''}</div>
+    </div>
+    <div class="customer-grid" style="margin-top:12px">
+      <div class="field"><label class="field-label">Current Password</label><input class="field-input" id="acct-current-pw" type="password" autocomplete="current-password"></div>
+      <div class="field"><label class="field-label">New Password</label><input class="field-input" id="acct-new-pw" type="password" autocomplete="new-password"></div>
+    </div>
+    <div class="setting-actions"><button class="btn btn-save btn-sm" onclick="changeAccountPassword()">Change Password</button></div>
+    <div class="setting-card" style="margin-top:12px">
+      <div class="setting-title">Create Staff Account</div>
+      <div class="setting-copy">${isAdmin?'Create admin or POS accounts.':'POS users can create POS accounts only.'}</div>
+      <div class="customer-grid" style="margin-top:10px">
+        <div class="field"><label class="field-label">Username</label><input class="field-input" id="acct-new-user" autocomplete="off"></div>
+        <div class="field"><label class="field-label">Password</label><input class="field-input" id="acct-new-user-pw" type="password" autocomplete="new-password"></div>
+        <div class="field"><label class="field-label">Role</label><select class="field-input" id="acct-new-role" ${isAdmin?'':'disabled'}><option value="pos">POS</option><option value="admin">Admin</option></select></div>
+      </div>
+      <div class="setting-actions"><button class="btn btn-add btn-sm" onclick="createStaffAccount()">Create Account</button></div>
+    </div>
+    <div class="setting-card" style="margin-top:12px">
+      <div class="setting-title">Staff Accounts</div>
+      <div class="mini-list" style="margin-top:10px">${accounts.map(a=>`<div class="mini-row"><div><div class="mini-name">${esc(a.username)}</div><div class="mini-meta">${esc(a.role)} · ${a.active===false?'disabled':'active'}${a.last_login_at?' · '+new Date(a.last_login_at).toLocaleDateString('en-GB'):''}</div></div></div>`).join('')||'<div class="empty-state">No accounts found.</div>'}</div>
+    </div>
+  </div>`;
+}
+async function openAccountProfile(){
+  showLoading('Loading account...');
+  try{
+    const {account,accounts}=await fetchAccountInfo();
+    openEditorModal('Account Profile',accountProfileHtml(account,accounts),'Close',null);
+  }catch(e){
+    showToast(e.message,'error');
+  }
+  hideLoading();
+}
+async function changeAccountPassword(){
+  const currentPassword=document.getElementById('acct-current-pw')?.value||'';
+  const newPassword=document.getElementById('acct-new-pw')?.value||'';
+  if(!currentPassword||newPassword.length<8){showToast('Enter current password and 8+ char new password','error');return}
+  try{
+    const res=await fetch(`${WORKER_URL}/auth/password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})});
+    const j=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(j.error||'Password change failed');
+    showToast('Password changed. Log in again.','success');
+    closeModal();
+    logout();
+  }catch(e){showToast(e.message,'error')}
+}
+async function createStaffAccount(){
+  const username=(document.getElementById('acct-new-user')?.value||'').trim();
+  const password=document.getElementById('acct-new-user-pw')?.value||'';
+  const role=document.getElementById('acct-new-role')?.value||'pos';
+  if(!username||password.length<8){showToast('Username and 8+ char password required','error');return}
+  try{
+    const res=await fetch(`${WORKER_URL}/auth/accounts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password,role})});
+    const j=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(j.error||'Create account failed');
+    showToast('Account created','success');
+    await openAccountProfile();
+  }catch(e){showToast(e.message,'error')}
 }
 
 function renderSettings(){
