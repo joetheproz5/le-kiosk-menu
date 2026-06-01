@@ -513,6 +513,21 @@ color:#166534}
 background:#fee2e2;
 color:#991b1b;
 box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+.account-avatar-btn{
+width:38px;
+height:38px;
+border-radius:50%;
+border:1px solid var(--line);
+background:linear-gradient(135deg,#111827,#92400e);
+color:#fff7ed;
+font-size:13px;
+font-weight:900;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+box-shadow:0 8px 20px rgba(17,24,39,.14)}
+.account-avatar-btn:hover{transform:translateY(-1px)}
 .sync-pill{
 height:38px;
 border-radius:9px;
@@ -1727,9 +1742,9 @@ margin-left:auto}
 <button class="sync-pill" id="sync-pill" onclick="syncOfflineQueue(true)" title="Offline sync status">Synced</button>
 <button class="quick-btn" data-theme-toggle onclick="toggleTheme()" title="Switch theme">Light</button>
 <button class="quick-btn hide-mobile" onclick="loadOrders(true)">Refresh</button>
-<button class="quick-btn" onclick="openAccountProfile()">Account</button>
 <button class="quick-btn primary" onclick="toggleCart()">Cart <span id="cart-count-mini">0</span>
 </button>
+<button class="account-avatar-btn" id="account-avatar-btn" onclick="openAccountProfile()" title="Account profile">P</button>
 </div>
 </header>
 <main class="main">
@@ -1917,6 +1932,13 @@ function applyTheme(){
 const theme=activeTheme();
 document.body.classList.toggle('theme-dark',theme==='dark');
 document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.textContent=theme==='dark'?'Dark':'Light'});
+}
+function updateAccountAvatar(){
+const el=$('account-avatar-btn');
+if(!el)return;
+const name=authSession?.username||authSession?.role||'P';
+el.textContent=String(name).trim().slice(0,1).toUpperCase()||'P';
+el.title=`${authSession?.username||'Account'} profile`;
 }
 function toggleTheme(){
 const next=activeTheme()==='dark'?'light':'dark';
@@ -2195,6 +2217,7 @@ function saveAuthSession(){
 if(!authSession)return;
 authSession.localExpiresAt=Date.now()+SESSION_MS;
 localStorage.setItem(AUTH_STORAGE_KEY,JSON.stringify(authSession));
+updateAccountAvatar();
 }
 function clearAuthSession(){
 authSession=null;
@@ -2208,6 +2231,7 @@ authSession=saved;
 if(!authExpiryMs()){clearAuthSession();return false}
 $('login-screen').style.display='none';
 $('app').classList.add('show');
+updateAccountAvatar();
 startSession();
 bootPOS();
 return true;
@@ -2257,7 +2281,7 @@ $('user').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
 restoreAuthSession();
 function startSession(){sessionExpiry=authExpiryMs()||Date.now()+SESSION_MS;resetSession();clearInterval(sessionTick);sessionTick=setInterval(updateSessionBadge,30000)}
 function resetSession(){if(!$('app').classList.contains('show'))return;clearTimeout(sessionTimer);const rem=Math.max(0,sessionExpiry-Date.now());updateSessionBadge();sessionTimer=setTimeout(()=>{showToast('Session expired','error');logout()},rem)}
-function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`}
+function updateSessionBadge(){const rem=Math.max(0,sessionExpiry-Date.now()),h=Math.floor(rem/3600000),m=Math.floor((rem%3600000)/60000);$('session-badge').textContent=`Session: ${h?h+'h ':''}${m}m`;updateAccountAvatar()}
 function logout(){clearAuthSession();clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(inboxPollInterval);clearInterval(orderEventInterval);$('app').classList.remove('show');$('login-screen').style.display='flex';$('pw').value='';$('pw').focus()}
 function togglePassword(){
 const input=$('pw'),btn=$('show-pw-btn'),show=input.type==='password';
