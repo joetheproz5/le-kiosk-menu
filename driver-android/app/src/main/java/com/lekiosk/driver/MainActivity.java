@@ -254,7 +254,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        stopService(new Intent(this, DriverBackgroundService.class));
         super.onDestroy();
     }
 

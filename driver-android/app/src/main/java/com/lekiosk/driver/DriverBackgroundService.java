@@ -183,6 +183,15 @@ public class DriverBackgroundService extends Service {
             }
 
             if (!baselineReady) {
+                if (!current.isEmpty() && firstNewOrder == null) {
+                    for (int i = 0; i < orders.length(); i++) {
+                        JSONObject order = orders.optJSONObject(i);
+                        if (order != null && !isDelivered(order) && current.contains(order.optString("id", ""))) {
+                            showOrderNotification(order);
+                            break;
+                        }
+                    }
+                }
                 saveKnownIds(current);
                 prefs().edit().putBoolean(MainActivity.PREF_KNOWN_ORDER_IDS_READY, true).apply();
                 return;
