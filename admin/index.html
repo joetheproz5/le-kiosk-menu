@@ -984,6 +984,563 @@ body.theme-dark .cat-row:hover{background:#241d18}
     box-shadow:var(--shadow-md);
   }
 }
+
+/* LE KIOSK OS: FULL COMMAND-CENTER REDESIGN */
+:root{
+  --brand:#ffb000;
+  --brand-dark:#fff2c7;
+  --brand-mid:#ffc64d;
+  --brand-soft:rgba(255,176,0,.13);
+  --brand-line:rgba(255,176,0,.28);
+  --accent:#ff5a1f;
+  --bg:#07090d;
+  --panel:rgba(15,20,29,.78);
+  --panel-2:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.105);
+  --muted:#96a0ad;
+  --soft:rgba(255,255,255,.07);
+  --ink:#f8fafc;
+  --ink-2:#d8dee8;
+  --green:#31d086;
+  --green-soft:rgba(49,208,134,.13);
+  --red:#ff5c62;
+  --red-soft:rgba(255,92,98,.13);
+  --blue:#74b7ff;
+  --blue-soft:rgba(116,183,255,.13);
+  --purple:#c09bff;
+  --purple-soft:rgba(192,155,255,.13);
+  --shadow-sm:0 1px 0 rgba(255,255,255,.06) inset;
+  --shadow-md:0 22px 70px rgba(0,0,0,.34);
+  --shadow-lg:0 40px 110px rgba(0,0,0,.52);
+}
+body,
+body.theme-dark{
+  background:
+    radial-gradient(circle at 16% 12%,rgba(255,176,0,.18),transparent 28rem),
+    radial-gradient(circle at 82% 8%,rgba(116,183,255,.13),transparent 26rem),
+    radial-gradient(circle at 76% 72%,rgba(255,90,31,.13),transparent 30rem),
+    linear-gradient(135deg,#07090d 0%,#10151d 52%,#080a0e 100%);
+  color:var(--ink);
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.18;
+  background-image:
+    linear-gradient(rgba(255,255,255,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.10) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at 50% 20%,#000 0%,transparent 72%);
+}
+#login-screen{
+  background:
+    radial-gradient(circle at 20% 20%,rgba(255,176,0,.28),transparent 23rem),
+    radial-gradient(circle at 78% 28%,rgba(116,183,255,.18),transparent 27rem),
+    linear-gradient(135deg,#07090d,#18110b 58%,#090b10);
+}
+.login-card{
+  background:linear-gradient(145deg,rgba(17,22,32,.86),rgba(9,12,18,.78));
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:var(--shadow-lg);
+  backdrop-filter:blur(22px);
+}
+.login-logo{color:#fff;font-size:34px}
+.login-sub,.lbl{color:var(--brand-mid)}
+.app-shell{
+  position:relative;
+  z-index:1;
+  grid-template-columns:112px minmax(0,1fr);
+  gap:20px;
+  padding:18px;
+  height:100vh;
+  background:transparent;
+}
+.sidebar{
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(18,23,32,.78),rgba(7,9,13,.82));
+  box-shadow:var(--shadow-lg);
+  backdrop-filter:blur(24px);
+  overflow:hidden;
+}
+.side-brand{
+  min-height:112px;
+  padding:18px 12px;
+  justify-content:center;
+  border-bottom:1px solid rgba(255,255,255,.09);
+}
+.brand-stack{text-align:center}
+.brand-name{
+  font-size:18px;
+  line-height:1.02;
+  color:#fff;
+  white-space:normal;
+}
+.brand-sub{
+  margin-top:8px;
+  font-size:8px;
+  color:var(--brand-mid);
+}
+.unsaved-dot{
+  position:absolute;
+  top:16px;
+  right:16px;
+}
+.side-nav{
+  padding:10px;
+  gap:7px;
+  align-items:center;
+}
+.nav-group-label,.nav-group-divider{display:none}
+.nav-btn{
+  width:86px;
+  min-height:72px;
+  padding:9px 7px;
+  flex-direction:column;
+  justify-content:center;
+  gap:7px;
+  border:1px solid transparent;
+  border-radius:20px;
+  color:#9fa9b8;
+  font-size:9px;
+  line-height:1.08;
+  letter-spacing:.04em;
+  text-align:center;
+  text-transform:uppercase;
+}
+.nav-btn:hover{
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.10);
+  transform:translateY(-1px);
+}
+.nav-btn.active{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,255,255,.28),transparent 34px),
+    linear-gradient(160deg,#ffcc4d,#ff8f1f);
+  color:#17100a;
+  box-shadow:0 18px 40px rgba(255,143,31,.25);
+}
+.nav-icon{
+  width:34px;
+  height:34px;
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  font-size:15px;
+}
+.nav-btn.active .nav-icon{background:rgba(0,0,0,.13)}
+.side-footer{
+  padding:12px;
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.04));
+}
+.status-row{justify-content:center}
+.status-pill{
+  width:100%;
+  justify-content:center;
+  text-align:center;
+  border-radius:14px;
+  padding:7px 6px;
+  font-size:8px;
+}
+.session-badge{
+  text-align:center;
+  font-size:10px;
+  color:#aab4c2;
+}
+.logout-btn{
+  height:40px;
+  border-radius:15px;
+  font-size:9px;
+  color:#fff;
+}
+.main{
+  min-width:0;
+  height:calc(100vh - 36px);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:32px;
+  overflow:hidden;
+  background:linear-gradient(135deg,rgba(13,18,27,.70),rgba(8,10,15,.50));
+  box-shadow:var(--shadow-lg);
+  backdrop-filter:blur(18px);
+}
+.topbar{
+  min-height:104px;
+  padding:20px 24px;
+  background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  border-bottom:1px solid rgba(255,255,255,.09);
+}
+.page-kicker{
+  color:var(--brand-mid);
+  font-size:10px;
+  letter-spacing:.24em;
+}
+.page-title{
+  margin-top:3px;
+  color:#fff;
+  font-size:34px;
+  letter-spacing:-.04em;
+}
+.mega-search{max-width:620px}
+.mega-input{
+  height:52px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.075);
+  color:#fff;
+  box-shadow:0 1px 0 rgba(255,255,255,.08) inset;
+}
+.mega-input::placeholder,.search-input::placeholder,.field-input::placeholder,.inp::placeholder{color:#748092}
+.mega-icon{
+  left:19px;
+  color:var(--brand-mid);
+}
+.top-actions{
+  gap:9px;
+}
+.btn,.theme-icon-btn,.account-avatar-btn{
+  border-radius:999px;
+}
+.btn{
+  min-height:42px;
+  padding:11px 16px;
+  border:1px solid rgba(255,255,255,.11);
+  background:rgba(255,255,255,.07);
+  color:#edf2f7;
+}
+.btn:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,176,0,.32);
+}
+.btn-save{
+  border:0;
+  background:linear-gradient(135deg,#ffca49,#ff6b1a);
+  color:#120d08;
+  box-shadow:0 16px 38px rgba(255,107,26,.25);
+}
+.btn-add,.btn-dark{
+  border-color:rgba(255,255,255,.16);
+  background:#f8fafc;
+  color:#0b0f16;
+}
+.btn-soft,.btn-ghost,.theme-icon-btn{
+  background:rgba(255,255,255,.07);
+  color:#e5edf7;
+  border-color:rgba(255,255,255,.11);
+}
+.account-avatar-btn{
+  background:linear-gradient(135deg,#111827,#ff8f1f);
+  border-color:rgba(255,255,255,.18);
+}
+.content{
+  padding:24px;
+  background:transparent;
+}
+.hero-bar{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(230px,.62fr) minmax(220px,.48fr);
+  gap:18px;
+  margin-bottom:18px;
+}
+.ops-hero-main,.ops-signal-card,.panel,.dashboard-section,.chart-card,.dash-card,.setting-card,
+.hub-card,.feature-card,.customer-card,.block-card,.item-card,.addon-group-card,.reward-row,
+.reward-empty,.mini-row,.edit-row,.loyalty-customer,.table-qr-card,.gallery-admin-card,
+.product-sales-card,.product-sales-metric,.modal{
+  border:1px solid rgba(255,255,255,.11);
+  background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035));
+  box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 24px 60px rgba(0,0,0,.22);
+  backdrop-filter:blur(18px);
+}
+.ops-hero-main{
+  position:relative;
+  min-height:250px;
+  border-radius:30px;
+  padding:30px;
+  overflow:hidden;
+  isolation:isolate;
+}
+.ops-hero-main::before{
+  content:"";
+  position:absolute;
+  inset:auto -80px -120px auto;
+  width:330px;
+  height:330px;
+  border-radius:999px;
+  background:radial-gradient(circle,rgba(255,176,0,.42),transparent 66%);
+  filter:blur(8px);
+  z-index:-1;
+}
+.ops-hero-grid{
+  position:absolute;
+  inset:0;
+  opacity:.16;
+  background-image:
+    linear-gradient(rgba(255,255,255,.22) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.22) 1px,transparent 1px);
+  background-size:30px 30px;
+  mask-image:linear-gradient(90deg,#000,transparent 75%);
+}
+.ops-eyebrow,.ops-signal-label{
+  position:relative;
+  z-index:1;
+  color:var(--brand-mid);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+.ops-hero-title{
+  position:relative;
+  z-index:1;
+  max-width:640px;
+  margin-top:16px;
+  color:#fff;
+  font-size:clamp(38px,5vw,68px);
+  line-height:.92;
+  font-weight:900;
+  letter-spacing:-.07em;
+}
+.ops-hero-copy{
+  position:relative;
+  z-index:1;
+  max-width:560px;
+  margin-top:18px;
+  color:#b8c2d0;
+  font-size:15px;
+  line-height:1.55;
+  font-weight:650;
+}
+.ops-hero-actions{
+  position:relative;
+  z-index:1;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:24px;
+}
+.ops-signal-stack{
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  gap:18px;
+}
+.ops-signal-card{
+  position:relative;
+  min-height:116px;
+  border-radius:26px;
+  padding:20px;
+  overflow:hidden;
+}
+.ops-signal-card::after{
+  content:"";
+  position:absolute;
+  right:-40px;
+  top:-40px;
+  width:120px;
+  height:120px;
+  border-radius:999px;
+  background:rgba(116,183,255,.16);
+}
+.ops-signal-card.warm::after{background:rgba(255,176,0,.20)}
+.ops-signal-card.tall{min-height:250px}
+.ops-signal-card strong{
+  display:block;
+  margin-top:12px;
+  color:#fff;
+  font-size:46px;
+  line-height:1;
+  letter-spacing:-.05em;
+}
+.ops-signal-card small{
+  display:block;
+  margin-top:8px;
+  color:#aab4c2;
+  font-size:12px;
+  font-weight:750;
+}
+.ops-orbit{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:18px;
+  height:86px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:999px;
+}
+.ops-orbit span{
+  position:absolute;
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  background:var(--brand);
+  box-shadow:0 0 24px rgba(255,176,0,.7);
+}
+.ops-orbit span:nth-child(1){left:22%;top:18px}
+.ops-orbit span:nth-child(2){left:53%;bottom:14px;background:#74b7ff;box-shadow:0 0 24px rgba(116,183,255,.6)}
+.ops-orbit span:nth-child(3){right:18%;top:24px;background:#31d086;box-shadow:0 0 24px rgba(49,208,134,.55)}
+.dash-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+.dash-card{
+  min-height:138px;
+  border-radius:24px;
+}
+.dash-label,.today-label,.panel-title,.chart-title,.dashboard-section-title,.setting-title{
+  color:#fff;
+}
+.dash-value,.chart-total,.product-sales-number,.sales-num,.sales-rev,.setting-stat{
+  color:var(--brand-dark);
+}
+.dash-note,.panel-sub,.chart-sub,.dashboard-section-sub,.setting-copy,.setting-note,.mini-meta,.sales-cat{
+  color:#97a2b0;
+}
+.panel,.dashboard-section,.chart-card{
+  border-radius:26px;
+}
+.panel-head{
+  padding:18px 20px;
+  background:rgba(255,255,255,.045);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.panel-body{padding:18px}
+.grid-menu{
+  grid-template-columns:minmax(300px,360px) minmax(0,1fr);
+  gap:18px;
+}
+.cat-row,.mini-row,.edit-row,.sales-row,.customer-card,.block-card{
+  background:rgba(255,255,255,.055);
+  border-color:rgba(255,255,255,.09);
+  color:#fff;
+}
+.cat-row.active{
+  background:linear-gradient(135deg,rgba(255,176,0,.20),rgba(255,90,31,.12));
+  border-color:rgba(255,176,0,.34);
+}
+.cat-name,.mini-name,.edit-row-title,.hub-title,.feature-title,.product-sales-name,.sales-name,.block-phone,.loyalty-name,.table-qr-title,.gallery-admin-title{
+  color:#fff;
+}
+.field-input,.search-input,.inp,.addon-input,.emoji-input,textarea,.segment,.segment button,.pills-area,
+.addons-editor,.active-box,.banner-box,.img-drop-zone,.mega-results,.mega-result,.sales-options-dropdown,.addon-dropdown{
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.12);
+  color:#fff;
+}
+.field-input:focus,.search-input:focus,.inp:focus,.mega-input:focus{
+  border-color:rgba(255,176,0,.58);
+  box-shadow:0 0 0 4px rgba(255,176,0,.15);
+}
+.field-label,.addons-title,.settings-section-title{
+  color:var(--brand-mid);
+}
+.switch .slider{
+  background:rgba(255,255,255,.18);
+}
+.switch input:checked+.slider{
+  background:linear-gradient(135deg,#31d086,#9dffcb);
+}
+.chip-btn,.cat-badge,.hub-badge,.edit-badge,.loyalty-ready{
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.12);
+  color:#c8d2df;
+}
+.chip-btn.active{
+  background:linear-gradient(135deg,#ffcc4d,#ff7a1a);
+  color:#17100a;
+  border-color:transparent;
+}
+#preview-panel{
+  background:rgba(8,11,16,.86);
+  border-left:1px solid rgba(255,255,255,.13);
+  backdrop-filter:blur(22px);
+}
+.preview-header{
+  background:rgba(255,255,255,.055);
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.preview-header h4,.preview-section-title{color:#fff}
+#modal-overlay{background:rgba(0,0,0,.62)}
+.modal{background:linear-gradient(145deg,rgba(18,23,32,.96),rgba(9,12,18,.96))}
+.modal h3{color:#fff}
+.modal-body{color:#b8c2d0}
+#toast{
+  background:rgba(248,250,252,.94);
+  color:#0b0f16;
+}
+#loading-overlay{
+  background:rgba(7,9,13,.68);
+  backdrop-filter:blur(12px);
+}
+.loading-text{color:#fff}
+.spinner{border-color:rgba(255,255,255,.16);border-top-color:var(--brand)}
+.sales-table-header{
+  border-color:rgba(255,255,255,.10);
+  color:var(--brand-mid);
+}
+.mobile-bottom-bar{
+  background:rgba(8,11,16,.90);
+  border-top:1px solid rgba(255,255,255,.10);
+  backdrop-filter:blur(20px);
+}
+.mobile-tab.active{
+  background:linear-gradient(135deg,#ffcc4d,#ff7a1a);
+  color:#17100a;
+}
+@media(max-width:1200px){
+  .app-shell{grid-template-columns:96px minmax(0,1fr)}
+  .nav-btn{width:72px;font-size:8px}
+  .hero-bar{grid-template-columns:1fr 1fr}
+  .ops-hero-main{grid-column:1/-1}
+}
+@media(max-width:980px){
+  body{overflow:auto}
+  .app-shell{
+    display:block;
+    height:auto;
+    padding:0;
+  }
+  .main{
+    min-height:100vh;
+    height:auto;
+    border:0;
+    border-radius:0;
+  }
+  .topbar{
+    padding:72px 16px 18px;
+    border-radius:0 0 26px 26px;
+  }
+  .page-title{font-size:32px}
+  .content{padding:16px 14px 112px}
+  .hero-bar,.dash-grid,.chart-grid,.product-sales-grid,.settings-grid,.loyalty-grid,.grid-menu{
+    grid-template-columns:1fr;
+  }
+  .ops-hero-main,.ops-signal-card{border-radius:24px}
+  .ops-hero-title{font-size:42px}
+  .sidebar{
+    width:300px;
+    border-radius:0 28px 28px 0;
+  }
+  .nav-btn{
+    width:100%;
+    min-height:48px;
+    flex-direction:row;
+    justify-content:flex-start;
+    padding:10px 12px;
+    font-size:11px;
+    text-align:left;
+  }
+  .sidebar-toggle{
+    width:44px;
+    height:44px;
+    background:rgba(255,255,255,.12);
+    color:#fff;
+    border-color:rgba(255,255,255,.16);
+  }
+  .sales-row,.customer-grid,.loyalty-customer,.table-qr-card,.gallery-admin-card{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 </head>
 <body>
@@ -1026,37 +1583,37 @@ body.theme-dark .cat-row:hover{background:#241d18}
     <aside class="sidebar" id="sidebar">
       <div class="side-brand">
         <div class="brand-stack">
-          <div class="brand-name">Le Kiosk</div>
-          <div class="brand-sub">Control Center</div>
+          <div class="brand-name">Le Kiosk OS</div>
+          <div class="brand-sub">Live Operations</div>
         </div>
         <span class="unsaved-dot" id="unsaved-indicator"></span>
       </div>
       <nav class="side-nav">
-        <div class="nav-group-label">Overview</div>
-        <button class="nav-btn active" id="nav-dashboard" onclick="switchView('dashboard')"><span class="nav-icon">▦</span>Dashboard</button>
+        <div class="nav-group-label">Now</div>
+        <button class="nav-btn active" id="nav-dashboard" onclick="switchView('dashboard')"><span class="nav-icon">▦</span>Pulse</button>
         <div class="nav-group-divider"></div>
-        <div class="nav-group-label">Menu</div>
-        <button class="nav-btn" id="nav-menu" onclick="switchView('menu')"><span class="nav-icon">✎</span>Editor</button>
-        <button class="nav-btn" id="nav-categories" onclick="switchView('categories')"><span class="nav-icon">☷</span>Categories</button>
-        <button class="nav-btn" id="nav-items" onclick="switchView('items')"><span class="nav-icon">▤</span>Menu Items</button>
-        <button class="nav-btn" id="nav-addons" onclick="switchView('addons')"><span class="nav-icon">＋</span>Add-ons</button>
+        <div class="nav-group-label">Kitchen Story</div>
+        <button class="nav-btn" id="nav-menu" onclick="switchView('menu')"><span class="nav-icon">✎</span>Studio</button>
+        <button class="nav-btn" id="nav-categories" onclick="switchView('categories')"><span class="nav-icon">☷</span>Boards</button>
+        <button class="nav-btn" id="nav-items" onclick="switchView('items')"><span class="nav-icon">▤</span>Catalog</button>
+        <button class="nav-btn" id="nav-addons" onclick="switchView('addons')"><span class="nav-icon">＋</span>Modifiers</button>
         <div class="nav-group-divider"></div>
-        <div class="nav-group-label">Features</div>
-        <button class="nav-btn" id="nav-loyalty" onclick="switchView('loyalty')"><span class="nav-icon">★</span>Loyalty</button>
-        <button class="nav-btn" id="nav-basketball" onclick="switchView('basketball')"><span class="nav-icon">●</span>Basketball</button>
-        <button class="nav-btn" id="nav-tables" onclick="switchView('tables')"><span class="nav-icon">▣</span>Tables</button>
-        <button class="nav-btn" id="nav-gallery" onclick="switchView('gallery')"><span class="nav-icon">◫</span>Gallery</button>
+        <div class="nav-group-label">Experiences</div>
+        <button class="nav-btn" id="nav-loyalty" onclick="switchView('loyalty')"><span class="nav-icon">★</span>Rewards</button>
+        <button class="nav-btn" id="nav-basketball" onclick="switchView('basketball')"><span class="nav-icon">●</span>Game Nights</button>
+        <button class="nav-btn" id="nav-tables" onclick="switchView('tables')"><span class="nav-icon">▣</span>Table Signals</button>
+        <button class="nav-btn" id="nav-gallery" onclick="switchView('gallery')"><span class="nav-icon">◫</span>Guest Lens</button>
         <div class="nav-group-divider"></div>
-        <div class="nav-group-label">Data</div>
-        <button class="nav-btn" id="nav-customers" onclick="switchView('customers')"><span class="nav-icon">♙</span>Customers</button>
-        <button class="nav-btn" id="nav-blocklist" onclick="switchView('blocklist')"><span class="nav-icon">!</span>Block List</button>
-        <button class="nav-btn" id="nav-sales" onclick="switchView('sales')"><span class="nav-icon">↗</span>Sales Analytics</button>
-        <button class="nav-btn" id="nav-settings" onclick="switchView('settings')"><span class="nav-icon">⚙</span>Settings</button>
+        <div class="nav-group-label">Intel</div>
+        <button class="nav-btn" id="nav-customers" onclick="switchView('customers')"><span class="nav-icon">♙</span>Guests</button>
+        <button class="nav-btn" id="nav-blocklist" onclick="switchView('blocklist')"><span class="nav-icon">!</span>Guardrail</button>
+        <button class="nav-btn" id="nav-sales" onclick="switchView('sales')"><span class="nav-icon">↗</span>Revenue Lab</button>
+        <button class="nav-btn" id="nav-settings" onclick="switchView('settings')"><span class="nav-icon">⚙</span>System</button>
       </nav>
       <div class="side-footer">
         <div class="status-row">
           <span class="status-pill" id="status-test">Test Off</span>
-          <span class="status-pill" id="status-loyalty">Loyalty On</span>
+          <span class="status-pill" id="status-loyalty">Rewards On</span>
         </div>
         <div class="session-badge" id="session-timer"></div>
         <button class="logout-btn" onclick="logout()">Logout</button>
@@ -1066,12 +1623,12 @@ body.theme-dark .cat-row:hover{background:#241d18}
     <main class="main">
       <header class="topbar">
         <div>
-          <div class="page-kicker" id="page-kicker">Control Center</div>
-          <div class="page-title" id="page-title">Dashboard</div>
+          <div class="page-kicker" id="page-kicker">Live Operations</div>
+          <div class="page-title" id="page-title">Pulse</div>
         </div>
         <div class="mega-search">
           <span class="mega-icon">Q</span>
-          <input class="mega-input" id="mega-search" type="text" placeholder="Search menu, categories, customers, orders..." autocomplete="off" oninput="renderMegaSearch()" onkeydown="handleMegaSearchKey(event)" onfocus="renderMegaSearch()">
+          <input class="mega-input" id="mega-search" type="text" placeholder="Command search: dish, guest, board, order..." autocomplete="off" oninput="renderMegaSearch()" onkeydown="handleMegaSearchKey(event)" onfocus="renderMegaSearch()">
           <div class="mega-results" id="mega-results"></div>
         </div>
         <div class="top-actions" id="recent-items" style="display:flex;align-items:center;gap:6px"></div>
@@ -3186,19 +3743,19 @@ function switchView(view){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('nav-'+view).classList.add('active');
   const titles={
-    dashboard:['Control Center','Dashboard'],
-    menu:['Menu CMS','Menu Editor'],
-    categories:['Menu Structure','Categories'],
-    items:['Catalog','Menu Items'],
-    addons:['Options','Add-ons'],
-    loyalty:['Rewards','Loyalty'],
-    basketball:['Game Nights','Basketball'],
-    tables:['Dine-In','Table QR Codes'],
-    gallery:['Community','Guest Gallery'],
-    customers:['Customer CRM','Customers'],
-    blocklist:['Risk Control','Block List'],
-    sales:['Sales Analytics','Sales Analytics'],
-    settings:['System Config','Settings']
+    dashboard:['Live Operations','Pulse'],
+    menu:['Kitchen Story','Studio'],
+    categories:['Menu Architecture','Boards'],
+    items:['Catalog Intelligence','Items'],
+    addons:['Choice Design','Modifiers'],
+    loyalty:['Guest Loop','Rewards'],
+    basketball:['Experience Layer','Game Nights'],
+    tables:['Dine-In Signals','Tables'],
+    gallery:['Community Signal','Guest Lens'],
+    customers:['Guest Memory','People'],
+    blocklist:['Risk Control','Guardrail'],
+    sales:['Revenue Intelligence','Revenue Lab'],
+    settings:['System Core','Control Matrix']
   };
   document.getElementById('page-kicker').textContent=titles[view][0];
   document.getElementById('page-title').textContent=titles[view][1];
@@ -3281,23 +3838,35 @@ function renderDashboardHero(){
   const t=todayDashboardStats();
   const ready=customersAdminData.filter(c=>c.loyaltyRewardReady).length;
   el.innerHTML=`
-    <div class="hero-card blue">
-      <div class="hero-icon">&#9744;</div>
-      <div class="hero-label">Today's Orders</div>
-      <div class="hero-value">${t.orders}</div>
-      <div class="hero-sub">${t.posOrders} POS &middot; ${t.menuOrders} online</div>
+    <div class="ops-hero-main">
+      <div class="ops-hero-grid"></div>
+      <div class="ops-eyebrow">Shift Signal</div>
+      <div class="ops-hero-title">Le Kiosk is ${t.orders?'moving':'quiet'} right now.</div>
+      <div class="ops-hero-copy">${t.orders?`${t.orders} active orders today with $${Number(t.sales||0).toFixed(0)} in revenue.`:'No active orders have landed today. The floor is ready.'}</div>
+      <div class="ops-hero-actions">
+        <button class="btn btn-save" onclick="switchView('sales')">Open Revenue Lab</button>
+        <button class="btn btn-soft" onclick="switchView('menu')">Tune Menu Studio</button>
+      </div>
     </div>
-    <div class="hero-card amber">
-      <div class="hero-icon">$</div>
-      <div class="hero-label">Today's Revenue</div>
-      <div class="hero-value">$${Number(t.sales||0).toFixed(0)}</div>
-      <div class="hero-sub">${t.orders?`Avg $${Number(t.sales/t.orders||0).toFixed(0)}/order`:'No orders yet'}</div>
+    <div class="ops-signal-stack">
+      <div class="ops-signal-card">
+        <span class="ops-signal-label">Orders</span>
+        <strong>${t.orders}</strong>
+        <small>${t.posOrders} POS / ${t.menuOrders} online</small>
+      </div>
+      <div class="ops-signal-card warm">
+        <span class="ops-signal-label">Revenue</span>
+        <strong>$${Number(t.sales||0).toFixed(0)}</strong>
+        <small>${t.orders?`$${Number(t.sales/t.orders||0).toFixed(0)} average ticket`:'Awaiting first ticket'}</small>
+      </div>
     </div>
-    <div class="hero-card emerald">
-      <div class="hero-icon">&#9823;</div>
-      <div class="hero-label">Today's Customers</div>
-      <div class="hero-value">${t.customers}</div>
-      <div class="hero-sub">${ready} with rewards ready</div>
+    <div class="ops-signal-card tall">
+      <span class="ops-signal-label">Guest Energy</span>
+      <strong>${t.customers}</strong>
+      <small>${ready} rewards waiting</small>
+      <div class="ops-orbit">
+        <span></span><span></span><span></span>
+      </div>
     </div>`;
 }
 function renderDashboardStats(s,ready){
