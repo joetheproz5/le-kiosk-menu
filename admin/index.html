@@ -1541,6 +1541,187 @@ body::before{
     grid-template-columns:1fr;
   }
 }
+
+/* PROFESSIONAL TONE-DOWN: GRAPHITE, BRONZE, SCROLLABLE NAV */
+:root{
+  --brand:#b89b6f;
+  --brand-dark:#f1eadf;
+  --brand-mid:#c9ad82;
+  --brand-soft:rgba(184,155,111,.12);
+  --brand-line:rgba(184,155,111,.24);
+  --accent:#9f835c;
+  --bg:#0a0c10;
+  --panel:rgba(17,20,26,.84);
+  --panel-2:rgba(255,255,255,.035);
+  --line:rgba(233,226,216,.11);
+  --muted:#9aa1ab;
+  --soft:rgba(233,226,216,.065);
+  --ink:#f3f5f7;
+  --ink-2:#d3d8df;
+  --green:#68c18e;
+  --green-soft:rgba(104,193,142,.13);
+  --red:#e06363;
+  --red-soft:rgba(224,99,99,.13);
+  --blue:#8ea6c8;
+  --blue-soft:rgba(142,166,200,.13);
+  --purple:#a99ac9;
+  --purple-soft:rgba(169,154,201,.13);
+  --shadow-md:0 20px 58px rgba(0,0,0,.30);
+  --shadow-lg:0 34px 90px rgba(0,0,0,.46);
+}
+body,
+body.theme-dark{
+  background:
+    radial-gradient(circle at 18% 12%,rgba(184,155,111,.10),transparent 26rem),
+    radial-gradient(circle at 80% 6%,rgba(142,166,200,.08),transparent 24rem),
+    linear-gradient(135deg,#0a0c10 0%,#12161d 54%,#080a0d 100%);
+}
+body::before{
+  opacity:.075;
+  background-size:48px 48px;
+}
+#login-screen{
+  background:
+    radial-gradient(circle at 24% 18%,rgba(184,155,111,.16),transparent 24rem),
+    linear-gradient(135deg,#080a0d,#141820 58%,#0a0c10);
+}
+.app-shell{
+  grid-template-columns:118px minmax(0,1fr);
+}
+.sidebar{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:linear-gradient(180deg,rgba(21,24,30,.90),rgba(10,12,16,.94));
+  border-color:rgba(233,226,216,.11);
+}
+.side-brand{
+  flex:0 0 auto;
+  min-height:104px;
+}
+.side-nav{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:10px 10px 14px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(184,155,111,.45) transparent;
+}
+.side-nav::-webkit-scrollbar{width:6px}
+.side-nav::-webkit-scrollbar-track{background:transparent}
+.side-nav::-webkit-scrollbar-thumb{
+  background:rgba(184,155,111,.42);
+  border-radius:999px;
+}
+.side-footer{
+  flex:0 0 auto;
+  border-top:1px solid rgba(233,226,216,.09);
+}
+.nav-btn{
+  color:#aeb5bf;
+  background:transparent;
+}
+.nav-btn:hover{
+  background:rgba(233,226,216,.055);
+  border-color:rgba(233,226,216,.10);
+  color:#f3f5f7;
+}
+.nav-btn.active{
+  background:linear-gradient(160deg,#d7c3a3,#a78a61);
+  color:#111111;
+  box-shadow:0 16px 34px rgba(167,138,97,.18);
+}
+.nav-icon{
+  background:rgba(233,226,216,.075);
+}
+.brand-sub,.page-kicker,.mega-icon,.ops-eyebrow,.ops-signal-label,.field-label,.addons-title,.settings-section-title,.sales-table-header{
+  color:var(--brand-mid);
+}
+.main{
+  background:linear-gradient(135deg,rgba(18,22,29,.78),rgba(10,12,16,.66));
+  border-color:rgba(233,226,216,.10);
+}
+.topbar{
+  background:linear-gradient(180deg,rgba(233,226,216,.060),rgba(233,226,216,.022));
+  border-color:rgba(233,226,216,.09);
+}
+.btn{
+  border-color:rgba(233,226,216,.11);
+  background:rgba(233,226,216,.060);
+}
+.btn:hover{
+  border-color:rgba(184,155,111,.34);
+}
+.btn-save,.chip-btn.active,.mobile-tab.active{
+  background:linear-gradient(135deg,#d7c3a3,#9f835c);
+  color:#111111;
+  box-shadow:0 14px 30px rgba(159,131,92,.18);
+}
+.btn-add,.btn-dark{
+  background:#e9e2d8;
+  color:#111111;
+}
+.account-avatar-btn{
+  background:linear-gradient(135deg,#1a1f28,#9f835c);
+}
+.ops-hero-main,.ops-signal-card,.panel,.dashboard-section,.chart-card,.dash-card,.setting-card,
+.hub-card,.feature-card,.customer-card,.block-card,.item-card,.addon-group-card,.reward-row,
+.reward-empty,.mini-row,.edit-row,.loyalty-customer,.table-qr-card,.gallery-admin-card,
+.product-sales-card,.product-sales-metric,.modal{
+  background:linear-gradient(145deg,rgba(233,226,216,.070),rgba(233,226,216,.026));
+  border-color:rgba(233,226,216,.105);
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 22px 54px rgba(0,0,0,.20);
+}
+.ops-hero-main::before{
+  background:radial-gradient(circle,rgba(184,155,111,.22),transparent 68%);
+}
+.ops-hero-grid{
+  opacity:.09;
+}
+.ops-signal-card::after{
+  background:rgba(142,166,200,.10);
+}
+.ops-signal-card.warm::after{
+  background:rgba(184,155,111,.13);
+}
+.ops-orbit span{
+  background:#c9ad82;
+  box-shadow:0 0 18px rgba(201,173,130,.36);
+}
+.ops-orbit span:nth-child(2){
+  background:#8ea6c8;
+  box-shadow:0 0 18px rgba(142,166,200,.32);
+}
+.ops-orbit span:nth-child(3){
+  background:#68c18e;
+  box-shadow:0 0 18px rgba(104,193,142,.30);
+}
+.cat-row.active{
+  background:linear-gradient(135deg,rgba(184,155,111,.16),rgba(233,226,216,.055));
+  border-color:rgba(184,155,111,.30);
+}
+.field-input:focus,.search-input:focus,.inp:focus,.mega-input:focus{
+  border-color:rgba(184,155,111,.52);
+  box-shadow:0 0 0 4px rgba(184,155,111,.12);
+}
+.switch input:checked+.slider{
+  background:linear-gradient(135deg,#68c18e,#9ad7b1);
+}
+@media(max-width:1200px){
+  .app-shell{grid-template-columns:104px minmax(0,1fr)}
+}
+@media(max-width:980px){
+  .sidebar{
+    overflow:hidden;
+  }
+  .side-brand{min-height:86px}
+  .side-nav{
+    align-items:stretch;
+    overflow-y:auto;
+    max-height:none;
+  }
+}
 </style>
 </head>
 <body>
