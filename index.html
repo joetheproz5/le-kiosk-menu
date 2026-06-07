@@ -1664,7 +1664,7 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   };
   let todaysMatches = [];
   let closeTimer = null;
-  const BASKETBALL_POPUP_SEEN_KEY = 'lk_basketball_popup_seen_day_v2';
+  const BASKETBALL_POPUP_SEEN_KEY = 'lk_basketball_popup_seen_day_v3';
 
   function beirutDateKey(d = new Date()) {
     const parts = new Intl.DateTimeFormat('en-CA', {
@@ -1936,23 +1936,17 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
 
       const today = beirutDateKey();
       const scheduledMatches = (Array.isArray(cfg.basketballMatches) ? cfg.basketballMatches : [])
-        .filter(m => m && m.active !== false && String(m.date || '') >= today)
-        .sort((a, b) => {
-          const dayOrder = String(a.date || '').localeCompare(String(b.date || ''));
-          return dayOrder || timeToMinutes(a.time) - timeToMinutes(b.time);
-        });
+        .filter(m => m && m.active !== false && String(m.date || '') === today)
+        .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
 
       // Active scheduled matches take precedence over a stale global toggle.
       if (cfg.basketballEnabled === false && !scheduledMatches.length) return;
-      todaysMatches = scheduledMatches.slice(0, 8);
+      todaysMatches = scheduledMatches;
 
       const bubble = document.getElementById('basketball-bubble');
       const dateLabel = document.getElementById('basketball-date-label');
       if (dateLabel) {
-        const hasToday = todaysMatches.some(m => m.date === today);
-        dateLabel.textContent = hasToday
-          ? `Lebanese Basketball / Today`
-          : `Upcoming Lebanese Basketball`;
+        dateLabel.textContent = `Lebanese Basketball / Today`;
       }
 
       if (todaysMatches.length) {
