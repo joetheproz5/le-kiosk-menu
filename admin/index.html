@@ -4064,7 +4064,17 @@ function sortBasketballMatches(){
 }
 async function saveBasketballMatches(){
   showLoading('Saving matches...');
-  try{normalizeBasketballMatches();await pruneExpiredBasketballMatches({persist:false,silent:true});await saveConfig();renderBasketballManager();renderSettings();showToast('Basketball matches saved','success');}
+  try{
+    normalizeBasketballMatches();
+    await pruneExpiredBasketballMatches({persist:false,silent:true});
+    const hasUpcomingActiveMatch=configData.basketballMatches.some(m=>m.active!==false&&m.date>=todayBeirutKey());
+    if(hasUpcomingActiveMatch)configData.basketballEnabled=true;
+    await saveConfig();
+    renderStatus();
+    renderBasketballManager();
+    renderSettings();
+    showToast(hasUpcomingActiveMatch?'Matches saved and popup enabled':'Basketball matches saved','success');
+  }
   catch(e){showToast('Save failed: '+e.message,'error');}
   hideLoading();
 }

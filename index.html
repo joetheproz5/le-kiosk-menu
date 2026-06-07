@@ -1731,11 +1731,31 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
     return get('hour') * 60 + get('minute');
   }
 
+  function matchDateLabel(date) {
+    const value = String(date || '');
+    const d = new Date(`${value}T12:00:00`);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toLocaleDateString('en-US', {
+      timeZone: 'Asia/Beirut',
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
   function matchStatus(matches, index) {
     const match = matches[index] || {};
+    const today = beirutDateKey();
+    const matchDay = String(match.date || '');
+    if (matchDay > today) {
+      return { label: `${matchDateLabel(matchDay)} · ${match.time || ''}`, cls: '' };
+    }
+    if (matchDay < today) return { label: 'Ended', cls: 'ended' };
+
     const now = beirutMinutesNow();
     const start = timeToMinutes(match.time);
-    const nextStart = matches[index + 1] ? timeToMinutes(matches[index + 1].time) : null;
+    const nextMatch = matches[index + 1];
+    const nextStart = nextMatch && nextMatch.date === match.date ? timeToMinutes(nextMatch.time) : null;
     if (now < start) return { label: `Start at ${match.time || ''}`, cls: '' };
     if (nextStart !== null && now >= nextStart) return { label: 'Ended', cls: 'ended' };
     if (nextStart === null && now >= start + 150) return { label: 'Ended', cls: 'ended' };
@@ -1917,15 +1937,27 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
 
       const today = beirutDateKey();
       todaysMatches = (Array.isArray(cfg.basketballMatches) ? cfg.basketballMatches : [])
-        .filter(m => m && m.active !== false && m.date === today)
-        .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+        .filter(m => m && m.active !== false && String(m.date || '') >= today)
+        .sort((a, b) => {
+          const dayOrder = String(a.date || '').localeCompare(String(b.date || ''));
+          return dayOrder || timeToMinutes(a.time) - timeToMinutes(b.time);
+        })
+        .slice(0, 8);
 
       const bubble = document.getElementById('basketball-bubble');
       const dateLabel = document.getElementById('basketball-date-label');
-      if (dateLabel) dateLabel.textContent = `Lebanese Basketball / ${today}`;
+      if (dateLabel) {
+        const hasToday = todaysMatches.some(m => m.date === today);
+        dateLabel.textContent = hasToday
+          ? `Lebanese Basketball / Today`
+          : `Upcoming Lebanese Basketball`;
+      }
 
       if (todaysMatches.length) {
-        if (bubble) bubble.classList.add('show');
+        if (bubble) {
+          bubble.classList.add('show');
+          bubble.classList.remove('hidden');
+        }
         if (!hasSeenBasketballPopupToday(today)) {
           markBasketballPopupSeen(today);
           setTimeout(openPopup, 650);
@@ -1942,11 +1974,6 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closePopup();
   });
-
-  window.addEventListener('scroll', () => {
-    const bubble = document.getElementById('basketball-bubble');
-    if (bubble) bubble.classList.toggle('hidden', window.scrollY > 60);
-  }, { passive: true });
 
   loadBasketballMatches();
 })();
