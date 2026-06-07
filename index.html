@@ -1664,7 +1664,7 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
   };
   let todaysMatches = [];
   let closeTimer = null;
-  const BASKETBALL_POPUP_SEEN_KEY = 'lk_basketball_popup_seen_day';
+  const BASKETBALL_POPUP_SEEN_KEY = 'lk_basketball_popup_seen_day_v2';
 
   function beirutDateKey(d = new Date()) {
     const parts = new Intl.DateTimeFormat('en-CA', {
@@ -1933,16 +1933,18 @@ It reads config.basketballEnabled and config.basketballMatches from /supabase/co
       if (!res.ok) return;
       const j = await res.json();
       const cfg = j.data || {};
-      if (cfg.basketballEnabled === false) return;
 
       const today = beirutDateKey();
-      todaysMatches = (Array.isArray(cfg.basketballMatches) ? cfg.basketballMatches : [])
+      const scheduledMatches = (Array.isArray(cfg.basketballMatches) ? cfg.basketballMatches : [])
         .filter(m => m && m.active !== false && String(m.date || '') >= today)
         .sort((a, b) => {
           const dayOrder = String(a.date || '').localeCompare(String(b.date || ''));
           return dayOrder || timeToMinutes(a.time) - timeToMinutes(b.time);
-        })
-        .slice(0, 8);
+        });
+
+      // Active scheduled matches take precedence over a stale global toggle.
+      if (cfg.basketballEnabled === false && !scheduledMatches.length) return;
+      todaysMatches = scheduledMatches.slice(0, 8);
 
       const bubble = document.getElementById('basketball-bubble');
       const dateLabel = document.getElementById('basketball-date-label');
