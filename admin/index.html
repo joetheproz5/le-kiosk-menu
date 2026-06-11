@@ -2445,13 +2445,57 @@ body.theme-dark .mega-result:hover,body.theme-dark .mega-result.active{backgroun
 .chip-btn.active{background:var(--brand);border-color:var(--brand);color:#fff}
 .switch input:checked+.slider{background:var(--green)}
 
-/* Mobile bottom bar = amber active, safe-area aware */
-.mobile-tab.active{background:linear-gradient(180deg,#f59e0b,#e08a06);color:#1c1208;border-radius:12px}
-.mobile-tab{transition:background .15s var(--ease),color .15s var(--ease)}
+/* Bottom tab bar fully removed — mobile navigates via the sidebar drawer */
+.mobile-bottom-bar{display:none!important}
+
+/* Hamburger only after login; hidden on the sign-in screen */
+.sidebar-toggle{display:none}
 @media(max-width:980px){
-  .mobile-bottom-bar{box-shadow:0 -4px 20px -6px rgba(28,23,20,.18)}
-  .topbar{flex-wrap:wrap}
-  .mega-search{order:3;flex:1 1 100%;max-width:none;min-width:0}
+  .sidebar-toggle{display:none}
+  body.authed .sidebar-toggle{display:inline-flex}
+}
+
+/* ---- Mobile layout cleanup (≤980px) ---- */
+@media(max-width:980px){
+  /* Hamburger: clean pill, top-left, above the drawer */
+  .sidebar-toggle{position:fixed;top:12px;left:12px;width:44px;height:44px;border-radius:12px;font-size:20px;z-index:200;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow-md)}
+  .sidebar-toggle.open{background:var(--accent);color:#1c1208;border-color:var(--accent)}
+
+  /* Drawer sits above the scrim and is fully scrollable/tappable */
+  .sidebar{width:284px!important;max-width:86vw;z-index:160!important}
+  .sidebar-overlay{z-index:155}
+  .side-brand{padding-left:68px}  /* clear the fixed hamburger */
+
+  /* Topbar becomes a tidy stacked header that clears the hamburger */
+  .topbar{flex-direction:column;align-items:stretch;gap:10px;min-height:0;height:auto;padding:14px 14px 12px}
+  .topbar>div:first-child{padding-left:56px;min-height:44px;display:flex;flex-direction:column;justify-content:center}
+  .page-title{font-size:21px}
+  .page-kicker{font-size:10px}
+  #recent-items{display:none!important}
+  .mega-search{width:100%;max-width:none;min-width:0}
+  /* Actions: one tidy, horizontally-scrollable row — nothing clipped or hidden */
+  .top-actions{flex-wrap:nowrap;overflow-x:auto;gap:8px;justify-content:flex-start;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .top-actions::-webkit-scrollbar{display:none}
+  .top-actions>*{flex:0 0 auto}
+  .top-actions .btn-save{order:-1}
+  .theme-icon-btn{width:auto;min-width:44px;padding:0 12px}
+
+  /* Content: no bottom bar, so reclaim the space */
+  .content{padding:16px 14px 40px}
+
+  /* Comfortable touch targets & spacing */
+  .nav-btn{min-height:46px;font-size:14px}
+  .btn{min-height:42px}
+  .panel-body{padding:14px}
+  .dash-grid{gap:10px}
+
+  /* Table-ish rows: let them wrap instead of overflowing */
+  .table-toolbar{flex-wrap:wrap}
+  .table-toolbar .search-input{flex:1 1 100%}
+}
+@media(max-width:560px){
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .summary-metric-card strong{font-size:28px}
 }
 /* ======================= END MODERN SAAS POLISH ======================= */
 </style>
@@ -3031,7 +3075,7 @@ let driverAppDownloadLink='';
 let generatedBasketballPoster=null;
 function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
 function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
-function activeTheme(){return savedTheme()||systemTheme()}
+function activeTheme(){return savedTheme()||'light'}
 
 /* ── SIDEBAR STATE ── */
 let _sidebarCollapsed=false,_sidebarStoredKey='lk_admin_sidebar_collapsed';
@@ -3125,6 +3169,7 @@ function restoreAuthSession(){
     if(!authExpiryMs()){clearAuthSession();return false;}
     document.getElementById('login-screen').style.display='none';
     document.getElementById('admin-screen').style.display='block';
+    document.body.classList.add('authed');
     updateAccountAvatar();
     startSession();
     initAdmin();
@@ -3164,6 +3209,7 @@ async function tryLogin(){
     resetLockout();hideLockoutBar();document.getElementById('login-error').classList.remove('show');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('admin-screen').style.display='block';
+    document.body.classList.add('authed');
     document.getElementById('pw-input').value='';
     startSession();initAdmin();
   }catch(e){
@@ -3201,6 +3247,8 @@ function logout(){
   clearTimeout(sessionTimer);clearInterval(sessionTick);clearInterval(lockoutCountdown);clearInterval(basketballPruneTimer);clearInterval(dashboardRefreshTimer);clearInterval(orderEventInterval);
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-screen').style.display='none';
+  document.body.classList.remove('authed');
+  closeMobileSidebar();
   document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
 }
 function togglePassword(){
@@ -4661,6 +4709,7 @@ function deleteGalleryPhoto(i){
 
 function switchView(view){
   currentView=view;
+  if(isMobileAdmin())closeMobileSidebar();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
@@ -4702,6 +4751,7 @@ function switchView(view){
   if(view==='gallery')loadGalleryAdmin();
   if(view==='settings')renderSettings();
   updateMobileTab();
+  document.querySelector('.content')?.scrollTo(0,0);
 }
 function renderAll(){
   renderCategoryList();
@@ -6133,9 +6183,10 @@ function showToast(msg,type=''){const t=document.getElementById('toast');t.textC
 function showLoading(msg){document.getElementById('loading-text').textContent=msg||'Loading...';document.getElementById('loading-overlay').classList.add('show');}
 function hideLoading(){document.getElementById('loading-overlay').classList.remove('show');}
 
-// ── MOBILE BOTTOM TAB BAR ──
+// ── MOBILE BOTTOM TAB BAR (removed — mobile uses the sidebar drawer) ──
 (function(){
-  if(window.innerWidth>980)return;
+  return;
+  /* eslint-disable no-unreachable */
   const bar=document.createElement('div');
   bar.className='mobile-bottom-bar';
   bar.id='mobile-bottom-bar';
