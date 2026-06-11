@@ -2167,6 +2167,11 @@ body.theme-dark .gallery-admin-card,
 body.theme-dark .dashboard-section,
 body.theme-dark .product-sales-card,
 body.theme-dark .product-sales-metric,
+body.theme-dark .admin-summary-card,
+body.theme-dark .summary-metric-card,
+body.theme-dark .ops-hero-main,
+body.theme-dark .ops-signal-card,
+body.theme-dark .today-card,
 body.theme-dark .modal,
 body.theme-dark #preview-panel,
 body.theme-dark .preview-header{
@@ -2175,6 +2180,13 @@ body.theme-dark .preview-header{
   border-color:var(--line);
 }
 body.theme-dark .panel-head{background:var(--panel-2)}
+/* small badges/pills: dark surface, readable text */
+body.theme-dark .cat-badge,
+body.theme-dark .edit-badge,
+body.theme-dark .hub-badge,
+body.theme-dark .loyalty-ready{background:var(--soft);color:var(--ink-2);border-color:var(--line-strong)}
+/* html is the parent of body, so the dark token set on body doesn't reach it — fix overscroll/edge color */
+html:has(body.theme-dark){background:#0e1116}
 body.theme-dark #toast{background:#000;color:#fff}
 body.theme-dark #loading-overlay{background:rgba(14,17,22,.78)}
 body.theme-dark .sidebar-toggle{background:var(--panel);color:var(--ink);border-color:var(--line)}
@@ -2362,12 +2374,11 @@ body.theme-dark .mega-result:hover,body.theme-dark .mega-result.active{backgroun
   .page-kicker{font-size:10px}
   #recent-items{display:none!important}
   .mega-search{width:100%;max-width:none;min-width:0}
-  /* Actions: one tidy, horizontally-scrollable row — nothing clipped or hidden */
-  .top-actions{flex-wrap:nowrap;overflow-x:auto;gap:8px;justify-content:flex-start;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  .top-actions::-webkit-scrollbar{display:none}
-  .top-actions>*{flex:0 0 auto}
-  .top-actions .btn-save{order:-1}
-  .theme-icon-btn{width:auto;min-width:44px;padding:0 12px}
+  /* Actions: wrap so every option stays visible (no clipped/hidden buttons, no overflow) */
+  .top-actions{flex-wrap:wrap;gap:8px;width:100%;max-width:100%;min-width:0;overflow:visible;justify-content:flex-start}
+  .top-actions>*{flex:1 1 auto;min-width:0}
+  .top-actions .btn-save{flex:1 1 100%;order:-1}
+  .top-actions .theme-icon-btn,.top-actions .account-avatar-btn{flex:0 0 auto;width:44px;min-width:44px;padding:0}
 
   /* Content: no bottom bar, so reclaim the space */
   .content{padding:16px 14px 40px}
