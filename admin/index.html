@@ -8,16 +8,40 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --brand:#7c3a12;--brand-dark:#48230b;--brand-mid:#b45309;--brand-soft:#fbf3e6;--brand-line:#f0e1c6;--accent:#f59e0b;--accent-strong:#e98c08;
-  --bg:#f5f4f1;--panel:#fff;--panel-2:#faf9f6;--line:#ebe7e0;--line-strong:#ddd6ca;--muted:#7a7065;--soft:#f2f0ea;
-  --ink:#1c1714;--ink-2:#4b443d;--green:#15803d;--green-soft:#e6f4ea;--red:#dc2626;--red-soft:#fdecec;
-  --blue:#2563eb;--blue-soft:#e7eefc;--purple:#7c3aed;--purple-soft:#efeafe;
-  --radius:14px;--radius-sm:10px;--radius-lg:20px;
+  --brand:#7c3a12;
+  --brand-dark:#48230b;
+  --brand-mid:#b45309;
+  --brand-soft:#fbf2e3;
+  --brand-line:#f0e0c4;
+  --accent:#f59e0b;
+  --accent-strong:#e98c08;
+  --bg:#f6f4f0;
+  --panel:#ffffff;
+  --panel-2:#faf8f4;
+  --line:#ece7de;
+  --line-strong:#ddd6ca;
+  --muted:#7a716a;
+  --soft:#f3f0ea;
+  --ink:#1c1714;
+  --ink-2:#4b443d;
+  --green:#15803d;
+  --green-soft:#e9f5ee;
+  --red:#c0392b;
+  --red-soft:#fdecea;
+  --blue:#2563eb;
+  --blue-soft:#eaf1ff;
+  --purple:#6d5bd0;
+  --purple-soft:#f0edff;
+  --radius:14px;
+  --radius-sm:10px;
+  --radius-lg:20px;
   --shadow-sm:0 1px 2px rgba(28,23,20,.05);
-  --shadow-md:0 1px 2px rgba(28,23,20,.04),0 10px 28px -8px rgba(28,23,20,.12);
-  --shadow-lg:0 20px 50px -12px rgba(28,23,20,.22);
+  --shadow-md:0 1px 2px rgba(28,23,20,.04),0 10px 28px -10px rgba(28,23,20,.16);
+  --shadow-lg:0 24px 60px -16px rgba(28,23,20,.26);
   --ring:0 0 0 3px rgba(245,158,11,.25);
-  --font:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--brandfont:'Poppins',sans-serif;
+  --font:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --brandfont:'Poppins',sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
 }
 html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
@@ -117,16 +141,7 @@ select{outline:none}
 .theme-btn{min-width:42px;padding:9px 11px;font-size:13px;letter-spacing:0;text-transform:none}
 .account-avatar-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:linear-gradient(135deg,#111827,#78350f);color:#fff7ed;font-size:13px;font-weight:900;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(17,24,39,.12);transition:transform .15s,box-shadow .15s}
 .account-avatar-btn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(17,24,39,.18)}
-body.theme-dark{
-  --brand:#f6a723;--brand-dark:#fcd34d;--brand-mid:#fbbf24;--brand-soft:#2a1f0e;--brand-line:#5a3f15;--accent:#f59e0b;--accent-strong:#fbbf24;
-  --bg:#0e1116;--panel:#181d25;--panel-2:#12161d;--line:#272d38;--line-strong:#343c49;--muted:#99a2ae;--soft:#222934;
-  --ink:#f4f6f8;--ink-2:#c9d1db;--green:#34d399;--green-soft:#0f3024;--red:#f87171;--red-soft:#3a1a1a;
-  --blue:#60a5fa;--blue-soft:#13233f;--purple:#a78bfa;--purple-soft:#241d3d;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --shadow-md:0 2px 6px rgba(0,0,0,.34),0 14px 34px -10px rgba(0,0,0,.5);
-  --shadow-lg:0 28px 64px -16px rgba(0,0,0,.65);
-  --ring:0 0 0 3px rgba(246,167,35,.32);
-}
+
 body.theme-dark #login-screen{background:linear-gradient(135deg,#120904,#2b1706)}
 body.theme-dark .login-card,
 body.theme-dark .topbar,
@@ -604,33 +619,7 @@ body.theme-dark .theme-icon-btn:hover{background:#2b3545}
 @media(min-width:981px){.mobile-bottom-bar{display:none}}
 
 /* PROFESSIONAL ADMIN REDESIGN */
-:root{
-  --brand:#8b5a2b;
-  --brand-dark:#2f1d12;
-  --brand-mid:#a56a32;
-  --brand-soft:#fff6ea;
-  --brand-line:#ead8c3;
-  --accent:#c7843d;
-  --bg:#f4f1ec;
-  --panel:#fffdf9;
-  --panel-2:#faf7f2;
-  --line:#e6ded4;
-  --muted:#776b60;
-  --soft:#f1ebe3;
-  --ink:#211914;
-  --ink-2:#51443a;
-  --green:#168047;
-  --green-soft:#e7f6ed;
-  --red:#c4362e;
-  --red-soft:#fdebea;
-  --blue:#315f9e;
-  --blue-soft:#eaf1fb;
-  --purple:#7251a6;
-  --purple-soft:#f0ebf8;
-  --shadow-sm:0 1px 2px rgba(47,29,18,.05);
-  --shadow-md:0 14px 35px rgba(47,29,18,.10);
-  --shadow-lg:0 28px 70px rgba(47,29,18,.18);
-}
+
 html{background:var(--bg)}
 body{
   background:
@@ -881,33 +870,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .mobile-bottom-bar{
   box-shadow:0 -12px 35px rgba(47,29,18,.12);
 }
-body.theme-dark{
-  --brand:#d8a15f;
-  --brand-dark:#f6d9af;
-  --brand-mid:#e3b36f;
-  --brand-soft:#2c2118;
-  --brand-line:#4c3828;
-  --accent:#d8a15f;
-  --bg:#11100f;
-  --panel:#1b1815;
-  --panel-2:#151311;
-  --line:#332a24;
-  --muted:#b4a69a;
-  --soft:#28221d;
-  --ink:#fbf7f0;
-  --ink-2:#dfd3c6;
-  --green:#4ade80;
-  --green-soft:#153321;
-  --red:#f87171;
-  --red-soft:#3b1d1b;
-  --blue:#8db6f2;
-  --blue-soft:#18273d;
-}
-body.theme-dark{
-  background:
-    radial-gradient(circle at top left,rgba(216,161,95,.10),transparent 32rem),
-    linear-gradient(135deg,#11100f 0%,#191511 100%);
-}
+
 body.theme-dark .topbar,
 body.theme-dark .panel-head,
 body.theme-dark .login-card,
@@ -1005,33 +968,7 @@ body.theme-dark .cat-row:hover{background:#241d18}
 }
 
 /* LE KIOSK OS: FULL COMMAND-CENTER REDESIGN */
-:root{
-  --brand:#ffb000;
-  --brand-dark:#fff2c7;
-  --brand-mid:#ffc64d;
-  --brand-soft:rgba(255,176,0,.13);
-  --brand-line:rgba(255,176,0,.28);
-  --accent:#ff5a1f;
-  --bg:#07090d;
-  --panel:rgba(15,20,29,.78);
-  --panel-2:rgba(255,255,255,.045);
-  --line:rgba(255,255,255,.105);
-  --muted:#96a0ad;
-  --soft:rgba(255,255,255,.07);
-  --ink:#f8fafc;
-  --ink-2:#d8dee8;
-  --green:#31d086;
-  --green-soft:rgba(49,208,134,.13);
-  --red:#ff5c62;
-  --red-soft:rgba(255,92,98,.13);
-  --blue:#74b7ff;
-  --blue-soft:rgba(116,183,255,.13);
-  --purple:#c09bff;
-  --purple-soft:rgba(192,155,255,.13);
-  --shadow-sm:0 1px 0 rgba(255,255,255,.06) inset;
-  --shadow-md:0 22px 70px rgba(0,0,0,.34);
-  --shadow-lg:0 40px 110px rgba(0,0,0,.52);
-}
+
 body,
 body.theme-dark{
   background:
@@ -1562,32 +1499,7 @@ body::before{
 }
 
 /* PROFESSIONAL TONE-DOWN: GRAPHITE, BRONZE, SCROLLABLE NAV */
-:root{
-  --brand:#b89b6f;
-  --brand-dark:#f1eadf;
-  --brand-mid:#c9ad82;
-  --brand-soft:rgba(184,155,111,.12);
-  --brand-line:rgba(184,155,111,.24);
-  --accent:#9f835c;
-  --bg:#0a0c10;
-  --panel:rgba(17,20,26,.84);
-  --panel-2:rgba(255,255,255,.035);
-  --line:rgba(233,226,216,.11);
-  --muted:#9aa1ab;
-  --soft:rgba(233,226,216,.065);
-  --ink:#f3f5f7;
-  --ink-2:#d3d8df;
-  --green:#68c18e;
-  --green-soft:rgba(104,193,142,.13);
-  --red:#e06363;
-  --red-soft:rgba(224,99,99,.13);
-  --blue:#8ea6c8;
-  --blue-soft:rgba(142,166,200,.13);
-  --purple:#a99ac9;
-  --purple-soft:rgba(169,154,201,.13);
-  --shadow-md:0 20px 58px rgba(0,0,0,.30);
-  --shadow-lg:0 34px 90px rgba(0,0,0,.46);
-}
+
 body,
 body.theme-dark{
   background:
@@ -1743,39 +1655,7 @@ body::before{
 }
 
 /* CLEAN PROFESSIONAL ADMIN REDESIGN */
-:root{
-  --brand:#7c3a12;
-  --brand-dark:#48230b;
-  --brand-mid:#b45309;
-  --brand-soft:#fbf2e3;
-  --brand-line:#f0e0c4;
-  --accent:#f59e0b;
-  --accent-strong:#e98c08;
-  --bg:#f6f4f0;
-  --panel:#ffffff;
-  --panel-2:#faf8f4;
-  --line:#ece7de;
-  --line-strong:#ddd6ca;
-  --muted:#7a716a;
-  --soft:#f3f0ea;
-  --ink:#1c1714;
-  --ink-2:#4b443d;
-  --green:#15803d;
-  --green-soft:#e9f5ee;
-  --red:#c0392b;
-  --red-soft:#fdecea;
-  --blue:#2563eb;
-  --blue-soft:#eaf1ff;
-  --purple:#6d5bd0;
-  --purple-soft:#f0edff;
-  --radius:14px;
-  --radius-sm:10px;
-  --radius-lg:20px;
-  --shadow-sm:0 1px 2px rgba(28,23,20,.05);
-  --shadow-md:0 1px 2px rgba(28,23,20,.04),0 10px 28px -10px rgba(28,23,20,.16);
-  --shadow-lg:0 24px 60px -16px rgba(28,23,20,.26);
-  --ring:0 0 0 3px rgba(245,158,11,.25);
-}
+
 html,body{
   background:var(--bg);
 }
@@ -2250,6 +2130,10 @@ body.theme-dark{
   --green-soft:#0f3024;
   --red:#f87171;
   --red-soft:#3a1a1a;
+  --blue:#8db6f2;
+  --blue-soft:#18273d;
+  --purple:#a78bfa;
+  --purple-soft:#241d3d;
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
   --shadow-md:0 2px 6px rgba(0,0,0,.34),0 14px 34px -10px rgba(0,0,0,.5);
   --shadow-lg:0 28px 64px -16px rgba(0,0,0,.65);
@@ -2380,7 +2264,6 @@ body.theme-dark .mega-result:hover,body.theme-dark .mega-result.active{backgroun
 }
 
 /* ============ MODERN SAAS POLISH (amber identity, final layer) ============ */
-:root{--ease:cubic-bezier(.4,0,.2,1)}
 
 /* Login */
 #login-screen{background:radial-gradient(120% 120% at 0% 0%,#2a1607 0%,#150b04 55%,#0c0805 100%)}
@@ -2461,10 +2344,16 @@ body.theme-dark .mega-result:hover,body.theme-dark .mega-result.active{backgroun
   .sidebar-toggle{position:fixed;top:12px;left:12px;width:44px;height:44px;border-radius:12px;font-size:20px;z-index:200;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow-md)}
   .sidebar-toggle.open{background:var(--accent);color:#1c1208;border-color:var(--accent)}
 
+  /* app-shell must NOT trap the drawer in its own stacking context,
+     otherwise the overlay (root level) paints over the sidebar and eats taps */
+  .app-shell{position:static!important;z-index:auto!important}
   /* Drawer sits above the scrim and is fully scrollable/tappable */
   .sidebar{width:284px!important;max-width:86vw;z-index:160!important}
   .sidebar-overlay{z-index:155}
   .side-brand{padding-left:68px}  /* clear the fixed hamburger */
+  /* Drawer scroll: contained, smooth, no glitchy background scroll-bleed */
+  .side-nav{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  body.nav-open{overflow:hidden}
 
   /* Topbar becomes a tidy stacked header that clears the hamburger */
   .topbar{flex-direction:column;align-items:stretch;gap:10px;min-height:0;height:auto;padding:14px 14px 12px}
@@ -3083,7 +2972,7 @@ function isMobileAdmin(){return window.matchMedia&&window.matchMedia('(max-width
 function loadSidebarState(){try{_sidebarCollapsed=localStorage.getItem(_sidebarStoredKey)==='1';}catch(_){_sidebarCollapsed=false};applySidebarState();}
 function applySidebarState(){const s=document.getElementById('sidebar'),mobile=isMobileAdmin();if(s)s.classList.toggle('collapsed',!mobile&&_sidebarCollapsed);const t=document.getElementById('sidebar-toggle');if(t)t.textContent=(!mobile&&_sidebarCollapsed)?'▶':'☰';}
 function toggleSidebar(){_sidebarCollapsed=!_sidebarCollapsed;localStorage.setItem(_sidebarStoredKey,_sidebarCollapsed?'1':'0');applySidebarState();}
-function closeMobileSidebar(){document.getElementById('sidebar')?.classList.remove('open');document.getElementById('sidebar-overlay')?.classList.remove('show');document.getElementById('sidebar-toggle')?.classList.remove('open');}
+function closeMobileSidebar(){document.getElementById('sidebar')?.classList.remove('open');document.getElementById('sidebar-overlay')?.classList.remove('show');document.getElementById('sidebar-toggle')?.classList.remove('open');document.body.classList.remove('nav-open');}
 loadSidebarState();
 window.addEventListener('resize',applySidebarState);
 document.getElementById('sidebar-toggle').addEventListener('click',function(e){
@@ -3095,6 +2984,7 @@ document.getElementById('sidebar-toggle').addEventListener('click',function(e){
     s.classList.toggle('open',willOpen);
     if(o)o.classList.toggle('show',willOpen);
     this.classList.toggle('open',willOpen);
+    document.body.classList.toggle('nav-open',willOpen);
     if(willOpen){s.classList.remove('collapsed');}
   }else{
     toggleSidebar();
@@ -3102,12 +2992,16 @@ document.getElementById('sidebar-toggle').addEventListener('click',function(e){
 });
 
 /* ── THEME ── */
+const THEME_SUN_SVG='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>';
+const THEME_MOON_SVG='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
 function applyTheme(){
   const theme=activeTheme();
-  document.body.classList.toggle('theme-dark',theme==='dark');
-  document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.textContent=theme==='dark'?'Dark':'Light'});
-  const icon=document.getElementById('theme-icon-btn');
-  if(icon){icon.textContent=theme==='dark'?'Dark':'Light';}
+  const isDark=theme==='dark';
+  document.body.classList.toggle('theme-dark',isDark);
+  // Show the sun in dark mode (tap to go light), the moon in light mode (tap to go dark)
+  const glyph=isDark?THEME_SUN_SVG:THEME_MOON_SVG;
+  const label=isDark?'Switch to light theme':'Switch to dark theme';
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.innerHTML=glyph;btn.setAttribute('aria-label',label);btn.title=label;});
 }
 function updateAccountAvatar(){
   const el=document.getElementById('account-avatar-btn');
