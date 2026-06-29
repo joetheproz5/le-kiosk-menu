@@ -387,6 +387,9 @@ export default {
 
     function publicConfig(value, isAdmin = false) {
       const clean = { ...(value || {}) };
+      if (!clean.googleMapsApiKey && env.GOOGLE_MAPS_BROWSER_KEY) {
+        clean.googleMapsApiKey = env.GOOGLE_MAPS_BROWSER_KEY;
+      }
       const pinSet = !!(clean.driverPinHash || env.DRIVER_PIN || env.DRIVER_PIN_HASH);
       delete clean.driverPin;
       delete clean.driverPinHash;
