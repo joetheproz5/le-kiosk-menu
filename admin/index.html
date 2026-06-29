@@ -2877,19 +2877,6 @@ body.theme-dark .mega-result:hover,body.theme-dark .mega-result.active{backgroun
               </div>
             </div>
             <div class="setting-card">
-              <div class="setting-title">Google Maps</div>
-              <div class="setting-copy">Use Google Maps on driver and customer tracking pages. Restrict this browser key to lekiosk.store before saving it.</div>
-              <div class="setting-stat" id="settings-google-maps-state">OpenStreetMap fallback active</div>
-              <div class="setting-actions" style="align-items:end">
-                <div style="flex:1;min-width:190px">
-                  <label class="field-label">Browser API Key</label>
-                  <input class="inp" id="google-maps-key-input" type="password" autocomplete="off" placeholder="AIza...">
-                </div>
-                <button class="btn btn-dark" onclick="saveGoogleMapsKey()">Save Key</button>
-                <button class="btn btn-soft" onclick="clearGoogleMapsKey()">Clear</button>
-              </div>
-            </div>
-            <div class="setting-card">
               <div class="setting-title">Loyalty System</div>
               <div class="setting-copy">Controls whether POS shows rewards, applies discounts, and awards stamps on completed orders.</div>
               <div class="switch-row">
@@ -2980,7 +2967,7 @@ let blockList=[],blockDirty=false,customersAdminData=[],customersAdminDirty=fals
 let dashboardOrdersData=[],menuVisitorData=[];
 let salesFilter='today';
 let salesSort='sales-desc';
-let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,galleryEnabled:true,googleMapsApiKey:'',loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
+let configData={testingMode:false,menuOrderingEnabled:true,aiComboEnabled:true,loyaltyEnabled:true,basketballEnabled:true,galleryEnabled:true,loyaltyRewards:DEFAULT_LOYALTY_REWARDS.map(r=>({...r})),basketballMatches:[],tables:[]};
 let rewardsDirty=false;
 let pendingDelete=null,toastTimer=null;
 let authSession=null;
@@ -3207,7 +3194,6 @@ async function fetchConfig(){
       if(typeof configData.testingMode!=='boolean')configData.testingMode=false;
       if(typeof configData.basketballEnabled!=='boolean')configData.basketballEnabled=true;
       if(typeof configData.galleryEnabled!=='boolean')configData.galleryEnabled=true;
-      if(typeof configData.googleMapsApiKey!=='string')configData.googleMapsApiKey='';
       normalizeTables();
       normalizeBasketballMatches();
       await pruneExpiredBasketballMatches({persist:true,silent:true});
@@ -3298,36 +3284,6 @@ async function saveDriverPin(){
     showToast('Driver PIN saved','success');
   }catch(e){
     delete configData.driverPin;
-    showToast('Failed: '+e.message,'error');
-  }
-  hideLoading();
-}
-async function saveGoogleMapsKey(){
-  const input=document.getElementById('google-maps-key-input');
-  const key=String(input?.value||'').trim();
-  if(!/^AIza[0-9A-Za-z_-]{20,}$/.test(key)){showToast('Enter a valid Google Maps browser key','error');return;}
-  showLoading('Saving Google Maps key...');
-  try{
-    configData.googleMapsApiKey=key;
-    await saveConfig();
-    if(input)input.value='';
-    renderSettings();
-    showToast('Google Maps enabled','success');
-  }catch(e){
-    showToast('Failed: '+e.message,'error');
-  }
-  hideLoading();
-}
-async function clearGoogleMapsKey(){
-  showLoading('Clearing Google Maps key...');
-  try{
-    configData.googleMapsApiKey='';
-    await saveConfig();
-    const input=document.getElementById('google-maps-key-input');
-    if(input)input.value='';
-    renderSettings();
-    showToast('Google Maps key cleared','success');
-  }catch(e){
     showToast('Failed: '+e.message,'error');
   }
   hideLoading();
@@ -6033,8 +5989,6 @@ function renderSettings(){
   if(tableCount)tableCount.textContent=`${configData.tables.length} table${configData.tables.length===1?'':'s'} configured`;
   const driverPinState=document.getElementById('settings-driver-pin-state');
   if(driverPinState)driverPinState.textContent=configData.driverPinSet?'PIN is set':'No PIN set';
-  const googleMapsState=document.getElementById('settings-google-maps-state');
-  if(googleMapsState)googleMapsState.textContent=configData.googleMapsApiKey?'Google Maps enabled':'OpenStreetMap fallback active';
   const galleryCount=document.getElementById('settings-gallery-count');
   if(galleryCount)galleryCount.textContent=`${galleryAdminData.length} photo${galleryAdminData.length===1?'':'s'} loaded`;
   const menuCounts=document.getElementById('settings-menu-counts');

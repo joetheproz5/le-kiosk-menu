@@ -82,7 +82,6 @@ body{font-family:'Poppins',sans-serif;background:linear-gradient(rgba(201,154,59
 <script>
 (function(){
 var W='https://lekiosk-order-inbox.lekiosklb.workers.dev';
-var GOOGLE_MAPS_API_KEY='', googleMapsPromise=null, usingGoogleMaps=false, googleDirectionsService=null, googleStoreLine=null;
 var TRACK_PARAMS=new URLSearchParams(window.location.search);
 var TRACK_HASH_PARAMS=new URLSearchParams(String(window.location.hash||'').replace(/^#/,''));
 var TRACK_TOKEN=TRACK_HASH_PARAMS.get('t')||TRACK_HASH_PARAMS.get('token')||TRACK_PARAMS.get('token')||TRACK_PARAMS.get('t')||'';
@@ -158,7 +157,7 @@ function animateHeading(){
   var delta=((targetHeading-animatedHeading+540)%360)-180;
   animatedHeading+=delta*.1;
   var el=driverMarker&&driverMarker.getElement&&driverMarker.getElement();
-  var headingEl=el&&(el.classList&&el.classList.contains('driver-heading')?el:el.querySelector('.driver-heading'));
+  var headingEl=el&&el.querySelector('.driver-heading');
   if(headingEl)headingEl.style.transform='rotate('+animatedHeading+'deg)';
   requestAnimationFrame(tick);
  }
@@ -195,10 +194,10 @@ function followDriverCamera(lat,lng){
  if(moved<8)return;
  clearTimeout(followTimer);
  followTimer=setTimeout(function(){
- if(!mapInst||Date.now()<manualPanUntil)return;
-  mapPanTo(lat,lng);
-  var z=Math.max(mapGetZoom(),Math.round(smoothZoom(getAdaptiveZoom(deadReckonSpeed))));
-  if(mapGetZoom()<z)mapSetZoom(z);
+  if(!mapInst||Date.now()<manualPanUntil)return;
+  mapInst.panTo([lat,lng],{animate:true,duration:.35});
+  var z=Math.max(mapInst.getZoom(),Math.round(smoothZoom(getAdaptiveZoom(deadReckonSpeed))));
+  if(mapInst.getZoom()<z)mapInst.setZoom(z,{animate:true});
   lastFollowLat=lat;
   lastFollowLng=lng;
  },40);
@@ -456,18 +455,11 @@ function buildMapPlaceholder(){
 }
 
 function resetMapState(){
- if(routeLine&&routeLine.casing&&routeLine.casing.setMap){try{routeLine.casing.setMap(null);routeLine.main.setMap(null)}catch(e){}}
- if(googleStoreLine&&googleStoreLine.setMap){try{googleStoreLine.setMap(null)}catch(e){}}
- if(driverMarker&&driverMarker.remove){try{driverMarker.remove()}catch(e){}}
- if(custMarker&&custMarker.remove){try{custMarker.remove()}catch(e){}}
- if(mapInst&&!usingGoogleMaps){try{mapInst.remove()}catch(e){}}
+ if(mapInst){try{mapInst.remove()}catch(e){}}
  mapInst=null;
  driverMarker=null;
  custMarker=null;
  routeLine=null;
- googleStoreLine=null;
- googleDirectionsService=null;
- usingGoogleMaps=false;
  addCustMarker.storeLine=null;
  firstMapDone=false;
  visualDriverLat=null;
@@ -485,6 +477,8 @@ function ensureMapReady(track,gps){
  setTimeout(function(){
   initMapOnce(track,gps);
   updateMap(track,gps);
+  mapInitInProgress=false;
+  if(pendingWSConnect&&currentOrderId){pendingWSConnect=false;connectCustomerWS(currentOrderId)}
  },60);
  return false;
 }
@@ -495,7 +489,7 @@ function recenterMap(){
  lastFollowLat=null;
  lastFollowLng=null;
  var p=driverMarker.getLatLng();
- mapSetView(p.lat,p.lng,Math.max(mapGetZoom(),16));
+ mapInst.setView([p.lat,p.lng],Math.max(mapInst.getZoom(),16),{animate:true});
 }
 window.recenterMap=recenterMap;
 
@@ -507,108 +501,30 @@ function pointFromGPS(gps){
  return{lat:lat,lng:lng};
 }
 
-async function loadMapConfig(){
- try{
-  var res=await fetch(W+'/supabase/config',{cache:'no-store'});
-  if(!res.ok)return;
-  var j=await res.json();
-  var key=j&&j.data&&String(j.data.googleMapsApiKey||'').trim();
-  if(key)GOOGLE_MAPS_API_KEY=key;
- }catch(e){}
-}
-
-function loadGoogleMapsAPI(){
- if(!GOOGLE_MAPS_API_KEY)return Promise.resolve(false);
- if(window.google&&google.maps)return Promise.resolve(true);
- if(googleMapsPromise)return googleMapsPromise;
- googleMapsPromise=new Promise(function(resolve){
-  var existing=document.getElementById('google-maps-js');
-  window.__lekioskTrackGoogleMapsReady=function(){resolve(!!(window.google&&google.maps))};
-  if(existing)return;
-  var s=document.createElement('script');
-  s.id='google-maps-js';
-  s.async=true;
-  s.defer=true;
-  s.onerror=function(){resolve(false)};
-  s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GOOGLE_MAPS_API_KEY)+'&v=weekly&callback=__lekioskTrackGoogleMapsReady';
-  document.head.appendChild(s);
- });
- return googleMapsPromise;
-}
-
-function mapGetZoom(){
- try{return mapInst&&mapInst.getZoom?Number(mapInst.getZoom()):14}catch(e){return 14}
-}
-
-function mapSetZoom(z){
- try{if(mapInst&&mapInst.setZoom)mapInst.setZoom(Math.round(z))}catch(e){}
-}
-
-function mapPanTo(lat,lng){
- try{
-  if(usingGoogleMaps)mapInst.panTo({lat:lat,lng:lng});
-  else mapInst.panTo([lat,lng],{animate:true,duration:.35});
- }catch(e){}
-}
-
-function mapSetView(lat,lng,zoom){
- try{
-  if(usingGoogleMaps){
-   mapInst.panTo({lat:lat,lng:lng});
-   if(zoom!==undefined)mapInst.setZoom(Math.round(zoom));
-  }else mapInst.setView([lat,lng],zoom,{animate:true});
- }catch(e){}
-}
-
 function initMapOnce(track,gps){
  var el=document.getElementById('map');
  if(!el||mapInst)return;
  var customerPoint=pointFromGPS(gps);
  var clat=customerPoint?customerPoint.lat:RLAT;
  var clng=customerPoint?customerPoint.lng:RLNG;
- loadGoogleMapsAPI().then(function(useGoogle){
-  if(!document.getElementById('map')||mapInst){mapInitInProgress=false;return}
-  if(useGoogle){
-   usingGoogleMaps=true;
-   mapInst=new google.maps.Map(document.getElementById('map'),{
-    center:{lat:clat,lng:clng},
-    zoom:14,
-    mapTypeControl:false,
-    streetViewControl:false,
-    fullscreenControl:false,
-    clickableIcons:false,
-    gestureHandling:'greedy'
-   });
-   googleDirectionsService=new google.maps.DirectionsService();
-   mapInst.addListener('dragstart',function(){manualPanUntil=Date.now()+8000});
-   mapInst.addListener('zoom_changed',function(){manualPanUntil=Date.now()+8000});
-  }else{
-   usingGoogleMaps=false;
-   mapInst=L.map('map',{zoomControl:true,attributionControl:true}).setView([clat,clng],14);
-   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{
-    subdomains:'abc',
-    maxZoom:19,
-    attribution:'&copy; OpenStreetMap contributors &copy; CARTO'
-   }).addTo(mapInst);
-   mapInst.on('dragstart zoomstart',function(){manualPanUntil=Date.now()+8000});
-  }
-  addStoreMarker();
-  addCustMarker(gps);
-  var drvNow=pointFromGPS(track&&track.driverLocation);
-  if(drvNow){
-   updateMap(track,gps);
-   if(Date.now()>manualPanUntil)mapSetView(drvNow.lat,drvNow.lng,(track.delivering&&!track.delivered)?15:14);
-  }
-  var rawDrv=track&&track.driverLocation;
-  if(rawDrv||(track.delivering&&!track.delivered)){var rb=document.getElementById('map-recenter');if(rb)rb.style.display='block'}
-  firstMapDone=true;
-  setTimeout(function(){
-   if(!mapInst)return;
-   try{if(usingGoogleMaps)google.maps.event.trigger(mapInst,'resize');else mapInst.invalidateSize()}catch(e){}
-  },120);
-  if(pendingWSConnect&&currentOrderId){pendingWSConnect=false;connectCustomerWS(currentOrderId)}
-  mapInitInProgress=false;
- });
+ mapInst=L.map('map',{zoomControl:true,attributionControl:true}).setView([clat,clng],14);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',{
+  subdomains:'abc',
+  maxZoom:19,
+  attribution:'&copy; OpenStreetMap contributors &copy; CARTO'
+ }).addTo(mapInst);
+ mapInst.on('dragstart zoomstart',function(){manualPanUntil=Date.now()+8000});
+ addStoreMarker();
+ addCustMarker(gps);
+ var drvNow=pointFromGPS(track&&track.driverLocation);
+ if(drvNow){
+  updateMap(track,gps);
+  if(Date.now()>manualPanUntil)mapInst.setView([drvNow.lat,drvNow.lng],(track.delivering&&!track.delivered)?15:14,{animate:true});
+ }
+ var drvNow=track&&track.driverLocation;
+ if(drvNow||(track.delivering&&!track.delivered)){var rb=document.getElementById('map-recenter');if(rb)rb.style.display='block'}
+ firstMapDone=true;
+ setTimeout(function(){if(mapInst)mapInst.invalidateSize()},120);
 }
 
 function markerEl(html){
@@ -617,46 +533,8 @@ function markerEl(html){
  return el.firstChild;
 }
 
-function googleHtmlMarker(lat,lng,html,anchorX,anchorY,popupHtml){
- var pos=new google.maps.LatLng(lat,lng);
- var div=null,info=popupHtml?new google.maps.InfoWindow({content:popupHtml}):null;
- var overlay=new google.maps.OverlayView();
- overlay.onAdd=function(){
-  div=markerEl(html);
-  div.style.position='absolute';
-  div.style.transform+=' translateZ(0)';
-  if(info)div.addEventListener('click',function(){info.setPosition(pos);info.open(mapInst)});
-  this.getPanes().overlayMouseTarget.appendChild(div);
- };
- overlay.draw=function(){
-  if(!div)return;
-  var p=this.getProjection().fromLatLngToDivPixel(pos);
-  if(!p)return;
-  div.style.left=(p.x-(anchorX||0))+'px';
-  div.style.top=(p.y-(anchorY||0))+'px';
- };
- overlay.onRemove=function(){
-  if(div&&div.parentNode)div.parentNode.removeChild(div);
-  div=null;
- };
- overlay.setLatLng=function(pair){
-  var lat=Array.isArray(pair)?pair[0]:pair.lat,lng=Array.isArray(pair)?pair[1]:pair.lng;
-  pos=new google.maps.LatLng(lat,lng);
-  this.draw();
- };
- overlay.getLatLng=function(){return{lat:pos.lat(),lng:pos.lng()}};
- overlay.getElement=function(){return div};
- overlay.remove=function(){this.setMap(null)};
- overlay.setMap(mapInst);
- return overlay;
-}
-
 function addStoreMarker(){
  var el=markerEl('\x3Cdiv style="width:32px;height:32px;background:#b45309;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E');
- if(usingGoogleMaps){
-  googleHtmlMarker(RLAT,RLNG,el.outerHTML,16,32,'\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour');
-  return;
- }
  L.marker([RLAT,RLNG],{icon:L.divIcon({html:el.outerHTML,className:'',iconSize:[32,32],iconAnchor:[16,32]})}).bindPopup('\x3Cb\x3ELe Kiosk\x3C/b\x3E\x3Cbr\x3EWadi Chahrour').addTo(mapInst);
 }
 
@@ -664,11 +542,6 @@ function addCustMarker(gps){
  var point=pointFromGPS(gps);
  if(!point||!mapInst||custMarker)return;
  var el=markerEl('\x3Cdiv style="width:24px;height:24px;background:#2563eb;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"\x3E\x3C/div\x3E');
- if(usingGoogleMaps){
-  custMarker=googleHtmlMarker(point.lat,point.lng,el.outerHTML,12,12,'\x3Cb\x3ECustomer\x3C/b\x3E');
-  if(!googleStoreLine)googleStoreLine=new google.maps.Polyline({path:[{lat:RLAT,lng:RLNG},{lat:point.lat,lng:point.lng}],map:mapInst,strokeColor:'#b45309',strokeOpacity:.45,strokeWeight:2});
-  return;
- }
  custMarker=L.marker([point.lat,point.lng],{icon:L.divIcon({html:el.outerHTML,className:'',iconSize:[24,24],iconAnchor:[12,12]})}).bindPopup('\x3Cb\x3ECustomer\x3C/b\x3E').addTo(mapInst);
  if(!addCustMarker.storeLine)addCustMarker.storeLine=L.polyline([[RLAT,RLNG],[point.lat,point.lng]],{color:'#b45309',weight:2,opacity:.45,dashArray:'5,5'}).addTo(mapInst);
 }
@@ -689,8 +562,6 @@ function updateMap(track,gps){
    noteServerDriverPosition(dl,track&&track.driverLocation);
    if(!driverMarker){
     var firstEl=markerEl('\x3Cdiv class="driver-heading"\x3E\x3Cdiv class="tip"\x3E\x3C/div\x3E\x3Cdiv class="core"\x3E\x3C/div\x3E\x3C/div\x3E');
-    if(usingGoogleMaps)driverMarker=googleHtmlMarker(dl.lat,dl.lng,firstEl.outerHTML,14,14,'\x3Cb\x3EDriver\x3C/b\x3E');
-    else
     driverMarker=L.marker([dl.lat,dl.lng],{icon:L.divIcon({html:firstEl.outerHTML,className:'',iconSize:[28,28],iconAnchor:[14,14]})}).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E').addTo(mapInst);
     animateHeading();
     routeNeeded=true;
@@ -728,15 +599,13 @@ function updateMap(track,gps){
   if(driverMarker)animateDriverMarker(routePoint.lat,routePoint.lng);
   else{
    var el=markerEl('\x3Cdiv class="driver-heading"\x3E\x3Cdiv class="tip"\x3E\x3C/div\x3E\x3Cdiv class="core"\x3E\x3C/div\x3E\x3C/div\x3E');
-   if(usingGoogleMaps)driverMarker=googleHtmlMarker(routePoint.lat,routePoint.lng,el.outerHTML,14,14,'\x3Cb\x3EDriver\x3C/b\x3E');
-   else
    driverMarker=L.marker([routePoint.lat,routePoint.lng],{icon:L.divIcon({html:el.outerHTML,className:'',iconSize:[28,28],iconAnchor:[14,14]})}).bindPopup('\x3Cb\x3EDriver\x3C/b\x3E').addTo(mapInst);
    animateHeading();
    moveMarkerTo(routePoint.lat,routePoint.lng);
   }
   var isDel=track.delivering&&!track.delivered;
-  if(isDel&&!wasDelivering){if(Date.now()>manualPanUntil)mapSetView(visualDriverLat||filteredLat,visualDriverLng||filteredLng,15);wasDelivering=true}
-  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(Date.now()>manualPanUntil){mapPanTo(visualDriverLat||filteredLat,visualDriverLng||filteredLng);if(mapGetZoom()<15)mapSetZoom(15)}}
+  if(isDel&&!wasDelivering){if(Date.now()>manualPanUntil)mapInst.setView([visualDriverLat||filteredLat,visualDriverLng||filteredLng],15,{animate:true});wasDelivering=true}
+  else if(isDel&&(lastDriverLat===null||haversine(lastDriverLat,lastDriverLng,dl.lat,dl.lng)>6)){if(Date.now()>manualPanUntil){mapInst.panTo([visualDriverLat||filteredLat,visualDriverLng||filteredLng],{animate:true,duration:.35});if(mapInst.getZoom()<15)mapInst.setZoom(15)}}
   lastDriverLat=dl.lat;lastDriverLng=dl.lng;
   if(!hadDriverMarker)startDeadReckoning();
   if(!isDel)wasDelivering=false;
@@ -815,7 +684,7 @@ function checkArrival(dLat,dLng,cLat,cLng){
  // Arrival mode flattens and recenters once the driver reaches the customer.
  if(!mapInst||arrivalTriggered||haversine(dLat,dLng,cLat,cLng)>50)return;
  arrivalTriggered=true;
- mapSetView(cLat,cLng,18);
+ mapInst.setView([cLat,cLng],18,{animate:true});
 }
 
 function animateDriverMarker(lat,lng){
@@ -859,19 +728,6 @@ function routeLatLngs(coords){
 
 function setRouteLine(coords){
  if(!mapInst||!coords||coords.length<2)return;
- if(usingGoogleMaps){
-  var path=coords.map(function(c){return{lat:c[1],lng:c[0]}});
-  if(!routeLine){
-   routeLine={
-    casing:new google.maps.Polyline({path:path,map:mapInst,strokeColor:'#fff',strokeOpacity:.96,strokeWeight:10}),
-    main:new google.maps.Polyline({path:path,map:mapInst,strokeColor:'#4285f4',strokeOpacity:.98,strokeWeight:6})
-   };
-  }else{
-   routeLine.casing.setPath(path);
-   routeLine.main.setPath(path);
-  }
-  return;
- }
  var latLngs=routeLatLngs(coords);
  if(!routeLine){
   routeLine={
@@ -909,31 +765,6 @@ async function fetchRoute(dLat,dLng,cLat,cLng){
   lastRouteLng=dLng;
   routeLastFetched=Date.now();
   finishRoute();
- }
- if(usingGoogleMaps&&googleDirectionsService){
-  googleDirectionsService.route({
-   origin:{lat:dLat,lng:dLng},
-   destination:{lat:cLat,lng:cLng},
-   travelMode:google.maps.TravelMode.DRIVING
-  },function(result,status){
-   if(seq!==routeFetchSeq){finishRoute();return}
-   if(status!==google.maps.DirectionsStatus.OK||!result||!result.routes||!result.routes[0]){drawFallback();return}
-   var route=result.routes[0];
-   var coords=(route.overview_path||[]).map(function(p){return[p.lng(),p.lat()]});
-   if(coords.length<2){drawFallback();return}
-   arrivalTriggered=false;
-   fullRouteCoords=null;
-   currentRouteCoords=null;
-   setRouteGeometry({type:'LineString',coordinates:coords});
-   var leg=route.legs&&route.legs[0];
-   var eta=leg&&leg.duration?Math.round(leg.duration.value/60):null;
-   setMapDistance(eta?eta+' min drive':fmtDist(haversine(dLat,dLng,cLat,cLng)));
-   lastRouteLat=dLat;
-   lastRouteLng=dLng;
-   routeLastFetched=Date.now();
-   finishRoute();
-  });
-  return;
  }
  var params=dLng+','+dLat+';'+cLng+','+cLat+'?overview=full&geometries=geojson&steps=true&annotations=distance,duration';
  var urls=[
@@ -1045,7 +876,8 @@ window.addEventListener('online',function(){load();startRefresh()});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'){stopTitleFlash();load();startRefresh()}});
 window.addEventListener('focus',stopTitleFlash);
 startSignalWatch();
-loadMapConfig().finally(function(){load();startRefresh()});
+load();
+startRefresh();
 })();
 </script>
 </body>
