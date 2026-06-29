@@ -475,7 +475,7 @@ export default {
     function storeIsOpen(cfg) {
       if (cfg.testingMode) return true;
       const h = beirutHour();
-      return h >= 18 || h < 1;
+      return h >= 12 && h < 23;
     }
 
     function normalizePhone(value) {
@@ -1471,7 +1471,7 @@ if (request.method === 'POST' && url.pathname === '/auth/setup') {
           return json({ error: 'Online ordering is currently disabled' }, 403);
         }
         if (!storeIsOpen(cfg)) {
-          return json({ error: 'Orders open from 6 PM to 12 AM' }, 403);
+          return json({ error: 'Orders open from 12 PM to 11 PM' }, 403);
         }
 
         const phone = normalizePhone(order.phone);
