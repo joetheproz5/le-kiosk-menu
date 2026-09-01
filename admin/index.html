@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Le Kiosk - Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -39,8 +39,8 @@
   --shadow-md:0 1px 2px rgba(28,23,20,.04),0 10px 28px -10px rgba(28,23,20,.16);
   --shadow-lg:0 24px 60px -16px rgba(28,23,20,.26);
   --ring:0 0 0 3px rgba(245,158,11,.25);
-  --font:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --brandfont:'Manrope',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font:'Sora',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --brandfont:'Sora',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
 }
 html,body{height:100%}
@@ -2663,6 +2663,34 @@ body[data-view="dashboard"] .save-state,body[data-view="sales"] .save-state,body
 body.theme-dark .panel,body.theme-dark .setting-card,body.theme-dark .hub-card,body.theme-dark .feature-card,body.theme-dark .customer-card,body.theme-dark .block-card,body.theme-dark .item-card,body.theme-dark .addon-group-card,body.theme-dark .reward-row,body.theme-dark .reward-empty,body.theme-dark .edit-row,body.theme-dark .loyalty-customer,body.theme-dark .table-qr-card,body.theme-dark .gallery-admin-card,body.theme-dark .mini-row,body.theme-dark .sales-row,body.theme-dark .today-card{border-color:var(--line)}
 body.theme-dark .table-qr-form,body.theme-dark #editor-root .editor-section,body.theme-dark .matchup-line{background:#1a232e;border-color:var(--line)}
 /* =============== END OPERATIONAL SCREEN SYSTEM =============== */
+/* ===================== KIOSK HQ NAVIGATION REBUILD ===================== */
+/* Desktop is a command deck, not a left-sidebar clone. */
+@media(min-width:981px){
+  #admin-screen,.app-shell{height:100vh;min-height:0}
+  .app-shell{display:block;position:relative;padding:18px;background:linear-gradient(135deg,#f8f3ed 0%,#f7f8f7 52%,#eff4f1 100%)}
+  .sidebar,.sidebar.collapsed{position:absolute;inset:18px 18px auto;height:66px;width:auto!important;min-height:66px;display:flex!important;flex-direction:row;align-items:center;overflow:hidden;border:0;border-radius:19px;background:#202a36;box-shadow:0 12px 32px rgba(25,31,42,.16);z-index:20}
+  .side-brand,.sidebar.collapsed .side-brand{width:166px;min-width:166px;height:66px;min-height:66px;padding:0 17px;display:flex!important;align-items:center;justify-content:flex-start;border:0;border-right:1px solid rgba(255,255,255,.12)}
+  .sidebar .brand-mark{width:28px;height:28px;border-radius:9px;background:#ffb26d;color:#3a1d0c;font-size:8px;box-shadow:none}
+  .sidebar .brand-name,.sidebar.collapsed .brand-name{display:block!important;color:#fff!important;-webkit-text-fill-color:#fff;font-size:15px;letter-spacing:-.06em}
+  .sidebar .brand-sub,.sidebar.collapsed .brand-sub{display:block!important;color:#aeb9c8;font-size:7px;letter-spacing:.14em}
+  .sidebar .unsaved-dot,.sidebar.collapsed .unsaved-dot{display:block!important;margin-left:auto;width:6px;height:6px;background:#ffb26d;box-shadow:0 0 0 4px rgba(255,178,109,.13)}
+  .side-nav{display:flex;flex:1 1 auto;min-width:0;height:66px;padding:0 10px;align-items:center;flex-direction:row;gap:3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.side-nav::-webkit-scrollbar{display:none}
+  .nav-group-label,.nav-group-divider,.sidebar.collapsed .nav-group-label,.sidebar.collapsed .nav-group-divider{display:none!important}
+  .nav-btn,.sidebar.collapsed .nav-btn{flex:0 0 auto;width:auto;min-height:38px;padding:7px 9px;display:inline-flex!important;align-items:center;justify-content:flex-start;gap:6px;border-radius:10px;color:#c4ceda;background:transparent;border:0;font-size:10px;font-weight:700;white-space:nowrap}
+  .nav-btn span:not(.nav-icon),.sidebar.collapsed .nav-btn span:not(.nav-icon){display:inline!important}
+  .nav-btn:hover{background:rgba(255,255,255,.09);color:#fff}.nav-btn.active{background:#ffefe3;color:#8e3815;box-shadow:none}.nav-btn.active::before{display:none}
+  .nav-icon,.sidebar.collapsed .nav-icon{width:20px;height:20px;margin:0;border-radius:6px;background:rgba(255,255,255,.11);font-size:10px}.nav-btn.active .nav-icon{background:#fff;color:#c44c1b}
+  .side-footer,.sidebar.collapsed .side-footer{display:flex!important;flex:0 0 auto;flex-direction:row;align-items:center;gap:7px;height:66px;margin:0;padding:0 12px;background:transparent;border:0;border-left:1px solid rgba(255,255,255,.1)}
+  .status-row{display:flex!important}.status-pill{padding:4px 6px;background:rgba(255,255,255,.1);color:#dbe2eb;font-size:8px}.status-pill.on{background:rgba(92,195,129,.16);color:#b3efc7}.session-badge{display:none!important}.logout-btn{width:31px;min-width:31px;height:31px;padding:0;font-size:0;border-radius:9px;background:rgba(255,255,255,.1);border:0}.logout-btn::before{content:'↗';font-size:15px;color:#fff}
+  .main{height:100%;padding-top:76px;border-radius:0;background:transparent;overflow:hidden}.topbar{min-height:78px;padding:10px 12px 12px;background:transparent;border:0;box-shadow:none}.topbar>div:first-child{padding-left:4px}.page-kicker{color:#a27055;font-size:8px}.page-title{font-size:24px;color:#1f2934}.mega-search{max-width:430px}.mega-input{background:rgba(255,255,255,.8);box-shadow:0 2px 10px rgba(30,38,48,.03)}
+  .content{padding:8px 12px 30px}.admin-summary-card{border-radius:24px}.panel,.chart-card,.dashboard-section,.setting-card,.hub-card,.feature-card,.customer-card,.block-card,.item-card,.addon-group-card,.reward-row,.reward-empty,.edit-row,.loyalty-customer,.table-qr-card,.gallery-admin-card{box-shadow:0 10px 25px rgba(31,41,52,.035)}
+}
+/* The new dark setting is a deliberate night shift, never the old navy grid. */
+body.theme-dark{--bg:#1d201f;--panel:#262b29;--panel-2:#292f2c;--line:#39413d;--line-strong:#4a544e;--soft:#323936;--ink:#f8f3ed;--ink-2:#d7d7cd;--muted:#a7afa8;--brand:#ff9a63;--brand-dark:#ffc3a0;--brand-mid:#ffa979;--brand-soft:#3d2d25;--brand-line:#684436}
+body.theme-dark .app-shell{background:radial-gradient(circle at 15% 0%,#3d3028 0%,transparent 35%),#1d201f}
+@media(min-width:981px){body.theme-dark .sidebar{background:#141817}body.theme-dark .topbar{background:transparent}body.theme-dark .page-title{color:#f8f3ed}body.theme-dark .mega-input{background:#292f2c}body.theme-dark .nav-btn.active{background:#ffe8da;color:#7d3218}body.theme-dark .nav-btn.active .nav-icon{color:#bf4819}}
+@media(max-width:980px){body.theme-dark .sidebar{background:#202523}body.theme-dark .side-footer{background:#202523}.sidebar-toggle{background:#fff8f3}.topbar{box-shadow:0 8px 18px rgba(38,31,25,.03)}}
+/* =================== END KIOSK HQ NAVIGATION REBUILD =================== */
 /* ======================= END MODERN SAAS POLISH ======================= */
 </style>
 </head>
@@ -3216,7 +3244,7 @@ const STORAGE_PUBLIC_BASE='https://lbrdfzcbtgeqniibsfin.supabase.co/storage/v1/o
 const BASKETBALL_WA_NUMBER='96176840244';
 const MAX_ATTEMPTS=5, LOCKOUT_MS=2*60*1000, SESSION_MS=6*60*60*1000;
 const AUTH_STORAGE_KEY='lk_admin_auth';
-const THEME_STORAGE_KEY='lk_admin_theme_v2';
+const THEME_STORAGE_KEY='lk_admin_theme_v3';
 const PILL_PRESETS=[
   {id:'amber',bg:'#fef3c7',border:'#fde68a',text:'#92400e',label:'Amber'},
   {id:'red',bg:'#fee2e2',border:'#fecaca',text:'#991b1b',label:'Red'},
