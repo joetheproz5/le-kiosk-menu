@@ -2726,6 +2726,7 @@ body.theme-dark .panel-sub,body.theme-dark .chart-sub,body.theme-dark .dashboard
   .panel,.setting-card,.hub-card,.feature-card,.customer-card,.block-card,.item-card,.addon-group-card,.reward-row,.reward-empty,.edit-row,.loyalty-customer,.table-qr-card,.gallery-admin-card{border-radius:7px!important;background:#101827!important;border-color:#253247!important}.panel-head{background:#101827!important;border-color:#253247!important}.field-input:focus,.search-input:focus,.inp:focus,textarea:focus{border-color:#4d83ff!important;box-shadow:0 0 0 3px rgba(47,109,244,.16)!important}.chip-btn.active{background:#2f6df4!important;border-color:#2f6df4!important}.empty-state{background:#0b121e!important;border-color:#293951!important;color:#9fb0c5!important}
 }
 @media(max-width:980px){body.theme-dark .topbar{background:#111a2a!important;border-color:#202b3d!important}body.theme-dark .sidebar{background:#111a2a!important}body.theme-dark .side-footer{background:#111a2a!important}.sidebar-toggle{background:#2f6df4!important;border:0!important;color:#fff!important}body.theme-dark .mobile-bottom-bar{background:#111a2a!important;border-color:#2c3b52!important}body.theme-dark .mobile-tab.active{background:#2d68e8!important;color:#fff!important}}
+body.theme-dark .theme-icon-btn{display:none!important}
 /* =============== END REFERENCE-LED DARK SIDEBAR WORKSPACE =============== */
 /* ======================= END MODERN SAAS POLISH ======================= */
 </style>
@@ -3312,7 +3313,7 @@ let driverAppDownloadLink='';
 let generatedBasketballPoster=null;
 function savedTheme(){return localStorage.getItem(THEME_STORAGE_KEY)}
 function systemTheme(){return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
-function activeTheme(){return savedTheme()||'dark'}
+function activeTheme(){return 'dark'}
 
 /* ── SIDEBAR STATE ── */
 let _sidebarCollapsed=false,_sidebarStoredKey='lk_admin_sidebar_collapsed';
@@ -3359,7 +3360,7 @@ function updateAccountAvatar(){
   el.title=`${authSession?.username||'Account'} profile`;
 }
 function toggleTheme(){
-  const next=activeTheme()==='dark'?'light':'dark';
+  const next='dark';
   localStorage.setItem(THEME_STORAGE_KEY,next);
   applyTheme();
   configData.theme=next;
