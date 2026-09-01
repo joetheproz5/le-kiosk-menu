@@ -2605,6 +2605,64 @@ body.theme-dark .sidebar,body.theme-dark .side-footer{background:#151b24;border-
 @media(max-width:980px){.app-shell{display:block}.sidebar{width:286px!important;background:#fff}.side-brand{height:80px;min-height:80px;padding-left:66px}.topbar{padding:13px 14px 12px;background:var(--bg)}.topbar>div:first-child{padding-left:54px}.content{padding:16px 14px 106px}.hero-bar,.dash-grid,.chart-grid,.product-sales-grid,.settings-grid,.loyalty-grid,.grid-menu{grid-template-columns:1fr;gap:12px}.admin-summary-card{min-height:205px}.summary-metric-card{min-height:116px}.summary-metric-card strong{margin-top:10px}.chart-canvas{height:245px}.mobile-bottom-bar{background:rgba(255,255,255,.98);border-color:var(--line);border-radius:18px}.mobile-tab.active{background:var(--brand-soft);color:var(--brand-dark)}body.theme-dark .sidebar{background:#151b24}body.theme-dark .mobile-bottom-bar{background:rgba(32,41,54,.98)}body.theme-dark .mobile-tab.active{background:#3a2925;color:#ffc19e}}
 @media(max-width:560px){.summary-title{font-size:26px}.summary-copy{font-size:11px}.admin-summary-card{padding:21px}.summary-actions{width:100%}.summary-actions .btn{flex:1}.top-actions .btn-save{min-width:120px}.panel-head,.panel-body,.chart-card,.dashboard-section{padding:15px}}
 /* ===================== END LE KIOSK WORKSPACE REBUILD ===================== */
+/* ================= OPERATIONAL SCREEN SYSTEM ================= */
+/* Shared interaction patterns across every admin workflow. */
+.view.active{animation:screen-in .22s ease both}
+@keyframes screen-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.panel-head,.dashboard-section-head{min-height:70px;align-items:center;gap:16px}
+.panel-head>div:first-child,.dashboard-section-head>div:first-child{min-width:0}
+.panel-head .btn,.toolbar-right .btn{flex:0 0 auto}
+.toolbar-right,.setting-actions,.reward-actions,.hub-actions,.gallery-admin-actions,.table-qr-actions,.summary-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.table-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:0}.table-toolbar .search-input{flex:1 1 250px;max-width:420px}.table-toolbar .btn{flex:0 0 auto}
+.table-toolbar:has(#bl-phone){display:grid;grid-template-columns:minmax(170px,.7fr) minmax(180px,1.3fr) auto}.table-toolbar:has(#bl-phone) .search-input{max-width:none}
+.empty-state{border:1px dashed #d9ddd8;border-radius:14px;background:#fbfbfa;color:#7c8790;padding:32px 20px;font-size:12px;font-weight:650;text-align:center}
+.field-label{color:#8a949d;font-size:9px;font-weight:800;letter-spacing:.11em}.field-input,.inp,.search-input{min-height:40px}.field-input,.inp,.search-input,.addon-input{font-size:12px}
+.btn-danger{background:#fff;border-color:#f2c3bb;color:#bb3e2c}.btn-danger:hover:not(:disabled){background:#fff0ee;border-color:#e6aba0;color:#9f2e20}
+.btn-blue{background:#eaf3fb;border-color:#c6dff1;color:#245b88}.btn-blue:hover{background:#dceefa;border-color:#aecfe8}
+.icon-btn{border-radius:9px}.switch-row{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.switch{width:44px;height:25px}.slider{background:#dce0df}.slider:before{width:19px;height:19px;top:3px;left:3px}.switch input:checked+.slider{background:#2f9d62}
+
+/* Menu studio: navigation stays available, editing stays central. */
+#view-menu .grid-menu{align-items:start}
+#view-menu .grid-menu>.panel:first-child{position:sticky;top:18px;max-height:calc(100vh - 150px);overflow:auto}
+#view-menu .category-list{padding:11px}.category-list .cat-row{min-height:54px;padding:11px}.cat-grip{width:20px;color:#abb2b9}.cat-name{font-size:12px}.cat-meta{font-size:9px}.cat-badge{background:#f2f2ef;border:0;color:#737e89;font-size:9px}
+#editor-root .editor-head{padding-bottom:18px;border-bottom:1px solid var(--line)}
+#editor-root .editor-section{margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:14px;background:#fbfbfa}
+#editor-root .editor-section-title{font-size:11px;font-weight:800;color:#2e3945}
+#editor-root .item-card{margin-top:12px;padding:14px;border-radius:15px;gap:15px}
+#editor-root .item-card:hover{border-color:#d5dad7;box-shadow:var(--shadow-sm)}
+.img-drop-zone{border-radius:12px;background:#fff8f4;border-color:#f3d8c9}.img-drop-label{color:var(--brand-dark)}
+.segment{border-radius:10px;border-color:var(--line)}.segment button{background:#fff;border-color:var(--line);font-size:10px}.segment button.active{background:#293544;color:#fff}
+
+/* Catalog, customers, basketball and analytics share an efficient list canvas. */
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:12px}.hub-card{padding:16px;border-radius:15px}.hub-top{gap:12px}.hub-title{color:#293440;font-size:13px}.hub-meta,.edit-row-meta,.customer-meta,.block-meta,.gallery-admin-meta{color:#818b95;font-size:10px;line-height:1.5}.hub-badge,.edit-badge,.loyalty-ready{background:#f2f4f3;border:0;border-radius:999px;color:#65717c;font-size:9px}
+.mini-list,.customer-list,.block-list{display:flex;flex-direction:column;gap:9px}.mini-row{min-height:66px;padding:10px 12px}.mini-img{border-radius:10px;background:#f2f2ef}.mini-name,.edit-row-title,.sales-name,.loyalty-name,.block-phone{font-size:12px;color:#2e3945}.edit-row{padding:12px;gap:12px}.edit-row-img{border-radius:11px}.edit-row-actions{gap:7px}.customer-card,.block-card{padding:15px}.block-card{border-left:3px solid #e3a393}
+.bulk-bar{padding:10px 12px;border-radius:12px;background:#fff4ed;border-color:#f5d8ca}.bulk-bar .bulk-count{color:var(--brand-dark)}.bulk-bar input[type=number]{border-color:#edcfbe;border-radius:8px}
+.sales-table-header{padding:9px 12px;border-color:var(--line);color:#8a949e;font-size:9px}.sales-row{padding:11px 12px;border-color:var(--line);background:#fff}.sales-row:hover{border-color:#d6dbd8;box-shadow:none}.sales-img{border-radius:10px}.sales-num,.sales-rev{color:#293440}
+
+/* Loyalty and settings make switches and operational states easy to scan. */
+.loyalty-grid{gap:16px}.setting-card{padding:17px}.setting-card+.setting-card{margin-top:12px!important}.setting-title{font-size:13px}.setting-copy{font-size:11px;line-height:1.6}.setting-stat{margin-top:14px;color:var(--brand-dark);font-size:11px}.loyalty-meter{height:8px;background:#f0f1ee}.loyalty-meter span{background:linear-gradient(90deg,var(--brand),#f0a36f)}.reward-row{padding:12px;border-radius:12px}.loyalty-customer{padding:12px;border-radius:12px}.settings-grid{gap:14px}.settings-section-title{margin-top:8px;padding:0;color:#939ca5;font-size:9px;letter-spacing:.13em}
+.today-bar{gap:12px;margin-bottom:18px}.today-card{border:1px solid var(--line);border-radius:15px;background:#fff;padding:17px;box-shadow:none}.today-card:nth-child(2){background:#fff7f1;border-color:#f5d9c8}.today-card:nth-child(3){background:#f2f8f3;border-color:#d6e9d9}.today-label{font-size:9px;color:#7e8993}.today-value{color:#2b3642;font-size:28px;letter-spacing:-.06em}.today-note{font-size:10px}.today-icon{border-radius:10px;background:#f0f1ef;color:var(--brand)}
+
+/* Specialist views. */
+.table-qr-form{padding:15px;border:1px solid var(--line);border-radius:14px;background:#fbfbfa;gap:10px}.tables-grid{gap:13px}.table-qr-card{padding:15px;border-radius:15px}.table-qr-img{border-radius:11px}.table-qr-title{font-size:14px}.gallery-admin-tabs{padding:5px;background:#f2f2ef;border-radius:12px;width:max-content}.gallery-admin-tabs .chip-btn{background:transparent;border:0}.gallery-admin-tabs .chip-btn.active{background:#fff;color:#293440;box-shadow:0 2px 6px rgba(16,24,40,.07)}.gallery-admin-card{padding:13px;border-radius:15px}.gallery-admin-photo{border-radius:12px}.gallery-admin-fields{margin-top:12px}.gallery-admin-actions{margin-top:12px}.gallery-admin-delete{border-top:1px solid var(--line);padding-top:11px}
+.basketball-edit-row{border-radius:14px}.matchup-line{padding:12px;border-radius:12px;background:#f7f8f7}.match-team-logo-wrap{border-radius:10px}.match-vs{border-radius:9px;background:#293544;font-size:11px}.poster-share-card{border-radius:15px}.sales-options-dropdown,.addon-dropdown{border-color:var(--line);border-radius:12px;box-shadow:var(--shadow-lg)}.sales-dd-label{color:#9099a2;font-size:9px}.sales-dd-item{border-radius:8px;color:#4f5a66}.sales-dd-item:hover,.sales-dd-item.active{background:#fff0e9;color:var(--brand-dark)}
+
+/* Context actions belong to their screen; the global save is menu-only. */
+#save-btn[hidden]{display:none!important}.top-actions{min-width:0}.top-actions #recent-items{min-width:0}.top-actions .utility-menu-wrap{flex:0 0 auto}
+body[data-view="dashboard"] .save-state,body[data-view="sales"] .save-state,body[data-view="settings"] .save-state{display:none}
+
+/* Mobile is an intentional interface, not a shrunken desktop. */
+@media(max-width:980px){
+  body{font-size:14px}.main{height:auto;min-height:100vh;overflow:visible}.topbar{position:sticky;top:0;z-index:120}.mega-search{width:100%;max-width:none}.top-actions{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;width:100%}.top-actions #recent-items{display:none!important}.top-actions .save-state{display:none}.top-actions .utility-menu-wrap{grid-column:1}.top-actions .btn-save{grid-column:2;grid-row:1;width:100%;min-width:0}.top-actions .account-avatar-btn{grid-column:3;grid-row:1}.top-actions .theme-icon-btn{display:none}.top-actions .utility-menu{left:0;right:auto;width:220px}.utility-menu-toggle{width:42px;padding:0!important;font-size:0}.utility-menu-toggle span{font-size:17px}
+  .sidebar-toggle{top:19px;left:14px;width:38px;height:38px;border-radius:11px;background:#fff;border-color:var(--line);box-shadow:var(--shadow-md);font-size:18px}.sidebar{z-index:190!important;box-shadow:20px 0 60px rgba(16,24,40,.22)}.sidebar-overlay{z-index:180}.side-nav{padding-bottom:22px}.nav-btn{min-height:46px;font-size:14px}.nav-icon{width:28px;height:28px}.side-footer{padding-bottom:92px}
+  .content{padding:17px 14px 104px}.panel-head,.dashboard-section-head{min-height:0;padding:15px;align-items:flex-start;flex-wrap:wrap}.panel-head>.btn,.panel-head>.toolbar-right{width:100%}.panel-head>.btn{min-height:42px}.toolbar-right{width:100%}.toolbar-right .btn{flex:1 1 120px;min-height:42px}.panel-body{padding:14px}.table-toolbar,.table-toolbar:has(#bl-phone){display:grid;grid-template-columns:1fr;gap:9px}.table-toolbar .search-input{width:100%;max-width:none}.table-toolbar .btn{width:100%;min-height:42px}.table-toolbar:has(#sales-options-btn){grid-template-columns:1fr 1fr}.table-toolbar:has(#sales-options-btn) .search-input{grid-column:1/-1}.table-toolbar:has(#sales-options-btn) .btn{width:auto}.table-toolbar:has(#sales-options-btn) #sales-options-btn{width:100%}
+  #view-menu .grid-menu>.panel:first-child{position:static;max-height:none}.category-list{max-height:280px;overflow:auto}.editor-head,.editor-grid,.editor-grid.three,.reward-fields-grid,.reward-value-grid,.table-qr-form{grid-template-columns:1fr}.item-card{grid-template-columns:76px minmax(0,1fr);padding:12px}.img-drop-zone{width:76px;height:76px}.item-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.item-actions .btn{width:100%;min-height:40px}.hub-grid{grid-template-columns:1fr}.edit-row,.loyalty-customer,.gallery-admin-card,.table-qr-card{grid-template-columns:1fr}.gallery-admin-photo{width:100%;max-width:180px}.gallery-admin-delete{grid-column:auto}.sales-table-header{display:none}.sales-row{grid-template-columns:46px minmax(0,1fr);gap:10px}.sales-row>*:nth-child(n+3){grid-column:2}.today-bar{grid-template-columns:1fr}.today-card{min-height:112px}.gallery-admin-tabs{width:100%;overflow-x:auto;flex-wrap:nowrap}.gallery-admin-tabs .chip-btn{flex:0 0 auto}.setting-actions,.reward-actions{display:grid;grid-template-columns:1fr}.setting-actions .btn,.reward-actions .btn{width:100%;min-height:42px}
+  .mobile-bottom-bar{left:12px;right:12px;bottom:max(10px,env(safe-area-inset-bottom));padding:6px;border-radius:16px}.mobile-tab{min-height:48px}.mobile-tab .tab-emoji{font-size:16px}.mobile-tab.active{font-weight:800}
+}
+@media(max-width:390px){.top-actions .btn-save{font-size:9px}.mobile-tab{font-size:7px}.mobile-tab .tab-emoji{font-size:15px}.summary-actions{display:grid;grid-template-columns:1fr}.summary-actions .btn{width:100%}}
+body.theme-dark .panel,body.theme-dark .setting-card,body.theme-dark .hub-card,body.theme-dark .feature-card,body.theme-dark .customer-card,body.theme-dark .block-card,body.theme-dark .item-card,body.theme-dark .addon-group-card,body.theme-dark .reward-row,body.theme-dark .reward-empty,body.theme-dark .edit-row,body.theme-dark .loyalty-customer,body.theme-dark .table-qr-card,body.theme-dark .gallery-admin-card,body.theme-dark .mini-row,body.theme-dark .sales-row,body.theme-dark .today-card{border-color:var(--line)}
+body.theme-dark .table-qr-form,body.theme-dark #editor-root .editor-section,body.theme-dark .matchup-line{background:#1a232e;border-color:var(--line)}
+/* =============== END OPERATIONAL SCREEN SYSTEM =============== */
 /* ======================= END MODERN SAAS POLISH ======================= */
 </style>
 </head>
@@ -4829,6 +4887,7 @@ function deleteGalleryPhoto(i){
 
 function switchView(view){
   currentView=view;
+  document.body.dataset.view=view;
   if(isMobileAdmin())closeMobileSidebar();
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
@@ -4851,6 +4910,7 @@ function switchView(view){
   };
   document.getElementById('page-kicker').textContent=titles[view][0];
   document.getElementById('page-title').textContent=titles[view][1];
+  syncGlobalSaveAction();
   if(view==='basketball'||view==='settings'){
     pruneExpiredBasketballMatches({persist:true,silent:true}).catch(e=>showToast('Expired match cleanup failed: '+e.message,'error'));
   }
@@ -4874,6 +4934,8 @@ function switchView(view){
   document.querySelector('.content')?.scrollTo(0,0);
 }
 function renderAll(){
+  document.body.dataset.view=currentView;
+  syncGlobalSaveAction();
   renderCategoryList();
   renderEditor();
   renderDashboard();
@@ -4888,6 +4950,13 @@ function renderAll(){
   renderPreview();
   renderStatus();
   markSaved();
+}
+function syncGlobalSaveAction(){
+  const globalSave=document.getElementById('save-btn');
+  if(!globalSave)return;
+  const showGlobalSave=['menu','categories','items','addons'].includes(currentView);
+  globalSave.hidden=!showGlobalSave;
+  globalSave.textContent=currentView==='menu'?'Save menu':'Save menu changes';
 }
 function setSaveState(message,dirty=false){
   const el=document.getElementById('save-state');
